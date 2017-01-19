@@ -4,8 +4,6 @@ import (
 	"io"
 	
 	"github.com/spf13/cobra"
-
-	"github.com/helm/prow/cmd/prow/prowpath"
 )
 
 const createDesc = `
@@ -19,9 +17,7 @@ If it is not provided, prow will automatically generate a unique name for the ap
 `
 
 type createCmd struct {
-	home    prowpath.Home
 	out     io.Writer
-	starter string
 }
 
 func newCreateCmd(out io.Writer) *cobra.Command {
@@ -34,7 +30,6 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 		Short: "transform the local directory to be deployable to Kubernetes",
 		Long:  createDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc.home = prowpath.Home(homePath())
 			return cc.run()
 		},
 	}
