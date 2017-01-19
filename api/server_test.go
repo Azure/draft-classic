@@ -7,7 +7,7 @@ import (
 )
 
 func TestPing(t *testing.T) {
-	srv, err := New("tcp", "0.0.0.0:4567")
+	srv, err := NewServer("tcp", "0.0.0.0:4567")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -35,8 +35,8 @@ func (s *HTTPServer) ServeRequest(w http.ResponseWriter, req *http.Request) {
 	s.srv.Handler.ServeHTTP(w, req)
 }
 
-// New sets up the required Server and does protocol specific checking.
-func New(proto, addr string) (*HTTPServer, error) {
+// NewServer sets up the required Server and does protocol specific checking.
+func NewServer(proto, addr string) (*HTTPServer, error) {
 	switch proto {
 	case "tcp":
 		return setupTCPHTTP(addr)
@@ -131,7 +131,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	r.ParseMultipartForm(32 << 20) // a maximum of 32MB is stored in memory before storing in temp files
 	file, _, err := r.FormFile("release-tar")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
