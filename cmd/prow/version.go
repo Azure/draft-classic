@@ -19,12 +19,12 @@ v1.0.0
 `
 
 type versionCmd struct {
-	out        io.Writer
+	out io.Writer
 }
 
 func newVersionCmd(out io.Writer) *cobra.Command {
 	version := &versionCmd{
-		out:    out,
+		out: out,
 	}
 
 	cmd := &cobra.Command{

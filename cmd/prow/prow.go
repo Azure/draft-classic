@@ -9,7 +9,7 @@ import (
 
 var (
 	// flagDebug is a signal that the user wants additional output.
-	flagDebug       bool
+	flagDebug bool
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -30,7 +30,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	}
 	p := cmd.PersistentFlags()
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
-	
+
 	cmd.AddCommand(
 		newCreateCmd(out),
 		newPushCmd(out),

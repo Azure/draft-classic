@@ -11,7 +11,7 @@ This command archives the current directory into a tar archive and uploads it to
 `
 
 type pushCmd struct {
-	out     io.Writer
+	out io.Writer
 }
 
 func newPushCmd(out io.Writer) *cobra.Command {
