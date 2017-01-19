@@ -2,7 +2,7 @@ package main
 
 import (
 	"io"
-	
+
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ If it is not provided, prow will automatically generate a unique name for the ap
 `
 
 type createCmd struct {
-	out     io.Writer
+	out io.Writer
 }
 
 func newCreateCmd(out io.Writer) *cobra.Command {

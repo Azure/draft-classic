@@ -1,8 +1,8 @@
 package version
 
 type Version struct {
-	SemVer string
-	GitCommit string
+	SemVer       string
+	GitCommit    string
 	GitTreeState string
 }
 

@@ -87,7 +87,7 @@ func createRouter() *httprouter.Router {
 			"/ping": ping,
 		},
 		"POST": {
-			"/apps/:id": 		buildApp,
+			"/apps/:id": buildApp,
 		},
 	}
 
