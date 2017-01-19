@@ -1,12 +1,90 @@
-hash: 6ef5aa3bf47800b0fb5ddf8a7f41fd220c31bb6a4515b1ba4a8c443a6ad2911e
-updated: 2017-01-18T23:13:28.150884108-07:00
+hash: 3d090f7d6031ba6058c8854497cbac2b09bc0b990b46d3efa3e1dfca65598df0
+updated: 2017-01-19T09:38:13.397280144-07:00
 imports:
+- name: github.com/Azure/go-ansiterm
+  version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
+  subpackages:
+  - winterm
+- name: github.com/docker/distribution
+  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
+  subpackages:
+  - digest
+  - reference
+- name: github.com/docker/docker
+  version: 49bf474f9ed7ce7143a59d1964ff7b7fd9b52178
+  subpackages:
+  - api/types
+  - api/types/blkiodev
+  - api/types/container
+  - api/types/events
+  - api/types/filters
+  - api/types/mount
+  - api/types/network
+  - api/types/reference
+  - api/types/registry
+  - api/types/strslice
+  - api/types/swarm
+  - api/types/time
+  - api/types/versions
+  - api/types/volume
+  - client
+  - opts
+  - pkg/archive
+  - pkg/fileutils
+  - pkg/homedir
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/jsonlog
+  - pkg/jsonmessage
+  - pkg/longpath
+  - pkg/pools
+  - pkg/promise
+  - pkg/stdcopy
+  - pkg/system
+  - pkg/term
+  - pkg/term/windows
+  - pkg/tlsconfig
+- name: github.com/docker/go-connections
+  version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
+  subpackages:
+  - nat
+  - sockets
+  - tlsconfig
+- name: github.com/docker/go-units
+  version: 9b001659dd36225e356b4467c465d732e745f53d
+- name: github.com/fsouza/go-dockerclient
+  version: e085edda407c05214cc6e71e4881de47667e77ec
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/julienschmidt/httprouter
   version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
+- name: github.com/Microsoft/go-winio
+  version: 307e919c663683a9000576fdc855acaf9534c165
+- name: github.com/opencontainers/runc
+  version: 7ca2aa4873aea7cb4265b1726acb24b90d8726c6
+  subpackages:
+  - libcontainer/system
+  - libcontainer/user
+- name: github.com/pkg/errors
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+- name: github.com/Sirupsen/logrus
+  version: 55eb11d21d2a31a3cc93838241d04800f52e823d
+  subpackages:
+  - formatters/logstash
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
+- name: golang.org/x/net
+  version: 4876518f9e71663000c348837735820161a42df7
+  subpackages:
+  - context
+  - context/ctxhttp
+  - proxy
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - windows
 testImports: []
