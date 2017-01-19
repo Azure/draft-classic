@@ -1,8 +1,10 @@
-hash: 5e20c4a5f7703f607177113a77bcf2dd22287eeb54eebc856b87442ce0146a50
-updated: 2017-01-18T00:59:47.840875527-07:00
+hash: 6ef5aa3bf47800b0fb5ddf8a7f41fd220c31bb6a4515b1ba4a8c443a6ad2911e
+updated: 2017-01-18T23:13:28.150884108-07:00
 imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/julienschmidt/httprouter
+  version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag

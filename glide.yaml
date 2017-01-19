@@ -2,3 +2,5 @@ package: github.com/helm/prow
 import:
 - package: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
+- package: github.com/julienschmidt/httprouter
+  version: 8a45e95fc75cb77048068a62daed98cc22fdac7c

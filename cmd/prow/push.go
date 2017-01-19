@@ -4,19 +4,14 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-
-	"github.com/helm/prow/cmd/prow/prowpath"
 )
 
 const pushDesc = `
-This command archives the current directory into a tarball and uploads it to
-prowd.
+This command archives the current directory into a tar archive and uploads it to the prow server.
 `
 
 type pushCmd struct {
-	home    prowpath.Home
 	out     io.Writer
-	starter string
 }
 
 func newPushCmd(out io.Writer) *cobra.Command {
@@ -26,10 +21,9 @@ func newPushCmd(out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "push",
-		Short: "upload the current directory to prowd for deployment",
+		Short: "upload the current directory to the prow server for deployment",
 		Long:  pushDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cc.home = prowpath.Home(homePath())
 			return cc.run()
 		},
 	}

@@ -12,7 +12,7 @@ import (
 const versionDesc = `
 Show the client version for prow.
 
-This will print a representation of the client version of prow. The output will look something like
+This will print the client version of prow. The output will look something like
 this:
 
 v1.0.0
