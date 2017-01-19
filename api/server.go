@@ -139,7 +139,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	f, err := ioutil.TempFile("", appName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("could not create tmpdir to store tarball: " + err.Error()))
+		w.Write([]byte("could not create temporary file to store release tar: " + err.Error()))
 		return
 	}
 	defer f.Close()
