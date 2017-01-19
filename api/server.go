@@ -145,7 +145,20 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer f.Close()
 	io.Copy(f, file)
 
+	hj, ok := w.(http.Hijacker)
+	if !ok {
+		http.Error(w, "webserver doesn't support hijacking", http.StatusInternalServerError)
+		return
+	}
+	conn, bufrw, err := hj.Hijack()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
 	// TODO: untar archive and run docker build on it
 	// TODO: push to local registry
 	// TODO: install/upgrade via helm
+	bufrw.ReadString('\n')
 }
