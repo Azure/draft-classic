@@ -142,6 +142,8 @@ func ping(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	appName := p.ByName("id")
+	imageName := fmt.Sprintf("127.0.0.1:5000/%s:latest", appName)
 	server := r.Context().Value("server").(*APIServer)
 
 	// TODO: check if app exists
@@ -172,14 +174,29 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer conn.Close()
 
 	// send uploaded tar to docker as the build context
-	response, err := server.DockerClient.ImageBuild(context.Background(), buildContext, types.ImageBuildOptions{})
+	buildResp, err := server.DockerClient.ImageBuild(
+		context.Background(),
+		buildContext,
+		types.ImageBuildOptions{
+			Tags: []string{imageName},
+		})
 	if err != nil {
 		conn.Write([]byte(err.Error() + "\n"))
 		return
 	}
-	io.Copy(conn, response.Body)
-
-	// TODO: untar archive and run docker build on it
-	// TODO: push to local registry
+	defer buildResp.Body.Close()
+	io.Copy(conn, buildResp.Body)
+	pushResp, err := server.DockerClient.ImagePush(
+		context.Background(),
+		imageName,
+		// assume no creds required for now
+		// TODO(bacongobbler): implement custom auth handling for a registry
+		types.ImagePushOptions{RegistryAuth: "foo"})
+	if err != nil {
+		conn.Write([]byte(err.Error() + "\n"))
+		return
+	}
+	defer pushResp.Close()
+	io.Copy(conn, pushResp)
 	// TODO: install/upgrade via helm
 }
