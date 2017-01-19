@@ -4,7 +4,27 @@ _This project is experimental, and has not hit a stable release point_
 
 Prow is a developer tool for creating cloud native applications for Kubernetes.
 
-TL;DR
+## Usage
+
+_NOTE(bacongobbler): this is usage instructions to test while there's no client yet_
+
+For now, this is the easiest way to test/run this locally on macOS:
+
+```
+make bootstrap build
+./bin/prowd start --docker-from-env
+```
+
+And in another terminal:
+
+```
+git clone https://github.com/deis/example-dockerfile-http
+cd example-dockerfile-http
+git archive master > master.tar.gz
+curl -XPOST -F release-tar=@master.tar.gz http://localhost:8080/apps/foo
+```
+
+_NOTE(bacongobbler): This is what the final CLI usage should look like_
 
 Start from your source code repository and let Prow transform it for
 Kubernetes:
@@ -13,7 +33,7 @@ Kubernetes:
 $ cd my-app
 $ ls
 app.py
-$ prow new my-app --pack=python
+$ prow create my-app --pack=python
 --> Created ./charts/my-app
 --> Created ./charts/my-app/Dockerfile
 --> Ready to sail

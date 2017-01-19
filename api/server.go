@@ -1,66 +1,104 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"syscall"
 
+	docker "github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
 	"github.com/julienschmidt/httprouter"
 )
 
-// HTTPServer is an API Server which listens and responds to HTTP requests.
-type HTTPServer struct {
-	srv *http.Server
-	l   net.Listener
+// APIServer is an API Server which listens and responds to HTTP requests.
+type APIServer struct {
+	HTTPServer *http.Server
+	Listener   net.Listener
+	DockerClient *docker.Client
 }
 
 // Serve starts the HTTP server, accepting all new connections.
-func (s *HTTPServer) Serve() error {
-	return s.srv.Serve(s.l)
+func (s *APIServer) Serve() error {
+	return s.HTTPServer.Serve(s.Listener)
 }
 
 // Close shuts down the HTTP server, dropping all current connections.
-func (s *HTTPServer) Close() error {
-	return s.l.Close()
+func (s *APIServer) Close() error {
+	return s.Listener.Close()
 }
 
 // ServeRequest processes a single HTTP request.
-func (s *HTTPServer) ServeRequest(w http.ResponseWriter, req *http.Request) {
-	s.srv.Handler.ServeHTTP(w, req)
+func (s *APIServer) ServeRequest(w http.ResponseWriter, req *http.Request) {
+	s.HTTPServer.Handler.ServeHTTP(w, req)
 }
 
-// NewServer sets up the required Server and does protocol specific checking.
-func NewServer(proto, addr string) (*HTTPServer, error) {
-	switch proto {
-	case "tcp":
-		return setupTCPHTTP(addr)
-	case "unix":
-		return setupUnixHTTP(addr)
-	default:
-		return nil, fmt.Errorf("Invalid protocol format.")
+func (s *APIServer) createRouter() {
+	r := httprouter.New()
+
+	routerMap := map[string]map[string]httprouter.Handle{
+		"GET": {
+			"/ping": ping,
+		},
+		"POST": {
+			"/apps/:id": buildApp,
+		},
+	}
+
+	for method, routes := range routerMap {
+		for route, funct := range routes {
+			r.Handle(method, route, s.serverMiddleware(logRequestMiddleware(funct)))
+		}
+	}
+	s.HTTPServer.Handler = r
+}
+
+func (s *APIServer) serverMiddleware(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		// attach the API server to the request params so that it can retrieve info about itself
+		ctx := context.WithValue(r.Context(), "server", s)
+		// Delegate request to the given handle
+		h(w, r.WithContext(ctx), p)
 	}
 }
 
-func setupTCPHTTP(addr string) (*HTTPServer, error) {
-	r := createRouter()
+// NewServer sets up the required Server and does protocol specific checking.
+func NewServer(proto, addr string) (*APIServer, error) {
+	var (
+		a *APIServer
+		err error
+	)
+	switch proto {
+	case "tcp":
+		a, err = setupTCPHTTP(addr)
+	case "unix":
+		a, err = setupUnixHTTP(addr)
+	default:
+		a, err = nil, fmt.Errorf("Invalid protocol format.")
+	}
+	a.createRouter()
+	return a, err
+}
 
+func setupTCPHTTP(addr string) (*APIServer, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 
-	return &HTTPServer{&http.Server{Addr: addr, Handler: r}, l}, nil
+	a := &APIServer{
+		HTTPServer: &http.Server{Addr: addr},
+		Listener: l,
+	}
+	return a, nil
 }
 
-func setupUnixHTTP(addr string) (*HTTPServer, error) {
-	r := createRouter()
-
+func setupUnixHTTP(addr string) (*APIServer, error) {
 	if err := syscall.Unlink(addr); err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
@@ -76,27 +114,11 @@ func setupUnixHTTP(addr string) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	return &HTTPServer{&http.Server{Addr: addr, Handler: r}, l}, nil
-}
-
-func createRouter() *httprouter.Router {
-	r := httprouter.New()
-
-	routerMap := map[string]map[string]httprouter.Handle{
-		"GET": {
-			"/ping": ping,
-		},
-		"POST": {
-			"/apps/:id": buildApp,
-		},
+	a := &APIServer{
+		HTTPServer: &http.Server{Addr: addr},
+		Listener: l,
 	}
-
-	for method, routes := range routerMap {
-		for route, funct := range routes {
-			r.Handle(method, route, logRequestMiddleware(funct))
-		}
-	}
-	return r
+	return a, nil
 }
 
 func logRequestMiddleware(h httprouter.Handle) httprouter.Handle {
@@ -120,7 +142,7 @@ func ping(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	appName := p.ByName("id")
+	server := r.Context().Value("server").(*APIServer)
 
 	// TODO: check if app exists
 
@@ -129,36 +151,35 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	r.ParseMultipartForm(32 << 20) // a maximum of 32MB is stored in memory before storing in temp files
-	file, _, err := r.FormFile("release-tar")
+	buildContext, _, err := r.FormFile("release-tar")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte(err.Error() + "\n"))
 		return
 	}
-	defer file.Close()
-	f, err := ioutil.TempFile("", appName)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("could not create temporary file to store release tar: " + err.Error()))
-		return
-	}
-	defer f.Close()
-	io.Copy(f, file)
+	defer buildContext.Close()
 
 	hj, ok := w.(http.Hijacker)
 	if !ok {
 		http.Error(w, "webserver doesn't support hijacking", http.StatusInternalServerError)
 		return
 	}
-	conn, bufrw, err := hj.Hijack()
+	conn, _, err := hj.Hijack()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
 
+	// send uploaded tar to docker as the build context
+	response, err := server.DockerClient.ImageBuild(context.Background(), buildContext, types.ImageBuildOptions{})
+	if err != nil {
+		conn.Write([]byte(err.Error() + "\n"))
+		return
+	}
+	io.Copy(conn, response.Body)
+
 	// TODO: untar archive and run docker build on it
 	// TODO: push to local registry
 	// TODO: install/upgrade via helm
-	bufrw.ReadString('\n')
 }
