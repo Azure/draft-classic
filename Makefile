@@ -64,7 +64,7 @@ docker-binary:
 
 .PHONY: docker-build
 docker-build: check-docker docker-binary
-	docker build --rm -t ${IMAGE} rootfs
+	docker build --rm -t ${IMAGE} .
 	docker tag ${IMAGE} ${MUTABLE_IMAGE}
 
 .PHONY: test
