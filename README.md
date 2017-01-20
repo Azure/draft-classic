@@ -21,7 +21,9 @@ And in another terminal:
 git clone https://github.com/deis/example-dockerfile-http
 cd example-dockerfile-http
 git archive master > master.tar.gz
-curl -XPOST -F release-tar=@master.tar.gz http://localhost:8080/apps/foo
+pushd charts/
+tar czf chart.tar.gz example-dockerfile-http/
+curl -XPOST -F release-tar=@master.tar.gz -F chart-tar=@chart.tar.gz http://localhost:8080/apps/foo
 ```
 
 _NOTE(bacongobbler): This is what the final CLI usage should look like_
