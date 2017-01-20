@@ -7,6 +7,6 @@ import:
 - package: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - package: k8s.io/helm
-  version: install-from-chart
+  version: prow
   vcs: git
   repo: https://github.com/bacongobbler/helm

@@ -16,6 +16,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/tiller/portforwarder"
 )
 
 // APIServer is an API Server which listens and responds to HTTP requests.
@@ -209,7 +210,13 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer pushResp.Close()
 	io.Copy(conn, pushResp)
 
-	client := &helm.Client{}
+	tunnel, err := portforwarder.New("kube-system", "")
+	if err != nil {
+		fmt.Fprintf(conn, "!!! Could not get a connection to tiller: %v\n", err)
+		return
+	}
+
+	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
 		fmt.Fprintf(conn, "!!! Could not load chart archive: %v\n", err)
