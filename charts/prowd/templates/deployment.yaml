@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - start
+        ports:
+        - containerPort: 44135
+          hostPort: 44135
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 44135
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 44135
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
+      - name: registry
+        image: registry:2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: registry
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
