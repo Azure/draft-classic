@@ -1,10 +1,8 @@
-hash: 3d090f7d6031ba6058c8854497cbac2b09bc0b990b46d3efa3e1dfca65598df0
-updated: 2017-01-19T09:38:13.397280144-07:00
+hash: f6dd12ee66bfc9c94b95b6b085626a196a398fb60aeb6395f870b30876037976
+updated: 2017-01-20T10:56:32.195104417-07:00
 imports:
-- name: github.com/Azure/go-ansiterm
-  version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
-  subpackages:
-  - winterm
+- name: github.com/blang/semver
+  version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/docker/distribution
   version: cd27f179f2c10c5d300e6d09025b538c475b0d51
   subpackages:
@@ -28,21 +26,6 @@ imports:
   - api/types/versions
   - api/types/volume
   - client
-  - opts
-  - pkg/archive
-  - pkg/fileutils
-  - pkg/homedir
-  - pkg/idtools
-  - pkg/ioutils
-  - pkg/jsonlog
-  - pkg/jsonmessage
-  - pkg/longpath
-  - pkg/pools
-  - pkg/promise
-  - pkg/stdcopy
-  - pkg/system
-  - pkg/term
-  - pkg/term/windows
   - pkg/tlsconfig
 - name: github.com/docker/go-connections
   version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
@@ -51,21 +34,38 @@ imports:
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: 9b001659dd36225e356b4467c465d732e745f53d
-- name: github.com/fsouza/go-dockerclient
-  version: e085edda407c05214cc6e71e4881de47667e77ec
-- name: github.com/hashicorp/go-cleanhttp
-  version: ad28ea4487f05916463e2423a55166280e8254b5
+  version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
+- name: github.com/ghodss/yaml
+  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/gobwas/glob
+  version: bea32b9cd2d6f55753d94a28e959b13f0244797a
+  subpackages:
+  - compiler
+  - match
+  - syntax
+  - syntax/ast
+  - syntax/lexer
+  - util/runes
+  - util/strings
+- name: github.com/golang/glog
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
+- name: github.com/golang/protobuf
+  version: df1d3ca07d2d07bba352d5b73c4313b4e2a6203e
+  subpackages:
+  - proto
+  - ptypes/any
+  - ptypes/timestamp
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/julienschmidt/httprouter
   version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
+- name: github.com/Masterminds/semver
+  version: 59c29afe1a994eacb71c833025ca7acf874bb1da
 - name: github.com/Microsoft/go-winio
   version: 307e919c663683a9000576fdc855acaf9534c165
 - name: github.com/opencontainers/runc
   version: 7ca2aa4873aea7cb4265b1726acb24b90d8726c6
   subpackages:
-  - libcontainer/system
   - libcontainer/user
 - name: github.com/pkg/errors
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
@@ -78,13 +78,71 @@ imports:
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: golang.org/x/net
-  version: 4876518f9e71663000c348837735820161a42df7
+  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
   - context/ctxhttp
+  - http2
+  - http2/hpack
+  - internal/timeseries
+  - lex/httplex
   - proxy
+  - trace
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
+  - unix
   - windows
+- name: google.golang.org/grpc
+  version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
+- name: gopkg.in/yaml.v2
+  version: bef53efd0c76e49e6de55ead051f886bea7e9420
+- name: k8s.io/helm
+  version: 4ec63f38d1a2e974462da71d603d597f3a4242ac
+  repo: https://github.com/bacongobbler/helm
+  vcs: git
+  subpackages:
+  - pkg/chartutil
+  - pkg/helm
+  - pkg/ignore
+  - pkg/proto/hapi/chart
+  - pkg/proto/hapi/release
+  - pkg/proto/hapi/services
+  - pkg/proto/hapi/version
+  - pkg/version
+- name: k8s.io/kubernetes
+  version: b5f9d56cab78ccaad2b726223ba8be5802026f0b
+  subpackages:
+  - pkg/api
+  - pkg/api/errors
+  - pkg/api/unversioned
+  - pkg/apimachinery/registered
+  - pkg/apis/batch
+  - pkg/apis/extensions
+  - pkg/client/clientset_generated/internalclientset
+  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion
+  - pkg/client/restclient
+  - pkg/client/typed/discovery
+  - pkg/client/unversioned/clientcmd
+  - pkg/client/unversioned/portforward
+  - pkg/client/unversioned/remotecommand
+  - pkg/kubectl
+  - pkg/kubectl/cmd/util
+  - pkg/kubectl/resource
+  - pkg/labels
+  - pkg/runtime
+  - pkg/util/intstr
+  - pkg/util/strategicpatch
+  - pkg/version
+  - pkg/watch
 testImports: []
