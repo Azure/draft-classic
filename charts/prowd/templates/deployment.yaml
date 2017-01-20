@@ -36,6 +36,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
+          hostPort: 5000
           name: registry
       volumes:
       - name: docker-socket
