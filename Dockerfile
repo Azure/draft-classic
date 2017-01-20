@@ -4,4 +4,4 @@ COPY rootfs /
 
 EXPOSE 44135
 
-CMD ["/bin/prowd"]
+ENTRYPOINT ["/bin/prowd"]
