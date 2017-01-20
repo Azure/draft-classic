@@ -224,7 +224,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	vals := fmt.Sprintf(`name="%s",version="%s",registry="%s:%s`,
+	vals := fmt.Sprintf(`name="%s",version="%s",registry="%s:%s"`,
 		appName,
 		"latest",
 		os.Getenv("PROWD_SERVICE_HOST"),
