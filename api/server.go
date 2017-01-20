@@ -14,6 +14,8 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/docker/docker/api/types"
 	"github.com/julienschmidt/httprouter"
+	"k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/helm"
 )
 
 // APIServer is an API Server which listens and responds to HTTP requests.
@@ -146,24 +148,30 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	imageName := fmt.Sprintf("127.0.0.1:5000/%s:latest", appName)
 	server := r.Context().Value("server").(*APIServer)
 
-	// TODO: check if app exists
-
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	r.ParseMultipartForm(32 << 20) // a maximum of 32MB is stored in memory before storing in temp files
+	// this is just a buffer of 32MB. Everything is piped over to docker's build context and to
+	// Helm so this is just a sane default in case docker or helm's backed up somehow.
+	r.ParseMultipartForm(32 << 20)
 	buildContext, _, err := r.FormFile("release-tar")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error() + "\n"))
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer buildContext.Close()
 
+	chartFile, _, err := r.FormFile("chart-tar")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer chartFile.Close()
+
 	hj, ok := w.(http.Hijacker)
 	if !ok {
-		http.Error(w, "webserver doesn't support hijacking", http.StatusInternalServerError)
+		http.Error(w, "Webserver doesn't support hijacking.", http.StatusInternalServerError)
 		return
 	}
 	conn, _, err := hj.Hijack()
@@ -181,7 +189,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			Tags: []string{imageName},
 		})
 	if err != nil {
-		conn.Write([]byte(err.Error() + "\n"))
+		fmt.Fprintf(conn, "!!! Could not build image from build context: %v\n", err)
 		return
 	}
 	defer buildResp.Body.Close()
@@ -191,12 +199,35 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		imageName,
 		// assume no creds required for now
 		// TODO(bacongobbler): implement custom auth handling for a registry
-		types.ImagePushOptions{RegistryAuth: "foo"})
+		types.ImagePushOptions{RegistryAuth: "hi"})
 	if err != nil {
-		conn.Write([]byte(err.Error() + "\n"))
+		fmt.Fprintf(conn, "!!! Could not load push %s to registry: %v\n", imageName, err)
 		return
 	}
 	defer pushResp.Close()
 	io.Copy(conn, pushResp)
-	// TODO: install/upgrade via helm
+
+	client := &helm.Client{}
+	chart, err := chartutil.LoadArchive(chartFile)
+	if err != nil {
+		fmt.Fprintf(conn, "!!! Could not load chart archive: %v\n", err)
+		return
+	}
+	// inject certain values into the chart such as the registry location, the application name
+	// and the version
+	vals := fmt.Sprintf(`name="%s",version="%s",registry="%s:%s`,
+		appName,
+		"latest",
+		os.Getenv("PROW_SERVICE_HOST"),
+		os.Getenv("PROW_SERVICE_PORT_REGISTRY"),
+	)
+	releaseResp, err := client.InstallReleaseFromChart(
+		chart,
+		appName,
+		helm.ValueOverrides([]byte(vals)))
+	if err != nil {
+		fmt.Fprintf(conn, "!!! Could not install chart: %v\n", err)
+		return
+	}
+	fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
 }
