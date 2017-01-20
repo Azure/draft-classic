@@ -145,7 +145,11 @@ func ping(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
-	imageName := fmt.Sprintf("127.0.0.1:5000/%s:latest", appName)
+	imageName := fmt.Sprintf("%s:%s/%s:latest",
+		os.Getenv("PROWD_SERVICE_HOST"),
+		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
+		appName,
+	)
 	server := r.Context().Value("server").(*APIServer)
 
 	if r.Method != "POST" {
@@ -218,8 +222,8 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	vals := fmt.Sprintf(`name="%s",version="%s",registry="%s:%s`,
 		appName,
 		"latest",
-		os.Getenv("PROW_SERVICE_HOST"),
-		os.Getenv("PROW_SERVICE_PORT_REGISTRY"),
+		os.Getenv("PROWD_SERVICE_HOST"),
+		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
 	)
 	releaseResp, err := client.InstallReleaseFromChart(
 		chart,
