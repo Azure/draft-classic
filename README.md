@@ -11,19 +11,17 @@ _NOTE(bacongobbler): this is usage instructions to test while there's no client 
 For now, this is the easiest way to test/run this locally on macOS:
 
 ```
-make bootstrap build
-./bin/prowd start --docker-from-env
-```
-
-And in another terminal:
-
-```
-git clone https://github.com/deis/example-dockerfile-http
-cd example-dockerfile-http
-git archive master > master.tar.gz
+# install prowd
+helm init
+helm install ./charts/prowd
+# prepare the build context and chart tarballs
+cd tests/testdata/example-dockerfile-http
+tar czf build.tar.gz Dockerfile rootfs/
 pushd charts/
-tar czf chart.tar.gz example-dockerfile-http/
-curl -XPOST -F release-tar=@master.tar.gz -F chart-tar=@chart.tar.gz http://localhost:8080/apps/foo
+tar czf ../charts.tar.gz example-dockerfile-http/
+popd
+# push the tarballs to prowd!
+curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@charts.tar.gz http://k8s.local:44135/apps/foo
 ```
 
 _NOTE(bacongobbler): This is what the final CLI usage should look like_
