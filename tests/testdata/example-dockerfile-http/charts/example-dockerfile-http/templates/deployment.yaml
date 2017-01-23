@@ -19,7 +19,6 @@ spec:
       labels:
         app: {{ .Values.name }}
     spec:
-      serviceAccount: {{ .Values.name }}
       containers:
         - name: {{ .Values.name }}
           image: {{ .Values.registry }}/{{ .Values.name }}:{{ .Values.version }}
