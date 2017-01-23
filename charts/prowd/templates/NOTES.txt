@@ -1,0 +1,10 @@
+Now you can deploy an app using prow!
+
+	$ cd my-app
+	$ prow up --namespace=foo
+	--> Building Dockerfile
+	--> Pushing my-app:latest
+	--> Deploying to Kubernetes
+	--> Deployed!
+
+That's it! You're now running your app in a Kubernetes cluster.
