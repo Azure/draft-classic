@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+echo "Powered by $POWERED_BY" > /usr/share/nginx/html/index.html
+
+nginx -g "daemon off;"
