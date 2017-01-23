@@ -1,18 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.name }}
+  name: {{ template "fullname" . }}
   labels:
-    heritage: deis
-    router.deis.io/routable: "true"
-  annotations:
-    router.deis.io/domains: deis
-    router.deis.io/connectTimeout: "10"
-    router.deis.io/tcpTimeout: "1200"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   ports:
-    - name: http
-      port: 80
-      targetPort: 80
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
   selector:
-    app: {{ .Values.name }}
+    app: {{ template "fullname" . }}
