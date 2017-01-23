@@ -1,3 +1,4 @@
 bin/
 vendor/
 *.exe
+*.tar.gz
