@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    heritage: deis
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      serviceAccount: {{ .Values.name }}
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.registry }}/{{ .Values.name }}:{{ .Values.version }}
+          imagePullPolicy: {{ default "" .Values.pull_policy | quote }}
+          ports:
+            - containerPort: 80
+              name: http
