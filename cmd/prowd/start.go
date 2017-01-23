@@ -9,7 +9,7 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
-	"github.com/helm/prow/api"
+	"github.com/deis/prow/api"
 )
 
 const startDesc = `
