@@ -9,20 +9,22 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"syscall"
 
-	docker "github.com/docker/docker/client"
 	"github.com/docker/docker/api/types"
+	docker "github.com/docker/docker/client"
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/helm/pkg/tiller/portforwarder"
 )
 
 // APIServer is an API Server which listens and responds to HTTP requests.
 type APIServer struct {
-	HTTPServer *http.Server
-	Listener   net.Listener
+	HTTPServer   *http.Server
+	Listener     net.Listener
 	DockerClient *docker.Client
 }
 
@@ -73,7 +75,7 @@ func (s *APIServer) serverMiddleware(h httprouter.Handle) httprouter.Handle {
 // NewServer sets up the required Server and does protocol specific checking.
 func NewServer(proto, addr string) (*APIServer, error) {
 	var (
-		a *APIServer
+		a   *APIServer
 		err error
 	)
 	switch proto {
@@ -96,7 +98,7 @@ func setupTCPHTTP(addr string) (*APIServer, error) {
 
 	a := &APIServer{
 		HTTPServer: &http.Server{Addr: addr},
-		Listener: l,
+		Listener:   l,
 	}
 	return a, nil
 }
@@ -119,7 +121,7 @@ func setupUnixHTTP(addr string) (*APIServer, error) {
 
 	a := &APIServer{
 		HTTPServer: &http.Server{Addr: addr},
-		Listener: l,
+		Listener:   l,
 	}
 	return a, nil
 }
@@ -230,13 +232,34 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		os.Getenv("PROWD_SERVICE_HOST"),
 		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
 	)
-	releaseResp, err := client.InstallReleaseFromChart(
-		chart,
-		appName,
-		helm.ValueOverrides([]byte(vals)))
-	if err != nil {
-		fmt.Fprintf(conn, "!!! Could not install chart: %v\n", err)
-		return
+	// If a release does not exist, install it. If another error occurs during
+	// the check, ignore the error and continue with the upgrade.
+	//
+	// The returned error is a grpc.rpcError that wraps the message from the original error.
+	// So we're stuck doing string matching against the wrapped error, which is nested somewhere
+	// inside of the grpc.rpcError message.
+	_, err = client.ReleaseContent(appName, helm.ContentReleaseVersion(1))
+	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+		fmt.Fprintf(conn, "Release %q does not exist. Installing it now.\n", appName)
+		releaseResp, err := client.InstallReleaseFromChart(
+			chart,
+			"default",
+			helm.ReleaseName(appName),
+			helm.ValueOverrides([]byte(vals)))
+		if err != nil {
+			fmt.Fprintf(conn, "!!! Could not install release: %v\n", err)
+			return
+		}
+		fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
+	} else {
+		releaseResp, err := client.UpdateReleaseFromChart(
+			appName,
+			chart,
+			helm.UpdateValueOverrides([]byte(vals)))
+		if err != nil {
+			fmt.Fprintf(conn, "!!! Could not install chart: %v\n", err)
+			return
+		}
+		fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
 	}
-	fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
 }

@@ -1,10 +1,11 @@
-hash: ed9bedad06e9bbdc5773d16d06074fae6ecd0253647f39d4b3f7b474eecc649a
-updated: 2017-01-20T16:27:07.911114063-07:00
+hash: 997ddcb588f76c382383a57e414cb3d3383b359e59c3f1195644a41251597a4f
+updated: 2017-01-24T11:31:41.91044702-08:00
 imports:
-- name: github.com/aokoli/goutils
-  version: 9c37978a95bd5c709a15883b6242714ea6709e64
-- name: github.com/asaskevich/govalidator
-  version: 7664702784775e51966f0885f5cd27435916517b
+- name: cloud.google.com/go
+  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/Azure/go-ansiterm
   version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
@@ -27,10 +28,6 @@ imports:
   - health
   - httputil
   - timeutil
-- name: github.com/cpuguy83/go-md2man
-  version: a65d4d2de4d5f7c74868dfa9b202a3c8be315aaa
-  subpackages:
-  - md2man
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -40,7 +37,7 @@ imports:
 - name: github.com/docker/distribution
   version: cd27f179f2c10c5d300e6d09025b538c475b0d51
   subpackages:
-  - digest
+  - digestset
   - reference
 - name: github.com/docker/docker
   version: 49bf474f9ed7ce7143a59d1964ff7b7fd9b52178
@@ -162,11 +159,6 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
-- name: github.com/gosuri/uitable
-  version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
-  subpackages:
-  - util/strutil
-  - util/wordwrap
 - name: github.com/howeyc/gopass
   version: 3ca23474a7c7203e0a0a070fd33508f6efdb9b3d
 - name: github.com/imdario/mergo
@@ -187,18 +179,12 @@ imports:
   - jwriter
 - name: github.com/Masterminds/semver
   version: 59c29afe1a994eacb71c833025ca7acf874bb1da
-- name: github.com/Masterminds/sprig
-  version: 69011c0cd9b4d2e0733c4d9e2c8e2a5a0d0a2f2f
-- name: github.com/mattn/go-runewidth
-  version: d6bea18f789704b5f83375793155289da36a3c7f
 - name: github.com/Microsoft/go-winio
   version: 307e919c663683a9000576fdc855acaf9534c165
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
-- name: github.com/opencontainers/runc
-  version: 7ca2aa4873aea7cb4265b1726acb24b90d8726c6
-  subpackages:
-  - libcontainer/user
+- name: github.com/opencontainers/go-digest
+  version: 21dfd564fd89c944783d00d069f33e3e7123c448
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/errors
@@ -207,20 +193,10 @@ imports:
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
-- name: github.com/russross/blackfriday
-  version: 300106c228d52c8941d4b3de6054a6062a86dda3
-- name: github.com/satori/go.uuid
-  version: 879c5887cd475cd7864858769793b2ceb0d44feb
-- name: github.com/shurcooL/sanitized_anchor_name
-  version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
 - name: github.com/Sirupsen/logrus
-  version: 55eb11d21d2a31a3cc93838241d04800f52e823d
-  subpackages:
-  - formatters/logstash
+  version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
-  subpackages:
-  - doc
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/ugorji/go
@@ -229,16 +205,14 @@ imports:
   - codec
   - codec/codecgen
 - name: golang.org/x/crypto
-  version: c10c31b5e94b6f7a0283272dc2bb27163dcea24b
+  version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
-  - cast5
-  - openpgp
-  - openpgp/armor
-  - openpgp/clearsign
-  - openpgp/elgamal
-  - openpgp/errors
-  - openpgp/packet
-  - openpgp/s2k
+  - bcrypt
+  - blowfish
+  - curve25519
+  - pkcs12
+  - pkcs12/internal/rc2
+  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
@@ -254,7 +228,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 045497edb6234273d67dbc25da3f2ddbc4c4cacf
+  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
   subpackages:
   - google
   - internal
@@ -279,7 +253,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/app_identity
@@ -290,13 +264,6 @@ imports:
   - internal/remote_api
   - internal/urlfetch
   - urlfetch
-- name: google.golang.org/cloud
-  version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
-  subpackages:
-  - compute/metadata
-  - internal
-  - internal/opts
-  - storage
 - name: google.golang.org/grpc
   version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:
@@ -311,42 +278,22 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: bef53efd0c76e49e6de55ead051f886bea7e9420
+  version: 14227de293ca979cf205cd88769fe71ed96a97e2
 - name: k8s.io/helm
-  version: 0a50d5603c04681107f52cdf7e2f8ff7400527cb
+  version: 5bc7375c9ca94340dc2d1371e5bf4b43ba1fc398
   repo: https://github.com/bacongobbler/helm
   vcs: git
   subpackages:
-  - cmd/helm
-  - cmd/helm/downloader
-  - cmd/helm/helmpath
-  - cmd/helm/installer
-  - cmd/helm/resolver
-  - cmd/helm/search
-  - cmd/helm/strvals
   - pkg/chartutil
-  - pkg/engine
   - pkg/helm
   - pkg/ignore
   - pkg/kube
-  - pkg/lint
-  - pkg/lint/rules
-  - pkg/lint/support
-  - pkg/plugin
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
-  - pkg/provenance
-  - pkg/releaseutil
-  - pkg/repo
-  - pkg/storage
   - pkg/storage/driver
-  - pkg/tiller/environment
   - pkg/tiller/portforwarder
-  - pkg/timeconv
-  - pkg/tlsutil
-  - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
   version: b5f9d56cab78ccaad2b726223ba8be5802026f0b
