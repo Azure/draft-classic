@@ -247,7 +247,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// inside of the grpc.rpcError message.
 	_, err = client.ReleaseContent(appName, helm.ContentReleaseVersion(1))
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
-		fmt.Fprintf(conn, "Release %q does not exist. Installing it now.\n", appName)
+		fmt.Fprintf(conn, "    Release %q does not exist. Installing it now.\n", appName)
 		releaseResp, err := client.InstallReleaseFromChart(
 			chart,
 			"default",
