@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -15,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
 	"github.com/julienschmidt/httprouter"
+	log "github.com/Sirupsen/logrus"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/storage/driver"
@@ -187,6 +187,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer conn.Close()
 
 	// send uploaded tar to docker as the build context
+	fmt.Fprintln(conn, "--> Building Dockerfile")
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
 		buildContext,
@@ -198,7 +199,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer buildResp.Body.Close()
-	io.Copy(conn, buildResp.Body)
+	if log.GetLevel() == log.DebugLevel {
+		io.Copy(conn, buildResp.Body)
+	}
+	fmt.Fprintf(conn, "--> Pushing %s\n", imageName)
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
@@ -210,8 +214,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer pushResp.Close()
-	io.Copy(conn, pushResp)
+	if log.GetLevel() == log.DebugLevel {
+		io.Copy(conn, pushResp)
+	}
 
+	fmt.Fprintln(conn, "--> Deploying to Kubernetes")
 	tunnel, err := portforwarder.New("kube-system", "")
 	if err != nil {
 		fmt.Fprintf(conn, "!!! Could not get a connection to tiller: %v\n", err)
@@ -250,7 +257,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			fmt.Fprintf(conn, "!!! Could not install release: %v\n", err)
 			return
 		}
-		fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
+		fmt.Fprintf(conn, "--> %s\n", releaseResp.Release.Info.Status.String())
 	} else {
 		releaseResp, err := client.UpdateReleaseFromChart(
 			appName,
@@ -260,6 +267,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			fmt.Fprintf(conn, "!!! Could not install chart: %v\n", err)
 			return
 		}
-		fmt.Fprintf(conn, "%s\n", releaseResp.Release.Info.Status.String())
+		fmt.Fprintf(conn, "--> %s\n", releaseResp.Release.Info.Status.String())
 	}
 }
