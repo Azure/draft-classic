@@ -11,17 +11,35 @@ _NOTE(bacongobbler): this is usage instructions to test while there's no client 
 For now, this is the easiest way to test/run this locally on macOS:
 
 ```
-# install prowd
-helm init
-helm install ./charts/prowd
-# prepare the build context and chart tarballs
-cd tests/testdata/example-dockerfile-http
-tar czf build.tar.gz Dockerfile rootfs/
-pushd charts/
-tar czf ../charts.tar.gz example-dockerfile-http/
-popd
-# push the tarballs to prowd!
-curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@charts.tar.gz http://k8s.local:44135/apps/foo
+$ # install prowd
+$ helm init
+$ export IMAGE_PREFIX=bacongobbler
+$ make info
+Build tag:       git-abc1234
+Registry:        quay.io
+Immutable tag:   quay.io/bacongobbler/prowd:git-abc1234
+Mutable tag:     quay.io/bacongobbler/prowd:canary
+$ make docker-build docker-push
+$ helm install ./charts/prowd
+$ # prepare the build context and chart tarballs
+$ cd tests/testdata/example-dockerfile-http
+$ tar czf build.tar.gz Dockerfile rootfs/
+$ pushd charts/
+$ tar czf ../charts.tar.gz example-dockerfile-http/
+$ popd
+$ # push the tarballs to prowd!
+$ curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@charts.tar.gz http://k8s.local:44135/apps/foo
+--> Building Dockerfile
+--> Pushing 127.0.0.1:5000/foo:latest
+--> Deploying to Kubernetes
+    Release "foo" does not exist. Installing it now.
+--> code:DEPLOYED
+$ helm list
+NAME            REVISION        UPDATED                         STATUS          CHART
+foo             1               Tue Jan 24 15:04:27 2017        DEPLOYED        example-dockerfile-http-1.0.0
+$ kubectl get po
+NAME                   READY     STATUS             RESTARTS   AGE
+foo-3666132817-m2pkr   1/1       Running            0          30s
 ```
 
 _NOTE(bacongobbler): This is what the final CLI usage should look like_
