@@ -56,7 +56,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 func (c *startCmd) run() error {
 	var (
 		dockerClient *docker.Client
-		err error
+		err          error
 	)
 
 	protoAndAddr := strings.SplitN(c.listenAddr, "://", 2)
@@ -67,8 +67,8 @@ func (c *startCmd) run() error {
 		dockerClient, err = docker.NewClient(c.dockerAddr, c.dockerVersion, nil, nil)
 	}
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
 	if err != nil {
