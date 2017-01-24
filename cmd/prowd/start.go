@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"strings"
 
 	docker "github.com/docker/docker/client"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/deis/prow/api"

@@ -1,11 +1,6 @@
-hash: 997ddcb588f76c382383a57e414cb3d3383b359e59c3f1195644a41251597a4f
-updated: 2017-01-24T11:31:41.91044702-08:00
+hash: 522f1bedc1c018d76eb6aabf63f9c4d83e0952f0e803ff568902d867908fda61
+updated: 2017-01-24T12:35:03.689616354-08:00
 imports:
-- name: cloud.google.com/go
-  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
-  subpackages:
-  - compute/metadata
-  - internal
 - name: github.com/Azure/go-ansiterm
   version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
@@ -37,7 +32,7 @@ imports:
 - name: github.com/docker/distribution
   version: cd27f179f2c10c5d300e6d09025b538c475b0d51
   subpackages:
-  - digestset
+  - digest
   - reference
 - name: github.com/docker/docker
   version: 49bf474f9ed7ce7143a59d1964ff7b7fd9b52178
@@ -183,8 +178,10 @@ imports:
   version: 307e919c663683a9000576fdc855acaf9534c165
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
-- name: github.com/opencontainers/go-digest
-  version: 21dfd564fd89c944783d00d069f33e3e7123c448
+- name: github.com/opencontainers/runc
+  version: ce450bcc6c135cae93ee2a99d41a308c179ff6dc
+  subpackages:
+  - libcontainer/user
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/errors
@@ -194,7 +191,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/Sirupsen/logrus
-  version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
+  version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
@@ -205,14 +202,10 @@ imports:
   - codec
   - codec/codecgen
 - name: golang.org/x/crypto
-  version: 1f22c0103821b9390939b6776727195525381532
+  version: c10c31b5e94b6f7a0283272dc2bb27163dcea24b
   subpackages:
   - bcrypt
   - blowfish
-  - curve25519
-  - pkcs12
-  - pkcs12/internal/rc2
-  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
@@ -228,7 +221,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
+  version: 045497edb6234273d67dbc25da3f2ddbc4c4cacf
   subpackages:
   - google
   - internal
@@ -253,7 +246,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
+  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
   subpackages:
   - internal
   - internal/app_identity
@@ -264,6 +257,13 @@ imports:
   - internal/remote_api
   - internal/urlfetch
   - urlfetch
+- name: google.golang.org/cloud
+  version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
+  subpackages:
+  - compute/metadata
+  - internal
+  - internal/opts
+  - storage
 - name: google.golang.org/grpc
   version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	log "github.com/Sirupsen/logrus"
 )
 
 var (
@@ -30,6 +31,10 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	}
 	p := cmd.PersistentFlags()
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
+
+	if flagDebug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	cmd.AddCommand(
 		newCreateCmd(out),
