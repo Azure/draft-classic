@@ -21,13 +21,15 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		Short:        "The prow server.",
 		Long:         globalUsage,
 		SilenceUsage: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if flagDebug {
+				log.Printf("debug logging enabled")
+				log.SetLevel(log.DebugLevel)
+			}
+		},
 	}
 	p := cmd.PersistentFlags()
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
-
-	if flagDebug {
-		log.SetLevel(log.DebugLevel)
-	}
 
 	cmd.AddCommand(
 		newStartCmd(out),
