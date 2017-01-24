@@ -20,6 +20,8 @@ Registry:        quay.io
 Immutable tag:   quay.io/bacongobbler/prowd:git-abc1234
 Mutable tag:     quay.io/bacongobbler/prowd:canary
 $ make docker-build docker-push
+$ cat charts/prowd/values.yaml | grep repository
+  repository: quay.io/bacongobbler/prowd
 $ helm install ./charts/prowd
 $ # prepare the build context and chart tarballs
 $ cd tests/testdata/example-dockerfile-http
