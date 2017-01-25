@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -148,9 +150,6 @@ func ping(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
-	imageName := fmt.Sprintf("127.0.0.1:5000/%s:latest",
-		appName,
-	)
 	server := r.Context().Value("server").(*APIServer)
 
 	if r.Method != "POST" {
@@ -186,11 +185,25 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	defer conn.Close()
 
+	// write build context to a buffer so we can also write to the sha1 hash
+	buf := new(bytes.Buffer)
+	buildContextChecksum := sha1.New()
+	mw := io.MultiWriter(buf, buildContextChecksum)
+	io.Copy(mw, buildContext)
+
+	// truncate checksum to the first 40 characters (20 bytes)
+	// this is the equivalent of `shasum build.tar.gz | awk '{print $1}'`
+	tag := fmt.Sprintf("%.20x", buildContextChecksum.Sum(nil))
+	imageName := fmt.Sprintf("127.0.0.1:5000/%s:%s",
+		appName,
+		tag,
+	)
+
 	// send uploaded tar to docker as the build context
 	fmt.Fprintln(conn, "--> Building Dockerfile")
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
-		buildContext,
+		buf,
 		types.ImageBuildOptions{
 			Tags: []string{imageName},
 		})
@@ -235,7 +248,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// and the version
 	vals := fmt.Sprintf("name: %s\nversion: %s\nregistry: \"%s:%s\"",
 		appName,
-		"latest",
+		tag,
 		os.Getenv("PROWD_SERVICE_HOST"),
 		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
 	)

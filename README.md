@@ -44,6 +44,15 @@ NAME                   READY     STATUS             RESTARTS   AGE
 foo-3666132817-m2pkr   1/1       Running            0          30s
 ```
 
+You can also confirm that the image deployed on kubernetes is the same as what was uploaded locally:
+
+```
+$ shasum build.tar.gz | awk '{print $1}'
+fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
+$ kubectl get po foo-3666132817-m2pkr -o=jsonpath='{.spec.containers[0].image}' | rev | cut -d ':' -f 1 | rev
+fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
+```
+
 _NOTE(bacongobbler): This is what the final CLI usage should look like_
 
 Start from your source code repository and let Prow transform it for
