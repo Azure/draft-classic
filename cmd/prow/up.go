@@ -6,23 +6,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const pushDesc = `
+const upDesc = `
 This command archives the current directory into a tar archive and uploads it to the prow server.
 `
 
-type pushCmd struct {
+type upCmd struct {
 	out io.Writer
 }
 
-func newPushCmd(out io.Writer) *cobra.Command {
-	cc := &pushCmd{
+func newUpCmd(out io.Writer) *cobra.Command {
+	cc := &upCmd{
 		out: out,
 	}
 
 	cmd := &cobra.Command{
-		Use:   "push",
+		Use:   "up",
 		Short: "upload the current directory to the prow server for deployment",
-		Long:  pushDesc,
+		Long:  upDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cc.run()
 		},
@@ -31,6 +31,6 @@ func newPushCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (c *pushCmd) run() error {
+func (c *upCmd) run() error {
 	return nil
 }
