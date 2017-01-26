@@ -6,14 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const createDesc = `
-This command transforms the local directory to be deployable via 'prow push'.
-
-By running 'prow create --scaffold', prow will scaffold a Helm chart for your application in the
-charts/ directory.
-
-The first argument is optional, but must be a unique application name to be deployed to Kubernetes.
-If it is not provided, prow will automatically generate a unique name for the application.
+const createDesc = `This command transforms the local directory to be deployable via 'prow up'.
 `
 
 type createCmd struct {
