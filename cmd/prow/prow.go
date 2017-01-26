@@ -18,7 +18,7 @@ var globalUsage = `The application deployment tool for Kubernetes.
 Commands:
 
 - prow create:    transform the local directory to be deployable via prow
-- prow push:      packages and deploys your local directory to Kubernetes
+- prow up:        packages and deploys your local directory to Kubernetes
 - prow version:   display client version information
 `
 
@@ -38,7 +38,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 
 	cmd.AddCommand(
 		newCreateCmd(out),
-		newPushCmd(out),
+		newUpCmd(out),
 		newVersionCmd(out),
 	)
 
