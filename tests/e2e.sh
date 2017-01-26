@@ -14,7 +14,7 @@
 # fail fast
 set -eof pipefail
 
-CONTAINER_TIMEOUT=10s
+CONTAINER_TIMEOUT=${CONTAINER_TIMEOUT:-1m)
 
 cd testdata/example-dockerfile-http
 
