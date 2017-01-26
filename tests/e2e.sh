@@ -14,7 +14,7 @@
 # fail fast
 set -eof pipefail
 
-CONTAINER_TIMEOUT=${CONTAINER_TIMEOUT:-1m)
+CONTAINER_TIMEOUT=${CONTAINER_TIMEOUT:-1m}
 
 cd testdata/example-dockerfile-http
 
@@ -49,8 +49,8 @@ tar czf build.tar.gz Dockerfile rootfs/
 curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@chart.tar.gz http://k8s.cluster:44135/apps/example-dockerfile-http
 
 sleep $CONTAINER_TIMEOUT
-app_output=$(curl -sS http://k8s.cluster:44144)
-if [[ "$app_output" != "Powered by Kubernetes" ]]; then
-	echo "Expected 'Powered by Kubernetes', got '$app_output'"
+app_output_2=$(curl -sS http://k8s.cluster:44144)
+if [[ "$app_output_2" != "Powered by Kubernetes" ]]; then
+	echo "Expected 'Powered by Kubernetes', got '$app_output_2'"
 	exit 1
 fi
