@@ -21,6 +21,8 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/helm/pkg/tiller/portforwarder"
+
+	"github.com/deis/prow/pkg/version"
 )
 
 // APIServer is an API Server which listens and responds to HTTP requests.
@@ -51,6 +53,7 @@ func (s *APIServer) createRouter() {
 	routerMap := map[string]map[string]httprouter.Handle{
 		"GET": {
 			"/ping": ping,
+			"/version": getVersion,
 		},
 		"POST": {
 			"/apps/:id": buildApp,
@@ -140,9 +143,9 @@ func logRequestMiddleware(h httprouter.Handle) httprouter.Handle {
 	}
 }
 
-// WriteJSON writes the value v to the http response stream as json with standard
+// writeJSON writes the value v to the http response stream as json with standard
 // json encoding.
-func WriteJSON(w http.ResponseWriter, v interface{}, code int) error {
+func writeJSON(w http.ResponseWriter, v interface{}, code int) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	return json.NewEncoder(w).Encode(v)
@@ -150,6 +153,12 @@ func WriteJSON(w http.ResponseWriter, v interface{}, code int) error {
 
 func ping(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Write([]byte{'P', 'O', 'N', 'G'})
+}
+
+func getVersion(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	if err := writeJSON(w, version.New(), http.StatusOK); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

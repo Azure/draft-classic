@@ -1,9 +1,9 @@
 package version
 
 type Version struct {
-	SemVer       string
-	GitCommit    string
-	GitTreeState string
+	SemVer       string `json:"semver"`
+	GitCommit    string `json:"git-commit"`
+	GitTreeState string `json:"git-tree-state"`
 }
 
 func (v *Version) String() string {
