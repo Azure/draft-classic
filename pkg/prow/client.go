@@ -1,6 +1,7 @@
 package prow
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 
@@ -50,5 +51,25 @@ func (c Client) Up(appDir, namespace string) (*release.Release, error) {
 
 // Version returns the server version.
 func (c Client) Version() (*version.Version, error) {
-	return version.New(), nil
+	var ver version.Version
+
+	c.Endpoint.Path = "/version"
+	req := &http.Request{
+		Method: "GET",
+		URL: c.Endpoint,
+		Proto:      "HTTP/1.1",
+		ProtoMajor: 1,
+		ProtoMinor: 1,
+		Header:     c.Header,
+		Body:       nil,
+		Host:       c.Endpoint.Host,
+	}
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	dec := json.NewDecoder(resp.Body)
+	err = dec.Decode(&ver)
+	return &ver, err
 }
