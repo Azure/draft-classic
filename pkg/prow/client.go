@@ -46,7 +46,7 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 // Up uploads the contents of appDir to prowd, installs it in the specified namespace and
 // returns a Helm Release.
 func (c Client) Up(appDir, namespace string) (*release.Release, error) {
-	return &release.Release{}, nil
+	return &release.Release{Info: &release.Info{Status: &release.Status{Code: release.Status_DEPLOYED}}}, nil
 }
 
 // Version returns the server version.
