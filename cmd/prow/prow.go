@@ -44,6 +44,11 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		Short:        "The application deployment tool for Kubernetes.",
 		Long:         globalUsage,
 		SilenceUsage: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if flagDebug {
+				log.SetLevel(log.DebugLevel)
+			}
+		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			teardown()
 		},
@@ -52,10 +57,6 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
 	p.StringVar(&prowdHost, "host", defaultProwdHost(), "address of prowd. Overrides $PROWD_HOST")
-
-	if flagDebug {
-		log.SetLevel(log.DebugLevel)
-	}
 
 	cmd.AddCommand(
 		newCreateCmd(out),
@@ -74,10 +75,10 @@ func setupConnection(c *cobra.Command, args []string) error {
 		}
 
 		prowdHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
-		log.Debugf("Created tunnel using local port: '%d'\n", tunnel.Local)
+		log.Debugf("Created tunnel using local port: '%d'", tunnel.Local)
 	}
 
-	log.Debugf("SERVER: %q\n", prowdHost)
+	log.Debugf("SERVER: %q", prowdHost)
 	return nil
 }
 
