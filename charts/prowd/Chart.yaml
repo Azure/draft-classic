@@ -1,4 +1,4 @@
-apiVersion: v1
-description: The prow server
 name: prowd
+description: The prow server
 version: 0.1.0
+apiVersion: v1
