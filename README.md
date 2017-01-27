@@ -62,7 +62,7 @@ Kubernetes:
 $ cd my-app
 $ ls
 app.py
-$ prow create my-app --pack=python
+$ prow create --pack=python
 --> Created ./charts/my-app
 --> Created ./charts/my-app/Dockerfile
 --> Ready to sail
@@ -76,14 +76,13 @@ $ prow up
 --> Building Dockerfile
 --> Pushing my-app:latest
 --> Deploying to Kubernetes
---> Ready at 10.21.77.7:8080
+--> code:DEPLOYED
 ```
 
 That's it! You're now running your Python app in a Kubernetes cluster.
 
 Behind the scenes, Prow is handling the heavy lifting for you:
 
-- It uses your existing Dockerfile, or creates one for you
 - It builds a container image, and pushes it to a registry
 - It creates a Helm chart for deploying into Kubernetes
 - Using Helm, it deploys your release
