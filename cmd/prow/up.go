@@ -14,8 +14,8 @@ This command archives the current directory into a tar archive and uploads it to
 `
 
 type upCmd struct {
-	out io.Writer
-	client     prowd.Client
+	out    io.Writer
+	client prowd.Client
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -24,9 +24,9 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "up",
-		Short: "upload the current directory to the prow server for deployment",
-		Long:  upDesc,
+		Use:               "up",
+		Short:             "upload the current directory to the prow server for deployment",
+		Long:              upDesc,
 		PersistentPreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			up.client = ensureProwClient(up.client)

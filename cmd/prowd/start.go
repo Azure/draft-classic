@@ -5,8 +5,8 @@ import (
 	"io"
 	"strings"
 
-	docker "github.com/docker/docker/client"
 	log "github.com/Sirupsen/logrus"
+	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"github.com/deis/prow/api"
