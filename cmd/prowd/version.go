@@ -39,6 +39,6 @@ func newVersionCmd(out io.Writer) *cobra.Command {
 }
 
 func (v *versionCmd) run() error {
-	fmt.Fprintf(v.out, "%s\n", version.GetVersion())
+	fmt.Fprintf(v.out, "%s\n", version.New())
 	return nil
 }

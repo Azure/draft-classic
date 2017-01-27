@@ -1,16 +1,32 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/spf13/cobra"
 	log "github.com/Sirupsen/logrus"
+	"k8s.io/helm/pkg/kube"
+
+	"github.com/deis/prow/pkg/prow"
+	"github.com/deis/prow/pkg/prowd"
+	"github.com/deis/prow/pkg/prowd/portforwarder"
+)
+
+const (
+	hostEnvVar             = "PROWD_HOST"
 )
 
 var (
 	// flagDebug is a signal that the user wants additional output.
 	flagDebug bool
+	kubeContext     string
+	// prowdTunnel is a tunnelled connection used to send requests to prowd.
+	// TODO refactor out this global var
+	prowdTunnel *kube.Tunnel
+	// prowdHost depicts where the prowd server is hosted.
+	prowdHost      string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -28,9 +44,14 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		Short:        "The application deployment tool for Kubernetes.",
 		Long:         globalUsage,
 		SilenceUsage: true,
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			teardown()
+		},
 	}
 	p := cmd.PersistentFlags()
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
+	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
+	p.StringVar(&prowdHost, "host", defaultProwdHost(), "address of prowd. Overrides $PROWD_HOST")
 
 	if flagDebug {
 		log.SetLevel(log.DebugLevel)
@@ -43,6 +64,42 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	)
 
 	return cmd
+}
+
+func setupConnection(c *cobra.Command, args []string) error {
+	if prowdHost == "" {
+		tunnel, err := portforwarder.New(kubeContext)
+		if err != nil {
+			return err
+		}
+
+		prowdHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
+		log.Debugf("Created tunnel using local port: '%d'\n", tunnel.Local)
+	}
+
+	log.Debugf("SERVER: %q\n", prowdHost)
+	return nil
+}
+
+func teardown() {
+	if prowdTunnel != nil {
+		prowdTunnel.Close()
+	}
+}
+
+func ensureProwClient(p prowd.Client) prowd.Client {
+	if p != nil {
+		return p
+	}
+	client, err := prow.NewFromString(prowdHost, nil)
+	if err != nil {
+		panic(err)
+	}
+	return client
+}
+
+func defaultProwdHost() string {
+	return os.Getenv(hostEnvVar)
 }
 
 func main() {

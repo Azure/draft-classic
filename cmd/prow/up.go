@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
+
+	"github.com/deis/prow/pkg/prowd"
 )
 
 const upDesc = `
@@ -12,10 +15,11 @@ This command archives the current directory into a tar archive and uploads it to
 
 type upCmd struct {
 	out io.Writer
+	client     prowd.Client
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
-	cc := &upCmd{
+	up := &upCmd{
 		out: out,
 	}
 
@@ -23,14 +27,20 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		Use:   "up",
 		Short: "upload the current directory to the prow server for deployment",
 		Long:  upDesc,
+		PersistentPreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cc.run()
+			up.client = ensureProwClient(up.client)
+			return up.run()
 		},
 	}
-
 	return cmd
 }
 
-func (c *upCmd) run() error {
+func (u *upCmd) run() error {
+	release, err := u.client.Up(".", "default")
+	if err != nil {
+		return fmt.Errorf("there was an error running 'prow up': %v", err)
+	}
+	fmt.Println(release)
 	return nil
 }

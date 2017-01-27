@@ -36,8 +36,8 @@ func getVersion() string {
 	return Release + "+" + BuildMetadata
 }
 
-// GetVersion returns the semver interpretation of the version
-func GetVersion() *Version {
+// New returns the semver interpretation of the version.
+func New() *Version {
 	return &Version{
 		SemVer:       getVersion(),
 		GitCommit:    GitCommit,
