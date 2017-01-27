@@ -24,9 +24,9 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:               "up",
-		Short:             "upload the current directory to the prow server for deployment",
-		Long:              upDesc,
+		Use:     "up",
+		Short:   "upload the current directory to the prow server for deployment",
+		Long:    upDesc,
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			up.client = ensureProwClient(up.client)
