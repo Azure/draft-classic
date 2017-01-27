@@ -22,7 +22,7 @@ Mutable tag:     quay.io/bacongobbler/prowd:canary
 $ make docker-build docker-push
 $ cat charts/prowd/values.yaml | grep repository
   repository: quay.io/bacongobbler/prowd
-$ helm install ./charts/prowd
+$ helm install ./charts/prowd --namespace prow
 $ # prepare the build context and chart tarballs
 $ cd tests/testdata/example-dockerfile-http
 $ tar czf build.tar.gz Dockerfile rootfs/
