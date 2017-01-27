@@ -59,7 +59,11 @@ func (s *APIServer) createRouter() {
 
 	for method, routes := range routerMap {
 		for route, funct := range routes {
-			r.Handle(method, route, s.serverMiddleware(logRequestMiddleware(funct)))
+			// disable logging on /ping requests
+			if route != "/ping" {
+				funct = logRequestMiddleware(funct)
+			}
+			r.Handle(method, route, s.serverMiddleware(funct))
 		}
 	}
 	s.HTTPServer.Handler = r
@@ -130,7 +134,7 @@ func setupUnixHTTP(addr string) (*APIServer, error) {
 
 func logRequestMiddleware(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		log.Printf("%s %s", r.Method, r.RequestURI)
+		log.Infof("%s %s", r.Method, r.RequestURI)
 		// Delegate request to the given handle
 		h(w, r, p)
 	}
