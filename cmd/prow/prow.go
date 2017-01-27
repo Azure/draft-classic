@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/spf13/cobra"
 	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/deis/prow/pkg/prow"
@@ -15,18 +15,18 @@ import (
 )
 
 const (
-	hostEnvVar             = "PROWD_HOST"
+	hostEnvVar = "PROWD_HOST"
 )
 
 var (
 	// flagDebug is a signal that the user wants additional output.
-	flagDebug bool
-	kubeContext     string
+	flagDebug   bool
+	kubeContext string
 	// prowdTunnel is a tunnelled connection used to send requests to prowd.
 	// TODO refactor out this global var
 	prowdTunnel *kube.Tunnel
 	// prowdHost depicts where the prowd server is hosted.
-	prowdHost      string
+	prowdHost string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.

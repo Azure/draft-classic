@@ -3,7 +3,7 @@ package prow
 import (
 	"net/http"
 	"net/url"
-	
+
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/deis/prow/pkg/version"
@@ -14,7 +14,7 @@ import (
 type Client struct {
 	HTTPClient *http.Client
 	Endpoint   *url.URL
-	Header http.Header
+	Header     http.Header
 }
 
 // New returns a new Client with a given a URL and an optional client.
