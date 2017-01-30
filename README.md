@@ -25,12 +25,7 @@ $ cat charts/prowd/values.yaml | grep repository
 $ helm install ./charts/prowd --namespace prow
 $ # prepare the build context and chart tarballs
 $ cd tests/testdata/example-dockerfile-http
-$ tar czf build.tar.gz Dockerfile rootfs/
-$ pushd charts/
-$ tar czf ../charts.tar.gz example-dockerfile-http/
-$ popd
-$ # push the tarballs to prowd!
-$ curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@charts.tar.gz http://k8s.local:44135/apps/foo
+$ prow up -a foo
 --> Building Dockerfile
 --> Pushing 127.0.0.1:5000/foo:latest
 --> Deploying to Kubernetes
