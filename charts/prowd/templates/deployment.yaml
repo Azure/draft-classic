@@ -20,7 +20,6 @@ spec:
         - start
         ports:
         - containerPort: 44135
-          hostPort: 44135
         livenessProbe:
           httpGet:
             path: /ping
