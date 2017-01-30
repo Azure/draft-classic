@@ -55,8 +55,8 @@ func (c Client) Version() (*version.Version, error) {
 
 	c.Endpoint.Path = "/version"
 	req := &http.Request{
-		Method: "GET",
-		URL: c.Endpoint,
+		Method:     "GET",
+		URL:        c.Endpoint,
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,

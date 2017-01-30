@@ -52,7 +52,7 @@ func (s *APIServer) createRouter() {
 
 	routerMap := map[string]map[string]httprouter.Handle{
 		"GET": {
-			"/ping": ping,
+			"/ping":    ping,
 			"/version": getVersion,
 		},
 		"POST": {
