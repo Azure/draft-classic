@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -37,7 +38,11 @@ func newUpCmd(out io.Writer) *cobra.Command {
 }
 
 func (u *upCmd) run() error {
-	release, err := u.client.Up(".", "default")
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	release, err := u.client.Up(currentDir, "default")
 	if err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
