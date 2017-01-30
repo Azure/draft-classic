@@ -174,14 +174,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	r.ParseMultipartForm(32 << 20)
 	buildContext, _, err := r.FormFile("release-tar")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("error while reading release-tar: %v", err), http.StatusBadRequest)
 		return
 	}
 	defer buildContext.Close()
 
 	chartFile, _, err := r.FormFile("chart-tar")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v", err), http.StatusBadRequest)
 		return
 	}
 	defer chartFile.Close()
