@@ -1,6 +1,11 @@
-hash: 522f1bedc1c018d76eb6aabf63f9c4d83e0952f0e803ff568902d867908fda61
-updated: 2017-01-24T12:35:03.689616354-08:00
+hash: 8fb7116d1ce4a61ba293a1f40e010984a83180753efeb6ccd7eeeb5b3824e2ed
+updated: 2017-01-31T12:09:52.611457277-08:00
 imports:
+- name: cloud.google.com/go
+  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/Azure/go-ansiterm
   version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
@@ -52,6 +57,14 @@ imports:
   - api/types/versions
   - api/types/volume
   - client
+  - pkg/archive
+  - pkg/fileutils
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/longpath
+  - pkg/pools
+  - pkg/promise
+  - pkg/system
   - pkg/term
   - pkg/term/windows
   - pkg/tlsconfig
@@ -154,6 +167,8 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/gorilla/websocket
+  version: c36f2fe5c330f0ac404b616b96c438b8616b1aaf
 - name: github.com/howeyc/gopass
   version: 3ca23474a7c7203e0a0a070fd33508f6efdb9b3d
 - name: github.com/imdario/mergo
@@ -175,12 +190,13 @@ imports:
 - name: github.com/Masterminds/semver
   version: 59c29afe1a994eacb71c833025ca7acf874bb1da
 - name: github.com/Microsoft/go-winio
-  version: 307e919c663683a9000576fdc855acaf9534c165
+  version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/opencontainers/runc
-  version: ce450bcc6c135cae93ee2a99d41a308c179ff6dc
+  version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
+  - libcontainer/system
   - libcontainer/user
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
@@ -202,10 +218,14 @@ imports:
   - codec
   - codec/codecgen
 - name: golang.org/x/crypto
-  version: c10c31b5e94b6f7a0283272dc2bb27163dcea24b
+  version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
   - bcrypt
   - blowfish
+  - curve25519
+  - pkcs12
+  - pkcs12/internal/rc2
+  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
@@ -221,7 +241,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 045497edb6234273d67dbc25da3f2ddbc4c4cacf
+  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
   subpackages:
   - google
   - internal
@@ -246,7 +266,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/app_identity
@@ -257,13 +277,6 @@ imports:
   - internal/remote_api
   - internal/urlfetch
   - urlfetch
-- name: google.golang.org/cloud
-  version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
-  subpackages:
-  - compute/metadata
-  - internal
-  - internal/opts
-  - storage
 - name: google.golang.org/grpc
   version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:
@@ -278,7 +291,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 14227de293ca979cf205cd88769fe71ed96a97e2
+  version: 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
 - name: k8s.io/helm
   version: 5bc7375c9ca94340dc2d1371e5bf4b43ba1fc398
   repo: https://github.com/bacongobbler/helm

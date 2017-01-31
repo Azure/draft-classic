@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/gorilla/websocket"
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
@@ -24,6 +25,12 @@ import (
 
 	"github.com/deis/prow/pkg/version"
 )
+
+const CloseBuildError = 3333
+
+var websocketUpgrader = websocket.Upgrader{
+	EnableCompression: true,
+}
 
 // APIServer is an API Server which listens and responds to HTTP requests.
 type APIServer struct {
@@ -186,14 +193,9 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	defer chartFile.Close()
 
-	hj, ok := w.(http.Hijacker)
-	if !ok {
-		http.Error(w, "Webserver doesn't support hijacking.", http.StatusInternalServerError)
-		return
-	}
-	conn, _, err := hj.Hijack()
+	conn, err := websocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error when upgrading connection: %v", err), http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
@@ -213,7 +215,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	)
 
 	// send uploaded tar to docker as the build context
-	fmt.Fprintln(conn, "--> Building Dockerfile")
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
 		buf,
@@ -221,14 +223,26 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			Tags: []string{imageName},
 		})
 	if err != nil {
-		fmt.Fprintf(conn, "!!! Could not build image from build context: %v\n", err)
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("!!! Could not build image from build context: %v\n", err)))
 		return
 	}
 	defer buildResp.Body.Close()
 	if log.GetLevel() == log.DebugLevel {
-		io.Copy(conn, buildResp.Body)
+		w, err := conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+		}
+		io.Copy(w, buildResp.Body)
 	}
-	fmt.Fprintf(conn, "--> Pushing %s\n", imageName)
+	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
@@ -236,25 +250,45 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		// TODO(bacongobbler): implement custom auth handling for a registry
 		types.ImagePushOptions{RegistryAuth: "hi"})
 	if err != nil {
-		fmt.Fprintf(conn, "!!! Could not load push %s to registry: %v\n", imageName, err)
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("!!! Could not push %s to registry: %v\n", imageName, err)))
 		return
 	}
 	defer pushResp.Close()
 	if log.GetLevel() == log.DebugLevel {
-		io.Copy(conn, pushResp)
+		w, err := conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+		}
+		io.Copy(w, pushResp)
 	}
 
-	fmt.Fprintln(conn, "--> Deploying to Kubernetes")
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
 	tunnel, err := portforwarder.New("kube-system", "")
 	if err != nil {
-		fmt.Fprintf(conn, "!!! Could not get a connection to tiller: %v\n", err)
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("!!! Could not get a connection to tiller: %v\n", err)))
 		return
 	}
 
 	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
-		fmt.Fprintf(conn, "!!! Could not load chart archive: %v\n", err)
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("!!! Could not load chart archive: %v\n", err)))
 		return
 	}
 	// inject certain values into the chart such as the registry location, the application name
@@ -273,26 +307,40 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// inside of the grpc.rpcError message.
 	_, err = client.ReleaseContent(appName, helm.ContentReleaseVersion(1))
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
-		fmt.Fprintf(conn, "    Release %q does not exist. Installing it now.\n", appName)
+		conn.WriteMessage(
+			websocket.TextMessage,
+			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
 		releaseResp, err := client.InstallReleaseFromChart(
 			chart,
 			"default",
 			helm.ReleaseName(appName),
 			helm.ValueOverrides([]byte(vals)))
 		if err != nil {
-			fmt.Fprintf(conn, "!!! Could not install release: %v\n", err)
+			conn.WriteMessage(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					CloseBuildError,
+					fmt.Sprintf("!!! Could not install release: %v\n", err)))
 			return
 		}
-		fmt.Fprintf(conn, "--> %s\n", releaseResp.Release.Info.Status.String())
+		conn.WriteMessage(
+			websocket.TextMessage,
+			[]byte(fmt.Sprintf("--> %s\n", releaseResp.Release.Info.Status.String())))
 	} else {
 		releaseResp, err := client.UpdateReleaseFromChart(
 			appName,
 			chart,
 			helm.UpdateValueOverrides([]byte(vals)))
 		if err != nil {
-			fmt.Fprintf(conn, "!!! Could not install chart: %v\n", err)
+			conn.WriteMessage(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					CloseBuildError,
+					fmt.Sprintf("!!! Could not install release: %v\n", err)))
 			return
 		}
-		fmt.Fprintf(conn, "--> %s\n", releaseResp.Release.Info.Status.String())
+		conn.WriteMessage(
+			websocket.TextMessage,
+			[]byte(fmt.Sprintf("--> %s\n", releaseResp.Release.Info.Status.String())))
 	}
 }
