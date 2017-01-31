@@ -1,7 +1,9 @@
 package: github.com/deis/prow
 import:
 - package: github.com/gorilla/websocket
-  version: c36f2fe5c330f0ac404b616b96c438b8616b1aaf
+  repo: https://github.com/bacongobbler/websocket
+  version: prow
+  vcs: git
 - package: github.com/docker/docker
   version: v1.13.0
 - package: github.com/julienschmidt/httprouter
