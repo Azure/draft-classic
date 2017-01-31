@@ -1,5 +1,5 @@
-hash: 8fb7116d1ce4a61ba293a1f40e010984a83180753efeb6ccd7eeeb5b3824e2ed
-updated: 2017-01-31T12:09:52.611457277-08:00
+hash: fcc0e665c6760aeac7b4564cd5875148129417ee9ec49e38d94c6c39c737113e
+updated: 2017-01-31T15:30:53.746852759-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -168,7 +168,9 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/gorilla/websocket
-  version: c36f2fe5c330f0ac404b616b96c438b8616b1aaf
+  version: 4d55e727f190db06cd49de0b649d8dce2cd0e9b3
+  repo: https://github.com/bacongobbler/websocket
+  vcs: git
 - name: github.com/howeyc/gopass
   version: 3ca23474a7c7203e0a0a070fd33508f6efdb9b3d
 - name: github.com/imdario/mergo
@@ -291,7 +293,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
   version: 5bc7375c9ca94340dc2d1371e5bf4b43ba1fc398
   repo: https://github.com/bacongobbler/helm
