@@ -21,9 +21,7 @@ cd testdata/example-dockerfile-http
 # TODO(bacongobbler): replace this with `prow up` once it is readily available
 # deploy the app
 tar czf build.tar.gz Dockerfile rootfs/
-pushd charts
-tar czf ../chart.tar.gz example-dockerfile-http/
-popd
+tar czf chart.tar.gz chart/
 curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@chart.tar.gz http://k8s.cluster:44135/apps/example-dockerfile-http
 
 # wait for the container to come up
