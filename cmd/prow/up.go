@@ -42,10 +42,8 @@ func (u *upCmd) run() error {
 	if err != nil {
 		return err
 	}
-	release, err := u.client.Up(currentDir, "default")
-	if err != nil {
+	if err := u.client.Up(currentDir, "default"); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
-	fmt.Println(release)
 	return nil
 }

@@ -13,10 +13,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/gorilla/websocket"
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
+	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
@@ -235,10 +235,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w, err := conn.NextWriter(websocket.TextMessage)
 		if err != nil {
 			conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				CloseBuildError,
-				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					CloseBuildError,
+					fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
 		}
 		io.Copy(w, buildResp.Body)
 	}
@@ -262,10 +262,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w, err := conn.NextWriter(websocket.TextMessage)
 		if err != nil {
 			conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				CloseBuildError,
-				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					CloseBuildError,
+					fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
 		}
 		io.Copy(w, pushResp)
 	}
