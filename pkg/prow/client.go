@@ -11,10 +11,11 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/pkg/archive"
-	"k8s.io/helm/pkg/proto/hapi/release"
+	"github.com/gorilla/websocket"
 
 	"github.com/deis/prow/pkg/version"
 )
@@ -63,9 +64,8 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 	return New(e, client), nil
 }
 
-// Up uploads the contents of appDir to prowd, installs it in the specified namespace and
-// returns a Helm Release.
-func (c Client) Up(appDir, namespace string) (*release.Release, error) {
+// Up uploads the contents of appDir to prowd then writes messages to stdout.
+func (c Client) Up(appDir, namespace string) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
@@ -75,64 +75,73 @@ func (c Client) Up(appDir, namespace string) (*release.Release, error) {
 	log.Debug("assembling build context archive")
 	buildContext, err := tarBuildContext(appDir)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	log.Debug("assembling chart archive")
 	chartTar, err := tarChart(path.Join(appDir, "chart"))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Prepare a form to upload the build context and chart archives.
 	w := multipart.NewWriter(&b)
 	buildContextFormFile, err := w.CreateFormFile("release-tar", "build.tar.gz")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err = io.Copy(buildContextFormFile, buildContext); err != nil {
-		return nil, err
+		return err
 	}
 
 	// Add the other fields
 	chartFormFile, err := w.CreateFormFile("chart-tar", "chart.tar.gz")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err = io.Copy(chartFormFile, chartTar); err != nil {
-		return nil, err
+		return err
 	}
 	if err := w.Close(); err != nil {
-		return nil, err
+		return err
 	}
 
 	c.Endpoint.Path = "/apps/" + appName
-	req := &http.Request{
-		Method:     "POST",
-		URL:        c.Endpoint,
-		Proto:      "HTTP/1.1",
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-		Header:     c.Header,
-		Body:       &b,
-		Host:       c.Endpoint.Host,
-	}
+	// because this is a websocket connection, we must switch the protocol as such.
+	// http:// becomes ws:// and https:// becomes wss://
+	c.Endpoint.Scheme = "ws" + strings.TrimPrefix(c.Endpoint.Scheme, "http")
+	req := websocket.DefaultRequest(c.Endpoint)
+	req.Method = "POST"
+	req.Header = c.Header
+	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	// NOTE(bacongobbler): after accepting the tarballs, the server upgrades the connection to
-	// a websocket connection, so we need to switch protocols.
-	if resp.StatusCode != http.StatusSwitchingProtocols {
-		body, err := ioutil.ReadAll(resp.Body)
+
+	conn, resp, err := websocket.DefaultDialer.Dial(req)
+	if err == websocket.ErrBadHandshake {
+		// let's do some digging to tell the user why the handshake failed
+		p, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("server responded with status code %d and failed to read the body: %v", resp.StatusCode, err)
+			return fmt.Errorf("there was an error while reading the response body from a bad websocket handshake: %v", err)
 		}
-		return nil, fmt.Errorf("server responded with status code %d: %s", resp.StatusCode, body)
+		return fmt.Errorf("there was an error initiating a websocket handshake with the server: %d %s", resp.StatusCode, string(p))
+	} else if err != nil {
+		return err
 	}
-	return nil, nil
+	defer conn.Close()
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			return err
+		}
+		switch messageType {
+		case websocket.TextMessage:
+			fmt.Println(p)
+		case websocket.CloseMessage:
+			break
+		}
+	}
+	return nil
 }
 
 // Version returns the server version.
