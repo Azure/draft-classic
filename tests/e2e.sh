@@ -20,9 +20,7 @@ cd testdata/example-dockerfile-http
 
 # TODO(bacongobbler): replace this with `prow up` once it is readily available
 # deploy the app
-tar czf build.tar.gz Dockerfile rootfs/
-tar czf chart.tar.gz chart/
-curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@chart.tar.gz http://k8s.cluster:44135/apps/example-dockerfile-http
+prow up
 
 # wait for the container to come up
 sleep $CONTAINER_TIMEOUT
@@ -43,8 +41,7 @@ fi
 # TODO(bacongobbler): replace this with `prow up` once it is readily available
 # deploy the app again, changing POWERED_BY and check that the update is seen upstream
 echo "ENV POWERED_BY Kubernetes" >> Dockerfile
-tar czf build.tar.gz Dockerfile rootfs/
-curl -XPOST -F release-tar=@build.tar.gz -F chart-tar=@chart.tar.gz http://k8s.cluster:44135/apps/example-dockerfile-http
+prow up
 
 sleep $CONTAINER_TIMEOUT
 app_output_2=$(curl -sS http://k8s.cluster:44144)
