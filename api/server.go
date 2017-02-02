@@ -215,7 +215,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	)
 
 	// send uploaded tar to docker as the build context
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile"))
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
 		buf,
@@ -227,7 +227,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				CloseBuildError,
-				fmt.Sprintf("!!! Could not build image from build context: %v\n", err)))
+				fmt.Sprintf("!!! Could not build image from build context: %v", err)))
 		return
 	}
 	defer buildResp.Body.Close()
@@ -238,11 +238,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					CloseBuildError,
-					fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
 		}
 		io.Copy(w, buildResp.Body)
 	}
-	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
+	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s", imageName)))
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
@@ -254,7 +254,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				CloseBuildError,
-				fmt.Sprintf("!!! Could not push %s to registry: %v\n", imageName, err)))
+				fmt.Sprintf("!!! Could not push %s to registry: %v", imageName, err)))
 		return
 	}
 	defer pushResp.Close()
@@ -265,19 +265,19 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					CloseBuildError,
-					fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
 		}
 		io.Copy(w, pushResp)
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes"))
 	tunnel, err := portforwarder.New("kube-system", "")
 	if err != nil {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				CloseBuildError,
-				fmt.Sprintf("!!! Could not get a connection to tiller: %v\n", err)))
+				fmt.Sprintf("!!! Could not get a connection to tiller: %v", err)))
 		return
 	}
 
@@ -288,7 +288,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				CloseBuildError,
-				fmt.Sprintf("!!! Could not load chart archive: %v\n", err)))
+				fmt.Sprintf("!!! Could not load chart archive: %v", err)))
 		return
 	}
 	// inject certain values into the chart such as the registry location, the application name
@@ -309,7 +309,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
+			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.", appName)))
 		releaseResp, err := client.InstallReleaseFromChart(
 			chart,
 			"default",
@@ -320,12 +320,12 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					CloseBuildError,
-					fmt.Sprintf("!!! Could not install release: %v\n", err)))
+					fmt.Sprintf("!!! Could not install release: %v", err)))
 			return
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("--> %s\n", releaseResp.Release.Info.Status.String())))
+			[]byte(fmt.Sprintf("--> %s", releaseResp.Release.Info.Status.String())))
 	} else {
 		releaseResp, err := client.UpdateReleaseFromChart(
 			appName,
@@ -336,11 +336,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					CloseBuildError,
-					fmt.Sprintf("!!! Could not install release: %v\n", err)))
+					fmt.Sprintf("!!! Could not install release: %v", err)))
 			return
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("--> %s\n", releaseResp.Release.Info.Status.String())))
+			[]byte(fmt.Sprintf("--> %s", releaseResp.Release.Info.Status.String())))
 	}
 }

@@ -136,7 +136,7 @@ func (c Client) Up(appDir, namespace string) error {
 		}
 		switch messageType {
 		case websocket.TextMessage:
-			fmt.Println(p)
+			fmt.Println(string(p))
 		case websocket.CloseMessage:
 			break
 		}
