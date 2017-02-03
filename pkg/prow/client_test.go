@@ -1,11 +1,77 @@
 package prow
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
+
+	"github.com/deis/prow/api"
 )
+
+const expectedURLPath = "/apps/testdata"
+
+type testWebsocketServerHandler struct{ *testing.T }
+
+type testWebsocketServer struct {
+	Server *httptest.Server
+	URL    string
+}
+
+func (t *testWebsocketServer) Close() {
+	t.Server.Close()
+}
+
+func newTestWebsocketServer(t *testing.T) *testWebsocketServer {
+	var s *testWebsocketServer = new(testWebsocketServer)
+	s.Server = httptest.NewServer(testWebsocketServerHandler{t})
+	s.URL = makeWsProto(s.Server.URL)
+	return s
+}
+
+func (t testWebsocketServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != expectedURLPath {
+		t.Logf("path=%v, want %v", r.URL.Path, expectedURLPath)
+		http.Error(w, "bad path", 400)
+		return
+	}
+	ws, err := api.WebsocketUpgrader.Upgrade(w, r, nil)
+	if err != nil {
+		t.Logf("Upgrade: %v", err)
+		return
+	}
+	defer ws.Close()
+
+	if ws.Subprotocol() != "p1" {
+		t.Logf("Subprotocol() = %s, want p1", ws.Subprotocol())
+		ws.Close()
+		return
+	}
+	op, rd, err := ws.NextReader()
+	if err != nil {
+		t.Logf("NextReader: %v", err)
+		return
+	}
+	wr, err := ws.NextWriter(op)
+	if err != nil {
+		t.Logf("NextWriter: %v", err)
+		return
+	}
+	if _, err = io.Copy(wr, rd); err != nil {
+		t.Logf("NextWriter: %v", err)
+		return
+	}
+	if err := wr.Close(); err != nil {
+		t.Logf("Close: %v", err)
+		return
+	}
+}
+
+func makeWsProto(s string) string {
+	return "ws" + strings.TrimPrefix(s, "http")
+}
 
 func TestNew(t *testing.T) {
 	u, err := url.Parse("http://prow.rocks/foo?bar=car#star")
@@ -55,9 +121,7 @@ func TestNewFromString(t *testing.T) {
 }
 
 func TestUp(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"name": "foo", "info": {"status": {"code": 1}}}`))
-	}))
+	ts := newTestWebsocketServer(t)
 	defer ts.Close()
 
 	client, err := NewFromString(ts.URL, nil)
@@ -65,12 +129,16 @@ func TestUp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = client.Up("/foo", "default")
+	err = client.Up("/ahsdkfjhaksdf", "default")
 	if err == nil {
 		t.Error("expected .Up() with invalid path to fail")
 	}
-	if err.Error() != "directory '/foo' does not exist" {
+	if err.Error() != "directory '/ahsdkfjhaksdf' does not exist" {
 		t.Errorf("expected .Up() with invalid path to fail as expected, got '%s'", err.Error())
+	}
+
+	if err := client.Up("testdata", "default"); err != nil {
+		t.Errorf("expected .Up() with valid path to pass, got %v", err)
 	}
 
 	// TODO(bacongobbler): write more extensive functional tests

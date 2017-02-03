@@ -107,9 +107,10 @@ func (c Client) Up(appDir, namespace string) error {
 	}
 
 	c.Endpoint.Path = "/apps/" + appName
-	// because this is a websocket connection, we must switch the protocol as such.
-	// http:// becomes ws:// and https:// becomes wss://
-	c.Endpoint.Scheme = "ws" + strings.TrimPrefix(c.Endpoint.Scheme, "http")
+	// because this is a websocket connection, we must switch the protocol from http(s) to ws(s).
+	if strings.Contains(c.Endpoint.Scheme, "http") {
+		c.Endpoint.Scheme = "ws" + strings.TrimPrefix(c.Endpoint.Scheme, "http")
+	}
 	req := websocket.DefaultRequest(c.Endpoint)
 	req.Method = "POST"
 	req.Header = c.Header
