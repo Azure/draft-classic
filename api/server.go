@@ -28,7 +28,7 @@ import (
 
 const CloseBuildError = 3333
 
-var websocketUpgrader = websocket.Upgrader{
+var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
 }
 
@@ -193,7 +193,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	defer chartFile.Close()
 
-	conn, err := websocketUpgrader.Upgrade(w, r, nil)
+	conn, err := WebsocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error when upgrading connection: %v", err), http.StatusInternalServerError)
 		return
