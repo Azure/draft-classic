@@ -1,12 +1,15 @@
 package prow
 
 import (
-	"io"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/gorilla/websocket"
 
 	"github.com/deis/prow/api"
 )
@@ -18,6 +21,10 @@ type testWebsocketServerHandler struct{ *testing.T }
 type testWebsocketServer struct {
 	Server *httptest.Server
 	URL    string
+}
+
+func init() {
+	log.SetLevel(log.DebugLevel)
 }
 
 func (t *testWebsocketServer) Close() {
@@ -34,9 +41,28 @@ func newTestWebsocketServer(t *testing.T) *testWebsocketServer {
 func (t testWebsocketServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != expectedURLPath {
 		t.Logf("path=%v, want %v", r.URL.Path, expectedURLPath)
-		http.Error(w, "bad path", 400)
+		http.Error(w, fmt.Sprintf("bad path %v, expected %v", r.URL.Path, expectedURLPath), http.StatusBadRequest)
 		return
 	}
+
+	r.ParseMultipartForm(32 << 20)
+
+	buildContext, _, err := r.FormFile("release-tar")
+	if err != nil {
+		t.Logf("no release-tar file found in multipart form")
+		http.Error(w, fmt.Sprintf("error while reading release-tar: %v", err), http.StatusBadRequest)
+		return
+	}
+	defer buildContext.Close()
+
+	chartFile, _, err := r.FormFile("chart-tar")
+	if err != nil {
+		t.Logf("no chart-tar file found in multipart form")
+		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v", err), http.StatusBadRequest)
+		return
+	}
+	defer chartFile.Close()
+
 	ws, err := api.WebsocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		t.Logf("Upgrade: %v", err)
@@ -44,29 +70,7 @@ func (t testWebsocketServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	}
 	defer ws.Close()
 
-	if ws.Subprotocol() != "p1" {
-		t.Logf("Subprotocol() = %s, want p1", ws.Subprotocol())
-		ws.Close()
-		return
-	}
-	op, rd, err := ws.NextReader()
-	if err != nil {
-		t.Logf("NextReader: %v", err)
-		return
-	}
-	wr, err := ws.NextWriter(op)
-	if err != nil {
-		t.Logf("NextWriter: %v", err)
-		return
-	}
-	if _, err = io.Copy(wr, rd); err != nil {
-		t.Logf("NextWriter: %v", err)
-		return
-	}
-	if err := wr.Close(); err != nil {
-		t.Logf("Close: %v", err)
-		return
-	}
+	ws.WriteMessage(websocket.TextMessage, []byte("hi there!"))
 }
 
 func makeWsProto(s string) string {
