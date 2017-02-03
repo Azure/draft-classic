@@ -117,6 +117,8 @@ func (c Client) Up(appDir, namespace string) error {
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
+	log.Debugf("REQUEST: %s %s", req.Method, req.URL.String())
+
 	conn, resp, err := websocket.DefaultDialer.Dial(req)
 	if err == websocket.ErrBadHandshake {
 		// let's do some digging to tell the user why the handshake failed
@@ -126,20 +128,23 @@ func (c Client) Up(appDir, namespace string) error {
 		}
 		return fmt.Errorf("there was an error initiating a websocket handshake with the server: %d %s", resp.StatusCode, string(p))
 	} else if err != nil {
-		return err
+		return fmt.Errorf("there was an error while dialing the server: %v", err)
 	}
 	defer conn.Close()
 
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			return err
+			log.Debug(messageType)
+			if messageType == websocket.CloseMessage {
+				return nil
+			}
+			return fmt.Errorf("there was an error while reading a message: %v", err)
 		}
-		switch messageType {
-		case websocket.TextMessage:
+		if messageType == websocket.TextMessage {
 			fmt.Println(string(p))
-		case websocket.CloseMessage:
-			break
+		} else {
+			fmt.Println(p)
 		}
 	}
 	return nil
