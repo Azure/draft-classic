@@ -1,5 +1,5 @@
-hash: fcc0e665c6760aeac7b4564cd5875148129417ee9ec49e38d94c6c39c737113e
-updated: 2017-02-01T15:27:05.313675438-08:00
+hash: 9db23829c4c47883d48dd85f265917e8a8f7cdf4b011df9ecf5618b31b3963f8
+updated: 2017-02-06T19:23:04.341007319Z
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -168,7 +168,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/gorilla/websocket
-  version: bb0b6ada23b3218eae0545f87761ecb53051a8c1
+  version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
   vcs: git
 - name: github.com/howeyc/gopass
@@ -311,7 +311,7 @@ imports:
   - pkg/tiller/portforwarder
   - pkg/version
 - name: k8s.io/kubernetes
-  version: b5f9d56cab78ccaad2b726223ba8be5802026f0b
+  version: 08e099554f3c31f6e6f07b448ab3ed78d0520507
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install
