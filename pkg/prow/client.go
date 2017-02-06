@@ -79,7 +79,7 @@ func (c Client) Up(appDir, namespace string) error {
 	}
 
 	log.Debug("assembling chart archive")
-	chartTar, err := tarChart(path.Join(appDir, "chart"))
+	chartTar, err := tarChart(appDir)
 	if err != nil {
 		return err
 	}
@@ -219,5 +219,12 @@ func tarChart(path string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("chart directory '%s' does not exist", path)
 	}
 
-	return archive.Tar(path, archive.Gzip)
+	options := archive.TarOptions{
+		IncludeFiles: []string{
+			"chart",
+		},
+		Compression: archive.Gzip,
+	}
+
+	return archive.TarWithOptions(path, &options)
 }
