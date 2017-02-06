@@ -11,6 +11,8 @@ _NOTE(bacongobbler): this is usage instructions to test while there's no client 
 For now, this is the easiest way to test/run this locally on macOS:
 
 ```
+$ go version
+go version go1.7 linux/amd64
 $ # install prowd
 $ helm init
 $ export IMAGE_PREFIX=bacongobbler
