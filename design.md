@@ -41,41 +41,40 @@ applications composed of one or more microservices.
 
 ## How To Use It
 
-Prow has three main commands:
+Prow has two main commands:
 
-- `prow init` configures your prow client and in-cluster environments
-- `prow new` takes your existing code and creates a new Kubernetes app
+- `prow create` takes your existing code and creates a new Kubernetes app
 - `prow up` deploys a development copy of your app into a Kubernetes
- cluster. Optionally, you can have it watch your code for changes,
- redeploying automatically with each change.
+  cluster. Optionally, you can have it watch your code for changes,
+  re-deploying automatically with each change.
 
 ## Start from a Dockerfile
 
-Say you have an application that is already Dockerized. Prow can start
+Say you have an application that is already Dockerized, but not Helm-ified. Prow can start
 from your existing Dockerfile and create a new app:
 
 ```
 $ ls
 Dockerfile
 src/
-$ prow new my-app
---> Created ./charts/my-app
+$ prow create
+--> Created ./chart
 --> Ready to sail
 $ ls
+chart/
 Dockerfile
-charts/
 src/
 ```
 
-In the example above, `prow new my-app` created a new application named
-`my-app` and based configuration off of the Dockerfile. Prow constructed
-a new Helm Chart for you, and stored it alongside your source code so
+In the example above, `prow create` created a new application and
+based configuration off of the Dockerfile. Prow constructed a new
+Helm Chart for you, and stored it alongside your source code so
 that you can add it to version control, and even manually edit it.
 
 ## Start from Scratch
 
-If you want to start with an empty Prow chart, you can simply run `prow
-new YOUR_NAME`, and it will scaffold a chart and a Dockerfile for you.
+If you want to start with an empty Prow app, you can simply run `prow
+create` and it will scaffold a chart and a Dockerfile for you.
 
 ## Start from Code
 
@@ -92,7 +91,7 @@ existing chart, and simply begin using Prow. There are a few patterns
 you may need to follow to meet the expectations for Prow, but this is a
 matter of a few minutes of work; not a complete refactoring.
 
-In this case, you don't even need `prow new`. You can just create the
+In this case, you don't even need `prow create`. You can just create the
 directory structure and sail onward.
 
 ## Running Your Code
@@ -106,11 +105,9 @@ cluster for you. It does the following:
 - (Optionally) watch your source code for changes, redeploying when
  necessary.
 
-And When You're Done with Development…
-
-Prow's "first class" objects are all supported by the Kubernetes
-toolchain. Simply deploy the chart to your production cluster in
-whatever way suits you.
+And when You're done with development, Prow's "first class" objects
+are all supported by the Kubernetes toolchain. Simply deploy the chart
+to your production cluster in whatever way suits you.
 
 ## Prow Packs
 
@@ -143,9 +140,9 @@ This is a look behind the curtain. Here's how Prow works:
  - The Helm Tiller server
  - An in-cluster Docker registry
  - A repository of "packs" for specific templates
-- While it's up to you to find the Kubernetes cluster, Prow can install
- the rest for you, should you so desire (`prow init`).
-- `prow new` reads a scaffold out of the appropriate Pack, creates the
+- While it's up to you to find the Kubernetes cluster and install Tiller,
+ Prow can install the rest for you should you so desire with `prow init`.
+- `prow create` reads a scaffold out of the appropriate Pack, creates the
  necessary file system objects, and writes some basic configuration
  into your chart.
 - `prow up` delivers your chart into the Kubernetes cluster (think `helm
@@ -166,37 +163,34 @@ myapp/
    app.py
 ```
 
-After running `prow up`, this directory would have a chart built for it:
+After running `prow create`, this directory would have a chart built for it:
 
 ```
 myapp/
+ chart/
+   Chart.yaml
+   templates/
+     deployment.yaml
+     service.yaml
+   values.yaml
  Dockerfile
  src/
    app.py
- charts/
-   myapp/
-     Chart.yaml
-     templates/
-       service.tpl
-       replicaset.tpl
-     values.yaml
 ```
 
-The `charts/myapp` directory is a complete Helm chart, tailored to your
+The `chart/` directory is a complete Helm chart, tailored to your
 needs.
 
 Inside of the `values.yaml` file, Prow configures images for your chart:
 
 ```
 name: myapp
-images:
- runner:
-   source: Dockerfile
-   imageRef: gcr.io/technosophos/myapp:latest
+version: 0.1.0
+registry: gcr.io
 ```
 
 This information is then available to all of your Helm charts. (e.g. via
-`{{.Values.images.runner.imageRef}}`)
+`{{.Values.name}}`)
 
 The contents of the `templates/` directory are determined by the
 particular Pack you've used. The `default` pack just creates a
@@ -206,26 +200,19 @@ replicated service for you.
 
 _Can I have multiple Prow charts in the same repo?_
 
-Yes. In this case, your directory layout simply looks like this:
-
-```
-myapp/
- charts/
-   app_one/
-   app_two/
-```
+At this time, no.
 
 _Can I modify the chart, or do I have to accept whatever the pack gives
 me?_
 
-You can modify the contents of the `charts/` directory as you wish.
+You can modify the contents of the `chart/` directory as you wish.
 Consider them part of your source code.
 
 _How do I add an existing chart to Prow?_
 
-Just copy (`helm fetch`) it into the `charts/` directory. You want
-want/need to tweak the `images:` section of the values file if you want
-Prow to regenerate Docker images for you.
+Just copy (`helm fetch`) it into the `chart/` directory. You need to
+tweak the values file if you want Prow to regenerate Docker images for
+you.
 
 _How do I deploy applications to production?_
 
@@ -233,19 +220,19 @@ Prow is a developer tool. While you _could_ simply use `prow up` to do
 this, we'd recommend using `helm` in conjuction with a CI/CD pipeline or
 whatever tooling you're most comfortable with.
 
-Remember: You can package a Prow-generated chart with `helm package` and
-load the results up to a chart repository, taking advantage of the
+Remember: You can package a Prow-generated chart with `helm package chart/`
+and load the results up to a chart repository, taking advantage of the
 existing Helm ecosystem.
 
 ## Other Architectural Considerations
 
-- We could run everything in-cluster (viz. `prowd`), and use the Git
- volume type to share data (Michelle!) In that case, the `prow` client
- would mainly just synchronize data. This has the advantage of
- requiring few or no additional client-side tools.
-- We could also have `prow init` (optionally) set up a `minikube` or
- `kubeadm` cluster, which means the developer could really go from zero
- to dev platform in just a couple of `prow` commands.
+- instead of a prowd HTTP server, we could spawn a prow pod "job" (via `prow up`)
+ that runs only when `prow up` is called. In that case, the `prow` client
+ would be the main focal point for server-side configuration. This has the
+ advantage of requiring fewer resource demands server-side, but might make the
+ client implementation (and security story) significantly more difficult. Furthermore,
+ it might make two `prow up` operations between two clients differ
+ (the "Works on My Machine!" problem).
 
 ## User Personas and Stories
 
