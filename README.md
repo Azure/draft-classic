@@ -19,26 +19,25 @@ $ export IMAGE_PREFIX=bacongobbler
 $ make info
 Build tag:       git-abc1234
 Registry:        quay.io
-Immutable tag:   quay.io/bacongobbler/prowd:git-abc1234
-Mutable tag:     quay.io/bacongobbler/prowd:canary
+Immutable tag:   quay.io/deis/prowd:git-abc1234
+Mutable tag:     quay.io/deis/prowd:canary
 $ make docker-build docker-push
-$ cat charts/prowd/values.yaml | grep repository
-  repository: quay.io/bacongobbler/prowd
+$ cat chart/values.yaml | grep repository
+  repository: quay.io/deis/prowd
 $ helm install ./chart --namespace prow
-$ # prepare the build context and chart tarballs
 $ cd tests/testdata/example-dockerfile-http
-$ prow up -a foo
+$ prow up
 --> Building Dockerfile
---> Pushing 127.0.0.1:5000/foo:latest
+--> Pushing 127.0.0.1:5000/example-dockerfile-http:fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
 --> Deploying to Kubernetes
-    Release "foo" does not exist. Installing it now.
+    Release "example-dockerfile-http" does not exist. Installing it now.
 --> code:DEPLOYED
 $ helm list
-NAME            REVISION        UPDATED                         STATUS          CHART
-foo             1               Tue Jan 24 15:04:27 2017        DEPLOYED        example-dockerfile-http-1.0.0
+NAME                                REVISION        UPDATED                         STATUS          CHART
+example-dockerfile-http             1               Tue Jan 24 15:04:27 2017        DEPLOYED        example-dockerfile-http-1.0.0
 $ kubectl get po
-NAME                   READY     STATUS             RESTARTS   AGE
-foo-3666132817-m2pkr   1/1       Running            0          30s
+NAME                                       READY     STATUS             RESTARTS   AGE
+example-dockerfile-http-3666132817-m2pkr   1/1       Running            0          30s
 ```
 
 You can also confirm that the image deployed on kubernetes is the same as what was uploaded locally:
@@ -46,7 +45,7 @@ You can also confirm that the image deployed on kubernetes is the same as what w
 ```
 $ shasum build.tar.gz | awk '{print $1}'
 fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
-$ kubectl get po foo-3666132817-m2pkr -o=jsonpath='{.spec.containers[0].image}' | rev | cut -d ':' -f 1 | rev
+$ kubectl get po example-dockerfile-http-3666132817-m2pkr -o=jsonpath='{.spec.containers[0].image}' | rev | cut -d ':' -f 1 | rev
 fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
 ```
 
@@ -91,7 +90,7 @@ manually re-run Prow to update the existing app.
 
 - Prow is language agnostic
 - Prow will work with any Kubernetes cluster that supports Helm
-- One it scaffolds your chart, you can leave the chart alone, or you can edit
-  it to your specific needs.
+- Once it scaffolds your chart, you can leave the chart alone, or you can edit
+  it to your specific needs
 - Charts can be packaged and delivered to your ops team
 
