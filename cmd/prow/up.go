@@ -38,7 +38,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&up.appName, "app", "a", "", "name of helm release. By default this is the basename of the current working directory")
+	f.StringVarP(&up.appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
 	f.StringVarP(&up.namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
 
 	return cmd
