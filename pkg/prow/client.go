@@ -135,11 +135,12 @@ func (c Client) Up(appDir, namespace string) error {
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			log.Debug(messageType)
-			if messageType == websocket.CloseMessage {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+				// server closed the connection, so we're done!
 				return nil
+			} else {
+				return fmt.Errorf("there was an error while reading a message: %v", err)
 			}
-			return fmt.Errorf("there was an error while reading a message: %v", err)
 		}
 		if messageType == websocket.TextMessage {
 			fmt.Println(string(p))

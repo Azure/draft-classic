@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
@@ -343,4 +344,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.TextMessage,
 			[]byte(fmt.Sprintf("--> %s", releaseResp.Release.Info.Status.String())))
 	}
+
+	// gently tell the client that we are closing the connection
+	conn.WriteControl(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+		time.Now().Add(time.Second))
 }
