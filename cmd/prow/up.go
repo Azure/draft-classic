@@ -15,9 +15,10 @@ This command archives the current directory into a tar archive and uploads it to
 `
 
 type upCmd struct {
-	out       io.Writer
+	appName   string
 	client    prowd.Client
 	namespace string
+	out       io.Writer
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -37,17 +38,21 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
+	f.StringVarP(&up.appName, "app", "a", "", "name of helm release. By default this is the basename of the current working directory")
 	f.StringVar(&up.namespace, "namespace", "default", "kubernetes namespace to install the chart")
 
 	return cmd
 }
 
 func (u *upCmd) run() error {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return err
+	var err error
+	if u.appName == "" {
+		u.appName, err = os.Getwd()
+		if err != nil {
+			return err
+		}
 	}
-	if err := u.client.Up(currentDir, u.namespace); err != nil {
+	if err = u.client.Up(u.appName, u.namespace); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
 	return nil
