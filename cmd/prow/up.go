@@ -52,7 +52,7 @@ func (u *upCmd) run() error {
 			return err
 		}
 	}
-	if err = u.client.Up(u.appName, u.namespace); err != nil {
+	if err = u.client.Up(u.appName, u.namespace, u.out); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
 	return nil

@@ -1,6 +1,8 @@
 package prowd
 
 import (
+	"io"
+
 	"github.com/deis/prow/pkg/version"
 )
 
@@ -8,7 +10,7 @@ import (
 type Client interface {
 	// Up uploads the contents of appDir to prowd, installs it in the specified namespace and
 	// returns a Helm Release.
-	Up(appDir, namespace string) error
+	Up(appDir, namespace string, out io.Writer) error
 	// Version returns the server version.
 	Version() (*version.Version, error)
 }

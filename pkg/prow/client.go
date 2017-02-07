@@ -65,7 +65,7 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 }
 
 // Up uploads the contents of appDir to prowd then writes messages to stdout.
-func (c Client) Up(appDir, namespace string) error {
+func (c Client) Up(appDir, namespace string, out io.Writer) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
@@ -144,9 +144,9 @@ func (c Client) Up(appDir, namespace string) error {
 			}
 		}
 		if messageType == websocket.TextMessage {
-			fmt.Println(string(p))
+			fmt.Fprintln(out, string(p))
 		} else {
-			fmt.Println(p)
+			fmt.Fprintln(out, p)
 		}
 	}
 	return nil
