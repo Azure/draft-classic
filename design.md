@@ -14,7 +14,7 @@ Kubernetes:
 $ cd my-app
 $ ls
 app.py
-$ prow new my-app --pack=python
+$ prow create my-app --pack=python
 --> Created ./charts/my-app
 --> Created ./charts/my-app/Dockerfile
 --> Ready to sail
