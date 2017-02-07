@@ -116,6 +116,7 @@ func (c Client) Up(appDir, namespace string) error {
 	req.Header = c.Header
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.Header.Set("Kubernetes-Namespace", namespace)
 
 	log.Debugf("REQUEST: %s %s", req.Method, req.URL.String())
 

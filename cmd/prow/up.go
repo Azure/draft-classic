@@ -15,8 +15,9 @@ This command archives the current directory into a tar archive and uploads it to
 `
 
 type upCmd struct {
-	out    io.Writer
-	client prowd.Client
+	out       io.Writer
+	client    prowd.Client
+	namespace string
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -34,6 +35,10 @@ func newUpCmd(out io.Writer) *cobra.Command {
 			return up.run()
 		},
 	}
+
+	f := cmd.Flags()
+	f.StringVar(&up.namespace, "namespace", "default", "kubernetes namespace to install the chart")
+
 	return cmd
 }
 
@@ -42,7 +47,7 @@ func (u *upCmd) run() error {
 	if err != nil {
 		return err
 	}
-	if err := u.client.Up(currentDir, "default"); err != nil {
+	if err := u.client.Up(currentDir, u.namespace); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
 	return nil

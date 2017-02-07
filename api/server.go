@@ -172,6 +172,12 @@ func getVersion(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
+	namespace := r.Header.Get("Kubernetes-Namespace")
+
+	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
+	if namespace == "" {
+		namespace = "default"
+	}
 
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -313,7 +319,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.", appName)))
 		releaseResp, err := client.InstallReleaseFromChart(
 			chart,
-			"default",
+			namespace,
 			helm.ReleaseName(appName),
 			helm.ValueOverrides([]byte(vals)))
 		if err != nil {
