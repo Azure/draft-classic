@@ -16,7 +16,7 @@ func (h Home) String() string {
 	return string(h)
 }
 
-// Starters returns the path to the Prow starter packs.
-func (h Home) Starters() string {
-	return filepath.Join(string(h), "starters")
+// Packs returns the path to the Prow starter packs.
+func (h Home) Packs() string {
+	return filepath.Join(string(h), "packs")
 }

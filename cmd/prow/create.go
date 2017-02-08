@@ -12,8 +12,8 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	"github.com/deis/prow/pkg/prow/prowpath"
 	"github.com/deis/prow/pkg/dockerutil"
+	"github.com/deis/prow/pkg/prow/prowpath"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 type createCmd struct {
 	appName string
 	out     io.Writer
-	starter string
+	pack    string
 	home    prowpath.Home
 }
 
@@ -45,8 +45,8 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&cc.appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
-	f.StringVarP(&cc.starter, "starter", "p", "", "the named Helm starter to scaffold the app with")
+	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default this is the basename of the current working directory")
+	f.StringVarP(&cc.pack, "pack", "p", "", "the named Prow starter pack to scaffold the app with")
 
 	return cmd
 }
@@ -72,10 +72,10 @@ func (c *createCmd) run() error {
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	if c.starter != "" {
-		// Create a chart from the starter
-		lstarter := filepath.Join(c.home.Starters(), c.starter)
-		err = chartutil.CreateFrom(cfile, "", lstarter)
+	if c.pack != "" {
+		// Create a chart from the starter pack
+		lpack := filepath.Join(c.home.Packs(), c.pack)
+		err = chartutil.CreateFrom(cfile, "", lpack)
 	} else {
 		_, err = chartutil.Create(cfile, "")
 	}
@@ -96,9 +96,9 @@ func (c *createCmd) run() error {
 	}
 
 	// now we check for a Dockerfile and create that based on the starter pack
-	if c.starter != "" {
-		lstarter := filepath.Join(c.home.Starters(), c.starter)
-		err = dockerutil.CreateFrom("Dockerfile", lstarter)
+	if c.pack != "" {
+		lpack := filepath.Join(c.home.Packs(), c.pack)
+		err = dockerutil.CreateFrom("Dockerfile", lpack)
 	} else {
 		err = dockerutil.Create("Dockerfile", bytes.NewBufferString(defaultDockerfile))
 	}
