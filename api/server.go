@@ -379,13 +379,13 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 // getKubeClient is a convenience method for creating kubernetes config and client
 // for a given kubeconfig context
 func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
-	client, err := internalclientset.NewForConfig(config)
-	if err != nil {
-		return nil, nil, err
-	}
 	config, err := kube.GetConfig(context).ClientConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+	}
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, err
 	}
 	return client, config, nil
 }
