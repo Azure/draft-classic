@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: prowd
+  name: {{ template "fullname" . }}
   labels:
-    chart: "prowd-{{ .Chart.Version }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: prowd
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start

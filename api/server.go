@@ -29,6 +29,12 @@ import (
 
 const CloseBuildError = 3333
 
+const ChartTemplate = `image:
+  name: %s
+  registry: "%s:%s"
+  tag: %s
+`
+
 var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
 }
@@ -300,11 +306,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	vals := fmt.Sprintf("name: %s\nversion: %s\nregistry: \"%s:%s\"",
+	vals := fmt.Sprintf(ChartTemplate,
 		appName,
-		tag,
 		os.Getenv("PROWD_SERVICE_HOST"),
 		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
+		tag,
 	)
 	// If a release does not exist, install it. If another error occurs during
 	// the check, ignore the error and continue with the upgrade.
