@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,7 +16,8 @@ import (
 )
 
 const (
-	hostEnvVar = "PROWD_HOST"
+	hostEnvVar = "PROW_HOST"
+	homeEnvVar = "PROW_HOME"
 )
 
 var (
@@ -25,8 +27,10 @@ var (
 	// prowdTunnel is a tunnelled connection used to send requests to prowd.
 	// TODO refactor out this global var
 	prowdTunnel *kube.Tunnel
-	// prowdHost depicts where the prowd server is hosted.
-	prowdHost string
+	// prowHome depicts the home directory where all prow config is stored.
+	prowHome string
+	// prowHost depicts where the prowd server is hosted.
+	prowHost string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -54,9 +58,10 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		},
 	}
 	p := cmd.PersistentFlags()
+	p.StringVar(&prowHome, "home", defaultProwHome(), "location of your Prow config. Overrides $PROW_HOME")
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
-	p.StringVar(&prowdHost, "host", defaultProwdHost(), "address of prowd. Overrides $PROWD_HOST")
+	p.StringVar(&prowHost, "host", defaultProwHost(), "address of prowd. Overrides $PROW_HOST")
 
 	cmd.AddCommand(
 		newCreateCmd(out),
@@ -68,17 +73,17 @@ func newRootCmd(out io.Writer) *cobra.Command {
 }
 
 func setupConnection(c *cobra.Command, args []string) error {
-	if prowdHost == "" {
+	if prowHost == "" {
 		tunnel, err := portforwarder.New(kubeContext)
 		if err != nil {
 			return err
 		}
 
-		prowdHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
+		prowHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
 		log.Debugf("Created tunnel using local port: '%d'", tunnel.Local)
 	}
 
-	log.Debugf("SERVER: %q", prowdHost)
+	log.Debugf("SERVER: %q", prowHost)
 	return nil
 }
 
@@ -92,15 +97,26 @@ func ensureProwClient(p prowd.Client) prowd.Client {
 	if p != nil {
 		return p
 	}
-	client, err := prow.NewFromString(prowdHost, nil)
+	client, err := prow.NewFromString(prowHost, nil)
 	if err != nil {
 		panic(err)
 	}
 	return client
 }
 
-func defaultProwdHost() string {
+func defaultProwHost() string {
 	return os.Getenv(hostEnvVar)
+}
+
+func defaultProwHome() string {
+	if home := os.Getenv(homeEnvVar); home != "" {
+		return home
+	}
+	return filepath.Join(os.Getenv("HOME"), ".prow")
+}
+
+func homePath() string {
+	return os.ExpandEnv(prowHome)
 }
 
 func main() {

@@ -44,6 +44,8 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 		},
 	}
 
+	cc.home = prowpath.Home(homePath())
+
 	f := cmd.Flags()
 	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default this is the basename of the current working directory")
 	f.StringVarP(&cc.pack, "pack", "p", "", "the named Prow starter pack to scaffold the app with")
