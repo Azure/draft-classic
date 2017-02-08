@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -65,11 +64,10 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 }
 
 // Up uploads the contents of appDir to prowd then writes messages to stdout.
-func (c Client) Up(appDir, namespace string, out io.Writer) error {
+func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
-	appName := path.Base(appDir)
 	log.Debugf("APP NAME: %s", appName)
 
 	log.Debug("assembling build context archive")
