@@ -8,7 +8,7 @@ import (
 // Create creates a new Dockerfile at dest with the given data. It returns an
 // error if dest already exists.
 func Create(dest string, data io.Reader) error {
-	f, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
 	if err != nil {
 		return err
 	}
