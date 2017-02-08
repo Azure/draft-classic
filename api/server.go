@@ -21,8 +21,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/helm/portforwarder"
+	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/storage/driver"
-	"k8s.io/helm/pkg/tiller/portforwarder"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/deis/prow/pkg/version"
 )
@@ -284,7 +287,16 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 
 	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes"))
-	tunnel, err := portforwarder.New("kube-system", "")
+	clientset, config, err := getKubeClient("")
+	if err != nil {
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				CloseBuildError,
+				fmt.Sprintf("!!! Could not get a kube client: %v", err)))
+		return
+	}
+	tunnel, err := portforwarder.New("kube-system", clientset, config)
 	if err != nil {
 		conn.WriteMessage(
 			websocket.CloseMessage,
@@ -362,4 +374,18 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 		time.Now().Add(time.Second))
+}
+
+// getKubeClient is a convenience method for creating kubernetes config and client
+// for a given kubeconfig context
+func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, err
+	}
+	config, err := kube.GetConfig(context).ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+	}
+	return client, config, nil
 }
