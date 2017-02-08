@@ -46,14 +46,14 @@ func newUpCmd(out io.Writer) *cobra.Command {
 }
 
 func (u *upCmd) run() error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
 	if u.appName == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
 		u.appName = path.Base(cwd)
 	}
-	if err := u.client.Up(u.appName, u.namespace, u.out); err != nil {
+	if err := u.client.Up(u.appName, cwd, u.namespace, u.out); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
 	return nil
