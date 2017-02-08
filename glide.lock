@@ -1,5 +1,5 @@
-hash: 296002fe15cac3a93d7eb9ae8d946e30bcd006afcfe451ec2bdd61ce2fa1ef3c
-updated: 2017-02-07T20:56:27.625943943-08:00
+hash: 8e359a7142bb1b2c7dc7a67c9f81d734b10174f7ae68c6eb6268990c870c4421
+updated: 2017-02-08T10:51:28.758175016-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -295,12 +295,11 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
-  version: d0c6551012bbc1d37407cf619335764406d2181a
-  repo: https://github.com/bacongobbler/helm
-  vcs: git
+  version: 977ceb9b5fc43b61e7c55e5fc7c083c577c4725d
   subpackages:
   - pkg/chartutil
   - pkg/helm
+  - pkg/helm/portforwarder
   - pkg/ignore
   - pkg/kube
   - pkg/proto/hapi/chart
@@ -308,7 +307,6 @@ imports:
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
   - pkg/storage/driver
-  - pkg/tiller/portforwarder
   - pkg/version
 - name: k8s.io/kubernetes
   version: b5f9d56cab78ccaad2b726223ba8be5802026f0b
