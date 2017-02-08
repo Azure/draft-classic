@@ -54,8 +54,6 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 }
 
 func (c *createCmd) run() error {
-	var err error
-
 	if c.appName == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -74,26 +72,33 @@ func (c *createCmd) run() error {
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	if c.pack != "" {
-		// Create a chart from the starter pack
-		lpack := filepath.Join(c.home.Packs(), c.pack)
-		err = chartutil.CreateFrom(cfile, "", lpack)
-	} else {
-		_, err = chartutil.Create(cfile, "")
+	chartExists, err := exists(cfile.Name)
+	if err != nil {
+		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
 
-	if err != nil {
-		if os.IsExist(err) {
-			// chart dir already exists, so we just tell the user that we are happily skipping
-			fmt.Fprintln(c.out, "--> Chart already exists at chart/, skipping")
-		} else {
-			return fmt.Errorf("there was an error creating the chart: %v", err)
-		}
+	if chartExists {
+		// chart dir already exists, so we just tell the user that we are happily skipping
+		fmt.Fprintln(c.out, "--> chart/ already exists, skipping")
 	} else {
-		// HACK(bacongobbler): see comment above about chartutil.Create
-		cfile.Name = c.appName
-		if err := chartutil.SaveChartfile(path.Join("chart", "Chart.yaml"), cfile); err != nil {
+		var err error
+		if c.pack != "" {
+			// Create a chart from the starter pack
+			lpack := filepath.Join(c.home.Packs(), c.pack)
+			err = chartutil.CreateFrom(cfile, "", lpack)
+		} else {
+			_, err = chartutil.Create(cfile, "")
+		}
+
+		if err != nil {
 			return fmt.Errorf("there was an error creating the chart: %v", err)
+		} else {
+			// HACK(bacongobbler): see comment above about chartutil.Create
+			cfile.Name = c.appName
+			if err := chartutil.SaveChartfile(path.Join("chart", "Chart.yaml"), cfile); err != nil {
+				return fmt.Errorf("there was an error creating the chart: %v", err)
+			}
+			fmt.Fprintln(c.out, "--> Created chart/")
 		}
 	}
 
@@ -112,8 +117,22 @@ func (c *createCmd) run() error {
 		} else {
 			return fmt.Errorf("there was an error creating the Dockerfile: %v", err)
 		}
+	} else {
+		fmt.Fprintln(c.out, "--> Created Dockerfile")
 	}
 
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
+}
+
+// exists returns whether the given file or directory exists or not
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
