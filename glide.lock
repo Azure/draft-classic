@@ -1,5 +1,5 @@
-hash: 9db23829c4c47883d48dd85f265917e8a8f7cdf4b011df9ecf5618b31b3963f8
-updated: 2017-02-06T19:23:04.341007319Z
+hash: 296002fe15cac3a93d7eb9ae8d946e30bcd006afcfe451ec2bdd61ce2fa1ef3c
+updated: 2017-02-07T20:56:27.625943943-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -295,7 +295,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
-  version: 5bc7375c9ca94340dc2d1371e5bf4b43ba1fc398
+  version: d0c6551012bbc1d37407cf619335764406d2181a
   repo: https://github.com/bacongobbler/helm
   vcs: git
   subpackages:
@@ -311,7 +311,7 @@ imports:
   - pkg/tiller/portforwarder
   - pkg/version
 - name: k8s.io/kubernetes
-  version: 08e099554f3c31f6e6f07b448ab3ed78d0520507
+  version: b5f9d56cab78ccaad2b726223ba8be5802026f0b
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install

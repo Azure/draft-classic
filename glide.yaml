@@ -14,5 +14,5 @@ import:
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - package: k8s.io/helm
   repo: https://github.com/bacongobbler/helm
-  version: prow
+  version: d0c6551012bbc1d37407cf619335764406d2181a
   vcs: git
