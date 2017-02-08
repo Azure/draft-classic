@@ -97,7 +97,7 @@ func (c *createCmd) run() error {
 
 	// now we check for a Dockerfile and create that based on the starter pack
 	if c.pack != "" {
-		lpack := filepath.Join(c.home.Packs(), c.pack)
+		lpack := filepath.Join(c.home.Packs(), c.pack, "Dockerfile")
 		err = dockerutil.CreateFrom("Dockerfile", lpack)
 	} else {
 		err = dockerutil.Create("Dockerfile", bytes.NewBufferString(defaultDockerfile))
