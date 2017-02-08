@@ -140,7 +140,7 @@ func TestUp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.Up("/ahsdkfjhaksdf", "default", ioutil.Discard)
+	err = client.Up("foo", "/ahsdkfjhaksdf", "default", ioutil.Discard)
 	if err == nil {
 		t.Error("expected .Up() with invalid path to fail")
 	}
@@ -148,7 +148,7 @@ func TestUp(t *testing.T) {
 		t.Errorf("expected .Up() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.Up("testdata", "default", ioutil.Discard); err != nil {
+	if err := client.Up("testdata", "testdata", "default", ioutil.Discard); err != nil {
 		t.Errorf("expected .Up() with valid path to pass, got %v", err)
 	}
 
