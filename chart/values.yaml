@@ -6,3 +6,4 @@ image:
   repository: quay.io/deis/prowd
   tag: canary
   pullPolicy: Always
+debug: false
