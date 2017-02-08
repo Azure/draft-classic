@@ -30,8 +30,6 @@ import (
 	"github.com/deis/prow/pkg/version"
 )
 
-const CloseBuildError = 3333
-
 const ChartTemplate = `image:
   name: %s
   registry: "%s:%s"
@@ -242,7 +240,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
-				CloseBuildError,
+				websocket.CloseUnsupportedData,
 				fmt.Sprintf("!!! Could not build image from build context: %v", err)))
 		return
 	}
@@ -253,7 +251,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			conn.WriteMessage(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
-					CloseBuildError,
+					websocket.CloseUnsupportedData,
 					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
 		}
 		io.Copy(w, buildResp.Body)
@@ -269,7 +267,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
-				CloseBuildError,
+				websocket.CloseUnsupportedData,
 				fmt.Sprintf("!!! Could not push %s to registry: %v", imageName, err)))
 		return
 	}
@@ -280,7 +278,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			conn.WriteMessage(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
-					CloseBuildError,
+					websocket.CloseUnsupportedData,
 					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
 		}
 		io.Copy(w, pushResp)
@@ -292,7 +290,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
-				CloseBuildError,
+				websocket.CloseUnsupportedData,
 				fmt.Sprintf("!!! Could not get a kube client: %v", err)))
 		return
 	}
@@ -301,7 +299,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
-				CloseBuildError,
+				websocket.CloseUnsupportedData,
 				fmt.Sprintf("!!! Could not get a connection to tiller: %v", err)))
 		return
 	}
@@ -312,7 +310,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
-				CloseBuildError,
+				websocket.CloseUnsupportedData,
 				fmt.Sprintf("!!! Could not load chart archive: %v", err)))
 		return
 	}
@@ -344,7 +342,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			conn.WriteMessage(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
-					CloseBuildError,
+					websocket.CloseUnsupportedData,
 					fmt.Sprintf("!!! Could not install release: %v", err)))
 			return
 		}
@@ -360,7 +358,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			conn.WriteMessage(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
-					CloseBuildError,
+					websocket.CloseUnsupportedData,
 					fmt.Sprintf("!!! Could not install release: %v", err)))
 			return
 		}
