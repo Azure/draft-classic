@@ -84,7 +84,7 @@ func (c *createCmd) run() error {
 		var err error
 		if c.pack != "" {
 			// Create a chart from the starter pack
-			lpack := filepath.Join(c.home.Packs(), c.pack)
+			lpack := filepath.Join(c.home.Packs(), c.pack, "chart")
 			err = chartutil.CreateFrom(cfile, "", lpack)
 		} else {
 			_, err = chartutil.Create(cfile, "")
