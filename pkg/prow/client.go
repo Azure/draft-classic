@@ -138,7 +138,7 @@ func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 				// server closed the connection, so we're done!
 				return nil
 			} else {
-				return fmt.Errorf("there was an error while reading a message: %v", err)
+				return err
 			}
 		}
 		if messageType == websocket.TextMessage {

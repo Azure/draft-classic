@@ -19,6 +19,7 @@ import (
 const expectedURLPath = "/apps/testdata"
 
 type testWebsocketServerHandler struct{ *testing.T }
+type testWebsocketServerHandlerCloseUnsupportedData struct{ *testing.T }
 
 type testWebsocketServer struct {
 	Server *httptest.Server
@@ -36,6 +37,13 @@ func (t *testWebsocketServer) Close() {
 func newTestWebsocketServer(t *testing.T) *testWebsocketServer {
 	var s *testWebsocketServer = new(testWebsocketServer)
 	s.Server = httptest.NewServer(testWebsocketServerHandler{t})
+	s.URL = makeWsProto(s.Server.URL)
+	return s
+}
+
+func newTestWebsocketServerCloseUnsupportedData(t *testing.T) *testWebsocketServer {
+	var s *testWebsocketServer = new(testWebsocketServer)
+	s.Server = httptest.NewServer(testWebsocketServerHandlerCloseUnsupportedData{t})
 	s.URL = makeWsProto(s.Server.URL)
 	return s
 }
@@ -77,6 +85,44 @@ func (t testWebsocketServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	ws.WriteControl(
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+		time.Now().Add(time.Second))
+}
+
+func (t testWebsocketServerHandlerCloseUnsupportedData) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != expectedURLPath {
+		t.Logf("path=%v, want %v", r.URL.Path, expectedURLPath)
+		http.Error(w, fmt.Sprintf("bad path %v, expected %v", r.URL.Path, expectedURLPath), http.StatusBadRequest)
+		return
+	}
+
+	r.ParseMultipartForm(32 << 20)
+
+	buildContext, _, err := r.FormFile("release-tar")
+	if err != nil {
+		t.Logf("no release-tar file found in multipart form")
+		http.Error(w, fmt.Sprintf("error while reading release-tar: %v", err), http.StatusBadRequest)
+		return
+	}
+	defer buildContext.Close()
+
+	chartFile, _, err := r.FormFile("chart-tar")
+	if err != nil {
+		t.Logf("no chart-tar file found in multipart form")
+		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v", err), http.StatusBadRequest)
+		return
+	}
+	defer chartFile.Close()
+
+	ws, err := api.WebsocketUpgrader.Upgrade(w, r, nil)
+	if err != nil {
+		t.Logf("Upgrade: %v", err)
+		return
+	}
+	defer ws.Close()
+
+	ws.WriteControl(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseUnsupportedData, ""),
 		time.Now().Add(time.Second))
 }
 
@@ -152,7 +198,20 @@ func TestUp(t *testing.T) {
 		t.Errorf("expected .Up() with valid path to pass, got %v", err)
 	}
 
-	// TODO(bacongobbler): write more extensive functional tests
+	ts2 := newTestWebsocketServerCloseUnsupportedData(t)
+	defer ts2.Close()
+
+	client, err = NewFromString(ts2.URL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.Up("testdata", "testdata", "default", ioutil.Discard)
+	if err == nil {
+		t.Error("expected .Up() with bad server to fail")
+	}
+	if !websocket.IsCloseError(err, websocket.CloseUnsupportedData) {
+		t.Errorf("expected err to be a CloseUnsupportedData error, got '%v'", err)
+	}
 }
 
 func TestVersion(t *testing.T) {
