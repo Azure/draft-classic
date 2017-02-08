@@ -40,15 +40,6 @@ NAME                                       READY     STATUS             RESTARTS
 example-dockerfile-http-3666132817-m2pkr   1/1       Running            0          30s
 ```
 
-To confirm that the image deployed to Kubernetes matches the local archive:
-
-```
-$ shasum build.tar.gz | awk '{print $1}'
-fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
-$ kubectl get po example-dockerfile-http-3666132817-m2pkr -o=jsonpath='{.spec.containers[0].image}' | rev | cut -d ':' -f 1 | rev
-fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
-```
-
 _NOTE: CLI usage will look like this when it is completed._
 
 Start from a source code repository and let Prow create the Kubernetes packaging:
@@ -85,6 +76,24 @@ Behind the scenes, Prow handles the heavy lifting:
 After deploying, you can run `prow up` again to create new releases when
 application source code has changed. Or you can let Prow continuously rebuild
 your application.
+
+
+## Hacking on Prow
+
+The easiest way to hack on Prow is to deploy changes... Using Prow. Check it out!
+
+```
+$ helm list
+NAME                    REVISION        UPDATED                         STATUS          CHART
+warped-nightingale      1               Wed Feb  8 10:29:19 2017        DEPLOYED        prowd-0.1.0
+$ make build docker-binary
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ./rootfs/bin/prowd -a -installsuffix cgo -tags '' -ldflags ' -X github.com/deis/prow/pkg/version.Version= -X github.com/deis/prow/pkg/version.GitCommit=d46a18200576d6ba3007ed26efb647ffd86303ba -X github.com/deis/prow/pkg/version.GitTreeState=clean' github.com/deis/prow/cmd/prowd
+$ ./bin/prow up --app warped-nightingale
+--> Building Dockerfile
+--> Pushing 127.0.0.1:5000/warped-nightingale:6f3b53003dcbf43821aea43208fc51455674d00e
+--> Deploying to Kubernetes
+--> code:DEPLOYED
+```
 
 ## Features
 
