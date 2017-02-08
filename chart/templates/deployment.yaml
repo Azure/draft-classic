@@ -18,6 +18,9 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start
+        {{- if .Values.debug }}
+        - --debug
+        {{- end }}
         ports:
         - containerPort: 44135
         livenessProbe:
