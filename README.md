@@ -1,14 +1,14 @@
 # Prow: Streamlined Kubernetes Development
 
-_This project is experimental, and has not hit a stable release point_
+_NOTE: Prow is experimental and does not have a stable release yet._
 
-Prow is a developer tool for creating cloud native applications for Kubernetes.
+Prow is a tool for developers to create cloud-native applications on [Kubernetes][].
 
 ## Usage
 
-_NOTE(bacongobbler): this is usage instructions to test while there's no client yet_
+_NOTE: These instructions are temporary until there is a CLI._
 
-For now, this is the easiest way to test/run this locally on macOS:
+Here's an example of installing Prow and creating an application:
 
 ```
 $ go version
@@ -33,14 +33,14 @@ $ prow up
     Release "example-dockerfile-http" does not exist. Installing it now.
 --> code:DEPLOYED
 $ helm list
-NAME                                REVISION        UPDATED                         STATUS          CHART
-example-dockerfile-http             1               Tue Jan 24 15:04:27 2017        DEPLOYED        example-dockerfile-http-1.0.0
+NAME                      REVISION   UPDATED                     STATUS      CHART
+example-dockerfile-http   1          Tue Jan 24 15:04:27 2017    DEPLOYED    example-dockerfile-http-1.0.0
 $ kubectl get po
 NAME                                       READY     STATUS             RESTARTS   AGE
 example-dockerfile-http-3666132817-m2pkr   1/1       Running            0          30s
 ```
 
-You can also confirm that the image deployed on kubernetes is the same as what was uploaded locally:
+To confirm that the image deployed to Kubernetes matches the local archive:
 
 ```
 $ shasum build.tar.gz | awk '{print $1}'
@@ -49,10 +49,9 @@ $ kubectl get po example-dockerfile-http-3666132817-m2pkr -o=jsonpath='{.spec.co
 fc8c34ba4349ce3771e728b15ead2bb4c81cb9fd
 ```
 
-_NOTE(bacongobbler): This is what the final CLI usage should look like_
+_NOTE: CLI usage will look like this when it is completed._
 
-Start from your source code repository and let Prow transform it for
-Kubernetes:
+Start from a source code repository and let Prow create the Kubernetes packaging:
 
 ```
 $ cd my-app
@@ -64,7 +63,6 @@ $ prow create --pack=python
 --> Ready to sail
 ```
 
-
 Now start it up!
 
 ```
@@ -75,22 +73,25 @@ $ prow up
 --> code:DEPLOYED
 ```
 
-That's it! You're now running your Python app in a Kubernetes cluster.
+That's it! You're now running your Python app in a [Kubernetes][] cluster.
 
-Behind the scenes, Prow is handling the heavy lifting for you:
+Behind the scenes, Prow handles the heavy lifting:
 
-- It builds a container image, and pushes it to a registry
-- It creates a Helm chart for deploying into Kubernetes
-- Using Helm, it deploys your release
+- Builds a container image from application source code
+- Pushes the image to a registry
+- Creates a [Helm][] chart for the image
+- Installs the chart to Kubernetes, deploying the application
 
-From there, you can either let Prow continually rebuild your app, or you can
-manually re-run Prow to update the existing app.
+After deploying, you can run `prow up` again to create new releases when
+application source code has changed. Or you can let Prow continuously rebuild
+your application.
 
 ## Features
 
-- Prow is language agnostic
-- Prow will work with any Kubernetes cluster that supports Helm
-- Once it scaffolds your chart, you can leave the chart alone, or you can edit
-  it to your specific needs
-- Charts can be packaged and delivered to your ops team
+- Prow is language-agnostic
+- Prow works with any Kubernetes cluster that supports [Helm][]
+- Charts that Prow creates can be edited to suit your needs
+- Charts can be packaged for delivery to your ops team
 
+[Kubernetes]: https://kubernetes.io/
+[Helm]: https://github.com/kubernetes/helm
