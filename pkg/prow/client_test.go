@@ -2,11 +2,13 @@ package prow
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
@@ -71,6 +73,11 @@ func (t testWebsocketServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	defer ws.Close()
 
 	ws.WriteMessage(websocket.TextMessage, []byte("hi there!"))
+
+	ws.WriteControl(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+		time.Now().Add(time.Second))
 }
 
 func makeWsProto(s string) string {
@@ -133,7 +140,7 @@ func TestUp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.Up("/ahsdkfjhaksdf", "default")
+	err = client.Up("/ahsdkfjhaksdf", "default", ioutil.Discard)
 	if err == nil {
 		t.Error("expected .Up() with invalid path to fail")
 	}
@@ -141,7 +148,7 @@ func TestUp(t *testing.T) {
 		t.Errorf("expected .Up() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.Up("testdata", "default"); err != nil {
+	if err := client.Up("testdata", "default", ioutil.Discard); err != nil {
 		t.Errorf("expected .Up() with valid path to pass, got %v", err)
 	}
 
