@@ -6,7 +6,7 @@ Prow is a tool for developers to create cloud-native applications on [Kubernetes
 
 ## Usage
 
-_NOTE: These instructions are temporary until there is a CLI._
+_NOTE: These instructions are temporary until there is an official binary release._
 
 Here's an example of installing Prow and creating an application:
 
@@ -19,12 +19,14 @@ $ export IMAGE_PREFIX=bacongobbler
 $ make info
 Build tag:       git-abc1234
 Registry:        quay.io
-Immutable tag:   quay.io/deis/prowd:git-abc1234
-Mutable tag:     quay.io/deis/prowd:canary
-$ make docker-build docker-push
-$ cat chart/values.yaml | grep repository
-  repository: quay.io/deis/prowd
-$ helm install ./chart --namespace prow
+Immutable tag:   quay.io/bacongobbler/prowd:git-abc1234
+Mutable tag:     quay.io/bacongobbler/prowd:canary
+$ make bootstrap docker-build docker-push
+$ cat chart/values.yaml | grep 'registry\|name'
+  registry: quay.io
+  name: deis/prowd
+$ helm install ./chart --namespace prow --set image.name=${IMAGE_PREFIX}/prowd
+$ make build && export PATH=$PWD/bin:$PATH
 $ cd tests/testdata/example-dockerfile-http
 $ prow up
 --> Building Dockerfile
