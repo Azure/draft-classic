@@ -266,6 +266,28 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		}
 		io.Copy(w, buildResp.Body)
 	}
+
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Checking to make sure image exists"))
+	_, _, err = server.DockerClient.ImageInspectWithRaw(
+		context.Background(),
+		imageName)
+	if err != nil {
+		if docker.IsErrImageNotFound(err) {
+			conn.WriteMessage(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					websocket.CloseUnsupportedData,
+					fmt.Sprintf("!!! Could not locate image for %s -- did the build succeed?", appName)))
+		} else {
+			conn.WriteMessage(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(
+					websocket.CloseUnsupportedData,
+					fmt.Sprintf("!!! ImageInspectWithRaw error: %v", err)))
+		}
+		return
+	}
+
 	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s", imageName)))
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
