@@ -85,6 +85,10 @@ test: test-unit
 test-unit:
 	$(GO) test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
 
+.PHONY: test-e2e
+test-e2e:
+	./tests/e2e.sh
+
 HAS_GLIDE := $(shell command -v glide;)
 HAS_GOX := $(shell command -v gox;)
 HAS_GIT := $(shell command -v git;)
