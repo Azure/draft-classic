@@ -6,6 +6,8 @@
 # installs all the apps under testdata and checks that they pass or fail, depending on their
 # success condition.
 
+cd $(dirname $0)
+
 echo "testing apps that are expected to pass"
 pushd testdata/good > /dev/null
 for app in */; do
