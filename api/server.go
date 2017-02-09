@@ -214,6 +214,16 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	defer conn.Close()
 
+	conn.SetCloseHandler(func(code int, text string) error {
+		message := []byte{}
+		if code != websocket.CloseNoStatusReceived {
+			message = websocket.FormatCloseMessage(code, "")
+		}
+		conn.WriteMessage(websocket.TextMessage, []byte(message))
+		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, ""), time.Now().Add(time.Second))
+		return nil
+	})
+
 	// write build context to a buffer so we can also write to the sha1 hash
 	buf := new(bytes.Buffer)
 	buildContextChecksum := sha1.New()
