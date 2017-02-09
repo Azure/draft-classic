@@ -14,7 +14,7 @@ for app in */; do
     echo "switching to ${app}"
     pushd "${app}" > /dev/null
     # strip trailing forward slash
-    app=${app: : -1}
+    app=${app%/}
     prow up
     echo "checking that ${app} v1 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
@@ -46,7 +46,7 @@ for app in */; do
     echo "switching to ${app}"
     pushd "${app}" > /dev/null
     # strip trailing forward slash
-    app=${app: : -1}
+    app=${app%/}
     prow up
     echo "checking that ${app} v1 was NOT released"
     release=$(helm list | grep "${app}")
