@@ -63,9 +63,18 @@ docker-binary:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o $(BINDIR)/prowd $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/prow/cmd/prowd
 
 .PHONY: docker-build
-docker-build: check-docker docker-binary
+docker-build: check-docker docker-binary compress-binary
 	docker build --rm -t ${IMAGE} .
 	docker tag ${IMAGE} ${MUTABLE_IMAGE}
+
+.PHONY: compress-binary
+compress-binary: BINDIR = ./rootfs/bin
+compress-binary:
+	@if [ -z $$(which upx) ]; then \
+	  echo "Missing \`upx\` tool to compress binaries"; \
+	else \
+	  upx --quiet ${BINDIR}/prowd; \
+	fi
 
 .PHONY: test
 test: build
