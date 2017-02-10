@@ -15,6 +15,7 @@ following are required:
  - [docker](https://www.docker.com/)
  - a Kubernetes cluster. We recommend [minikube](https://github.com/kubernetes/minikube)
  - [helm](https://github.com/kubernetes/helm)
+ - [upx](https://upx.github.io) OPTIONAL if you want to compress your binary for smaller Docker images.
 
 In most cases, you should simply install according to the instructions. We'll cover the special
 cases below.
