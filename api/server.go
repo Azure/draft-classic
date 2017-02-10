@@ -180,10 +180,15 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
+	logLevel := r.Header.Get("Log-Level")
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	if logLevel == "" {
+		logLevel = log.GetLevel().String()	
 	}
 
 	if r.Method != "POST" {
@@ -255,7 +260,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer buildResp.Body.Close()
-	if log.GetLevel() == log.DebugLevel {
+	if logLevel == log.DebugLevel.String() {
 		w, err := conn.NextWriter(websocket.TextMessage)
 		if err != nil {
 			conn.WriteMessage(
@@ -304,7 +309,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer pushResp.Close()
-	if log.GetLevel() == log.DebugLevel {
+	if logLevel == log.DebugLevel.String() {
 		w, err := conn.NextWriter(websocket.TextMessage)
 		if err != nil {
 			conn.WriteMessage(
