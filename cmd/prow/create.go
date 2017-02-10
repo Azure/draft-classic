@@ -12,6 +12,7 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
+	pchartutil "github.com/deis/prow/pkg/chartutil"
 	"github.com/deis/prow/pkg/dockerutil"
 	"github.com/deis/prow/pkg/prow/prowpath"
 )
@@ -87,7 +88,7 @@ func (c *createCmd) run() error {
 			lpack := filepath.Join(c.home.Packs(), c.pack, "chart")
 			err = chartutil.CreateFrom(cfile, "", lpack)
 		} else {
-			_, err = chartutil.Create(cfile, "")
+			_, err = pchartutil.Create(cfile, "")
 		}
 
 		if err != nil {
