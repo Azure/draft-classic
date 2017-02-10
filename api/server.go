@@ -17,6 +17,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/docker/pkg/term"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
@@ -188,7 +190,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 
 	if logLevel == "" {
-		logLevel = log.GetLevel().String()	
+		logLevel = log.GetLevel().String()
 	}
 
 	if r.Method != "POST" {
@@ -260,19 +262,21 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer buildResp.Body.Close()
-	if logLevel == log.DebugLevel.String() {
-		w, err := conn.NextWriter(websocket.TextMessage)
-		if err != nil {
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
-		}
-		io.Copy(w, buildResp.Body)
+	writer, err := conn.NextWriter(websocket.TextMessage)
+	if err != nil {
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				websocket.CloseUnsupportedData,
+				fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
+	}
+	outFd, isTerm := term.GetFdInfo(writer)
+	if err := jsonmessage.DisplayJSONMessagesStream(buildResp.Body, writer, outFd, isTerm, nil); err != nil {
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseUnsupportedData, err.Error()))
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Checking to make sure image exists"))
 	_, _, err = server.DockerClient.ImageInspectWithRaw(
 		context.Background(),
 		imageName)
@@ -309,16 +313,19 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 	defer pushResp.Close()
-	if logLevel == log.DebugLevel.String() {
-		w, err := conn.NextWriter(websocket.TextMessage)
-		if err != nil {
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
-		}
-		io.Copy(w, pushResp)
+	writer, err = conn.NextWriter(websocket.TextMessage)
+	if err != nil {
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				websocket.CloseUnsupportedData,
+				fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
+	}
+	outFd, isTerm = term.GetFdInfo(writer)
+	if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
+		conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseUnsupportedData, err.Error()))
 	}
 
 	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes"))
@@ -340,7 +347,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				fmt.Sprintf("!!! Could not get a connection to tiller: %v", err)))
 		return
 	}
-
 	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
