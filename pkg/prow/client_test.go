@@ -214,6 +214,28 @@ func TestUp(t *testing.T) {
 	}
 }
 
+func TestUpHeaders(t *testing.T) {
+	var expectedNamespace = "testdata"
+	var expectedLogLevel = log.DebugLevel
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Kubernetes-Namespace") != expectedNamespace {
+			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedLogLevel, r.Header.Get("Kubernetes-Namespace"))
+		}
+		if r.Header.Get("Log-Level") != expectedLogLevel.String() {
+			t.Errorf("expected Log-Level = %s, got %s", expectedLogLevel, r.Header.Get("Log-Level"))
+		}
+	}))
+	defer ts.Close()
+
+	log.SetLevel(expectedLogLevel)
+
+	client, err := NewFromString(ts.URL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.Up("testdata", "testdata", expectedNamespace, ioutil.Discard)
+}
+
 func TestVersion(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"semver": "v0.1.0", "git-commit": "abc123", "git-tree-state": "dirty"}`))
