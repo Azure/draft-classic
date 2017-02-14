@@ -8,3 +8,10 @@ image:
   tag: canary
   pullPolicy: Always
 debug: false
+service:
+  http:
+    externalPort: 80
+    internalPort: 44135
+  registry:
+    externalPort: 5000
+    internalPort: 5000

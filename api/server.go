@@ -183,6 +183,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	logLevel := r.Header.Get("Log-Level")
+	registryServicePort := os.Getenv("REGISTRY_SERVICE_PORT")
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -191,6 +192,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	if logLevel == "" {
 		logLevel = log.GetLevel().String()
+	}
+
+	if registryServicePort == "" {
+		registryServicePort = "5000"
 	}
 
 	if r.Method != "POST" {
@@ -240,7 +245,8 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// truncate checksum to the first 40 characters (20 bytes)
 	// this is the equivalent of `shasum build.tar.gz | awk '{print $1}'`
 	tag := fmt.Sprintf("%.20x", buildContextChecksum.Sum(nil))
-	imageName := fmt.Sprintf("127.0.0.1:5000/%s:%s",
+	imageName := fmt.Sprintf("127.0.0.1:%s/%s:%s",
+		registryServicePort,
 		appName,
 		tag,
 	)
