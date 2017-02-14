@@ -1,5 +1,6 @@
 DOCKER_REGISTRY ?= quay.io
 IMAGE_PREFIX    ?= deis
+IMAGE_TAG       ?= canary
 SHORT_NAME      ?= prowd
 TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm windows/amd64
 DIST_DIRS       = find * -type d -exec
@@ -56,6 +57,13 @@ check-docker:
 	  exit 2; \
 	fi
 
+.PHONY: check-helm
+check-helm:
+	@if [ -z $$(which helm) ]; then \
+	  echo "Missing \`helm\` client which is required for development"; \
+	  exit 2; \
+	fi
+
 .PHONY: docker-binary
 docker-binary: BINDIR = ./rootfs/bin
 docker-binary: GOFLAGS += -a -installsuffix cgo
@@ -75,6 +83,17 @@ compress-binary:
 	else \
 	  upx --quiet ${BINDIR}/prowd; \
 	fi
+
+.PHONY: serve
+serve: check-helm
+	helm install chart/ --name ${SHORT_NAME} --namespace ${APP} \
+		--set image.name=${IMAGE_PREFIX}/${SHORT_NAME},image.registry=${DOCKER_REGISTRY},image.tag=${IMAGE_TAG}
+
+.PHONY: clean
+clean:
+	-helm delete --purge ${SHORT_NAME}
+	-rm bin/*
+	-rm rootfs/bin/*
 
 .PHONY: test
 test: build
@@ -101,7 +120,6 @@ endif
 ifndef HAS_GOX
 	go get -u github.com/mitchellh/gox
 endif
-
 ifndef HAS_GIT
 	$(error You must install git)
 endif
