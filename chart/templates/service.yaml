@@ -5,10 +5,10 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 80
-      targetPort: 44135
+      port: {{ .Values.service.http.externalPort }}
+      targetPort: {{ .Values.service.http.internalPort }}
     - name: registry
-      port: 5000
-      targetPort: 5000
+      port: {{ .Values.service.registry.externalPort }}
+      targetPort: {{ .Values.service.registry.internalPort }}
   selector:
     app: {{ .Chart.Name }}
