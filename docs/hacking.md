@@ -97,7 +97,7 @@ need to make use of a Docker Registry. This is a location to where you can push 
 images and from where your Kubernetes cluster can retrieve those same images.
 
 In most cases, a local registry will not be accessible to your Kubernetes nodes. A public registry
-such as [DockerHub][dh] or [quay.io][quay] will suffice.
+such as [Docker Hub](https://hub.docker.com/) or [Quay][https://quay.io/] will suffice.
 
 To use DockerHub for this purpose, for instance:
 
@@ -109,7 +109,7 @@ $ export IMAGE_PREFIX=<your DockerHub username>
 To use quay.io:
 
 ```
-$ export DEIS_REGISTRY="quay.io"
+$ export DOCKER_REGISTRY="quay.io"
 $ export IMAGE_PREFIX=<your quay.io username>
 ```
 
@@ -124,6 +124,12 @@ you just deployed:
 
 ```
 $ $EDITOR charts/values.yaml
+```
+
+Ensure Tiller is running in the Kubernetes cluster:
+
+```
+$ helm init
 ```
 
 Then, install the chart:
