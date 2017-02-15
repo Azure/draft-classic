@@ -34,7 +34,8 @@ import (
 
 const ChartTemplate = `image:
   name: %s
-  registry: "%s:%s"
+  org: %s
+  registry: %s
   tag: %s
 `
 
@@ -47,6 +48,15 @@ type APIServer struct {
 	HTTPServer   *http.Server
 	Listener     net.Listener
 	DockerClient *docker.Client
+	// RegistryAuth is the authorization token used to push images up to the registry.
+	//
+	// This field follows the format of the X-Registry-Auth header.
+	RegistryAuth string
+	// RegistryOrg is the organization (e.g. your DockerHub account) used to push images
+	// up to the registry.
+	RegistryOrg string
+	// RegistryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
+	RegistryURL string
 }
 
 // Serve starts the HTTP server, accepting all new connections.
@@ -179,11 +189,11 @@ func getVersion(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var imagePrefix string
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	logLevel := r.Header.Get("Log-Level")
-	registryServicePort := os.Getenv("REGISTRY_SERVICE_PORT")
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -192,10 +202,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	if logLevel == "" {
 		logLevel = log.GetLevel().String()
-	}
-
-	if registryServicePort == "" {
-		registryServicePort = "5000"
 	}
 
 	if r.Method != "POST" {
@@ -245,8 +251,12 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// truncate checksum to the first 40 characters (20 bytes)
 	// this is the equivalent of `shasum build.tar.gz | awk '{print $1}'`
 	tag := fmt.Sprintf("%.20x", buildContextChecksum.Sum(nil))
-	imageName := fmt.Sprintf("127.0.0.1:%s/%s:%s",
-		registryServicePort,
+	if server.RegistryOrg != "" {
+		imagePrefix = server.RegistryOrg + "/"
+	}
+	imageName := fmt.Sprintf("%s/%s%s:%s",
+		server.RegistryURL,
+		imagePrefix,
 		appName,
 		tag,
 	)
@@ -307,9 +317,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
-		// assume no creds required for now
-		// TODO(bacongobbler): implement custom auth handling for a registry
-		types.ImagePushOptions{RegistryAuth: "hi"})
+		types.ImagePushOptions{RegistryAuth: server.RegistryAuth})
 	if err != nil {
 		conn.WriteMessage(
 			websocket.CloseMessage,
@@ -367,8 +375,8 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// and the version
 	vals := fmt.Sprintf(ChartTemplate,
 		appName,
-		os.Getenv("PROWD_SERVICE_HOST"),
-		os.Getenv("PROWD_SERVICE_PORT_REGISTRY"),
+		server.RegistryOrg,
+		server.RegistryURL,
 		tag,
 	)
 	// If a release does not exist, install it. If another error occurs during

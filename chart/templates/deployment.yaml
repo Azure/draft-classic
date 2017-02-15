@@ -14,10 +14,13 @@ spec:
     spec:
       containers:
       - name: prowd
-        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start
+        - --registry-url={{ .Values.registry.url }}
+        - --registry-org={{ .Values.registry.org }}
+        - --registry-auth={{ .Values.registry.authtoken }}
         {{- if .Values.debug }}
         - --debug
         {{- end }}
@@ -34,16 +37,6 @@ spec:
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: docker-socket
-        env:
-          - name: "REGISTRY_SERVICE_PORT"
-            value: "{{ .Values.service.registry.externalPort }}"
-      - name: registry
-        image: registry:2
-        imagePullPolicy: Always
-        ports:
-        - containerPort: {{ .Values.service.registry.internalPort }}
-          hostPort: {{ .Values.service.registry.externalPort }}
-          name: registry
       volumes:
       - name: docker-socket
         hostPath:

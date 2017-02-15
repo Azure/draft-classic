@@ -7,8 +7,5 @@ spec:
     - name: http
       port: {{ .Values.service.http.externalPort }}
       targetPort: {{ .Values.service.http.internalPort }}
-    - name: registry
-      port: {{ .Values.service.registry.externalPort }}
-      targetPort: {{ .Values.service.registry.internalPort }}
   selector:
     app: {{ .Chart.Name }}
