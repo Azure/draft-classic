@@ -22,24 +22,27 @@ spec:
         - --debug
         {{- end }}
         ports:
-        - containerPort: 44135
+        - containerPort: {{ .Values.service.http.internalPort }}
         livenessProbe:
           httpGet:
             path: /ping
-            port: 44135
+            port: {{ .Values.service.http.internalPort }}
         readinessProbe:
           httpGet:
             path: /ping
-            port: 44135
+            port: {{ .Values.service.http.internalPort }}
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: docker-socket
+        env:
+          - name: "REGISTRY_SERVICE_PORT"
+            value: "{{ .Values.service.registry.externalPort }}"
       - name: registry
         image: registry:2
         imagePullPolicy: Always
         ports:
-        - containerPort: 5000
-          hostPort: 5000
+        - containerPort: {{ .Values.service.registry.internalPort }}
+          hostPort: {{ .Values.service.registry.externalPort }}
           name: registry
       volumes:
       - name: docker-socket
