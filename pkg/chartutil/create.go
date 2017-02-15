@@ -53,6 +53,7 @@ const defaultValues = `# Default values for %s.
 replicaCount: 1
 image:
   registry: docker.io
+  org: library
   name: nginx
   tag: stable
   pullPolicy: IfNotPresent
@@ -109,7 +110,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}

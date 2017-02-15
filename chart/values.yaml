@@ -4,7 +4,8 @@
 replicaCount: 1
 image:
   registry: quay.io
-  name: deis/prowd
+  org: deis
+  name: prowd
   tag: canary
   pullPolicy: Always
 debug: false
@@ -12,6 +13,18 @@ service:
   http:
     externalPort: 80
     internalPort: 44135
-  registry:
-    externalPort: 5000
-    internalPort: 5000
+registry:
+  url: quay.io
+  org: deis
+  # This field follows the format of Docker's X-Registry-Auth header.
+  #
+  # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
+  #
+  # For credential-based logins, use
+  #
+  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64 -w 0
+  #
+  # For token-based logins, use
+  #
+  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
+  authtoken: changeme

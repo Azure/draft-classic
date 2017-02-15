@@ -65,7 +65,7 @@ When you run `prow up`, Prow deploys your code to your Kubernetes cluster for yo
 following:
 
 - Packages your code using a `docker build`.
-- Sends your code to the in-cluster Docker Registry.
+- Sends your code to a Docker Registry.
 - Installs (or upgrades) your chart using Helm
 
 And when you're done with development, Prow's "first class" objects are all supported by the
@@ -101,7 +101,7 @@ This is a look behind the curtain. Here's how Prow works:
 - Prow uses several existing components:
  - A Kubernetes cluster
  - The Helm Tiller server
- - An in-cluster Docker Registry
+ - A Docker Registry
  - A directory full of "packs" for specific templates
 - `prow create` reads a scaffold out of the appropriate pack, creates the necessary file system
  objects, and writes some basic configuration into your chart.
@@ -142,6 +142,7 @@ Inside of the `values.yaml` file, Prow configures images for your chart:
 ```
 image:
   registry: gcr.io
+  org: bacongobbler
   name: myapp
   tag: 0.1.0
 ```
@@ -168,15 +169,16 @@ want to use:
 
 ```
 image:
-  registry: 10.0.0.131:5000  # the address of the in-cluster registry
-  name: myapp 				 # the name of the image
+  registry: quay.io          # the address of the registry
+  org: bacongobbler          # the organization of the image
+  name: myapp                # the name of the image
   tag: 08db751               # the release of the image in the registry
 ```
 
 _How do I add an existing chart to Prow?_
 
 Just copy (`helm fetch`) it into the `chart/` directory. You need to tweak the values file to
-read from `image.regsitry`, `image.name` and `image.tag` if you want Prow to regenerate Docker
+read from `image.registry`, `image.org`, `image.name` and `image.tag` if you want Prow to regenerate Docker
 images for you. See above.
 
 _How do I deploy applications to production?_
