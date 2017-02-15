@@ -42,6 +42,10 @@ const ChartTemplate = `image:
 
 var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
+	// reduce the WriteBufferSize so `docker build` and `docker push` responses aren't internally
+	// buffered by gorilla/websocket, but smaller, more informative messages can still be buffered.
+	// https://github.com/gorilla/websocket/blob/9bc973af0682dc73a22553a08bfe00ee6255f56f/conn.go#L586-L593
+	WriteBufferSize: 128,
 }
 
 // APIServer is an API Server which listens and responds to HTTP requests.
@@ -214,21 +218,21 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	r.ParseMultipartForm(32 << 20)
 	buildContext, _, err := r.FormFile("release-tar")
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error while reading release-tar: %v", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("error while reading release-tar: %v\n", err), http.StatusBadRequest)
 		return
 	}
 	defer buildContext.Close()
 
 	chartFile, _, err := r.FormFile("chart-tar")
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v\n", err), http.StatusBadRequest)
 		return
 	}
 	defer chartFile.Close()
 
 	conn, err := WebsocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error when upgrading connection: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error when upgrading connection: %v\n", err), http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
@@ -263,7 +267,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	)
 
 	// send uploaded tar to docker as the build context
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile"))
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
 		buf,
@@ -275,7 +279,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not build image from build context: %v", err)))
+				fmt.Sprintf("!!! Could not build image from build context: %v\n", err)))
 		return
 	}
 	defer buildResp.Body.Close()
@@ -285,7 +289,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
+				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
 	}
 	outFd, isTerm := term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(buildResp.Body, writer, outFd, isTerm, nil); err != nil {
@@ -303,18 +307,18 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not locate image for %s -- did the build succeed?", appName)))
+					fmt.Sprintf("!!! Could not locate image for %s -- did the build succeed?\n", appName)))
 		} else {
 			conn.WriteMessage(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! ImageInspectWithRaw error: %v", err)))
+					fmt.Sprintf("!!! ImageInspectWithRaw error: %v\n", err)))
 		}
 		return
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s", imageName)))
+	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
@@ -324,7 +328,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not push %s to registry: %v", imageName, err)))
+				fmt.Sprintf("!!! Could not push %s to registry: %v\n", imageName, err)))
 		return
 	}
 	defer pushResp.Close()
@@ -334,7 +338,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("There was an error fetching a text message writer: %v", err)))
+				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
 	}
 	outFd, isTerm = term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
@@ -343,14 +347,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.FormatCloseMessage(websocket.CloseUnsupportedData, err.Error()))
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes"))
+	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
 	clientset, config, err := getKubeClient("")
 	if err != nil {
 		conn.WriteMessage(
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not get a kube client: %v", err)))
+				fmt.Sprintf("!!! Could not get a kube client: %v\n", err)))
 		return
 	}
 	tunnel, err := portforwarder.New("kube-system", clientset, config)
@@ -359,7 +363,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not get a connection to tiller: %v", err)))
+				fmt.Sprintf("!!! Could not get a connection to tiller: %v\n", err)))
 		return
 	}
 	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
@@ -369,7 +373,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.CloseMessage,
 			websocket.FormatCloseMessage(
 				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not load chart archive: %v", err)))
+				fmt.Sprintf("!!! Could not load chart archive: %v\n", err)))
 		return
 	}
 	// inject certain values into the chart such as the registry location, the application name
@@ -390,7 +394,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.", appName)))
+			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
 		releaseResp, err := client.InstallReleaseFromChart(
 			chart,
 			namespace,
@@ -401,7 +405,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not install release: %v", err)))
+					fmt.Sprintf("!!! Could not install release: %v\n", err)))
 			return
 		}
 		conn.WriteMessage(
@@ -417,7 +421,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(
 					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not install release: %v", err)))
+					fmt.Sprintf("!!! Could not install release: %v\n", err)))
 			return
 		}
 		conn.WriteMessage(
@@ -446,7 +450,7 @@ func formatReleaseStatus(release *release.Release) []byte {
 func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
 	config, err := kube.GetConfig(context).ClientConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s\n", context, err)
 	}
 	client, err := internalclientset.NewForConfig(config)
 	if err != nil {
