@@ -61,7 +61,11 @@ Behind the scenes, Prow handles the heavy lifting:
 After deploying, you can run `prow up` again to create new releases when
 application source code has changed.
 
+## Next Steps
 
+Looking for a more detailed, hands-on exercise exploring the lifecycle of an app deployed with Prow?  Check out the [Getting Started][] doc and you'll soon be sailing!
+
+[Getting Started]: docs/getting-started.md
 [hacking]: docs/hacking.md
 [Kubernetes]: https://kubernetes.io/
 [Helm]: https://github.com/kubernetes/helm
