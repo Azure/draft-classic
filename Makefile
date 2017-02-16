@@ -91,7 +91,7 @@ serve: check-helm
 
 .PHONY: clean
 clean:
-	-helm delete --purge ${SHORT_NAME}
+	-helm delete --purge ${APP}
 	-rm bin/*
 	-rm rootfs/bin/*
 
