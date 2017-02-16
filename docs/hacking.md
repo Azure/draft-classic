@@ -127,7 +127,7 @@ Then, install the chart:
 
 ```shell
 $ make serve
-$ helm list  # check that prowd has a helm release
+$ helm list  # check that prow has a helm release
 NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
 prow	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	prow
 ```
