@@ -25,6 +25,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/client/restclient"
@@ -405,7 +406,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("--> %s", releaseResp.Release.Info.Status.String())))
+			formatReleaseStatus(releaseResp.Release))
 	} else {
 		releaseResp, err := client.UpdateReleaseFromChart(
 			appName,
@@ -421,7 +422,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
-			[]byte(fmt.Sprintf("--> %s", releaseResp.Release.Info.Status.String())))
+			formatReleaseStatus(releaseResp.Release))
 	}
 
 	// gently tell the client that we are closing the connection
@@ -429,6 +430,15 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 		time.Now().Add(time.Second))
+}
+
+// formatReleaseStatus returns a byte slice of formatted release status information
+func formatReleaseStatus(release *release.Release) []byte {
+	output := fmt.Sprintf("--> Status: %s\n", release.Info.Status.Code.String())
+	if release.Info.Status.Notes != "" {
+		output += fmt.Sprintf("--> Notes:\n     %s\n", release.Info.Status.Notes)
+	}
+	return []byte(output)
 }
 
 // getKubeClient is a convenience method for creating kubernetes config and client
