@@ -8,6 +8,7 @@ development environment for working on the Prow source code.
 To compile and test Prow binaries and to build Docker images, you will need:
 
  - [docker][]
+ - a [Docker Hub][] or [quay.io][quay] account
  - [git][]
  - [Go][] 1.7 or later, with support for compiling to `linux/amd64`
  - [glide][]
@@ -115,13 +116,20 @@ Client: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89e
 Server: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89ef008fef5cdf89", GitTreeState:"clean"}
 ```
 
-Then, install the Prow chart:
+To install Prowd, edit `chart/values.yaml` and change the fields under `registry` to your
+[Docker Hub][] or [quay.io][quay] account:
+
+```
+$ $EDITOR charts/values.yaml
+```
+
+Then, install the chart:
 
 ```shell
 $ make serve
 $ helm list  # check that prowd has a helm release
 NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
-prowd	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	prow
+prow	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	prow
 ```
 
 ## Re-deploying Your Changes
