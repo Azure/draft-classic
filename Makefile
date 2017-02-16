@@ -86,7 +86,7 @@ compress-binary:
 
 .PHONY: serve
 serve: check-helm
-	helm install chart/ --name ${SHORT_NAME} --namespace ${APP} \
+	helm install chart/ --name ${APP} --namespace ${APP} \
 		--set image.name=${IMAGE_PREFIX}/${SHORT_NAME},image.registry=${DOCKER_REGISTRY},image.tag=${IMAGE_TAG}
 
 .PHONY: clean
