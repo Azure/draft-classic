@@ -156,7 +156,7 @@ To remove the Prow chart and local binaries:
 
 ```shell
 $ make clean
-helm delete --purge prowd
+helm delete --purge prow
 rm bin/*
 rm rootfs/bin/*
 ```
