@@ -1,16 +1,18 @@
 # Getting Started
 
-This document illustrates the workflow of deploying a sample "Hello World" app via Prow.  If intending to follow along, be sure to have met the prerequisites in the [Hacking guide][hacking.md#prerequisites].
+This document shows how to deploy a "Hello World" app with Prow. To follow along, be sure you
+have completed the [Hacking on Prow](hacking.md) guide.
 
 ## App setup
 
-Here we'll set up a sample Python "Hello World" app using [Flask](http://flask.pocoo.org/).
+Let's create a sample Python app using [Flask](http://flask.pocoo.org/).
 
-```
+```shell
 $ mkdir hello-world
 $ cd hello-world
 $ cat <<EOF > hello.py
 from flask import Flask
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -27,9 +29,10 @@ hello.py  requirements.txt
 
 ## Prow Create
 
-We're now ready to create the scaffolding needed to deploy our app into a [Kubernetes][] cluster.  Prow handles the creation of a default `Dockerfile` and [Helm][Helm] chart directory in `chart/` with `prow create`:
+We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Prow can create a
+[Helm][] chart and `Dockerfile` with `prow create`:
 
-```
+```shell
 $ prow create
 --> Created chart/
 --> Created Dockerfile
@@ -38,9 +41,10 @@ $ prow create
 
 ## App-specific Modifications
 
-Both the Dockerfile and chart assets created by Prow default to basic [nginx][nginx] configurations. However, for this exercise, all we need to do is update the `Dockerfile` with Python-specific details:
+The `chart/` and `Dockerfile` assets created by Prow default to a basic [nginx][]
+configuration. For this exercise, let's replace the `Dockerfile` with one more Pythonic:
 
-```
+```shell
 $ cat Dockerfile
 FROM nginx:latest
 $ cat <<EOF > Dockerfile
@@ -52,13 +56,22 @@ EXPOSE 80
 EOF
 ```
 
-The resultant image build will harness the [python:onbuild](https://hub.docker.com/_/python/) image's handling of installing the dependencies specified by our `requirements.txt` and then copying the current directory into `/usr/src/app`.  In addition, to align with the corresponding service values in `chart/values.yaml` (see `service.externalPort` and `service.internalPort`), we've chosen port 80 to be exposed by the container.
+This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which
+will install the dependencies in `requirements.txt` and copy the current directory
+into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile
+exposes port 80 from the container.
 
 ## Prow Up
 
-We're now ready to deploy our application into a Kubernetes cluster.  Prow will handle building the Docker image, pushing the image to the internal registry and then installing the chart described in `chart/`, having updated the appropriate values in `chart/values.yaml` to reference said internal registry image.
+Now we're ready to deploy `hello.py` to a Kubernetes cluster.
 
-```
+Prow handles these tasks with one `prow up` command:
+
+- builds a Docker image from the `Dockerfile`
+- pushes the image to a registry
+- installs the Helm chart under `chart/`, referencing the Docker registry image
+
+```shell
 $ prow up
 --> Building Dockerfile
 Step 1 : FROM nginx:latest
@@ -91,14 +104,14 @@ _NOTE(vdice): update output above once https://github.com/deis/prow/issues/32 is
 
 Using the handy output that follows successful deployment, we can now contact our app:
 
-```
+```shell
 $ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
 $ kubectl port-forward $POD_NAME 8080:80
 ```
 
 Oops! When we curl our app at `localhost:8080` we don't see "Hello World".  Indeed, if we were to check in on the application pod we would see its `Readiness` and `Liveness` checks failing:
 
-```
+```shell
 $ curl localhost:8080
 curl: (52) Empty reply from server
 $ kubectl describe pod $POD_NAME
@@ -117,9 +130,10 @@ Events:
 
 Ah, of course.  We need to change the `app.run()` command in `hello.py` to explicitly run on port 80 so that our app handles connections where we've intended:
 
-```
+```shell
 $ cat <<EOF > hello.py
 from flask import Flask
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -135,7 +149,7 @@ EOF
 
 Now if we rerun `prow up` after making changes to our app, Prow will determine that the Helm release already exists and will hence perform a `helm upgrade` to this existing release rather than attempting another `helm install`:
 
-```
+```shell
 $ prow up
 --> Building Dockerfile
 Step 1 : FROM python:onbuild
@@ -163,9 +177,10 @@ The push refers to a repository [127.0.0.1:5000/hello-world]
 
 ## Great Success
 
-As our every subsequent `prow up` invocation will recreate the application pod, we'll need to re-run the export and port-forward steps as done above.
+Every `prow up` recreates the application pod, so we need to re-run the export and port-forward
+steps from above.
 
-```
+```shell
 $ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
 $ kubectl port-forward $POD_NAME 8080:80
 ```
@@ -178,14 +193,14 @@ As a bonus section, we can utilize [Prow packs](packs.md) to create a Python-spe
 
 For now, let's just copy over our `Dockerfile` and `chart/` assets to this location, to be built on at a later date:
 
-```
+```shell
 $ mkdir -p ~/.prow/packs/python
 $ cp -r Dockerfile chart ~/.prow/packs/python/
 ```
 
 Now when we wish to create and deploy our new-fangled "Hello Universe" app, we can use our `python` Prow pack:
 
-```
+```shell
 $ mkdir hello-universe
 $ cp hello.py requirements.txt hello-universe
 $ cd hello-universe
