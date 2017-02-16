@@ -115,17 +115,16 @@ Client: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89e
 Server: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89ef008fef5cdf89", GitTreeState:"clean"}
 ```
 
-Then, install the Prow chart. Make sure to override `values.yaml` with flags that reference your
-Prowd image:
+Then, install the Prow chart:
 
 ```shell
-$ helm install ./chart --name prow --namespace prow \
-    --set image.registry=$DOCKER_REGISTRY,image.name=$IMAGE_PREFIX/prowd
+$ make serve
+$ helm list  # check that prowd has a helm release
+NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
+prowd	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	prow
 ```
 
-You should see a new Helm release available in `helm list`.
-
-### Re-deploying Your Changes
+## Re-deploying Your Changes
 
 Because Prow deploys Kubernetes applications and Prow is a Kubernetes application itself, you can
 use Prow to deploy Prow. How neat is that?!
@@ -142,6 +141,17 @@ $ prow up
 ```
 
 You should see a new release of Prow available and deployed with `helm list`.
+
+## Cleaning Up
+
+To remove the Prow chart and local binaries:
+
+```shell
+$ make clean
+helm delete --purge prowd
+rm bin/*
+rm rootfs/bin/*
+```
 
 
 [docker]: https://www.docker.com/
