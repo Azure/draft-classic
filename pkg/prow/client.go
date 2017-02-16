@@ -133,7 +133,7 @@ func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 	defer conn.Close()
 
 	for {
-		messageType, p, err := conn.ReadMessage()
+		_, p, err := conn.NextReader()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				// server closed the connection, so we're done!
@@ -141,14 +141,10 @@ func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 			} else {
 				return err
 			}
-		}
-		if messageType == websocket.TextMessage {
-			fmt.Fprintln(out, string(p))
 		} else {
-			fmt.Fprintln(out, p)
+			io.Copy(out, p)
 		}
 	}
-	return nil
 }
 
 // Version returns the server version.
