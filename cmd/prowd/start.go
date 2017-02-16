@@ -28,6 +28,12 @@ type startCmd struct {
 	dockerVersion string
 	// retrieve docker engine information from environment
 	dockerFromEnv bool
+	// registryAuth is the authorization token used to push images up to the registry.
+	registryAuth string
+	// registryOrg is the organization (e.g. your DockerHub account) used to push images up to the registry.
+	registryOrg string
+	// registryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
+	registryURL string
 }
 
 func newStartCmd(out io.Writer) *cobra.Command {
@@ -49,6 +55,9 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&sc.dockerAddr, "docker-addr", "", "unix:///var/run/docker.sock", "the address the docker engine listens on")
 	f.StringVarP(&sc.dockerVersion, "docker-version", "", "", "the API version of the docker engine")
 	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", false, "retrieve docker engine information from environment")
+	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
+	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
+	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
 
 	return cmd
 }
@@ -75,6 +84,9 @@ func (c *startCmd) run() error {
 		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
 	}
 	server.DockerClient = dockerClient
+	server.RegistryAuth = c.registryAuth
+	server.RegistryOrg = c.registryOrg
+	server.RegistryURL = c.registryURL
 	log.Printf("server is now listening at %s", c.listenAddr)
 	if err = server.Serve(); err != nil {
 		return err
