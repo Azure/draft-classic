@@ -120,7 +120,7 @@ To install Prowd, edit `chart/values.yaml` and change the fields under `registry
 [Docker Hub][] or [quay.io][quay] account:
 
 ```
-$ $EDITOR charts/values.yaml
+$ $EDITOR chart/values.yaml
 ```
 
 Then, install the chart:
