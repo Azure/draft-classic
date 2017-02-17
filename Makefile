@@ -89,9 +89,13 @@ serve: check-helm
 	helm install chart/ --name ${APP} --namespace ${APP} \
 		--set image.name=${SHORT_NAME},image.org=${IMAGE_PREFIX},image.registry=${DOCKER_REGISTRY},image.tag=${IMAGE_TAG}
 
+.PHONY: unserve
+unserve: check-helm
+	-helm delete --purge ${APP}
+	-kubectl delete namespace ${APP}
+
 .PHONY: clean
 clean:
-	-helm delete --purge ${APP}
 	-rm bin/*
 	-rm rootfs/bin/*
 
