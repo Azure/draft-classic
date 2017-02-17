@@ -402,10 +402,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			helm.ValueOverrides([]byte(vals)))
 		if err != nil {
 			conn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(fmt.Sprintf("!!! Could not install release: %v\n", err)))
+			conn.WriteMessage(
 				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not install release: %v\n", err)))
+				websocket.FormatCloseMessage(websocket.CloseUnsupportedData, ""))
 			return
 		}
 		conn.WriteMessage(
@@ -418,10 +419,11 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			helm.UpdateValueOverrides([]byte(vals)))
 		if err != nil {
 			conn.WriteMessage(
+				websocket.TextMessage,
+				[]byte(fmt.Sprintf("!!! Could not upgrade release: %v\n", err)))
+			conn.WriteMessage(
 				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not install release: %v\n", err)))
+				websocket.FormatCloseMessage(websocket.CloseUnsupportedData, ""))
 			return
 		}
 		conn.WriteMessage(
