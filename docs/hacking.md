@@ -166,10 +166,11 @@ You should see a new release of Prow available and deployed with `helm list`.
 To remove the Prow chart and local binaries:
 
 ```shell
-$ make clean
-helm delete --purge prow
+$ make clean unserve
 rm bin/*
 rm rootfs/bin/*
+helm delete --purge prow
+kubectl delete namespace prow
 ```
 
 
