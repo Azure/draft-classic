@@ -238,11 +238,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer conn.Close()
 
 	conn.SetCloseHandler(func(code int, text string) error {
-		message := []byte{}
-		if code != websocket.CloseNoStatusReceived {
-			message = websocket.FormatCloseMessage(code, "")
-		}
-		conn.WriteMessage(websocket.TextMessage, []byte(message))
+		// Note https://tools.ietf.org/html/rfc6455#section-5.5 which specifies control
+		// frames MUST be less than 125 bytes (This includes Close, Ping and Pong)
+		// Hence, sending text as TextMessage and then sending control message.
+		conn.WriteMessage(websocket.TextMessage, []byte(text))
 		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, ""), time.Now().Add(time.Second))
 		return nil
 	})
@@ -275,27 +274,16 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			Tags: []string{imageName},
 		})
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not build image from build context: %v\n", err)))
-		return
+		handleClosingError(conn, "Could not build image from build context", err)
 	}
 	defer buildResp.Body.Close()
 	writer, err := conn.NextWriter(websocket.TextMessage)
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+		handleClosingError(conn, "There was an error fetching a text message writer", err)
 	}
 	outFd, isTerm := term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(buildResp.Body, writer, outFd, isTerm, nil); err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(websocket.CloseUnsupportedData, err.Error()))
+		handleClosingError(conn, "Error encountered streaming JSON response", err)
 	}
 
 	_, _, err = server.DockerClient.ImageInspectWithRaw(
@@ -303,19 +291,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		imageName)
 	if err != nil {
 		if docker.IsErrImageNotFound(err) {
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! Could not locate image for %s -- did the build succeed?\n", appName)))
+			handleClosingError(conn, fmt.Sprintf("Could not locate image for %s", appName), err)
 		} else {
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(
-					websocket.CloseUnsupportedData,
-					fmt.Sprintf("!!! ImageInspectWithRaw error: %v\n", err)))
+			handleClosingError(conn, "ImageInspectWithRaw error", err)
 		}
-		return
 	}
 
 	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
@@ -324,57 +303,31 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		imageName,
 		types.ImagePushOptions{RegistryAuth: server.RegistryAuth})
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not push %s to registry: %v\n", imageName, err)))
-		return
+		handleClosingError(conn, fmt.Sprintf("Could not push %s to registry", imageName), err)
 	}
 	defer pushResp.Close()
 	writer, err = conn.NextWriter(websocket.TextMessage)
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("There was an error fetching a text message writer: %v\n", err)))
+		handleClosingError(conn, "There was an error fetching a text message writer", err)
 	}
 	outFd, isTerm = term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(websocket.CloseUnsupportedData, err.Error()))
+		handleClosingError(conn, "Error encountered streaming JSON response", err)
 	}
 
 	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
 	clientset, config, err := getKubeClient("")
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not get a kube client: %v\n", err)))
-		return
+		handleClosingError(conn, "Could not get a kube client", err)
 	}
 	tunnel, err := portforwarder.New("kube-system", clientset, config)
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not get a connection to tiller: %v\n", err)))
-		return
+		handleClosingError(conn, "Could not get a connection to tiller", err)
 	}
 	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
-		conn.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(
-				websocket.CloseUnsupportedData,
-				fmt.Sprintf("!!! Could not load chart archive: %v\n", err)))
-		return
+		handleClosingError(conn, "Could not load chart archive", err)
 	}
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
@@ -401,13 +354,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			helm.ReleaseName(appName),
 			helm.ValueOverrides([]byte(vals)))
 		if err != nil {
-			conn.WriteMessage(
-				websocket.TextMessage,
-				[]byte(fmt.Sprintf("!!! Could not install release: %v\n", err)))
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseUnsupportedData, ""))
-			return
+			handleClosingError(conn, "Could not install release", err)
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
@@ -418,13 +365,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			chart,
 			helm.UpdateValueOverrides([]byte(vals)))
 		if err != nil {
-			conn.WriteMessage(
-				websocket.TextMessage,
-				[]byte(fmt.Sprintf("!!! Could not upgrade release: %v\n", err)))
-			conn.WriteMessage(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseUnsupportedData, ""))
-			return
+			handleClosingError(conn, "Could not upgrade release", err)
 		}
 		conn.WriteMessage(
 			websocket.TextMessage,
@@ -436,6 +377,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 		time.Now().Add(time.Second))
+}
+
+// handleClosingError formats the err and corresponding verbiage and invokes
+// conn.CloseHandler() as set by conn.SetCloseHandler()
+func handleClosingError(conn *websocket.Conn, verbiage string, err error) {
+	conn.CloseHandler()(
+		websocket.CloseInternalServerErr,
+		fmt.Sprintf("%s: %v\n", verbiage, err))
 }
 
 // formatReleaseStatus returns a byte slice of formatted release status information
