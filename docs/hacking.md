@@ -143,9 +143,20 @@ To build your changes and upload it to Prowd, run
 $ make build docker-binary
 $ prow up
 --> Building Dockerfile
---> Pushing 127.0.0.1:5000/prow:6f3b53003dcbf43821aea43208fc51455674d00e
+--> Pushing quay.io/deis/prow:6f3b53003dcbf43821aea43208fc51455674d00e
 --> Deploying to Kubernetes
---> code:DEPLOYED
+--> Status: DEPLOYED
+--> Notes:
+     Now you can deploy an app using prow!
+
+        $ cd my-app
+        $ prow up --namespace=foo
+        --> Building Dockerfile
+        --> Pushing my-app:latest
+        --> Deploying to Kubernetes
+        --> Deployed!
+
+That's it! You're now running your app in a Kubernetes cluster.
 ```
 
 You should see a new release of Prow available and deployed with `helm list`.

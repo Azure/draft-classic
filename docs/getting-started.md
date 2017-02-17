@@ -74,31 +74,23 @@ Prow handles these tasks with one `prow up` command:
 ```shell
 $ prow up
 --> Building Dockerfile
-Step 1 : FROM nginx:latest
-latest: Pulling from library/nginx
-5040bd298390: Already exists
-333547110842: Pulling fs layer
-4df1e44d2a7a: Pulling fs layer
-4df1e44d2a7a: Verifying Checksum
-4df1e44d2a7a: Download complete
-333547110842: Verifying Checksum
-333547110842: Download complete
-333547110842: Pull complete
-4df1e44d2a7a: Pull complete
-Digest: sha256:f2d384a6ca8ada733df555be3edc427f2e5f285ebf468aae940843de8cf74645
-Status: Downloaded newer image for nginx:latest
- ---> cc1b61406712
-Successfully built cc1b61406712
-
---> Pushing 127.0.0.1:5000/hello-world:6c69b0e886fa89f49330c8f7900d02338ad47bc2
-The push refers to a repository [127.0.0.1:5000/hello-world]
-
+Step 1 : FROM python:onbuild
+onbuild: Pulling from library/python
+...
+Successfully built 38f35b50162c
+--> Pushing quay.io/deis/hello-world:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
+The push refers to a repository [quay.io/deis/hello-world]
+...
+5a3c633ae76c9bdb81b55f5d4a783398bf00658e: digest: sha256:9d9e9fdb8ee3139dd77a110fa2d2b87573c3ff5ec9c045db6009009d1c9ebf5b size: 16384
 --> Deploying to Kubernetes
     Release "hello-world" does not exist. Installing it now.
---> code:DEPLOYED notes:"1. Get the application URL by running these commands:\n  export POD_NAME=$(kubectl get pods --namespace default -l \"app=hello-world-hello-world\" -o jsonpath=\"{.items[0].metadata.name}\")\n  echo \"Visit http://127.0.0.1:8080 to use your application\"\n  kubectl port-forward $POD_NAME 8080:80\n"
+--> Status: DEPLOYED
+--> Notes:
+     1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl port-forward $POD_NAME 8080:80
 ```
-
-_NOTE(vdice): update output above once https://github.com/deis/prow/issues/32 is fixed._
 
 ## Interact with Deployed App
 
@@ -168,11 +160,16 @@ Step 3 : EXPOSE 80
  ---> 9c90b0445146
 Successfully built 9c90b0445146
 
---> Pushing 127.0.0.1:5000/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
-The push refers to a repository [127.0.0.1:5000/hello-world]
+--> Pushing quay.io/deis/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
+The push refers to a repository [quay.io/deis/hello-world]
 
 --> Deploying to Kubernetes
---> code:DEPLOYED notes:"1. Get the application URL by running these commands:\n  export POD_NAME=$(kubectl get pods --namespace default -l \"app=hello-world-hello-world\" -o jsonpath=\"{.items[0].metadata.name}\")\n  echo \"Visit http://127.0.0.1:8080 to use your application\"\n  kubectl port-forward $POD_NAME 8080:80\n"
+--> Status: DEPLOYED
+--> Notes:
+     1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl port-forward $POD_NAME 8080:80
 ```
 
 ## Great Success
