@@ -8,7 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/deis/prow/pkg/prowd"
+	"github.com/deis/prow/pkg/prow"
 	"github.com/deis/prow/pkg/version"
 )
 
@@ -23,7 +23,7 @@ v1.0.0
 
 type versionCmd struct {
 	out        io.Writer
-	client     prowd.Client
+	client     *prow.Client
 	showClient bool
 	showServer bool
 	short      bool
