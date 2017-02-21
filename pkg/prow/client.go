@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -189,8 +190,8 @@ func (c *Client) Version() (*version.Version, error) {
 }
 
 // exists returns whether the given file or directory exists or not
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
+func exists(dir string) (bool, error) {
+	_, err := os.Stat(dir)
 	if err == nil {
 		return true, nil
 	}
@@ -201,14 +202,23 @@ func exists(path string) (bool, error) {
 }
 
 // tarBuildContext archives the given directory and returns the archive as an io.ReadCloser.
-func tarBuildContext(path string) (io.ReadCloser, error) {
-	pathExists, err := exists(path)
+func tarBuildContext(dir string) (io.ReadCloser, error) {
+	dirExists, err := exists(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	if !pathExists {
-		return nil, fmt.Errorf("directory '%s' does not exist", path)
+	if !dirExists {
+		return nil, fmt.Errorf("directory '%s' does not exist", dir)
+	}
+
+	dockerfileExists, err := exists(path.Join(dir, "Dockerfile"))
+	if err != nil {
+		return nil, err
+	}
+
+	if !dockerfileExists {
+		return nil, DockerfileNotExistError
 	}
 
 	options := archive.TarOptions{
@@ -218,18 +228,18 @@ func tarBuildContext(path string) (io.ReadCloser, error) {
 		},
 		Compression: archive.Gzip,
 	}
-	return archive.TarWithOptions(path, &options)
+	return archive.TarWithOptions(dir, &options)
 }
 
 // tarChart archives the directory and returns the archive as an io.ReadCloser.
-func tarChart(path string) (io.ReadCloser, error) {
-	pathExists, err := exists(path)
+func tarChart(dir string) (io.ReadCloser, error) {
+	dirExists, err := exists(path.Join(dir, "chart"))
 	if err != nil {
 		return nil, err
 	}
 
-	if !pathExists {
-		return nil, fmt.Errorf("chart directory '%s' does not exist", path)
+	if !dirExists {
+		return nil, ChartNotExistError
 	}
 
 	options := archive.TarOptions{
@@ -239,5 +249,5 @@ func tarChart(path string) (io.ReadCloser, error) {
 		Compression: archive.Gzip,
 	}
 
-	return archive.TarWithOptions(path, &options)
+	return archive.TarWithOptions(dir, &options)
 }
