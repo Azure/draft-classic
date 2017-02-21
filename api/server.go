@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -199,6 +200,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	logLevel := r.Header.Get("Log-Level")
+	flagWait := r.Header.Get("Helm-Flag-Wait")
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -213,6 +215,13 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+
+	optionWait, err := strconv.ParseBool(flagWait)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Wait': %v\n", err), http.StatusBadRequest)
+		return
+	}
+
 	// this is just a buffer of 32MB. Everything is piped over to docker's build context and to
 	// Helm so this is just a sane default in case docker or helm's backed up somehow.
 	r.ParseMultipartForm(32 << 20)
@@ -352,7 +361,8 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			chart,
 			namespace,
 			helm.ReleaseName(appName),
-			helm.ValueOverrides([]byte(vals)))
+			helm.ValueOverrides([]byte(vals)),
+			helm.InstallWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not install release", err)
 		}
@@ -363,7 +373,8 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		releaseResp, err := client.UpdateReleaseFromChart(
 			appName,
 			chart,
-			helm.UpdateValueOverrides([]byte(vals)))
+			helm.UpdateValueOverrides([]byte(vals)),
+			helm.UpgradeWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not upgrade release", err)
 		}
