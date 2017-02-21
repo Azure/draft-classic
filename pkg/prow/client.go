@@ -66,24 +66,17 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 	return New(e, client), nil
 }
 
-// Up uploads the contents of appDir to prowd then writes messages to stdout.
-func (c *Client) Up(appName, appDir, namespace string, out io.Writer) error {
+// Up uploads the build context and chart to prowd, then writes messages from prowd to out.
+// appName specifies the Helm release to create/update, and namespace specifies which namespace
+// to deploy the application into.
+func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chartReader io.ReadCloser) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
+	defer buildContext.Close()
+	defer chartReader.Close()
+
 	log.Debugf("APP NAME: %s", appName)
-
-	log.Debug("assembling build context archive")
-	buildContext, err := tarBuildContext(appDir)
-	if err != nil {
-		return err
-	}
-
-	log.Debug("assembling chart archive")
-	chartTar, err := tarChart(appDir)
-	if err != nil {
-		return err
-	}
 
 	// Prepare a form to upload the build context and chart archives.
 	w := multipart.NewWriter(&b)
@@ -100,7 +93,7 @@ func (c *Client) Up(appName, appDir, namespace string, out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if _, err = io.Copy(chartFormFile, chartTar); err != nil {
+	if _, err = io.Copy(chartFormFile, chartReader); err != nil {
 		return err
 	}
 	if err := w.Close(); err != nil {
@@ -149,6 +142,25 @@ func (c *Client) Up(appName, appDir, namespace string, out io.Writer) error {
 			io.Copy(out, p)
 		}
 	}
+}
+
+// UpFromDir prepares the contents of appDir to create a build context and chart archive, then
+// calls Up().
+func (c Client) UpFromDir(appName, namespace string, out io.Writer, appDir string) error {
+
+	log.Debug("assembling build context archive")
+	buildContext, err := tarBuildContext(appDir)
+	if err != nil {
+		return err
+	}
+
+	log.Debug("assembling chart archive")
+	chartTar, err := tarChart(appDir)
+	if err != nil {
+		return err
+	}
+
+	return c.Up(appName, namespace, out, buildContext, chartTar)
 }
 
 // Version returns the server version.

@@ -177,7 +177,7 @@ func TestNewFromString(t *testing.T) {
 	}
 }
 
-func TestUp(t *testing.T) {
+func TestUpFromDir(t *testing.T) {
 	ts := newTestWebsocketServer(t)
 	defer ts.Close()
 
@@ -186,16 +186,16 @@ func TestUp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.Up("foo", "/ahsdkfjhaksdf", "default", ioutil.Discard)
+	err = client.UpFromDir("foo", "default", ioutil.Discard, "/ahsdkfjhaksdf")
 	if err == nil {
-		t.Error("expected .Up() with invalid path to fail")
+		t.Error("expected .UpFromDir() with invalid path to fail")
 	}
 	if err.Error() != "directory '/ahsdkfjhaksdf' does not exist" {
-		t.Errorf("expected .Up() with invalid path to fail as expected, got '%s'", err.Error())
+		t.Errorf("expected .UpFromDir() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.Up("testdata", "testdata", "default", ioutil.Discard); err != nil {
-		t.Errorf("expected .Up() with valid path to pass, got %v", err)
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "testdata"); err != nil {
+		t.Errorf("expected .UpFromDir() with valid path to pass, got %v", err)
 	}
 
 	ts2 := newTestWebsocketServerCloseUnsupportedData(t)
@@ -205,9 +205,9 @@ func TestUp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.Up("testdata", "testdata", "default", ioutil.Discard)
+	err = client.UpFromDir("testdata", "default", ioutil.Discard, "testdata")
 	if err == nil {
-		t.Error("expected .Up() with bad server to fail")
+		t.Error("expected .UpFromDir() with bad server to fail")
 	}
 	if !websocket.IsCloseError(err, websocket.CloseUnsupportedData) {
 		t.Errorf("expected err to be a CloseUnsupportedData error, got '%v'", err)
@@ -233,7 +233,7 @@ func TestUpHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.Up("testdata", "testdata", expectedNamespace, ioutil.Discard)
+	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "testdata")
 }
 
 func TestVersion(t *testing.T) {
