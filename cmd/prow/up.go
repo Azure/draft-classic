@@ -16,19 +16,24 @@ import (
 )
 
 const upDesc = `
-This command archives the current directory into a tar archive and uploads it to the prow server.
+This command archives the current directory into a tar archive and uploads it to
+the prow server.
+
+Adding the "--watch" flag makes prow automatically archive and upload whenever
+local files are saved. Prow delays a couple seconds to ensure that changes have
+stopped before uploading, but that can be altered by the "--watch-delay" flag.
 `
 
 type upCmd struct {
-	appName          string
-	client           *prow.Client
-	namespace        string
-	out              io.Writer
-	buildTarPath     string
-	chartTarPath     string
-	wait             bool
-	watch            bool
-	watchQuietPeriod int
+	appName      string
+	client       *prow.Client
+	namespace    string
+	out          io.Writer
+	buildTarPath string
+	chartTarPath string
+	wait         bool
+	watch        bool
+	watchDelay   int
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -52,9 +57,9 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&up.namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
 	f.StringVar(&up.buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set.")
 	f.StringVar(&up.chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set.")
-	f.BoolVarP(&up.wait, "wait", "w", false, "specifies whether or not to wait for all resources to be ready")
-	f.BoolVarP(&up.watch, "watch", "", false, "whether to deploy the app automatically when local files change")
-	f.IntVarP(&up.watchQuietPeriod, "watch-quiet-period", "", 5, "how many seconds to wait before deploying the app automatically")
+	f.BoolVarP(&up.wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
+	f.BoolVarP(&up.watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
+	f.IntVarP(&up.watchDelay, "watch-delay", "", 2, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
@@ -78,8 +83,7 @@ func (u *upCmd) run() (err error) {
 		return nil
 	}
 
-	watchingMsg := "Watching local files for changes..."
-	fmt.Println(watchingMsg)
+	fmt.Println("Watching local files for changes...")
 
 	notifyPath := filepath.Join(cwd, "...")
 	notifyTypes := []notify.Event{notify.Create, notify.Remove, notify.Rename, notify.Write}
@@ -95,19 +99,18 @@ func (u *upCmd) run() (err error) {
 	// create a timer to enforce a "quiet period" before deploying the app
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()
-	quietPeriod := time.Duration(u.watchQuietPeriod) * time.Second
+	delay := time.Duration(u.watchDelay) * time.Second
 
 	for {
 		select {
 		case evt := <-ch:
 			log.Debugf("Event %s", evt)
 			// reset the timer when files have changed
-			timer.Reset(quietPeriod)
+			timer.Reset(delay)
 		case <-timer.C:
 			if err = u.doUp(cwd); err != nil {
 				return err
 			}
-			fmt.Println(watchingMsg)
 		}
 	}
 	return
