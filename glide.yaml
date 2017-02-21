@@ -8,6 +8,8 @@ import:
   version: v1.13.0
 - package: github.com/julienschmidt/httprouter
   version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
+- package: github.com/rjeczalik/notify
+  version: 9d5aa0c3b735c3340018a4627446c3ea5a04a097
 - package: github.com/Sirupsen/logrus
   version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - package: github.com/spf13/cobra

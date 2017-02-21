@@ -1,5 +1,5 @@
-hash: 832d7775b644c6a0f127e5e07ebeefb9ba25d68f296d2bbe358a947a03d06f3e
-updated: 2017-02-15T08:51:28.709896197-08:00
+hash: 03f16ed6d5c6aa7e03d37eaaa5326cde0fcba3863794ee95b6ebd86ac01335d2
+updated: 2017-02-21T10:04:46.575399285-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -210,6 +210,8 @@ imports:
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
+- name: github.com/rjeczalik/notify
+  version: 9d5aa0c3b735c3340018a4627446c3ea5a04a097
 - name: github.com/Sirupsen/logrus
   version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - name: github.com/spf13/cobra
