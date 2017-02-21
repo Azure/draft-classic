@@ -5,7 +5,11 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
+	"time"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
 
 	"github.com/deis/prow/pkg/prow"
@@ -23,6 +27,7 @@ type upCmd struct {
 	buildTarPath string
 	chartTarPath string
 	wait         bool
+	watch        bool
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -47,6 +52,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&up.buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set.")
 	f.StringVar(&up.chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set.")
 	f.BoolVarP(&up.wait, "wait", "w", false, "specifies whether or not to wait for all resources to be ready")
+	f.BoolVarP(&up.watch, "watch", "", false, "whether to deploy the app automatically when local files change")
 
 	return cmd
 }
@@ -60,6 +66,53 @@ func (u *upCmd) run() (err error) {
 		u.appName = path.Base(cwd)
 	}
 	u.client.OptionWait = u.wait
+
+	if err = u.doUp(cwd); err != nil {
+		return err
+	}
+
+	// if `--watch=false`, return now
+	if !u.watch {
+		return nil
+	}
+
+	watchingMsg := "Watching local files for changes..."
+	fmt.Println(watchingMsg)
+
+	notifyPath := filepath.Join(cwd, "...")
+	notifyTypes := []notify.Event{notify.Create, notify.Remove, notify.Rename, notify.Write}
+	// make a buffered channel of filesystem notification events
+	ch := make(chan notify.EventInfo, 1)
+
+	// watch the current directory and everything under it, sending events to the channel
+	if err := notify.Watch(notifyPath, ch, notifyTypes...); err != nil {
+		log.Fatal(err)
+	}
+	defer notify.Stop(ch)
+
+	// create a timer to enforce a "quiet period" before deploying the app
+	timer := time.NewTimer(time.Hour)
+	timer.Stop()
+	// TODO: allow the user to set this quiet period?
+	quietPeriod := time.Second * 5
+
+	for {
+		select {
+		case evt := <-ch:
+			log.Debugf("Event %s", evt)
+			// reset the timer when files have changed
+			timer.Reset(quietPeriod)
+		case <-timer.C:
+			if err = u.doUp(cwd); err != nil {
+				return err
+			}
+			fmt.Println(watchingMsg)
+		}
+	}
+	return
+}
+
+func (u *upCmd) doUp(cwd string) (err error) {
 	if u.buildTarPath != "" && u.chartTarPath != "" {
 		buildTar, e := os.Open(u.buildTarPath)
 		if e != nil {
