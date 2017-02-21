@@ -194,7 +194,7 @@ func TestUpFromDir(t *testing.T) {
 		t.Errorf("expected .UpFromDir() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "testdata"); err != nil {
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good"); err != nil {
 		t.Errorf("expected .UpFromDir() with valid path to pass, got %v", err)
 	}
 
@@ -205,12 +205,25 @@ func TestUpFromDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.UpFromDir("testdata", "default", ioutil.Discard, "testdata")
+	err = client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good")
 	if err == nil {
 		t.Error("expected .UpFromDir() with bad server to fail")
 	}
 	if !websocket.IsCloseError(err, websocket.CloseUnsupportedData) {
 		t.Errorf("expected err to be a CloseUnsupportedData error, got '%v'", err)
+	}
+}
+
+func TestBadData(t *testing.T) {
+	// don't care about setting up anything because we shouldn't hit the server.
+	client := &Client{}
+
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile"); err != DockerfileNotExistError {
+		t.Errorf("expected .UpFromDir() with no Dockerfile to return DockerfileNotExistError, got %v", err)
+	}
+
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart"); err != ChartNotExistError {
+		t.Errorf("expected .UpFromDir() with no Dockerfile to return ChartNotExistError, got %v", err)
 	}
 }
 
@@ -233,7 +246,7 @@ func TestUpHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "testdata")
+	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good")
 }
 
 func TestVersion(t *testing.T) {
