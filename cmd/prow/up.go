@@ -20,14 +20,15 @@ This command archives the current directory into a tar archive and uploads it to
 `
 
 type upCmd struct {
-	appName      string
-	client       *prow.Client
-	namespace    string
-	out          io.Writer
-	buildTarPath string
-	chartTarPath string
-	wait         bool
-	watch        bool
+	appName          string
+	client           *prow.Client
+	namespace        string
+	out              io.Writer
+	buildTarPath     string
+	chartTarPath     string
+	wait             bool
+	watch            bool
+	watchQuietPeriod int
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -53,6 +54,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&up.chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set.")
 	f.BoolVarP(&up.wait, "wait", "w", false, "specifies whether or not to wait for all resources to be ready")
 	f.BoolVarP(&up.watch, "watch", "", false, "whether to deploy the app automatically when local files change")
+	f.IntVarP(&up.watchQuietPeriod, "watch-quiet-period", "", 5, "how many seconds to wait before deploying the app automatically")
 
 	return cmd
 }
@@ -93,8 +95,7 @@ func (u *upCmd) run() (err error) {
 	// create a timer to enforce a "quiet period" before deploying the app
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()
-	// TODO: allow the user to set this quiet period?
-	quietPeriod := time.Second * 5
+	quietPeriod := time.Duration(u.watchQuietPeriod) * time.Second
 
 	for {
 		select {
