@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -36,6 +37,8 @@ type Client struct {
 	HTTPClient *http.Client
 	Endpoint   *url.URL
 	Header     http.Header
+	// OptionWait specifies whether or not to wait for all resources to be ready on `prow up`
+	OptionWait bool
 }
 
 // New returns a new Client with a given a URL and an optional client.
@@ -50,7 +53,7 @@ func New(endpoint *url.URL, client *http.Client) *Client {
 	endpoint.RawQuery = ""
 	endpoint.Fragment = ""
 
-	return &Client{client, endpoint, make(http.Header)}
+	return &Client{client, endpoint, make(http.Header), false}
 }
 
 // NewFromString returns a new Client given a string URL and an optional client.
@@ -64,7 +67,7 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 }
 
 // Up uploads the contents of appDir to prowd then writes messages to stdout.
-func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
+func (c *Client) Up(appName, appDir, namespace string, out io.Writer) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
@@ -116,6 +119,7 @@ func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("Kubernetes-Namespace", namespace)
 	req.Header.Set("Log-Level", log.GetLevel().String())
+	req.Header.Set("Helm-Flag-Wait", strconv.FormatBool(c.OptionWait))
 
 	log.Debugf("REQUEST: %s %s", req.Method, req.URL.String())
 
@@ -148,7 +152,7 @@ func (c Client) Up(appName, appDir, namespace string, out io.Writer) error {
 }
 
 // Version returns the server version.
-func (c Client) Version() (*version.Version, error) {
+func (c *Client) Version() (*version.Version, error) {
 	var ver version.Version
 
 	c.Endpoint.Path = "/version"

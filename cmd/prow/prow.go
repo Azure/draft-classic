@@ -11,7 +11,6 @@ import (
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/deis/prow/pkg/prow"
-	"github.com/deis/prow/pkg/prowd"
 	"github.com/deis/prow/pkg/prowd/portforwarder"
 )
 
@@ -93,7 +92,7 @@ func teardown() {
 	}
 }
 
-func ensureProwClient(p prowd.Client) prowd.Client {
+func ensureProwClient(p *prow.Client) *prow.Client {
 	if p != nil {
 		return p
 	}
