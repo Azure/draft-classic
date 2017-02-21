@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/deis/prow/pkg/prowd"
+	"github.com/deis/prow/pkg/prow"
 )
 
 const upDesc = `
@@ -17,9 +17,10 @@ This command archives the current directory into a tar archive and uploads it to
 
 type upCmd struct {
 	appName   string
-	client    prowd.Client
+	client    *prow.Client
 	namespace string
 	out       io.Writer
+	wait      bool
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -41,6 +42,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVarP(&up.appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
 	f.StringVarP(&up.namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
+	f.BoolVarP(&up.wait, "wait", "w", false, "specifies whether or not to wait for all resources to be ready")
 
 	return cmd
 }
@@ -53,6 +55,7 @@ func (u *upCmd) run() error {
 	if u.appName == "" {
 		u.appName = path.Base(cwd)
 	}
+	u.client.OptionWait = u.wait
 	if err := u.client.Up(u.appName, cwd, u.namespace, u.out); err != nil {
 		return fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
