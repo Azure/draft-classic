@@ -5,14 +5,23 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
+	"time"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
 
 	"github.com/deis/prow/pkg/prow"
 )
 
 const upDesc = `
-This command archives the current directory into a tar archive and uploads it to the prow server.
+This command archives the current directory into a tar archive and uploads it to
+the prow server.
+
+Adding the "--watch" flag makes prow automatically archive and upload whenever
+local files are saved. Prow delays a couple seconds to ensure that changes have
+stopped before uploading, but that can be altered by the "--watch-delay" flag.
 `
 
 type upCmd struct {
@@ -23,6 +32,8 @@ type upCmd struct {
 	buildTarPath string
 	chartTarPath string
 	wait         bool
+	watch        bool
+	watchDelay   int
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -46,7 +57,9 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&up.namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
 	f.StringVar(&up.buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set.")
 	f.StringVar(&up.chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set.")
-	f.BoolVarP(&up.wait, "wait", "w", false, "specifies whether or not to wait for all resources to be ready")
+	f.BoolVarP(&up.wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
+	f.BoolVarP(&up.watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
+	f.IntVarP(&up.watchDelay, "watch-delay", "", 2, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
@@ -60,6 +73,50 @@ func (u *upCmd) run() (err error) {
 		u.appName = path.Base(cwd)
 	}
 	u.client.OptionWait = u.wait
+
+	if err = u.doUp(cwd); err != nil {
+		return err
+	}
+
+	// if `--watch=false`, return now
+	if !u.watch {
+		return nil
+	}
+
+	fmt.Println("Watching local files for changes...")
+
+	notifyPath := filepath.Join(cwd, "...")
+	notifyTypes := []notify.Event{notify.Create, notify.Remove, notify.Rename, notify.Write}
+	// make a buffered channel of filesystem notification events
+	ch := make(chan notify.EventInfo, 1)
+
+	// watch the current directory and everything under it, sending events to the channel
+	if err := notify.Watch(notifyPath, ch, notifyTypes...); err != nil {
+		log.Fatal(err)
+	}
+	defer notify.Stop(ch)
+
+	// create a timer to enforce a "quiet period" before deploying the app
+	timer := time.NewTimer(time.Hour)
+	timer.Stop()
+	delay := time.Duration(u.watchDelay) * time.Second
+
+	for {
+		select {
+		case evt := <-ch:
+			log.Debugf("Event %s", evt)
+			// reset the timer when files have changed
+			timer.Reset(delay)
+		case <-timer.C:
+			if err = u.doUp(cwd); err != nil {
+				return err
+			}
+		}
+	}
+	return
+}
+
+func (u *upCmd) doUp(cwd string) (err error) {
 	if u.buildTarPath != "" && u.chartTarPath != "" {
 		buildTar, e := os.Open(u.buildTarPath)
 		if e != nil {
