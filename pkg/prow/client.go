@@ -107,7 +107,6 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	}
 	req := websocket.DefaultRequest(c.Endpoint)
 	req.Method = "POST"
-	req.Header = c.Header
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("Kubernetes-Namespace", namespace)
