@@ -19,7 +19,7 @@ to build the project from source until we get some automation up in here. Please
 
 ### Use It!
 
-Climb aboard and explore the [lifecycle of an app deployed with Prow][Getting Started] - you'll soon be sailing!
+Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
 [Getting Started]: docs/getting-started.md
 [hacking]: docs/hacking.md
