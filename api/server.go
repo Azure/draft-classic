@@ -34,6 +34,7 @@ import (
 	"github.com/deis/prow/pkg/version"
 )
 
+// ChartTemplate is used to format part of a YAML manifest with container image parameters.
 const ChartTemplate = `image:
   name: %s
   org: %s

@@ -13,9 +13,11 @@ import (
 )
 
 const (
+	// ProwNamespace is the Kubernetes namespace in which the prow pod runs.
 	ProwNamespace string = "prow"
 )
 
+// New returns a tunnel to the prow pod.
 func New(context string) (*kube.Tunnel, error) {
 	config, client, err := getKubeClient(context)
 	if err != nil {

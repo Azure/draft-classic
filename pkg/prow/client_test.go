@@ -36,14 +36,14 @@ func (t *testWebsocketServer) Close() {
 }
 
 func newTestWebsocketServer(t *testing.T) *testWebsocketServer {
-	var s *testWebsocketServer = new(testWebsocketServer)
+	var s = new(testWebsocketServer)
 	s.Server = httptest.NewServer(testWebsocketServerHandler{t})
 	s.URL = makeWsProto(s.Server.URL)
 	return s
 }
 
 func newTestWebsocketServerCloseUnsupportedData(t *testing.T) *testWebsocketServer {
-	var s *testWebsocketServer = new(testWebsocketServer)
+	var s = new(testWebsocketServer)
 	s.Server = httptest.NewServer(testWebsocketServerHandlerCloseUnsupportedData{t})
 	s.URL = makeWsProto(s.Server.URL)
 	return s
@@ -219,12 +219,12 @@ func TestBadData(t *testing.T) {
 	// don't care about setting up anything because we shouldn't hit the server.
 	client := &Client{}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile"); err != DockerfileNotExistError {
-		t.Errorf("expected .UpFromDir() with no Dockerfile to return DockerfileNotExistError, got %v", err)
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile"); err != ErrDockerfileNotExist {
+		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrDockerfileNotExist, got %v", err)
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart"); err != ChartNotExistError {
-		t.Errorf("expected .UpFromDir() with no Dockerfile to return ChartNotExistError, got %v", err)
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart"); err != ErrChartNotExist {
+		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrChartNotExist, got %v", err)
 	}
 }
 
