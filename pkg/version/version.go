@@ -1,5 +1,6 @@
 package version
 
+// Version contains the semver release, git commit, and git tree state.
 type Version struct {
 	SemVer       string `json:"semver"`
 	GitCommit    string `json:"git-commit"`

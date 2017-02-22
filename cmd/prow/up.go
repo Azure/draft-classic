@@ -113,7 +113,6 @@ func (u *upCmd) run() (err error) {
 			}
 		}
 	}
-	return
 }
 
 func (u *upCmd) doUp(cwd string) (err error) {
