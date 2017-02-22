@@ -16,4 +16,5 @@ func TestProwHome(t *testing.T) {
 
 	isEq(t, ph.String(), "/r")
 	isEq(t, ph.Packs(), "/r/packs")
+	isEq(t, ph.Plugins(), "/r/plugins")
 }

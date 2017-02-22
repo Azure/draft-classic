@@ -20,3 +20,8 @@ func (h Home) String() string {
 func (h Home) Packs() string {
 	return filepath.Join(string(h), "packs")
 }
+
+// Plugins returns the path to the Prow plugins.
+func (h Home) Plugins() string {
+	return filepath.Join(string(h), "plugins")
+}

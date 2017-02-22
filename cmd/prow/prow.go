@@ -11,6 +11,7 @@ import (
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/deis/prow/pkg/prow"
+	"github.com/deis/prow/pkg/prow/prowpath"
 	"github.com/deis/prow/pkg/prowd/portforwarder"
 )
 
@@ -67,6 +68,9 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		newUpCmd(out),
 		newVersionCmd(out),
 	)
+
+	// Find and add plugins
+	loadPlugins(cmd, prowpath.Home(homePath()), out)
 
 	return cmd
 }
