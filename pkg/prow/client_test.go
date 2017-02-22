@@ -1,6 +1,7 @@
 package prow
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -270,5 +271,31 @@ func TestVersion(t *testing.T) {
 	}
 	if ver.GitTreeState != "dirty" {
 		t.Errorf("expected server semver to be dirty, got '%s'", ver.GitTreeState)
+	}
+}
+
+func TestTarBuildContext(t *testing.T) {
+	diContext, err := tarBuildContext("./testdata/has-dockerignore")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer diContext.Close()
+	diContents, err := ioutil.ReadAll(diContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goodContext, err := tarBuildContext("./testdata/no-dockerignore")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer goodContext.Close()
+	goodContents, err := ioutil.ReadAll(goodContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if bytes.Equal(diContents, goodContents) {
+		t.Error("expected app with .dockerignore to differ from app without .dockerignore")
 	}
 }
