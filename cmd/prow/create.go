@@ -93,14 +93,13 @@ func (c *createCmd) run() error {
 
 		if err != nil {
 			return fmt.Errorf("there was an error creating the chart: %v", err)
-		} else {
-			// HACK(bacongobbler): see comment above about chartutil.Create
-			cfile.Name = c.appName
-			if err := chartutil.SaveChartfile(path.Join("chart", "Chart.yaml"), cfile); err != nil {
-				return fmt.Errorf("there was an error creating the chart: %v", err)
-			}
-			fmt.Fprintln(c.out, "--> Created chart/")
 		}
+		// HACK(bacongobbler): see comment above about chartutil.Create
+		cfile.Name = c.appName
+		if err := chartutil.SaveChartfile(path.Join("chart", "Chart.yaml"), cfile); err != nil {
+			return fmt.Errorf("there was an error creating the chart: %v", err)
+		}
+		fmt.Fprintln(c.out, "--> Created chart/")
 	}
 
 	// now we check for a Dockerfile and create that based on the starter pack

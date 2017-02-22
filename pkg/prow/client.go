@@ -135,12 +135,10 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				// server closed the connection, so we're done!
 				return nil
-			} else {
-				return err
 			}
-		} else {
-			io.Copy(out, p)
+			return err
 		}
+		io.Copy(out, p)
 	}
 }
 
@@ -216,10 +214,10 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 	}
 
 	if !dockerfileExists {
-		return nil, DockerfileNotExistError
+		return nil, ErrDockerfileNotExist
 	}
 
-	var excludePatterns []string = []string{
+	var excludePatterns = []string{
 		// do not include the chart directory. That will be packaged separately.
 		"chart",
 	}
@@ -252,7 +250,7 @@ func tarChart(dir string) (io.ReadCloser, error) {
 	}
 
 	if !dirExists {
-		return nil, ChartNotExistError
+		return nil, ErrChartNotExist
 	}
 
 	options := archive.TarOptions{

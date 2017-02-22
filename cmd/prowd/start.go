@@ -88,8 +88,5 @@ func (c *startCmd) run() error {
 	server.RegistryOrg = c.registryOrg
 	server.RegistryURL = c.registryURL
 	log.Printf("server is now listening at %s", c.listenAddr)
-	if err = server.Serve(); err != nil {
-		return err
-	}
-	return nil
+	return server.Serve()
 }
