@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/docker/docker/builder/dockerignore"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/gorilla/websocket"
 
@@ -220,12 +221,27 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 		return nil, DockerfileNotExistError
 	}
 
+	var excludePatterns []string = []string{
+		// do not include the chart directory. That will be packaged separately.
+		"chart",
+	}
+
+	diFd, err := os.Open(path.Join(dir, ".dockerignore"))
+	if err == nil {
+		defer diFd.Close()
+		di, err := dockerignore.ReadAll(diFd)
+		if err != nil {
+			return nil, fmt.Errorf("there was an error reading .dockerignore: %v", err)
+		}
+		excludePatterns = append(excludePatterns, di...)
+	} else {
+		// log, but don't cry if no dockerignore file exists.
+		log.Debugf("there was an error opening .dockerignore: %v", err)
+	}
+
 	options := archive.TarOptions{
-		ExcludePatterns: []string{
-			// do not include the chart directory. That will be packaged separately.
-			"chart",
-		},
-		Compression: archive.Gzip,
+		ExcludePatterns: excludePatterns,
+		Compression:     archive.Gzip,
 	}
 	return archive.TarWithOptions(dir, &options)
 }
