@@ -38,7 +38,6 @@ func (cb *closingBuffer) Close() error {
 type Client struct {
 	HTTPClient *http.Client
 	Endpoint   *url.URL
-	Header     http.Header
 	// OptionWait specifies whether or not to wait for all resources to be ready on `prow up`
 	OptionWait bool
 }
@@ -55,7 +54,7 @@ func New(endpoint *url.URL, client *http.Client) *Client {
 	endpoint.RawQuery = ""
 	endpoint.Fragment = ""
 
-	return &Client{client, endpoint, make(http.Header), false}
+	return &Client{client, endpoint, false}
 }
 
 // NewFromString returns a new Client given a string URL and an optional client.
@@ -175,7 +174,6 @@ func (c *Client) Version() (*version.Version, error) {
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
-		Header:     c.Header,
 		Body:       nil,
 		Host:       c.Endpoint.Host,
 	}
