@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return "Hello World!\n"
 
 if __name__ == "__main__":
     app.run()
@@ -71,8 +71,11 @@ Prow handles these tasks with one `prow up` command:
 - pushes the image to a registry
 - installs the Helm chart under `chart/`, referencing the Docker registry image
 
+
+Let's use the `--watch` flag so we can let this run in the background while we make changes later on...
+
 ```shell
-$ prow up
+$ prow up --watch
 --> Building Dockerfile
 Step 1 : FROM python:onbuild
 onbuild: Pulling from library/python
@@ -90,6 +93,8 @@ The push refers to a repository [quay.io/deis/hello-world]
   export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl port-forward $POD_NAME 8080:80
+
+Watching local files for changes...
 ```
 
 ## Interact with Deployed App
@@ -130,7 +135,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return "Hello World!\n"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
@@ -139,30 +144,16 @@ EOF
 
 ## Prow Up(grade)
 
-Now if we rerun `prow up` after making changes to our app, Prow will determine that the Helm release already exists and will hence perform a `helm upgrade` to this existing release rather than attempting another `helm install`:
+Now if we watch the terminal that we initially called `prow up --watch` with, Prow will notice that there were changes made locally and call `prow up` again. Prow then determines that the Helm release already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
 
 ```shell
-$ prow up
 --> Building Dockerfile
 Step 1 : FROM python:onbuild
-# Executing 3 build triggers...
-Step 1 : COPY requirements.txt /usr/src/app/
- ---> Using cache
-Step 1 : RUN pip install --no-cache-dir -r requirements.txt
- ---> Using cache
-Step 1 : COPY . /usr/src/app
- ---> 721cc23a36b2
-Step 2 : CMD python ./hello.py
- ---> Running in a11269445ce4
- ---> 4bae33ea2c9a
-Step 3 : EXPOSE 80
- ---> Running in 0e8d3d99a840
- ---> 9c90b0445146
+...
 Successfully built 9c90b0445146
-
 --> Pushing quay.io/deis/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
 The push refers to a repository [quay.io/deis/hello-world]
-
+...
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
 --> Notes:
