@@ -86,12 +86,12 @@ func (u *upCmd) run() (err error) {
 	fmt.Println("Watching local files for changes...")
 
 	notifyPath := filepath.Join(cwd, "...")
-	notifyTypes := []notify.Event{notify.Create, notify.Remove, notify.Rename, notify.Write}
+	log.Debugf("NOTIFY PATH: %s", notifyPath)
 	// make a buffered channel of filesystem notification events
 	ch := make(chan notify.EventInfo, 1)
 
 	// watch the current directory and everything under it, sending events to the channel
-	if err := notify.Watch(notifyPath, ch, notifyTypes...); err != nil {
+	if err := notify.Watch(notifyPath, ch, notify.All); err != nil {
 		log.Fatal(err)
 	}
 	defer notify.Stop(ch)
