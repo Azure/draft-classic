@@ -232,7 +232,7 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 		excludePatterns = append(excludePatterns, di...)
 	} else {
 		// log, but don't cry if no dockerignore file exists.
-		log.Debugf("there was an error opening .dockerignore: %v", err)
+		log.Debugf("there was an error opening .dockerignore: %v. Ignoring...", err)
 	}
 
 	options := archive.TarOptions{
