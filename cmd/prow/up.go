@@ -83,7 +83,7 @@ func (u *upCmd) run() (err error) {
 		return nil
 	}
 
-	fmt.Println("Watching local files for changes...")
+	fmt.Fprintln(u.out, "Watching local files for changes...")
 
 	notifyPath := filepath.Join(cwd, "...")
 	notifyTypes := []notify.Event{notify.Create, notify.Remove, notify.Rename, notify.Write}
