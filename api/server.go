@@ -24,12 +24,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
-	"k8s.io/helm/pkg/helm/portforwarder"
-	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/storage/driver"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/deis/prow/pkg/version"
 )
@@ -55,6 +51,7 @@ type APIServer struct {
 	HTTPServer   *http.Server
 	Listener     net.Listener
 	DockerClient *docker.Client
+	HelmClient   *helm.Client
 	// RegistryAuth is the authorization token used to push images up to the registry.
 	//
 	// This field follows the format of the X-Registry-Auth header.
@@ -326,15 +323,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 
 	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
-	clientset, config, err := getKubeClient("")
-	if err != nil {
-		handleClosingError(conn, "Could not get a kube client", err)
-	}
-	tunnel, err := portforwarder.New("kube-system", clientset, config)
-	if err != nil {
-		handleClosingError(conn, "Could not get a connection to tiller", err)
-	}
-	client := helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
 		handleClosingError(conn, "Could not load chart archive", err)
@@ -353,12 +341,12 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// The returned error is a grpc.rpcError that wraps the message from the original error.
 	// So we're stuck doing string matching against the wrapped error, which is nested somewhere
 	// inside of the grpc.rpcError message.
-	_, err = client.ReleaseContent(appName, helm.ContentReleaseVersion(1))
+	_, err = server.HelmClient.ReleaseContent(appName, helm.ContentReleaseVersion(1))
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
 		conn.WriteMessage(
 			websocket.TextMessage,
 			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
-		releaseResp, err := client.InstallReleaseFromChart(
+		releaseResp, err := server.HelmClient.InstallReleaseFromChart(
 			chart,
 			namespace,
 			helm.ReleaseName(appName),
@@ -371,7 +359,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			websocket.TextMessage,
 			formatReleaseStatus(releaseResp.Release))
 	} else {
-		releaseResp, err := client.UpdateReleaseFromChart(
+		releaseResp, err := server.HelmClient.UpdateReleaseFromChart(
 			appName,
 			chart,
 			helm.UpdateValueOverrides([]byte(vals)),
@@ -406,18 +394,4 @@ func formatReleaseStatus(release *release.Release) []byte {
 		output += fmt.Sprintf("--> Notes:\n     %s\n", release.Info.Status.Notes)
 	}
 	return []byte(output)
-}
-
-// getKubeClient is a convenience method for creating kubernetes config and client
-// for a given kubeconfig context
-func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
-	config, err := kube.GetConfig(context).ClientConfig()
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s\n", context, err)
-	}
-	client, err := internalclientset.NewForConfig(config)
-	if err != nil {
-		return nil, nil, err
-	}
-	return client, config, nil
 }
