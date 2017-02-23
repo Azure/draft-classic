@@ -92,7 +92,7 @@ func (u *upCmd) run() (err error) {
 
 	// watch the current directory and everything under it, sending events to the channel
 	if err := notify.Watch(notifyPath, ch, notify.All); err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not watch local filesystem for changes: %v", err)
 	}
 	defer notify.Stop(ch)
 
