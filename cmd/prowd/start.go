@@ -8,6 +8,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/helm/portforwarder"
+	"k8s.io/helm/pkg/kube"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/deis/prow/api"
 )
@@ -79,6 +84,15 @@ func (c *startCmd) run() error {
 		return err
 	}
 
+	clientset, config, err := getKubeClient("")
+	if err != nil {
+		return fmt.Errorf("Could not get a kube client", err)
+	}
+	tunnel, err := portforwarder.New("kube-system", clientset, config)
+	if err != nil {
+		return fmt.Errorf("Could not get a connection to tiller", err)
+	}
+
 	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
 	if err != nil {
 		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
@@ -87,6 +101,21 @@ func (c *startCmd) run() error {
 	server.RegistryAuth = c.registryAuth
 	server.RegistryOrg = c.registryOrg
 	server.RegistryURL = c.registryURL
+	server.HelmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 	log.Printf("server is now listening at %s", c.listenAddr)
 	return server.Serve()
+}
+
+// getKubeClient is a convenience method for creating kubernetes config and client
+// for a given kubeconfig context
+func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
+	config, err := kube.GetConfig(context).ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s\n", context, err)
+	}
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, err
+	}
+	return client, config, nil
 }
