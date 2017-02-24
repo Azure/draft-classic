@@ -1,5 +1,5 @@
-hash: 03f16ed6d5c6aa7e03d37eaaa5326cde0fcba3863794ee95b6ebd86ac01335d2
-updated: 2017-02-21T10:04:46.575399285-07:00
+hash: 2662c2f84796a6a7c38895a8fd35749fe32e845b812209b03ba6f0979a46e361
+updated: 2017-02-24T12:35:22.496860951-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -56,6 +56,7 @@ imports:
   - api/types/time
   - api/types/versions
   - api/types/volume
+  - builder/dockerignore
   - client
   - pkg/archive
   - pkg/fileutils
@@ -299,13 +300,14 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
-  version: fc315ab59850ddd1b9b4959c89ef008fef5cdf89
+  version: db531fd75fb2a1fb0841a98d9e55c58c21f70f4c
   subpackages:
   - pkg/chartutil
   - pkg/helm
   - pkg/helm/portforwarder
   - pkg/ignore
   - pkg/kube
+  - pkg/plugin
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
