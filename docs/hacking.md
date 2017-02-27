@@ -129,7 +129,7 @@ Then, install the chart:
 $ make serve
 $ helm list  # check that prow has a helm release
 NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
-prow	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	prow
+prow	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	kube-system
 ```
 
 ## Re-deploying Your Changes
@@ -170,7 +170,6 @@ $ make clean unserve
 rm bin/*
 rm rootfs/bin/*
 helm delete --purge prow
-kubectl delete namespace prow
 ```
 
 

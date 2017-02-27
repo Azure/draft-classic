@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -84,11 +85,17 @@ func (c *startCmd) run() error {
 		return err
 	}
 
+	// tiller is assumed to be running in the same namespace as prow due to `prow init`.
+	tillerNamespace := os.Getenv("PROW_NAMESPACE")
+	if tillerNamespace == "" {
+		tillerNamespace = "kube-system"
+	}
+
 	clientset, config, err := getKubeClient("")
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client", err)
 	}
-	tunnel, err := portforwarder.New("kube-system", clientset, config)
+	tunnel, err := portforwarder.New(tillerNamespace, clientset, config)
 	if err != nil {
 		return fmt.Errorf("Could not get a connection to tiller", err)
 	}
