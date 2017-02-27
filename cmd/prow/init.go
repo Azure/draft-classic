@@ -80,7 +80,7 @@ func newInitCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&i.image, "prowd-image", "i", "", "override prowd image")
 	f.BoolVar(&i.canary, "canary-image", false, "use the canary image")
 	f.BoolVar(&i.upgrade, "upgrade", false, "upgrade if prowd is already installed")
-	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "if set does not install prowd")
+	f.BoolVarP(&i.clientOnly, "client-only", "c", true, "if set does not install prowd")
 	f.BoolVar(&i.dryRun, "dry-run", false, "do not install local or remote")
 
 	return cmd
