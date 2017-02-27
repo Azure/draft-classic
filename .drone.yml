@@ -1,0 +1,10 @@
+workspace:
+  base: /go
+  path: src/github.com/deis/prow
+pipeline:
+  unit:
+    image: golang:1.8.0
+    commands:
+      - go get github.com/Masterminds/glide
+      - make bootstrap
+      - make test-unit
