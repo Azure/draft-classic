@@ -21,7 +21,16 @@ to build the project from source until we get some automation up in here. Please
 
 Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
+# License
+
+This software is covered under the Apache v2.0 license. You can read the license [here][license].
+
+This software contains a large amount of code from [Helm][], which is also covered by the Apache
+v2.0 license.
+
+
 [Getting Started]: docs/getting-started.md
 [hacking]: docs/hacking.md
-[Kubernetes]: https://kubernetes.io/
 [Helm]: https://github.com/kubernetes/helm
+[Kubernetes]: https://kubernetes.io/
+[license]: LICENSE
