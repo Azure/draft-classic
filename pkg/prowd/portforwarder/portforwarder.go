@@ -14,7 +14,7 @@ import (
 
 const (
 	// ProwNamespace is the Kubernetes namespace in which the prow pod runs.
-	ProwNamespace string = "prow"
+	ProwNamespace string = "kube-system"
 )
 
 // New returns a tunnel to the prow pod.
