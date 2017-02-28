@@ -5,3 +5,4 @@ COPY rootfs /
 EXPOSE 44135
 
 ENTRYPOINT ["/bin/prowd"]
+CMD ["start"]
