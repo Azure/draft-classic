@@ -6,11 +6,12 @@ pipeline:
     image: golang:1.8.0
     commands:
       - go get github.com/Masterminds/glide
-      - make bootstrap
+      - make bootstrap build docker-binary
       - make test-unit
   publish-master:
     image: plugins/docker
     repo: deis/prowd
+    registry: quay.io
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
     tag:
@@ -21,6 +22,7 @@ pipeline:
   publish-release:
     image: plugins/docker
     repo: deis/prowd
+    registry: quay.io
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
     tag:
