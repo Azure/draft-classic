@@ -117,7 +117,8 @@ Server: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89e
 ```
 
 To install Prowd, edit `chart/values.yaml` and change the fields under `registry` to your
-[Docker Hub][] or [quay.io][quay] account:
+[Docker Hub][] or [quay.io][quay] account, and change the fields under `image` to the newly
+deployed prowd image:
 
 ```
 $ $EDITOR chart/values.yaml
@@ -126,7 +127,7 @@ $ $EDITOR chart/values.yaml
 Then, install the chart:
 
 ```shell
-$ make serve
+$ prow init -f chart/values.yaml
 $ helm list  # check that prow has a helm release
 NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
 prow	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	prowd-0.1.0	kube-system
