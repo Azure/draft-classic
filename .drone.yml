@@ -10,7 +10,7 @@ pipeline:
       - make test-unit
   publish-master:
     image: plugins/docker
-    repo: deis/prowd
+    repo: quay.io/deis/prowd
     registry: quay.io
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
@@ -21,7 +21,7 @@ pipeline:
       event: push
   publish-release:
     image: plugins/docker
-    repo: deis/prowd
+    repo: quay.io/deis/prowd
     registry: quay.io
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
