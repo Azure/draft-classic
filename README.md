@@ -1,5 +1,7 @@
 # Prow: Streamlined Kubernetes Development
 
+[![Build Status](http://drone.champagne.deis.com/api/badges/deis/prow/status.svg)](http://drone.champagne.deis.com/deis/prow)
+
 _NOTE: Prow is experimental and does not have a stable release yet._
 
 Prow handles the heavy lifting involved in taking source code and deploying it to Kubernetes:
