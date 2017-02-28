@@ -2,9 +2,28 @@ workspace:
   base: /go
   path: src/github.com/deis/prow
 pipeline:
-  unit:
+  test-unit:
     image: golang:1.8.0
     commands:
       - go get github.com/Masterminds/glide
       - make bootstrap
       - make test-unit
+  publish-master:
+    image: plugins/docker
+    repo: deis/prowd
+    username: ${DOCKER_USERNAME}
+    password: ${DOCKER_PASSWORD}
+    tag:
+      - canary
+    when:
+      branch: master
+      event: push
+  publish-release:
+    image: plugins/docker
+    repo: deis/prowd
+    username: ${DOCKER_USERNAME}
+    password: ${DOCKER_PASSWORD}
+    tag:
+      - ${DRONE_TAG}
+    when:
+      event: tag
