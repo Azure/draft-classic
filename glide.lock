@@ -1,11 +1,13 @@
-hash: 2662c2f84796a6a7c38895a8fd35749fe32e845b812209b03ba6f0979a46e361
-updated: 2017-02-24T12:35:22.496860951-08:00
+hash: b859b7b249982ee9ce0af031ce2cf3e812d7f3173ab629fa25a324be738e4cd4
+updated: 2017-03-02T11:13:43.129824513-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
   subpackages:
   - compute/metadata
   - internal
+- name: github.com/aokoli/goutils
+  version: 9c37978a95bd5c709a15883b6242714ea6709e64
 - name: github.com/Azure/go-ansiterm
   version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
@@ -108,6 +110,8 @@ imports:
   version: 465937c80b3c07a7c7ad20cc934898646a91c1de
 - name: github.com/exponent-io/jsonpath
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
+- name: github.com/facebookgo/symwalk
+  version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/jsonpointer
@@ -194,6 +198,8 @@ imports:
   - jwriter
 - name: github.com/Masterminds/semver
   version: 59c29afe1a994eacb71c833025ca7acf874bb1da
+- name: github.com/Masterminds/sprig
+  version: 2d2df7bd8bda53b5a55ed04422173cedd50500ea
 - name: github.com/Microsoft/go-winio
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
@@ -213,6 +219,8 @@ imports:
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/rjeczalik/notify
   version: 9d5aa0c3b735c3340018a4627446c3ea5a04a097
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
   version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - name: github.com/spf13/cobra
@@ -230,8 +238,10 @@ imports:
   - bcrypt
   - blowfish
   - curve25519
+  - pbkdf2
   - pkcs12
   - pkcs12/internal/rc2
+  - scrypt
   - ssh
   - ssh/terminal
 - name: golang.org/x/net
@@ -300,9 +310,10 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
-  version: db531fd75fb2a1fb0841a98d9e55c58c21f70f4c
+  version: de6fb23e7ada129b92a6c5dbdac3befbc2f481f1
   subpackages:
   - pkg/chartutil
+  - pkg/engine
   - pkg/helm
   - pkg/helm/portforwarder
   - pkg/ignore
@@ -312,7 +323,10 @@ imports:
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
+  - pkg/releaseutil
+  - pkg/storage
   - pkg/storage/driver
+  - pkg/tiller/environment
   - pkg/version
 - name: k8s.io/kubernetes
   version: e9eeec655e7fdee50d4e19200f9707d1cd4a3371
