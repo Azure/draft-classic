@@ -9,6 +9,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/kube"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/deis/prow/pkg/prow"
 	"github.com/deis/prow/pkg/prow/prowpath"
@@ -16,8 +18,9 @@ import (
 )
 
 const (
-	hostEnvVar = "PROW_HOST"
-	homeEnvVar = "PROW_HOME"
+	hostEnvVar      = "PROW_HOST"
+	homeEnvVar      = "PROW_HOME"
+	namespaceEnvVar = "PROW_NAMESPACE"
 )
 
 var (
@@ -31,6 +34,8 @@ var (
 	prowHome string
 	// prowHost depicts where the prowd server is hosted.
 	prowHost string
+	// prowNamespace depicts which kubernetes namespace the prowd server is hosted.
+	prowNamespace string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -62,6 +67,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
 	p.StringVar(&prowHost, "host", defaultProwHost(), "address of prowd. Overrides $PROW_HOST")
+	p.StringVar(&prowNamespace, "namespace", defaultProwNamespace(), "namespace of prowd. Overrides $PROW_NAMESPACE")
 
 	cmd.AddCommand(
 		newCreateCmd(out),
@@ -79,7 +85,11 @@ func newRootCmd(out io.Writer) *cobra.Command {
 
 func setupConnection(c *cobra.Command, args []string) error {
 	if prowHost == "" {
-		tunnel, err := portforwarder.New(kubeContext)
+		clientset, config, err := getKubeClient(kubeContext)
+		if err != nil {
+			return err
+		}
+		tunnel, err := portforwarder.New(prowNamespace, clientset, config)
 		if err != nil {
 			return err
 		}
@@ -113,6 +123,10 @@ func defaultProwHost() string {
 	return os.Getenv(hostEnvVar)
 }
 
+func defaultProwNamespace() string {
+	return os.Getenv(namespaceEnvVar)
+}
+
 func defaultProwHome() string {
 	if home := os.Getenv(homeEnvVar); home != "" {
 		return home
@@ -122,6 +136,20 @@ func defaultProwHome() string {
 
 func homePath() string {
 	return os.ExpandEnv(prowHome)
+}
+
+// getKubeClient is a convenience method for creating kubernetes config and client
+// for a given kubeconfig context
+func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
+	config, err := kube.GetConfig(context).ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+	}
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
+	}
+	return client, config, nil
 }
 
 func main() {

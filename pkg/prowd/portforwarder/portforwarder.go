@@ -18,12 +18,7 @@ const (
 )
 
 // New returns a tunnel to the prow pod.
-func New(context string) (*kube.Tunnel, error) {
-	config, client, err := getKubeClient(context)
-	if err != nil {
-		return nil, err
-	}
-
+func New(namespace string, client *internalclientset.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
 	podName, err := getProwPodName(client.Core())
 	if err != nil {
 		return nil, err
@@ -58,18 +53,4 @@ func getFirstRunningPod(client internalversion.PodsGetter, selector labels.Selec
 		}
 	}
 	return nil, fmt.Errorf("could not find a ready prowd pod")
-}
-
-// getKubeClient is a convenience method for creating kubernetes config and client
-// for a given kubeconfig context
-func getKubeClient(context string) (*restclient.Config, *internalclientset.Clientset, error) {
-	config, err := kube.GetConfig(context).ClientConfig()
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
-	}
-	client, err := internalclientset.NewForConfig(config)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
-	}
-	return config, client, nil
 }

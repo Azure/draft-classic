@@ -2,195 +2,213 @@ package installer
 
 import (
 	"fmt"
+	"path"
 
-	"github.com/ghodss/yaml"
-
-	"k8s.io/kubernetes/pkg/api"
-	kerrors "k8s.io/kubernetes/pkg/api/errors"
-	"k8s.io/kubernetes/pkg/apis/extensions"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
-	extensionsclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion"
-	"k8s.io/kubernetes/pkg/util/intstr"
+	"k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/deis/prow/pkg/version"
 )
 
-const defaultImage = "quay.io/deis/prowd"
+const prowChart = `name: prowd
+description: The prow server
+version: %s
+apiVersion: v1
+`
 
-// Install uses kubernetes client to install tiller
-//
-// Returns the string output received from the operation, and an error if the
-// command failed.
-//
-// If verbose is true, this will print the manifest to stdout.
-func Install(client internalclientset.Interface, namespace, image string, canary, verbose bool) error {
-	if err := createDeployment(client.Extensions(), namespace, image, canary); err != nil {
-		return err
-	}
-	if err := createService(client.Core(), namespace); err != nil {
-		return err
-	}
-	return nil
+const prowValues = `# Default values for prowd.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  registry: quay.io
+  org: deis
+  name: prowd
+  tag: %s
+  pullPolicy: Always
+debug: false
+service:
+  http:
+    externalPort: 80
+    internalPort: 44135
+registry:
+  url: quay.io
+  org: deis
+  # This field follows the format of Docker's X-Registry-Auth header.
+  #
+  # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
+  #
+  # For credential-based logins, use
+  #
+  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64 -w 0
+  #
+  # For token-based logins, use
+  #
+  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
+  authtoken: changeme
+`
+
+const prowIgnore = `# Patterns to ignore when building packages.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+.DS_Store
+# Common VCS dirs
+.git/
+.gitignore
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*~
+# Various IDEs
+.project
+.idea/
+*.tmproj
+`
+
+const prowDeployment = `apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prowd
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: prow
+        name: prowd
+    spec:
+      containers:
+      - name: prowd
+        image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - start
+        - --registry-url={{ .Values.registry.url }}
+        - --registry-org={{ .Values.registry.org }}
+        - --registry-auth={{ .Values.registry.authtoken }}
+        {{- if .Values.debug }}
+        - --debug
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.http.internalPort }}
+        env:
+        - name: PROW_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: {{ .Values.service.http.internalPort }}
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: {{ .Values.service.http.internalPort }}
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+`
+
+const prowService = `apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.service.http.externalPort }}
+      targetPort: {{ .Values.service.http.internalPort }}
+  selector:
+    app: {{ .Chart.Name }}
+`
+
+const prowNotes = `Now you can deploy an app using prow!
+
+	$ cd my-app
+	$ prow up --namespace=foo
+	--> Building Dockerfile
+	--> Pushing my-app:latest
+	--> Deploying to Kubernetes
+	--> Deployed!
+
+That's it! You're now running your app in a Kubernetes cluster.
+`
+
+// this file left intentionally blank.
+const prowHelpers = ``
+
+var DefaultChartFiles = []*chartutil.BufferedFile{
+	&chartutil.BufferedFile{
+		Name: chartutil.ChartfileName,
+		Data: []byte(fmt.Sprintf(prowChart, version.Release)),
+	},
+	&chartutil.BufferedFile{
+		Name: chartutil.ValuesfileName,
+		Data: []byte(fmt.Sprintf(prowValues, version.Release)),
+	},
+	&chartutil.BufferedFile{
+		Name: chartutil.IgnorefileName,
+		Data: []byte(prowIgnore),
+	},
+	&chartutil.BufferedFile{
+		Name: path.Join(chartutil.TemplatesDir, chartutil.DeploymentName),
+		Data: []byte(prowDeployment),
+	},
+	&chartutil.BufferedFile{
+		Name: path.Join(chartutil.TemplatesDir, chartutil.ServiceName),
+		Data: []byte(prowService),
+	},
+	&chartutil.BufferedFile{
+		Name: path.Join(chartutil.TemplatesDir, chartutil.NotesName),
+		Data: []byte(prowNotes),
+	},
+	&chartutil.BufferedFile{
+		Name: path.Join(chartutil.TemplatesDir, chartutil.HelpersName),
+		Data: []byte(prowHelpers),
+	},
 }
 
-//
-// Upgrade uses kubernetes client to upgrade tiller to current version
+// Install uses the helm client to install Prowd with the given config.
 //
 // Returns an error if the command failed.
-func Upgrade(client internalclientset.Interface, namespace, image string, canary bool) error {
-	obj, err := client.Extensions().Deployments(namespace).Get("prowd")
+func Install(client *helm.Client, chartConfig *chart.Config, namespace string) error {
+	chart, err := chartutil.LoadFiles(DefaultChartFiles)
 	if err != nil {
 		return err
 	}
-	obj.Spec.Template.Spec.Containers[0].Image = selectImage(image, canary)
-	if _, err := client.Extensions().Deployments(namespace).Update(obj); err != nil {
+	_, err = client.InstallReleaseFromChart(
+		chart,
+		namespace,
+		helm.ReleaseName("prow"),
+		helm.ValueOverrides([]byte(chartConfig.Raw)))
+	return err
+}
+
+//
+// Upgrade uses the helm client to upgrade Prowd using the given config.
+//
+// Returns an error if the command failed.
+func Upgrade(client *helm.Client, chartConfig *chart.Config) error {
+	chart, err := chartutil.LoadFiles(DefaultChartFiles)
+	if err != nil {
 		return err
 	}
-	// If the service does not exists that would mean we are upgrading from a tiller version
-	// that didn't deploy the service, so install it.
-	if _, err := client.Core().Services(namespace).Get("prowd"); err != nil {
-		if !kerrors.IsNotFound(err) {
-			return err
-		}
-		if err := createService(client.Core(), namespace); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// createDeployment creates the Tiller deployment reource
-func createDeployment(client extensionsclient.DeploymentsGetter, namespace, image string, canary bool) error {
-	obj := deployment(namespace, image, canary)
-	_, err := client.Deployments(obj.Namespace).Create(obj)
+	_, err = client.UpdateReleaseFromChart(
+		"prow",
+		chart,
+		helm.UpdateValueOverrides([]byte(chartConfig.Raw)))
 	return err
-}
-
-// deployment gets the deployment object that installs Tiller.
-func deployment(namespace, image string, canary bool) *extensions.Deployment {
-	return generateDeployment(namespace, selectImage(image, canary))
-}
-
-// createService creates the Tiller service resource
-func createService(client internalversion.ServicesGetter, namespace string) error {
-	obj := service(namespace)
-	_, err := client.Services(obj.Namespace).Create(obj)
-	return err
-}
-
-// service gets the service object that installs Tiller.
-func service(namespace string) *api.Service {
-	return generateService(namespace)
-}
-
-func selectImage(image string, canary bool) string {
-	switch {
-	case canary:
-		image = defaultImage + ":canary"
-	case image == "":
-		image = fmt.Sprintf("%s:%s", defaultImage, version.Release)
-	}
-	return image
-}
-
-// DeploymentManifest gets the manifest (as a string) that describes the Tiller Deployment
-// resource.
-func DeploymentManifest(namespace, image string, canary bool) (string, error) {
-	obj := deployment(namespace, image, canary)
-
-	buf, err := yaml.Marshal(obj)
-	return string(buf), err
-}
-
-// ServiceManifest gets the manifest (as a string) that describes the Tiller Service
-// resource.
-func ServiceManifest(namespace string) (string, error) {
-	obj := service(namespace)
-
-	buf, err := yaml.Marshal(obj)
-	return string(buf), err
-}
-
-func generateLabels(labels map[string]string) map[string]string {
-	labels["app"] = "prow"
-	return labels
-}
-
-func generateDeployment(namespace, image string) *extensions.Deployment {
-	labels := generateLabels(map[string]string{"name": "prowd"})
-	d := &extensions.Deployment{
-		ObjectMeta: api.ObjectMeta{
-			Namespace: namespace,
-			Name:      "prowd",
-			Labels:    labels,
-		},
-		Spec: extensions.DeploymentSpec{
-			Replicas: 1,
-			Template: api.PodTemplateSpec{
-				ObjectMeta: api.ObjectMeta{
-					Labels: labels,
-				},
-				Spec: api.PodSpec{
-					Containers: []api.Container{
-						{
-							Name:            "prowd",
-							Image:           image,
-							ImagePullPolicy: "IfNotPresent",
-							Ports: []api.ContainerPort{
-								{ContainerPort: 44135, Name: "prowd"},
-							},
-							Env: []api.EnvVar{
-								{Name: "PROW_NAMESPACE", Value: namespace},
-							},
-							LivenessProbe: &api.Probe{
-								Handler: api.Handler{
-									HTTPGet: &api.HTTPGetAction{
-										Path: "/ping",
-										Port: intstr.FromInt(44135),
-									},
-								},
-								InitialDelaySeconds: 1,
-								TimeoutSeconds:      1,
-							},
-							ReadinessProbe: &api.Probe{
-								Handler: api.Handler{
-									HTTPGet: &api.HTTPGetAction{
-										Path: "/ping",
-										Port: intstr.FromInt(44135),
-									},
-								},
-								InitialDelaySeconds: 1,
-								TimeoutSeconds:      1,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	return d
-}
-
-func generateService(namespace string) *api.Service {
-	labels := generateLabels(map[string]string{"name": "prowd"})
-	s := &api.Service{
-		ObjectMeta: api.ObjectMeta{
-			Namespace: namespace,
-			Name:      "prowd",
-			Labels:    labels,
-		},
-		Spec: api.ServiceSpec{
-			Type: api.ServiceTypeClusterIP,
-			Ports: []api.ServicePort{
-				{
-					Name:       "prowd",
-					Port:       44135,
-					TargetPort: intstr.FromString("prowd"),
-				},
-			},
-			Selector: labels,
-		},
-	}
-	return s
 }
