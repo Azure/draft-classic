@@ -34,8 +34,7 @@ We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Prow
 
 ```shell
 $ prow create
---> Created chart/
---> Created Dockerfile
+--> Default app detected
 --> Ready to sail
 ```
 
@@ -194,8 +193,6 @@ $ cp hello.py requirements.txt hello-universe
 $ cd hello-universe
 $ perl -i -0pe 's/World/Universe/' hello.py
 $ prow create --pack=python
---> Created chart/
---> Created Dockerfile
 --> Ready to sail
 $ prow up
 ...

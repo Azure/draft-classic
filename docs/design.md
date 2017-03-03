@@ -26,8 +26,8 @@ $ ls
 Dockerfile
 src/
 $ prow create
---> Created chart/
---> Dockerfile already exists, skipping
+!!! A Dockerfile was found! Renaming to Dockerfile.old before proceeding
+--> Default app detected
 --> Ready to sail
 $ ls
 chart/

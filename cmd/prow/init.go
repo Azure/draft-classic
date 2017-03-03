@@ -34,6 +34,7 @@ import (
 
 	"github.com/deis/prow/cmd/prow/installer"
 	"github.com/deis/prow/cmd/prow/strvals"
+	"github.com/deis/prow/pkg/prow/pack"
 	"github.com/deis/prow/pkg/prow/prowpath"
 )
 
@@ -143,6 +144,9 @@ func (i *initCmd) run() error {
 	if err := ensureDirectories(i.home, i.out); err != nil {
 		return err
 	}
+	if err := ensurePacks(i.home, i.out); err != nil {
+		return err
+	}
 	fmt.Fprintf(i.out, "$PROW_HOME has been configured at %s.\n", prowHome)
 
 	if !i.clientOnly {
@@ -202,6 +206,20 @@ func ensureDirectories(home prowpath.Home, out io.Writer) error {
 		}
 	}
 
+	return nil
+}
+
+// ensurePacks checks to see if the default packs exist.
+//
+// If the pack does not exist, this function will create it.
+func ensurePacks(home prowpath.Home, out io.Writer) error {
+	packNames := []string{"zzznginx"}
+	for _, packName := range packNames {
+		fmt.Fprintf(out, "Creating pack %s\n", packName)
+		if _, err := pack.Create(packName, home.Packs()); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

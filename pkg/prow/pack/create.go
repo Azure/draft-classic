@@ -1,20 +1,4 @@
-/*
-Copyright 2016 The Kubernetes Authors All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-package chartutil
+package pack
 
 import (
 	"fmt"
@@ -22,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	kchartutil "k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
@@ -33,6 +17,8 @@ const (
 	ValuesfileName = "values.yaml"
 	// TemplatesDir is the relative directory name for templates.
 	TemplatesDir = "templates"
+	// ChartDir is the relative directory name for the packaged chart with a pack.
+	ChartDir = "chart"
 	// ChartsDir is the relative directory name for charts dependencies.
 	ChartsDir = "charts"
 	// IgnorefileName is the name of the Helm ignore file.
@@ -45,6 +31,10 @@ const (
 	NotesName = "NOTES.txt"
 	// HelpersName is the name of the example NOTES.txt file.
 	HelpersName = "_helpers.tpl"
+	// DetectName is the name of the detect script.
+	DetectName = "detect"
+	// DockerfileName is the name of the Dockerfile
+	DockerfileName = "Dockerfile"
 )
 
 const defaultValues = `# Default values for %s.
@@ -69,7 +59,6 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-
 `
 
 const defaultIgnore = `# Patterns to ignore when building packages.
@@ -178,11 +167,19 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 `
 
-// Create creates a new chart in a directory.
+const defaultDetect = `#!/bin/sh
+
+echo "Default"
+`
+
+const defaultDockerfile = `FROM nginx:latest
+`
+
+// Create creates a new Pack in a directory.
 //
-// Inside of dir, this will create a directory based on the name of
-// chartfile.Name. It will then write the Chart.yaml into this directory and
-// create the (empty) appropriate directories.
+// Inside of dir, this will create a directory based on the name. It will
+// then write the Chart.yaml into this directory and create the (empty)
+// appropriate directories.
 //
 // The returned string will point to the newly created directory. It will be
 // an absolute path, even if the provided base directory was relative.
@@ -190,8 +187,8 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 // If dir does not exist, this will return an error.
 // If Chart.yaml or any directories cannot be created, this will return an
 // error. In such a case, this will attempt to clean up by removing the
-// new chart directory.
-func Create(chartfile *chart.Metadata, dir string) (string, error) {
+// new pack directory.
+func Create(name, dir string) (string, error) {
 	path, err := filepath.Abs(dir)
 	if err != nil {
 		return path, err
@@ -203,61 +200,84 @@ func Create(chartfile *chart.Metadata, dir string) (string, error) {
 		return path, fmt.Errorf("no such directory %s", path)
 	}
 
-	n := chartfile.Name
-	cdir := filepath.Join(path, n)
-	if fi, err := os.Stat(cdir); err == nil && !fi.IsDir() {
-		return cdir, fmt.Errorf("file %s already exists and is not a directory", cdir)
+	pdir := filepath.Join(path, name)
+	cdir := filepath.Join(pdir, ChartDir)
+	if fi, err := os.Stat(pdir); err == nil && !fi.IsDir() {
+		return pdir, fmt.Errorf("file %s already exists and is not a directory", pdir)
 	}
-	if err := os.MkdirAll(cdir, 0755); err != nil {
-		return cdir, err
+	if err := os.MkdirAll(pdir, 0755); err != nil {
+		return pdir, err
 	}
 
-	cf := filepath.Join(cdir, ChartfileName)
-	if _, err := os.Stat(cf); err != nil {
-		if err := kchartutil.SaveChartfile(cf, chartfile); err != nil {
-			return cdir, err
-		}
+	if err := os.MkdirAll(cdir, 0755); err != nil {
+		return pdir, err
 	}
 
 	for _, d := range []string{TemplatesDir, ChartsDir} {
 		if err := os.MkdirAll(filepath.Join(cdir, d), 0755); err != nil {
-			return cdir, err
+			return pdir, err
+		}
+	}
+
+	cf := filepath.Join(cdir, ChartfileName)
+	if _, err := os.Stat(cf); err != nil {
+		if err := chartutil.SaveChartfile(cf, &chart.Metadata{Name: name}); err != nil {
+			return pdir, err
 		}
 	}
 
 	files := []struct {
 		path    string
 		content []byte
+		perm    os.FileMode
 	}{
 		{
 			// values.yaml
 			path:    filepath.Join(cdir, ValuesfileName),
-			content: []byte(fmt.Sprintf(defaultValues, chartfile.Name)),
+			content: []byte(fmt.Sprintf(defaultValues, name)),
+			perm:    0644,
 		},
 		{
 			// .helmignore
 			path:    filepath.Join(cdir, IgnorefileName),
 			content: []byte(defaultIgnore),
+			perm:    0644,
 		},
 		{
 			// deployment.yaml
 			path:    filepath.Join(cdir, TemplatesDir, DeploymentName),
 			content: []byte(defaultDeployment),
+			perm:    0644,
 		},
 		{
 			// service.yaml
 			path:    filepath.Join(cdir, TemplatesDir, ServiceName),
 			content: []byte(defaultService),
+			perm:    0644,
 		},
 		{
 			// NOTES.txt
 			path:    filepath.Join(cdir, TemplatesDir, NotesName),
 			content: []byte(defaultNotes),
+			perm:    0644,
 		},
 		{
 			// _helpers.tpl
 			path:    filepath.Join(cdir, TemplatesDir, HelpersName),
 			content: []byte(defaultHelpers),
+			perm:    0644,
+		},
+		{
+			// detect
+			path:    filepath.Join(pdir, DetectName),
+			content: []byte(defaultDetect),
+			perm:    0755,
+		},
+		{
+			// Dockerfile
+			path:    filepath.Join(pdir, DockerfileName),
+			content: []byte(defaultDockerfile),
+			perm:    0644,
 		},
 	}
 
@@ -266,9 +286,20 @@ func Create(chartfile *chart.Metadata, dir string) (string, error) {
 			// File exists and is okay. Skip it.
 			continue
 		}
-		if err := ioutil.WriteFile(file.path, file.content, 0644); err != nil {
-			return cdir, err
+		if err := ioutil.WriteFile(file.path, file.content, file.perm); err != nil {
+			return pdir, err
 		}
 	}
-	return cdir, nil
+	return pdir, nil
+}
+
+// CreateFrom scaffolds a directory with the src pack.
+func CreateFrom(chartMeta *chart.Metadata, dest, src string) error {
+	pack, err := FromDir(src)
+	if err != nil {
+		return fmt.Errorf("could not load %s: %s", src, err)
+	}
+
+	pack.Chart.Metadata = chartMeta
+	return pack.SaveDir(dest, false)
 }
