@@ -83,8 +83,6 @@ func (u *upCmd) run() (err error) {
 		return nil
 	}
 
-	fmt.Fprintln(u.out, "Watching local files for changes...")
-
 	notifyPath := filepath.Join(cwd, "...")
 	log.Debugf("NOTIFY PATH: %s", notifyPath)
 	// make a buffered channel of filesystem notification events
@@ -111,6 +109,7 @@ func (u *upCmd) run() (err error) {
 			if err = u.doUp(cwd); err != nil {
 				return err
 			}
+			fmt.Fprintln(u.out, "Watching local files for changes...")
 		}
 	}
 }
