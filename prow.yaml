@@ -1,0 +1,5 @@
+environments:
+  development:
+    name: prow
+    namespace: kube-system
+    wait: false

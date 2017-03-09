@@ -28,24 +28,46 @@ local files are saved. Prow delays a couple seconds to ensure that changes have
 stopped before uploading, but that can be altered by the "--watch-delay" flag.
 `
 
+const (
+	environmentEnvVar      = "PROW_ENV"
+	DefaultEnvironmentName = "development"
+)
+
 type upCmd struct {
-	appName           string
-	client            *prow.Client
-	namespace         string
-	out               io.Writer
-	buildTarPath      string
-	chartTarPath      string
-	values            []string
-	rawValueFilePaths []string
-	wait              bool
-	watch             bool
-	watchDelay        int
+	Client       *prow.Client            `json:"-"`
+	Out          io.Writer               `json:"-"`
+	Environments map[string]*Environment `json:"environments"`
+}
+
+type Environment struct {
+	AppName           string   `json:"name,omitempty"`
+	BuildTarPath      string   `json:"build_tar,omitempty"`
+	ChartTarPath      string   `json:"chart_tar,omitempty"`
+	Namespace         string   `json:"namespace,omitempty"`
+	Values            []string `json:"set,omitempty"`
+	RawValueFilePaths []string `json:"values,omitempty"`
+	Wait              bool     `json:"wait,omitempty"`
+	Watch             bool     `json:"watch,omitempty"`
+	WatchDelay        int      `json:"watch_delay,omitempty"`
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
-	up := &upCmd{
-		out: out,
-	}
+	var (
+		up = &upCmd{
+			Out:          out,
+			Environments: make(map[string]*Environment),
+		}
+		appName            string
+		namespace          string
+		buildTarPath       string
+		chartTarPath       string
+		values             []string
+		rawValueFilePaths  []string
+		runningEnvironment string
+		wait               bool
+		watch              bool
+		watchDelay         int
+	)
 
 	cmd := &cobra.Command{
 		Use:     "up",
@@ -53,26 +75,48 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		Long:    upDesc,
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			up.client = ensureProwClient(up.client)
-			return up.run()
+			up.Client = ensureProwClient(up.Client)
+			up.Environments[runningEnvironment] = &Environment{
+				AppName:           appName,
+				BuildTarPath:      buildTarPath,
+				ChartTarPath:      chartTarPath,
+				Namespace:         namespace,
+				Values:            values,
+				RawValueFilePaths: rawValueFilePaths,
+				Wait:              wait,
+				Watch:             watch,
+				WatchDelay:        watchDelay,
+			}
+			prowYaml, err := ioutil.ReadFile("prow.yaml")
+			if err != nil {
+				if !os.IsNotExist(err) {
+					return err
+				}
+			} else {
+				if err = yaml.Unmarshal(prowYaml, up.Environments[runningEnvironment]); err != nil {
+					return err
+				}
+			}
+			return up.run(runningEnvironment)
 		},
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&up.appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
-	f.StringVarP(&up.namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
-	f.StringVar(&up.buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set.")
-	f.StringVar(&up.chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set.")
-	f.StringArrayVar(&up.values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVarP(&up.rawValueFilePaths, "values", "f", []string{}, "specify prowd values in a YAML file (can specify multiple)")
-	f.BoolVarP(&up.wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
-	f.BoolVarP(&up.watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
-	f.IntVarP(&up.watchDelay, "watch-delay", "", 2, "wait for local file changes to have stopped for this many seconds before deploying")
+	f.StringVarP(&appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
+	f.StringVarP(&namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
+	f.StringVarP(&runningEnvironment, "environment", "e", defaultProwEnvironment(), "the environment (development, staging, qa, etc) that prow will run under")
+	f.StringVar(&buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set")
+	f.StringVar(&chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set")
+	f.StringArrayVar(&values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	f.StringArrayVarP(&rawValueFilePaths, "values", "f", []string{}, "specify prowd values in a YAML file (can specify multiple)")
+	f.BoolVarP(&wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
+	f.BoolVarP(&watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
+	f.IntVarP(&watchDelay, "watch-delay", "", 2, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
 
-func (u *upCmd) vals(cwd string) ([]byte, error) {
+func (e *Environment) Vals(cwd string) ([]byte, error) {
 	base := map[string]interface{}{}
 
 	// load $PWD/chart/values.yaml as the base config
@@ -86,7 +130,7 @@ func (u *upCmd) vals(cwd string) ([]byte, error) {
 	}
 
 	// User specified a values files via -f/--values
-	for _, filePath := range u.rawValueFilePaths {
+	for _, filePath := range e.RawValueFilePaths {
 		currentMap := map[string]interface{}{}
 		bytes, err := ioutil.ReadFile(filePath)
 		if err != nil {
@@ -101,7 +145,7 @@ func (u *upCmd) vals(cwd string) ([]byte, error) {
 	}
 
 	// User specified a value via --set
-	for _, value := range u.values {
+	for _, value := range e.Values {
 		if err := strvals.ParseInto(value, base); err != nil {
 			return []byte{}, fmt.Errorf("failed parsing --set data: %s", err)
 		}
@@ -110,27 +154,28 @@ func (u *upCmd) vals(cwd string) ([]byte, error) {
 	return yaml.Marshal(base)
 }
 
-func (u *upCmd) run() (err error) {
+func (u *upCmd) run(environment string) (err error) {
+	env := u.Environments[environment]
 	cwd, e := os.Getwd()
 	if e != nil {
 		return e
 	}
-	if u.appName == "" {
-		u.appName = path.Base(cwd)
+	if env.AppName == "" {
+		env.AppName = path.Base(cwd)
 	}
-	u.client.OptionWait = u.wait
+	u.Client.OptionWait = env.Wait
 
-	rawVals, err := u.vals(cwd)
+	rawVals, err := env.Vals(cwd)
 	if err != nil {
 		return err
 	}
 
-	if err = u.doUp(cwd, rawVals); err != nil {
+	if err = u.doUp(environment, cwd, rawVals); err != nil {
 		return err
 	}
 
 	// if `--watch=false`, return now
-	if !u.watch {
+	if !env.Watch {
 		return nil
 	}
 
@@ -148,7 +193,7 @@ func (u *upCmd) run() (err error) {
 	// create a timer to enforce a "quiet period" before deploying the app
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()
-	delay := time.Duration(u.watchDelay) * time.Second
+	delay := time.Duration(env.WatchDelay) * time.Second
 
 	for {
 		select {
@@ -157,27 +202,28 @@ func (u *upCmd) run() (err error) {
 			// reset the timer when files have changed
 			timer.Reset(delay)
 		case <-timer.C:
-			if err = u.doUp(cwd, rawVals); err != nil {
+			if err = u.doUp(environment, cwd, rawVals); err != nil {
 				return err
 			}
-			fmt.Fprintln(u.out, "Watching local files for changes...")
+			fmt.Fprintln(u.Out, "Watching local files for changes...")
 		}
 	}
 }
 
-func (u *upCmd) doUp(cwd string, vals []byte) (err error) {
-	if u.buildTarPath != "" && u.chartTarPath != "" {
-		buildTar, e := os.Open(u.buildTarPath)
+func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
+	env := u.Environments[environment]
+	if env.BuildTarPath != "" && env.ChartTarPath != "" {
+		buildTar, e := os.Open(env.BuildTarPath)
 		if e != nil {
 			return e
 		}
-		chartTar, e := os.Open(u.chartTarPath)
+		chartTar, e := os.Open(env.ChartTarPath)
 		if e != nil {
 			return e
 		}
-		err = u.client.Up(u.appName, u.namespace, u.out, buildTar, chartTar, vals)
+		err = u.Client.Up(env.AppName, env.Namespace, u.Out, buildTar, chartTar, vals)
 	} else {
-		err = u.client.UpFromDir(u.appName, u.namespace, u.out, cwd, vals)
+		err = u.Client.UpFromDir(env.AppName, env.Namespace, u.Out, cwd, vals)
 	}
 
 	// format error before returning
@@ -185,4 +231,12 @@ func (u *upCmd) doUp(cwd string, vals []byte) (err error) {
 		err = fmt.Errorf("there was an error running 'prow up': %v", err)
 	}
 	return
+}
+
+func defaultProwEnvironment() string {
+	env := os.Getenv(environmentEnvVar)
+	if env == "" {
+		env = DefaultEnvironmentName
+	}
+	return env
 }
