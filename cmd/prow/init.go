@@ -33,9 +33,9 @@ import (
 	kerrors "k8s.io/kubernetes/pkg/api/errors"
 
 	"github.com/deis/prow/cmd/prow/installer"
-	"github.com/deis/prow/cmd/prow/strvals"
 	"github.com/deis/prow/pkg/prow/pack"
 	"github.com/deis/prow/pkg/prow/prowpath"
+	"github.com/deis/prow/pkg/strvals"
 )
 
 const initDesc = `

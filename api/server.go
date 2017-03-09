@@ -20,6 +20,7 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
+	"github.com/ghodss/yaml"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
 	"k8s.io/helm/pkg/chartutil"
@@ -27,16 +28,9 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/storage/driver"
 
+	"github.com/deis/prow/pkg/strvals"
 	"github.com/deis/prow/pkg/version"
 )
-
-// ChartTemplate is used to format part of a YAML manifest with container image parameters.
-const ChartTemplate = `image:
-  name: %s
-  org: %s
-  registry: %s
-  tag: %s
-`
 
 var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
@@ -194,11 +188,18 @@ func getVersion(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var imagePrefix string
+	baseValues := map[string]interface{}{}
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	logLevel := r.Header.Get("Log-Level")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
+
+	// load client values as the base config
+	if err := yaml.Unmarshal([]byte(r.Header.Get("Helm-Flag-Set")), &baseValues); err != nil {
+		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
+		return
+	}
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -272,6 +273,26 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		tag,
 	)
 
+	// inject certain values into the chart such as the registry location, the application name
+	// and the version
+	vals := map[string]string{
+		"name":     appName,
+		"org":      server.RegistryOrg,
+		"registry": server.RegistryURL,
+		"tag":      tag,
+	}
+
+	for _, value := range vals {
+		if err := strvals.ParseInto(value, baseValues); err != nil {
+			handleClosingError(conn, "Could not inject registry data into values", err)
+		}
+	}
+
+	rawVals, err := yaml.Marshal(baseValues)
+	if err != nil {
+		handleClosingError(conn, "Could not marshal values", err)
+	}
+
 	// send uploaded tar to docker as the build context
 	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
 	buildResp, err := server.DockerClient.ImageBuild(
@@ -327,14 +348,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if err != nil {
 		handleClosingError(conn, "Could not load chart archive", err)
 	}
-	// inject certain values into the chart such as the registry location, the application name
-	// and the version
-	vals := fmt.Sprintf(ChartTemplate,
-		appName,
-		server.RegistryOrg,
-		server.RegistryURL,
-		tag,
-	)
 	// If a release does not exist, install it. If another error occurs during
 	// the check, ignore the error and continue with the upgrade.
 	//
@@ -350,7 +363,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			chart,
 			namespace,
 			helm.ReleaseName(appName),
-			helm.ValueOverrides([]byte(vals)),
+			helm.ValueOverrides([]byte(rawVals)),
 			helm.InstallWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not install release", err)
@@ -362,7 +375,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		releaseResp, err := server.HelmClient.UpdateReleaseFromChart(
 			appName,
 			chart,
-			helm.UpdateValueOverrides([]byte(vals)),
+			helm.UpdateValueOverrides([]byte(rawVals)),
 			helm.UpgradeWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not upgrade release", err)
