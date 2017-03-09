@@ -32,6 +32,7 @@ python/               # the name of the directory is the name of the starter pac
     charts/           # OPTIONAL: A directory containing any charts upon which this chart depends.
     templates/        # OPTIONAL: A directory of templates that, when combined with values,
                       # will generate valid Kubernetes manifest files.
+  detect              # OPTIONAL: An executable file for pack detection
   Dockerfile          # A Dockerfile for building the application
 ```
 
@@ -57,5 +58,36 @@ $ echo "FROM python:onbuild" > Dockerfile
 
 See [Helm's documentation on Charts][charts] for more information on the Chart file structure.
 
+## Pack Detection
+
+When `prow create` is executed on an application, prow starts iterating through the packs available
+in `~/.prow/packs`. Each pack optionally has an executable file named `detect` in the root
+directory. The intention of this `detect` script is to determine if the pack should be used with
+the given application.
+
+A detect executable takes one argument: the directory in which `prow create` was executed. The
+executable should be portable across most systems (read: not a Ruby/Python script unless it's
+a self-contained binary). The executable should exit with a non-zero exit code if the pack is not
+relevant for the app, otherwise it should display the pack's name and exit zero.
+
+For example, here is how a Python pack's detect executable would look like:
+
+```
+#!/usr/bin/env bash
+
+APP_DIR=$1
+
+# Exit early if app is clearly not Python.
+if [ ! -f $APP_DIR/requirements.txt ] && [ ! -f $APP_DIR/setup.py ]; then
+  exit 1
+fi
+
+echo Python
+```
+
+`prow create` iterates through packs alphabetically with a "first one wins" approach to detection.
+If a pack does not include a detect executable, it is considered a "loser". Pack detection can be
+overridden with the `--pack` flag. The detect script will not be considered and prow will bootstrap
+the app with the pack, no questions asked.
 
 [charts]: https://github.com/kubernetes/helm/blob/master/docs/charts.md

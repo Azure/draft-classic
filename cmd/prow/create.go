@@ -1,19 +1,19 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	pchartutil "github.com/deis/prow/pkg/chartutil"
-	"github.com/deis/prow/pkg/dockerutil"
+	"github.com/deis/prow/pkg/prow/pack"
 	"github.com/deis/prow/pkg/prow/prowpath"
 )
 
@@ -55,6 +55,7 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 }
 
 func (c *createCmd) run() error {
+	var err error
 	if c.appName == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -64,65 +65,80 @@ func (c *createCmd) run() error {
 	}
 
 	cfile := &chart.Metadata{
-		// HACK(bacongobbler): chartutil.Create uses the name as the directory. Because we want to
-		// write it to chart/, we name the chart chart and then re-save the Chart.yaml later with
-		// chartutil.SaveChartfile().
-		Name:        "chart",
+		Name:        c.appName,
 		Description: "A Helm chart for Kubernetes",
 		Version:     "0.1.0",
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	chartExists, err := exists(cfile.Name)
+	chartExists, err := exists("chart")
 	if err != nil {
 		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
-
 	if chartExists {
-		// chart dir already exists, so we just tell the user that we are happily skipping
-		fmt.Fprintln(c.out, "--> chart/ already exists, skipping")
-	} else {
-		var err error
-		if c.pack != "" {
-			// Create a chart from the starter pack
-			lpack := filepath.Join(c.home.Packs(), c.pack, "chart")
-			err = chartutil.CreateFrom(cfile, "", lpack)
-		} else {
-			_, err = pchartutil.Create(cfile, "")
-		}
-
-		if err != nil {
-			return fmt.Errorf("there was an error creating the chart: %v", err)
-		}
-		// HACK(bacongobbler): see comment above about chartutil.Create
-		cfile.Name = c.appName
-		if err := chartutil.SaveChartfile(path.Join("chart", "Chart.yaml"), cfile); err != nil {
-			return fmt.Errorf("there was an error creating the chart: %v", err)
-		}
-		fmt.Fprintln(c.out, "--> Created chart/")
+		// chart dir already exists, so we just tell the user that we are happily skipping the
+		// process.
+		fmt.Fprintln(c.out, "--> chart/ already exists. Ready to sail!")
+		return nil
 	}
 
-	// now we check for a Dockerfile and create that based on the starter pack
-	if c.pack != "" {
-		lpack := filepath.Join(c.home.Packs(), c.pack, "Dockerfile")
-		err = dockerutil.CreateFrom("Dockerfile", lpack)
-	} else {
-		err = dockerutil.Create("Dockerfile", bytes.NewBufferString(defaultDockerfile))
-	}
-
+	dockerfileExists, err := exists("Dockerfile")
 	if err != nil {
-		if os.IsExist(err) {
-			// Dockerfile already exists, so we just tell the user that we are happily skipping
-			fmt.Fprintln(c.out, "--> Dockerfile already exists, skipping")
-		} else {
-			return fmt.Errorf("there was an error creating the Dockerfile: %v", err)
+		return fmt.Errorf("there was an error checking if a Dockerfile exists: %v", err)
+	}
+	if dockerfileExists {
+		// HALT! A Dockerfile was found, and we don't want to overwrite their work.
+		fmt.Fprintln(c.out, "!!! A Dockerfile was found! Renaming to Dockerfile.old before proceeding")
+		if err := os.Rename("Dockerfile", "Dockerfile.old"); err != nil {
+			return err
 		}
-	} else {
-		fmt.Fprintln(c.out, "--> Created Dockerfile")
 	}
 
+	if c.pack != "" {
+		// --pack was explicitly defined, so we can just lazily use that here. No detection required.
+		lpack := filepath.Join(c.home.Packs(), c.pack)
+		err = pack.CreateFrom(cfile, "", lpack)
+	} else {
+		// pack detection time
+		packPath, output, err := doPackDetection(c.home.Packs(), c.out)
+		log.Debugf("doPackDetection result: %s, %s, %v", packPath, output, err)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(c.out, "--> %s app detected\n", output)
+		err = pack.CreateFrom(cfile, "", packPath)
+	}
+	if err != nil {
+		return err
+	}
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
+}
+
+// doPackDetection performs pack detection across all the packs available in ~/.prow/packs in
+// alphabetical order, returning the pack dirpath, the "formal name" returned from the detect
+// script's output and any errors that occurred during the pack detection.
+func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) {
+	files, err := ioutil.ReadDir(packHomeDir)
+	if err != nil {
+		return "", "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
+	}
+	for _, file := range files {
+		if file.IsDir() {
+			packPath := filepath.Join(packHomeDir, file.Name())
+			log.Debugf("pack path: %s", packPath)
+			p, err := pack.FromDir(packPath)
+			if err != nil {
+				return "", "", fmt.Errorf("could not load pack %s: %v", packPath, err)
+			}
+			output, err := p.Detect("")
+			log.Debugf("pack.Detect() result: %s, %v", output, err)
+			if err == nil {
+				return packPath, output, err
+			}
+		}
+	}
+	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
 }
 
 // exists returns whether the given file or directory exists or not
