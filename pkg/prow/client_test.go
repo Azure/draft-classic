@@ -187,7 +187,7 @@ func TestUpFromDir(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.UpFromDir("foo", "default", ioutil.Discard, "/ahsdkfjhaksdf")
+	err = client.UpFromDir("foo", "default", ioutil.Discard, "/ahsdkfjhaksdf", []byte{})
 	if err == nil {
 		t.Error("expected .UpFromDir() with invalid path to fail")
 	}
@@ -195,7 +195,7 @@ func TestUpFromDir(t *testing.T) {
 		t.Errorf("expected .UpFromDir() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good"); err != nil {
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good", []byte{}); err != nil {
 		t.Errorf("expected .UpFromDir() with valid path to pass, got %v", err)
 	}
 
@@ -206,7 +206,7 @@ func TestUpFromDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good")
+	err = client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good", []byte{})
 	if err == nil {
 		t.Error("expected .UpFromDir() with bad server to fail")
 	}
@@ -219,11 +219,11 @@ func TestBadData(t *testing.T) {
 	// don't care about setting up anything because we shouldn't hit the server.
 	client := &Client{}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile"); err != ErrDockerfileNotExist {
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile", []byte{}); err != ErrDockerfileNotExist {
 		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrDockerfileNotExist, got %v", err)
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart"); err != ErrChartNotExist {
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart", []byte{}); err != ErrChartNotExist {
 		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrChartNotExist, got %v", err)
 	}
 }
@@ -231,12 +231,16 @@ func TestBadData(t *testing.T) {
 func TestUpHeaders(t *testing.T) {
 	var expectedNamespace = "testdata"
 	var expectedLogLevel = log.DebugLevel
+	var expectedValues = "hello: world"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Kubernetes-Namespace") != expectedNamespace {
 			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedLogLevel, r.Header.Get("Kubernetes-Namespace"))
 		}
 		if r.Header.Get("Log-Level") != expectedLogLevel.String() {
 			t.Errorf("expected Log-Level = %s, got %s", expectedLogLevel, r.Header.Get("Log-Level"))
+		}
+		if r.Header.Get("Helm-Flag-Set") != expectedValues {
+			t.Errorf("expected Helm-Flag-Set = '%s', got '%s'", expectedValues, r.Header.Get("Helm-Flag-Set"))
 		}
 	}))
 	defer ts.Close()
@@ -247,7 +251,7 @@ func TestUpHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good")
+	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good", []byte("hello: world"))
 }
 
 func TestVersion(t *testing.T) {
