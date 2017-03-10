@@ -1,5 +1,5 @@
-hash: b859b7b249982ee9ce0af031ce2cf3e812d7f3173ab629fa25a324be738e4cd4
-updated: 2017-03-02T11:13:43.129824513-07:00
+hash: e29dc4ad0d608bd00f97ee68fed1639d45c8a9e706836860f87b2beecf81aae2
+updated: 2017-03-10T13:36:45.698760721-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -37,14 +37,17 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
+  version: 28602af35aceda2f8d571bad7ca37a54cf0250bc
   subpackages:
+  - context
   - digest
   - reference
+  - uuid
 - name: github.com/docker/docker
-  version: 49bf474f9ed7ce7143a59d1964ff7b7fd9b52178
+  version: 60ccb2265b0574d6c1c1090876a1d1ab32bed60e
   subpackages:
   - api/types
+  - api/types/backend
   - api/types/blkiodev
   - api/types/container
   - api/types/events
@@ -58,21 +61,44 @@ imports:
   - api/types/time
   - api/types/versions
   - api/types/volume
+  - builder
   - builder/dockerignore
   - client
+  - daemon/graphdriver
+  - image
+  - image/v1
+  - layer
+  - oci
   - pkg/archive
+  - pkg/chrootarchive
   - pkg/fileutils
+  - pkg/gitutils
+  - pkg/httputils
   - pkg/idtools
   - pkg/ioutils
   - pkg/jsonlog
   - pkg/jsonmessage
   - pkg/longpath
+  - pkg/mount
+  - pkg/plugingetter
+  - pkg/plugins
+  - pkg/plugins/transport
   - pkg/pools
+  - pkg/progress
   - pkg/promise
+  - pkg/random
+  - pkg/reexec
+  - pkg/streamformatter
+  - pkg/stringid
+  - pkg/symlink
   - pkg/system
+  - pkg/tarsum
   - pkg/term
   - pkg/term/windows
   - pkg/tlsconfig
+  - pkg/urlutil
+  - plugin/v2
+  - reference
 - name: github.com/docker/engine-api
   version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
   subpackages:
@@ -174,6 +200,10 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/gorilla/context
+  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
+- name: github.com/gorilla/mux
+  version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
 - name: github.com/gorilla/websocket
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
@@ -207,12 +237,18 @@ imports:
 - name: github.com/opencontainers/runc
   version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
+  - libcontainer/configs
+  - libcontainer/devices
   - libcontainer/system
   - libcontainer/user
+- name: github.com/opencontainers/runtime-spec
+  version: 1c7c27d043c2a5e513a44084d2b10d77d1402b8c
+  subpackages:
+  - specs-go
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/errors
-  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+  version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
@@ -232,6 +268,12 @@ imports:
   subpackages:
   - codec
   - codec/codecgen
+- name: github.com/vbatts/tar-split
+  version: bd4c5d64c3e9297f410025a3b1bd0c58f659e721
+  subpackages:
+  - archive/tar
+  - tar/asm
+  - tar/storage
 - name: golang.org/x/crypto
   version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
@@ -282,6 +324,10 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
+- name: golang.org/x/time
+  version: f51c12702a4d776e4c1fa9b0fabab841babae631
+  subpackages:
+  - rate
 - name: google.golang.org/appengine
   version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
@@ -329,7 +375,7 @@ imports:
   - pkg/tiller/environment
   - pkg/version
 - name: k8s.io/kubernetes
-  version: e9eeec655e7fdee50d4e19200f9707d1cd4a3371
+  version: 00a1fb254bd8e5235575fba1398b958943e39078
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install
