@@ -10,13 +10,15 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/docker/docker/builder"
 	"github.com/docker/docker/builder/dockerignore"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/docker/docker/pkg/fileutils"
 	"github.com/gorilla/websocket"
 
 	"github.com/deis/prow/pkg/version"
@@ -200,52 +202,65 @@ func exists(dir string) (bool, error) {
 
 // tarBuildContext archives the given directory and returns the archive as an io.ReadCloser.
 func tarBuildContext(dir string) (io.ReadCloser, error) {
-	dirExists, err := exists(dir)
+	contextDir, relDockerfile, err := builder.GetContextFromLocalDir(dir, "")
+
 	if err != nil {
+		return nil, fmt.Errorf("unable to prepare docker context: %s", err)
+	}
+
+	// canonicalize dockerfile name to a platform-independent one
+	relDockerfile, err = archive.CanonicalTarNameForPath(relDockerfile)
+	if err != nil {
+		return nil, fmt.Errorf("cannot canonicalize dockerfile path %s: %v", relDockerfile, err)
+	}
+
+	f, err := os.Open(filepath.Join(contextDir, ".dockerignore"))
+	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
+	defer f.Close()
 
-	if !dirExists {
-		return nil, fmt.Errorf("directory '%s' does not exist", dir)
-	}
-
-	dockerfileExists, err := exists(path.Join(dir, "Dockerfile"))
-	if err != nil {
-		return nil, err
-	}
-
-	if !dockerfileExists {
-		return nil, ErrDockerfileNotExist
-	}
-
-	var excludePatterns = []string{
-		// do not include the chart directory. That will be packaged separately.
-		"chart",
-	}
-
-	diFd, err := os.Open(path.Join(dir, ".dockerignore"))
+	var excludes []string
 	if err == nil {
-		defer diFd.Close()
-		di, err := dockerignore.ReadAll(diFd)
+		excludes, err = dockerignore.ReadAll(f)
 		if err != nil {
-			return nil, fmt.Errorf("there was an error reading .dockerignore: %v", err)
+			return nil, err
 		}
-		excludePatterns = append(excludePatterns, di...)
-	} else {
-		// log, but don't cry if no dockerignore file exists.
-		log.Debugf("there was an error opening .dockerignore: %v. Ignoring...", err)
 	}
 
-	options := archive.TarOptions{
-		ExcludePatterns: excludePatterns,
-		Compression:     archive.Gzip,
+	// do not include the chart directory. That will be packaged separately.
+	excludes = append(excludes, filepath.Join(contextDir, "chart"))
+
+	if err := builder.ValidateContextDirectory(contextDir, excludes); err != nil {
+		return nil, fmt.Errorf("Error checking docker context: '%s'.", err)
 	}
-	return archive.TarWithOptions(dir, &options)
+
+	// If .dockerignore mentions .dockerignore or the Dockerfile
+	// then make sure we send both files over to the daemon
+	// because Dockerfile is, obviously, needed no matter what, and
+	// .dockerignore is needed to know if either one needs to be
+	// removed. The daemon will remove them for us, if needed, after it
+	// parses the Dockerfile. Ignore errors here, as they will have been
+	// caught by validateContextDirectory above.
+	var includes = []string{"."}
+	keepThem1, _ := fileutils.Matches(".dockerignore", excludes)
+	keepThem2, _ := fileutils.Matches(relDockerfile, excludes)
+	if keepThem1 || keepThem2 {
+		includes = append(includes, ".dockerignore", relDockerfile)
+	}
+
+	log.Debugf("INCLUDES: %v", includes)
+	log.Debugf("EXCLUDES: %v", excludes)
+	return archive.TarWithOptions(contextDir, &archive.TarOptions{
+		Compression:     archive.Gzip,
+		ExcludePatterns: excludes,
+		IncludeFiles:    includes,
+	})
 }
 
 // tarChart archives the directory and returns the archive as an io.ReadCloser.
 func tarChart(dir string) (io.ReadCloser, error) {
-	dirExists, err := exists(path.Join(dir, "chart"))
+	dirExists, err := exists(filepath.Join(dir, "chart"))
 	if err != nil {
 		return nil, err
 	}
