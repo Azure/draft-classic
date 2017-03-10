@@ -191,7 +191,7 @@ func TestUpFromDir(t *testing.T) {
 	if err == nil {
 		t.Error("expected .UpFromDir() with invalid path to fail")
 	}
-	if err.Error() != "directory '/ahsdkfjhaksdf' does not exist" {
+	if err.Error() != "unable to prepare docker context: unable to evaluate symlinks in context path: lstat /ahsdkfjhaksdf: no such file or directory" {
 		t.Errorf("expected .UpFromDir() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
@@ -219,8 +219,8 @@ func TestBadData(t *testing.T) {
 	// don't care about setting up anything because we shouldn't hit the server.
 	client := &Client{}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile", []byte{}); err != ErrDockerfileNotExist {
-		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrDockerfileNotExist, got %v", err)
+	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile", []byte{}); err == nil {
+		t.Error("expected .UpFromDir() with no Dockerfile to return an err")
 	}
 
 	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart", []byte{}); err != ErrChartNotExist {

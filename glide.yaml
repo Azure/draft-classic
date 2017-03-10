@@ -5,7 +5,9 @@ import:
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   vcs: git
 - package: github.com/docker/docker
-  version: v1.13.0
+  version: v17.03.0-ce
+- package: github.com/docker/distribution
+  version: 28602af35aceda2f8d571bad7ca37a54cf0250bc
 - package: github.com/julienschmidt/httprouter
   version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
 - package: github.com/rjeczalik/notify
