@@ -126,6 +126,6 @@ endif
 ifndef HAS_GIT
 	$(error You must install git)
 endif
-	glide install --strip-vendor
+	glide install
 
 include versioning.mk
