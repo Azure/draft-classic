@@ -16,10 +16,12 @@ var (
 	// Update this whenever making a new release.
 	// The release is of the format Major.Minor.Patch[-Prerelease][+BuildMetadata]
 	//
+	// If it is a development build, the release name is called "canary".
+	//
 	// Increment major number for new feature additions and behavioral changes.
 	// Increment minor number for bug fixes and performance enhancements.
 	// Increment patch number for critical fixes to existing releases.
-	Release = "v0.1.0"
+	Release = "canary"
 
 	// BuildMetadata is extra build time data
 	BuildMetadata = ""
