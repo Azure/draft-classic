@@ -1,4 +1,4 @@
 name: prowd
 description: The prow server
-version: 0.1.0
+version: canary
 apiVersion: v1
