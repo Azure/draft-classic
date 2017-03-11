@@ -1,7 +1,7 @@
 # Getting Started
 
 This document shows how to deploy a "Hello World" app with Prow. To follow along, be sure you
-have completed the [Hacking on Prow](hacking.md) guide.
+have completed the [Hacking on Prow](contributing/hacking.md) guide.
 
 ## App setup
 

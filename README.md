@@ -32,7 +32,7 @@ v2.0 license.
 
 
 [Getting Started]: docs/getting-started.md
-[hacking]: docs/hacking.md
+[hacking]: docs/contributing/hacking.md
 [Helm]: https://github.com/kubernetes/helm
 [Kubernetes]: https://kubernetes.io/
 [license]: LICENSE
