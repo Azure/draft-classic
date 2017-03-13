@@ -1,4 +1,5 @@
 bin/
+_dist/
 vendor/
 *.exe
 *.tar.gz
