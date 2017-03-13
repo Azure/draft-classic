@@ -6,8 +6,33 @@ pipeline:
     image: golang:1.8.0
     commands:
       - go get github.com/Masterminds/glide
-      - make bootstrap build docker-binary
+      - make bootstrap build-cross docker-binary
       - make test-unit
+  dist-canary:
+    image: golang:1.8.0
+    commands:
+      - VERSION=canary make dist checksum
+    when:
+      branch: master
+  dist-release:
+    image: golang:1.8.0
+    commands:
+      - VERSION=${DRONE_TAG} make dist checksum
+    when:
+      event: tag
+  dist-upload:
+    image: plugins/s3
+    acl: public-read
+    region: us-east-1
+    bucket: deis-prow
+    access_key: ${AWS_ACCESS_KEY_ID}
+    secret_key: ${AWS_SECRET_ACCESS_KEY}
+    source: _dist/*
+    strip_prefix: _dist/
+    target: /
+    when:
+      branch: master
+      event: tag
   publish-master:
     image: plugins/docker
     repo: quay.io/deis/prowd

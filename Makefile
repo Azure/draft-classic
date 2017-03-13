@@ -9,7 +9,7 @@ APP             = prow
 # go option
 GO        ?= go
 PKG       := $(shell glide novendor)
-TAGS      :=
+TAGS      := kqueue
 TESTS     := .
 TESTFLAGS :=
 LDFLAGS   :=
