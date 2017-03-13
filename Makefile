@@ -99,7 +99,6 @@ clean:
 	-rm rootfs/bin/*
 
 .PHONY: test
-test: build
 test: TESTFLAGS += -race -v
 test: test-unit
 
