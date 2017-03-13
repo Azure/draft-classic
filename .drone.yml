@@ -2,23 +2,22 @@ workspace:
   base: /go
   path: src/github.com/deis/prow
 pipeline:
-  test-unit:
+  test:
     image: golang:1.8.0
     commands:
       - go get github.com/Masterminds/glide
-      - make bootstrap build-cross docker-binary
-      - make test-unit
+      - make bootstrap test
   dist-canary:
     image: golang:1.8.0
     commands:
-      - VERSION=canary make dist checksum
+      - VERSION=canary make build-cross docker-binary dist checksum
     when:
       branch: master
       event: push
   dist-release:
     image: golang:1.8.0
     commands:
-      - VERSION=${DRONE_TAG} make dist checksum
+      - VERSION=${DRONE_TAG} make build-cross docker-binary dist checksum
     when:
       event: tag
   dist-upload:
@@ -34,7 +33,7 @@ pipeline:
     when:
       branch: master
       event: [push, tag]
-  publish-master:
+  docker-canary:
     image: plugins/docker
     repo: quay.io/deis/prowd
     registry: quay.io
@@ -45,7 +44,7 @@ pipeline:
     when:
       branch: master
       event: push
-  publish-release:
+  docker-release:
     image: plugins/docker
     repo: quay.io/deis/prowd
     registry: quay.io
