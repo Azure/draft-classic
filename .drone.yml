@@ -14,6 +14,7 @@ pipeline:
       - VERSION=canary make dist checksum
     when:
       branch: master
+      event: push
   dist-release:
     image: golang:1.8.0
     commands:
@@ -32,7 +33,7 @@ pipeline:
     target: /
     when:
       branch: master
-      event: tag
+      event: [push, tag]
   publish-master:
     image: plugins/docker
     repo: quay.io/deis/prowd
