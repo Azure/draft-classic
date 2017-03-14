@@ -13,11 +13,40 @@ Prow handles the heavy lifting involved in taking source code and deploying it t
 
 ## Usage
 
-### Build Prow
+### Install Prow
 
 Because Prow is currently experimental, there is no stable release out yet and users are expected
-to build the project from source until we get some automation up in here. Please see
-[this doc][hacking] to get started hacking on Prow.
+to be using the latest build of Prow for testing. Canary releases of the Prow client can be found
+at the following links:
+
+ - [Linux amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-linux-amd64.tar.gz)
+ - [macOS amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-darwin-amd64.tar.gz)
+ - [Windows amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-windows-amd64.tar.gz)
+
+Unpack the Prow binary and add it to your PATH and you are good to go!
+
+To install the server-side of Prow, use `prow init` with your credentials to let Prow communicate
+with a Docker registry:
+
+```
+$ prow init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme
+```
+
+The auth token field follows the format of Docker's X-Registry-Auth header. For credential-based
+logins such as Docker Hub and Quay, use
+
+```
+$ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
+```
+
+For token-based logins such as Google Container Registry and Amazon ECR, use
+
+```
+$ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
+```
+
+If you're looking to build from source or get started hacking on Prow, please see the
+[hacking guide][hacking] for more information.
 
 ### Use It!
 
