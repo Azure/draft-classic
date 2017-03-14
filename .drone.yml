@@ -23,7 +23,7 @@ pipeline:
   dist-upload:
     image: plugins/s3
     acl: public-read
-    region: us-east-1
+    region: us-west-2
     bucket: deis-prow
     access_key: ${AWS_ACCESS_KEY_ID}
     secret_key: ${AWS_SECRET_ACCESS_KEY}
