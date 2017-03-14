@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -195,9 +196,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 
 	// load client values as the base config
-	log.Debugf("Helm-Flag-Set:\n%s", r.Header.Get("Helm-Flag-Set"))
-	if err := yaml.Unmarshal([]byte(r.Header.Get("Helm-Flag-Set")), &baseValues); err != nil {
+	log.Debugf("Helm-Flag-Set: %s", r.Header.Get("Helm-Flag-Set"))
+
+	userVals, err := base64.StdEncoding.DecodeString(r.Header.Get("Helm-Flag-Set"))
+	if err != nil {
 		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
+	}
+	if err := yaml.Unmarshal([]byte(userVals), &baseValues); err != nil {
+		http.Error(w, fmt.Sprintf("error while unmarshalling header 'Helm-Flag-Set' to yaml: %v\n", err), http.StatusBadRequest)
 		return
 	}
 
@@ -271,17 +277,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	vals := map[string]string{
-		"name":     appName,
-		"org":      server.RegistryOrg,
-		"registry": server.RegistryURL,
-		"tag":      tag,
-	}
+	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s",
+		appName,
+		server.RegistryOrg,
+		server.RegistryURL,
+		tag)
 
-	for _, value := range vals {
-		if err := strvals.ParseInto(value, baseValues); err != nil {
-			handleClosingError(conn, "Could not inject registry data into values", err)
-		}
+	if err := strvals.ParseInto(imageVals, baseValues); err != nil {
+		handleClosingError(conn, "Could not inject registry data into values", err)
 	}
 
 	rawVals, err := yaml.Marshal(baseValues)
