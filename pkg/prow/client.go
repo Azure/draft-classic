@@ -2,6 +2,7 @@ package prow
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -113,11 +114,10 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("Kubernetes-Namespace", namespace)
-	req.Header.Set("Log-Level", log.GetLevel().String())
 	req.Header.Set("Helm-Flag-Wait", strconv.FormatBool(c.OptionWait))
-	req.Header.Set("Helm-Flag-Set", string(rawVals))
+	req.Header.Set("Helm-Flag-Set", base64.StdEncoding.EncodeToString(rawVals))
 
-	log.Debugf("REQUEST: %s %s", req.Method, req.URL.String())
+	log.Debugf("REQUEST: %s %s %s", req.Method, req.URL.String(), req.Header)
 
 	conn, resp, err := websocket.DefaultDialer.Dial(req)
 	if err == websocket.ErrBadHandshake {
