@@ -192,7 +192,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
-	logLevel := r.Header.Get("Log-Level")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 
 	// load client values as the base config
@@ -204,10 +203,6 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
 		namespace = "default"
-	}
-
-	if logLevel == "" {
-		logLevel = log.GetLevel().String()
 	}
 
 	if r.Method != "POST" {

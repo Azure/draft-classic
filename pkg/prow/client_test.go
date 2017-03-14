@@ -230,22 +230,16 @@ func TestBadData(t *testing.T) {
 
 func TestUpHeaders(t *testing.T) {
 	var expectedNamespace = "testdata"
-	var expectedLogLevel = log.DebugLevel
 	var expectedValues = "hello: world"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Kubernetes-Namespace") != expectedNamespace {
-			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedLogLevel, r.Header.Get("Kubernetes-Namespace"))
-		}
-		if r.Header.Get("Log-Level") != expectedLogLevel.String() {
-			t.Errorf("expected Log-Level = %s, got %s", expectedLogLevel, r.Header.Get("Log-Level"))
+			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedNamespace, r.Header.Get("Kubernetes-Namespace"))
 		}
 		if r.Header.Get("Helm-Flag-Set") != expectedValues {
 			t.Errorf("expected Helm-Flag-Set = '%s', got '%s'", expectedValues, r.Header.Get("Helm-Flag-Set"))
 		}
 	}))
 	defer ts.Close()
-
-	log.SetLevel(expectedLogLevel)
 
 	client, err := NewFromString(ts.URL, nil)
 	if err != nil {

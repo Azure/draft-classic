@@ -113,7 +113,6 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("Kubernetes-Namespace", namespace)
-	req.Header.Set("Log-Level", log.GetLevel().String())
 	req.Header.Set("Helm-Flag-Wait", strconv.FormatBool(c.OptionWait))
 	req.Header.Set("Helm-Flag-Set", string(rawVals))
 
