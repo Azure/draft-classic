@@ -10,14 +10,17 @@ pipeline:
   dist-canary:
     image: golang:1.8.0
     commands:
-      - VERSION=canary make build-cross docker-binary dist checksum
+      - make build-cross docker-binary
+      - VERSION=${DRONE_COMMIT} make dist checksum
+      - VERSION=canary make dist checksum
     when:
       branch: master
       event: push
   dist-release:
     image: golang:1.8.0
     commands:
-      - VERSION=${DRONE_TAG} make build-cross docker-binary dist checksum
+      - make build-cross docker-binary
+      - VERSION=${DRONE_TAG} make dist checksum
     when:
       event: tag
   dist-upload:
