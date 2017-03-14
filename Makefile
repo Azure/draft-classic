@@ -40,8 +40,7 @@ dist:
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
 		$(DIST_DIRS) tar -zcf prow-${VERSION}-{}.tar.gz {} \; && \
-		$(DIST_DIRS) zip -r prow-${VERSION}-{}.zip {} \; && \
-		mv $(APP)-${VERSION}-*.* .. \
+		$(DIST_DIRS) zip -r prow-${VERSION}-{}.zip {} \; \
 	)
 
 .PHONY: checksum
