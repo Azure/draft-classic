@@ -195,6 +195,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 
 	// load client values as the base config
+	log.Debugf("Helm-Flag-Set:\n%s", r.Header.Get("Helm-Flag-Set"))
 	if err := yaml.Unmarshal([]byte(r.Header.Get("Helm-Flag-Set")), &baseValues); err != nil {
 		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
 		return
