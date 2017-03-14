@@ -22,9 +22,9 @@ registry:
   #
   # For credential-based logins, use
   #
-  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64 -w 0
+  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
   #
   # For token-based logins, use
   #
-  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
+  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
   authtoken: changeme
