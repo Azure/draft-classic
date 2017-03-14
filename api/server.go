@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -192,22 +193,23 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	appName := p.ByName("id")
 	server := r.Context().Value("server").(*APIServer)
 	namespace := r.Header.Get("Kubernetes-Namespace")
-	logLevel := r.Header.Get("Log-Level")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 
 	// load client values as the base config
-	if err := yaml.Unmarshal([]byte(r.Header.Get("Helm-Flag-Set")), &baseValues); err != nil {
+	log.Debugf("Helm-Flag-Set: %s", r.Header.Get("Helm-Flag-Set"))
+
+	userVals, err := base64.StdEncoding.DecodeString(r.Header.Get("Helm-Flag-Set"))
+	if err != nil {
 		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
+	}
+	if err := yaml.Unmarshal([]byte(userVals), &baseValues); err != nil {
+		http.Error(w, fmt.Sprintf("error while unmarshalling header 'Helm-Flag-Set' to yaml: %v\n", err), http.StatusBadRequest)
 		return
 	}
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
 		namespace = "default"
-	}
-
-	if logLevel == "" {
-		logLevel = log.GetLevel().String()
 	}
 
 	if r.Method != "POST" {
@@ -275,17 +277,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	vals := map[string]string{
-		"name":     appName,
-		"org":      server.RegistryOrg,
-		"registry": server.RegistryURL,
-		"tag":      tag,
-	}
+	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s",
+		appName,
+		server.RegistryOrg,
+		server.RegistryURL,
+		tag)
 
-	for _, value := range vals {
-		if err := strvals.ParseInto(value, baseValues); err != nil {
-			handleClosingError(conn, "Could not inject registry data into values", err)
-		}
+	if err := strvals.ParseInto(imageVals, baseValues); err != nil {
+		handleClosingError(conn, "Could not inject registry data into values", err)
 	}
 
 	rawVals, err := yaml.Marshal(baseValues)

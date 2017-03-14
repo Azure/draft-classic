@@ -2,6 +2,7 @@ package prow
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -230,28 +231,31 @@ func TestBadData(t *testing.T) {
 
 func TestUpHeaders(t *testing.T) {
 	var expectedNamespace = "testdata"
-	var expectedLogLevel = log.DebugLevel
-	var expectedValues = "hello: world"
+	var expectedValues = `aGVsbG86IHdvcmxkCmdvb2RieWU6IHdvcmxk`
+	var expectedDecodedValues = "hello: world\ngoodbye: world"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Kubernetes-Namespace") != expectedNamespace {
-			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedLogLevel, r.Header.Get("Kubernetes-Namespace"))
+			t.Errorf("expected Kubernetes-Namespace = %s, got %s", expectedNamespace, r.Header.Get("Kubernetes-Namespace"))
 		}
-		if r.Header.Get("Log-Level") != expectedLogLevel.String() {
-			t.Errorf("expected Log-Level = %s, got %s", expectedLogLevel, r.Header.Get("Log-Level"))
+		actualValues := r.Header.Get("Helm-Flag-Set")
+		if actualValues != expectedValues {
+			t.Errorf("expected Helm-Flag-Set = '%s', got '%s'", expectedValues, actualValues)
 		}
-		if r.Header.Get("Helm-Flag-Set") != expectedValues {
-			t.Errorf("expected Helm-Flag-Set = '%s', got '%s'", expectedValues, r.Header.Get("Helm-Flag-Set"))
+		decodedVals, err := base64.StdEncoding.DecodeString(actualValues)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(decodedVals) != expectedDecodedValues {
+			t.Errorf("expected decoded Helm-Flag-Set = '%s', got '%s'", expectedDecodedValues, decodedVals)
 		}
 	}))
 	defer ts.Close()
-
-	log.SetLevel(expectedLogLevel)
 
 	client, err := NewFromString(ts.URL, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good", []byte("hello: world"))
+	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good", []byte("hello: world\ngoodbye: world"))
 }
 
 func TestVersion(t *testing.T) {
