@@ -27,6 +27,8 @@ const (
 	DeploymentName = "deployment.yaml"
 	// ServiceName is the name of the example service file.
 	ServiceName = "service.yaml"
+	// IngressName is the name of the example ingress file.
+	IngressName = "ingress.yaml"
 	// NotesName is the name of the example NOTES.txt file.
 	NotesName = "NOTES.txt"
 	// HelpersName is the name of the example NOTES.txt file.
@@ -130,6 +132,20 @@ spec:
     name: {{ .Values.service.name }}
   selector:
     app: {{ template "fullname" . }}
+`
+
+const defaultIngress = `apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ template "fullname" . }}
+          servicePort: {{ .Values.service.externalPort }}
 `
 
 const defaultNotes = `1. Get the application URL by running these commands:
@@ -253,6 +269,12 @@ func Create(name, dir string) (string, error) {
 			// service.yaml
 			path:    filepath.Join(cdir, TemplatesDir, ServiceName),
 			content: []byte(defaultService),
+			perm:    0644,
+		},
+		{
+			// ingress.yaml
+			path:    filepath.Join(cdir, TemplatesDir, IngressName),
+			content: []byte(defaultIngress),
 			perm:    0644,
 		},
 		{

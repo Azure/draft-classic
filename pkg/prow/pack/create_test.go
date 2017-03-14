@@ -52,7 +52,7 @@ func TestCreate(t *testing.T) {
 		}
 	}
 
-	for _, f := range []string{NotesName, DeploymentName, ServiceName, HelpersName} {
+	for _, f := range []string{NotesName, DeploymentName, ServiceName, IngressName, HelpersName} {
 		if fi, err := os.Stat(filepath.Join(dir, ChartDir, TemplatesDir, f)); err != nil {
 			t.Errorf("Expected %s file: %s", f, err)
 		} else if fi.IsDir() {
