@@ -116,7 +116,7 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	req.Header.Set("Helm-Flag-Wait", strconv.FormatBool(c.OptionWait))
 	req.Header.Set("Helm-Flag-Set", string(rawVals))
 
-	log.Debugf("REQUEST: %s %s", req.Method, req.URL.String())
+	log.Debugf("REQUEST: %s %s %s", req.Method, req.URL.String(), req.Header)
 
 	conn, resp, err := websocket.DefaultDialer.Dial(req)
 	if err == websocket.ErrBadHandshake {
