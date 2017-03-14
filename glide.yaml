@@ -18,4 +18,4 @@ import:
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - package: k8s.io/helm
   # TODO: update to v2.3.0 once that is released
-  version: de6fb23e7ada129b92a6c5dbdac3befbc2f481f1
+  version: 1aee50f5dbc38dcd444b2dfd0f2d46df862892ee
