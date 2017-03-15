@@ -13,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -56,6 +57,9 @@ type APIServer struct {
 	RegistryOrg string
 	// RegistryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
 	RegistryURL string
+	// Requests is a mapping of URLs that are currently being accessed by someone
+	Requests     map[string]bool
+	RequestsLock *sync.Mutex
 }
 
 // Serve starts the HTTP server, accepting all new connections.
@@ -82,7 +86,7 @@ func (s *APIServer) createRouter() {
 			"/version": getVersion,
 		},
 		"POST": {
-			"/apps/:id": buildApp,
+			"/apps/:id": s.BuildMiddleware(buildApp),
 		},
 	}
 
@@ -92,18 +96,43 @@ func (s *APIServer) createRouter() {
 			if route != "/ping" {
 				funct = logRequestMiddleware(funct)
 			}
-			r.Handle(method, route, s.serverMiddleware(funct))
+			r.Handle(method, route, s.ServerMiddleware(funct))
 		}
 	}
 	s.HTTPServer.Handler = r
 }
 
-func (s *APIServer) serverMiddleware(h httprouter.Handle) httprouter.Handle {
+func (s *APIServer) ServerMiddleware(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		// attach the API server to the request params so that it can retrieve info about itself
 		ctx := context.WithValue(r.Context(), "server", s)
 		// Delegate request to the given handle
 		h(w, r.WithContext(ctx), p)
+	}
+}
+
+func (s *APIServer) BuildMiddleware(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		s.RequestsLock.Lock()
+		inUse := s.Requests[r.URL.Path]
+		s.RequestsLock.Unlock()
+		// if the request is currently in use, notify the user and tell them to try again later.
+		if inUse {
+			http.Error(
+				w,
+				fmt.Sprintf("Someone is currently using %s. Please try again later.", r.URL.Path),
+				http.StatusConflict)
+			return
+		}
+		s.RequestsLock.Lock()
+		s.Requests[r.URL.Path] = true
+		s.RequestsLock.Unlock()
+		// Delegate request to the given handle
+		h(w, r, p)
+		// release the URL
+		s.RequestsLock.Lock()
+		s.Requests[r.URL.Path] = false
+		s.RequestsLock.Unlock()
 	}
 }
 
@@ -122,6 +151,8 @@ func NewServer(proto, addr string) (*APIServer, error) {
 		a, err = nil, fmt.Errorf("Invalid protocol format.")
 	}
 	a.createRouter()
+	a.Requests = make(map[string]bool)
+	a.RequestsLock = &sync.Mutex{}
 	return a, err
 }
 
