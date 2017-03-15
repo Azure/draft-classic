@@ -72,8 +72,14 @@ func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 
 	// save Dockerfile
 	dockerfilePath := filepath.Join(dest, DockerfileName)
-	if err := ioutil.WriteFile(dockerfilePath, p.Dockerfile, 0644); err != nil {
+	exists, err := exists(dockerfilePath)
+	if err != nil {
 		return err
+	}
+	if !exists {
+		if err := ioutil.WriteFile(dockerfilePath, p.Dockerfile, 0644); err != nil {
+			return err
+		}
 	}
 
 	if includeDetectScript {
@@ -84,4 +90,16 @@ func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 		}
 	}
 	return nil
+}
+
+// exists returns whether the given file or directory exists or not
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

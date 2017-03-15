@@ -82,18 +82,6 @@ func (c *createCmd) run() error {
 		return nil
 	}
 
-	dockerfileExists, err := exists("Dockerfile")
-	if err != nil {
-		return fmt.Errorf("there was an error checking if a Dockerfile exists: %v", err)
-	}
-	if dockerfileExists {
-		// HALT! A Dockerfile was found, and we don't want to overwrite their work.
-		fmt.Fprintln(c.out, "!!! A Dockerfile was found! Renaming to Dockerfile.old before proceeding")
-		if err := os.Rename("Dockerfile", "Dockerfile.old"); err != nil {
-			return err
-		}
-	}
-
 	if c.pack != "" {
 		// --pack was explicitly defined, so we can just lazily use that here. No detection required.
 		lpack := filepath.Join(c.home.Packs(), c.pack)
