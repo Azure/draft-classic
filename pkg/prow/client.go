@@ -22,6 +22,7 @@ import (
 	"github.com/docker/docker/pkg/fileutils"
 	"github.com/gorilla/websocket"
 
+	"github.com/deis/prow/pkg/osutil"
 	"github.com/deis/prow/pkg/version"
 )
 
@@ -188,18 +189,6 @@ func (c *Client) Version() (*version.Version, error) {
 	return &ver, err
 }
 
-// exists returns whether the given file or directory exists or not
-func exists(dir string) (bool, error) {
-	_, err := os.Stat(dir)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
-
 // tarBuildContext archives the given directory and returns the archive as an io.ReadCloser.
 func tarBuildContext(dir string) (io.ReadCloser, error) {
 	contextDir, relDockerfile, err := builder.GetContextFromLocalDir(dir, "")
@@ -260,7 +249,7 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 
 // tarChart archives the directory and returns the archive as an io.ReadCloser.
 func tarChart(dir string) (io.ReadCloser, error) {
-	dirExists, err := exists(filepath.Join(dir, "chart"))
+	dirExists, err := osutil.Exists(filepath.Join(dir, "chart"))
 	if err != nil {
 		return nil, err
 	}
