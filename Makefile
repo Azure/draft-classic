@@ -103,7 +103,7 @@ test: test-unit
 
 .PHONY: test-unit
 test-unit:
-	$(GO) test $(GOFLAGS) -run $(TESTS) $(PKG) $(TESTFLAGS)
+	$(GO) test $(GOFLAGS) -cover -run $(TESTS) $(PKG) $(TESTFLAGS)
 
 .PHONY: test-e2e
 test-e2e:
