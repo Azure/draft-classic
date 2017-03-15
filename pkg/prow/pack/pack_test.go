@@ -1,10 +1,15 @@
 package pack
 
 import (
+	"bytes"
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 const appPythonPath = "testdata/app-python"
@@ -75,5 +80,71 @@ echo $1`)
 	}
 	if output != expectedOutput {
 		t.Errorf("expected '%s', got '%s'", expectedOutput, output)
+	}
+}
+
+func TestSaveDir(t *testing.T) {
+	p := &Pack{
+		Chart: &chart.Chart{
+			Metadata: &chart.Metadata{
+				Name: "chart-for-nigel-thornberry",
+			},
+		},
+		Dockerfile:   []byte(defaultDockerfile),
+		DetectScript: []byte(defaultDetect),
+	}
+	dir, err := ioutil.TempDir("", "prow-pack-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	if err := p.SaveDir(dir, false); err != nil {
+		t.Errorf("expected there to be no error when writing to %v, got %v", dir, err)
+	}
+
+	detectPath := filepath.Join(dir, DetectName)
+	exists, err := exists(detectPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		t.Error("expected SaveDir(dir, false) to not write the detect script to the resultant directory")
+	}
+}
+
+func TestSaveDirDockerfileExists(t *testing.T) {
+	p := &Pack{
+		Chart: &chart.Chart{
+			Metadata: &chart.Metadata{
+				Name: "chart-for-nigel-thornberry",
+			},
+		},
+		Dockerfile:   []byte(defaultDockerfile),
+		DetectScript: []byte(defaultDetect),
+	}
+	dir, err := ioutil.TempDir("", "prow-pack-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	tmpfn := filepath.Join(dir, "Dockerfile")
+	expectedDockerfile := []byte("FROM prow")
+	if err := ioutil.WriteFile(tmpfn, expectedDockerfile, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := p.SaveDir(dir, false); err != nil {
+		t.Errorf("expected there to be no error when writing to %v, got %v", dir, err)
+	}
+
+	savedDockerfile, err := ioutil.ReadFile(tmpfn)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(savedDockerfile, expectedDockerfile) {
+		t.Errorf("expected '%s', got '%s'", string(expectedDockerfile), string(savedDockerfile))
 	}
 }

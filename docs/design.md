@@ -26,7 +26,6 @@ $ ls
 Dockerfile
 src/
 $ prow create
-!!! A Dockerfile was found! Renaming to Dockerfile.old before proceeding
 --> Default app detected
 --> Ready to sail
 $ ls
