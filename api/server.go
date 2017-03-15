@@ -28,8 +28,8 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/storage/driver"
+	"k8s.io/helm/pkg/strvals"
 
-	"github.com/deis/prow/pkg/strvals"
 	"github.com/deis/prow/pkg/version"
 )
 

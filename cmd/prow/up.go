@@ -13,10 +13,10 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
+	"k8s.io/helm/pkg/strvals"
 
 	"github.com/deis/prow/pkg/prow"
 	"github.com/deis/prow/pkg/prow/pack"
-	"github.com/deis/prow/pkg/strvals"
 )
 
 const upDesc = `
