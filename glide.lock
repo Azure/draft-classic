@@ -1,5 +1,5 @@
-hash: e29dc4ad0d608bd00f97ee68fed1639d45c8a9e706836860f87b2beecf81aae2
-updated: 2017-03-10T13:36:45.698760721-08:00
+hash: 6fe4509092f17817a3150db3334d94863eb54bd175668127b915c4ff0be3a06c
+updated: 2017-03-14T15:05:57.356293973-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -234,6 +234,12 @@ imports:
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
+- name: github.com/naoina/go-stringutil
+  version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
+- name: github.com/naoina/toml
+  version: 751171607256bb66e64c9f0220c00662420c38e9
+  subpackages:
+  - ast
 - name: github.com/opencontainers/runc
   version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
@@ -269,7 +275,7 @@ imports:
   - codec
   - codec/codecgen
 - name: github.com/vbatts/tar-split
-  version: bd4c5d64c3e9297f410025a3b1bd0c58f659e721
+  version: b9127a139315e57ebc26030e7decf72d0a20acb4
   subpackages:
   - archive/tar
   - tar/asm
@@ -354,9 +360,9 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
 - name: k8s.io/helm
-  version: de6fb23e7ada129b92a6c5dbdac3befbc2f481f1
+  version: 1aee50f5dbc38dcd444b2dfd0f2d46df862892ee
   subpackages:
   - pkg/chartutil
   - pkg/engine
@@ -372,6 +378,7 @@ imports:
   - pkg/releaseutil
   - pkg/storage
   - pkg/storage/driver
+  - pkg/strvals
   - pkg/tiller/environment
   - pkg/version
 - name: k8s.io/kubernetes
