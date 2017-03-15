@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"github.com/deis/prow/pkg/osutil"
 )
 
 const appPythonPath = "testdata/app-python"
@@ -104,7 +106,7 @@ func TestSaveDir(t *testing.T) {
 	}
 
 	detectPath := filepath.Join(dir, DetectName)
-	exists, err := exists(detectPath)
+	exists, err := osutil.Exists(detectPath)
 	if err != nil {
 		t.Fatal(err)
 	}

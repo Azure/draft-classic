@@ -13,6 +13,7 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
+	"github.com/deis/prow/pkg/osutil"
 	"github.com/deis/prow/pkg/prow/pack"
 	"github.com/deis/prow/pkg/prow/prowpath"
 )
@@ -71,7 +72,7 @@ func (c *createCmd) run() error {
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	chartExists, err := exists("chart")
+	chartExists, err := osutil.Exists("chart")
 	if err != nil {
 		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
@@ -127,16 +128,4 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) 
 		}
 	}
 	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
-}
-
-// exists returns whether the given file or directory exists or not
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

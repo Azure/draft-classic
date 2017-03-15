@@ -11,6 +11,8 @@ import (
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"github.com/deis/prow/pkg/osutil"
 )
 
 // Pack defines a Prow Starter Pack.
@@ -72,7 +74,7 @@ func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 
 	// save Dockerfile
 	dockerfilePath := filepath.Join(dest, DockerfileName)
-	exists, err := exists(dockerfilePath)
+	exists, err := osutil.Exists(dockerfilePath)
 	if err != nil {
 		return err
 	}
@@ -90,16 +92,4 @@ func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 		}
 	}
 	return nil
-}
-
-// exists returns whether the given file or directory exists or not
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }
