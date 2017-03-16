@@ -40,3 +40,21 @@ func TestFromDir(t *testing.T) {
 		t.Errorf("expected detect == expected, got '%v'", pack.DetectScript)
 	}
 }
+
+func TestFromDirNoDetect(t *testing.T) {
+	pack, err := FromDir("testdata/pack-python-no-detect")
+	if err != nil {
+		t.Fatalf("could not load python pack: %v", err)
+	}
+	if pack.Chart == nil {
+		t.Errorf("expected chart to be non-nil")
+	}
+
+	if string(pack.Dockerfile) != expectedDockerfile {
+		t.Errorf("expected dockerfile == expected, got '%v'", pack.Dockerfile)
+	}
+
+	if pack.DetectScript != nil {
+		t.Errorf("expected detect to be nil, got '%v'", pack.DetectScript)
+	}
+}
