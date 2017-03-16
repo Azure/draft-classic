@@ -11,6 +11,8 @@ import (
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"github.com/deis/prow/pkg/osutil"
 )
 
 // Pack defines a Prow Starter Pack.
@@ -72,8 +74,14 @@ func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 
 	// save Dockerfile
 	dockerfilePath := filepath.Join(dest, DockerfileName)
-	if err := ioutil.WriteFile(dockerfilePath, p.Dockerfile, 0644); err != nil {
+	exists, err := osutil.Exists(dockerfilePath)
+	if err != nil {
 		return err
+	}
+	if !exists {
+		if err := ioutil.WriteFile(dockerfilePath, p.Dockerfile, 0644); err != nil {
+			return err
+		}
 	}
 
 	if includeDetectScript {

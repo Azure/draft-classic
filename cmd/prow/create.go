@@ -13,6 +13,7 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
+	"github.com/deis/prow/pkg/osutil"
 	"github.com/deis/prow/pkg/prow/pack"
 	"github.com/deis/prow/pkg/prow/prowpath"
 )
@@ -71,7 +72,7 @@ func (c *createCmd) run() error {
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	chartExists, err := exists("chart")
+	chartExists, err := osutil.Exists("chart")
 	if err != nil {
 		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
@@ -80,18 +81,6 @@ func (c *createCmd) run() error {
 		// process.
 		fmt.Fprintln(c.out, "--> chart/ already exists. Ready to sail!")
 		return nil
-	}
-
-	dockerfileExists, err := exists("Dockerfile")
-	if err != nil {
-		return fmt.Errorf("there was an error checking if a Dockerfile exists: %v", err)
-	}
-	if dockerfileExists {
-		// HALT! A Dockerfile was found, and we don't want to overwrite their work.
-		fmt.Fprintln(c.out, "!!! A Dockerfile was found! Renaming to Dockerfile.old before proceeding")
-		if err := os.Rename("Dockerfile", "Dockerfile.old"); err != nil {
-			return err
-		}
 	}
 
 	if c.pack != "" {
@@ -139,16 +128,4 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) 
 		}
 	}
 	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
-}
-
-// exists returns whether the given file or directory exists or not
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }
