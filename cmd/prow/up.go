@@ -178,6 +178,7 @@ func (u *upCmd) run(environment string) (err error) {
 	if !env.Watch {
 		return nil
 	}
+	fmt.Fprintln(u.Out, "Watching local files for changes...")
 
 	notifyPath := filepath.Join(cwd, "...")
 	log.Debugf("NOTIFY PATH: %s", notifyPath)
