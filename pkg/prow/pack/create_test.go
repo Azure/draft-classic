@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 const packName = "foo"
@@ -68,4 +69,20 @@ func TestCreate(t *testing.T) {
 		}
 	}
 
+}
+
+func TestCreateFrom(t *testing.T) {
+	tdir, err := ioutil.TempDir("", "pack-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tdir)
+
+	if err := CreateFrom(&chart.Metadata{Name: "foo"}, tdir, "testdata/pack-python"); err != nil {
+		t.Errorf("expected err to be nil, got %v", err)
+	}
+
+	if err := CreateFrom(&chart.Metadata{Name: "foo"}, tdir, "testdata/pack-does-not-exist"); err == nil {
+		t.Error("expected err to be non-nil with an invalid source pack")
+	}
 }
