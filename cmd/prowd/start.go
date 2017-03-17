@@ -93,11 +93,11 @@ func (c *startCmd) run() error {
 
 	clientset, config, err := getKubeClient("")
 	if err != nil {
-		return fmt.Errorf("Could not get a kube client", err)
+		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
 	tunnel, err := portforwarder.New(tillerNamespace, clientset, config)
 	if err != nil {
-		return fmt.Errorf("Could not get a connection to tiller", err)
+		return fmt.Errorf("Could not get a connection to tiller: %s", err)
 	}
 
 	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
@@ -118,7 +118,7 @@ func (c *startCmd) run() error {
 func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
 	config, err := kube.GetConfig(context).ClientConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s\n", context, err)
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
 	}
 	client, err := internalclientset.NewForConfig(config)
 	if err != nil {
