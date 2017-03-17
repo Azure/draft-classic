@@ -5,8 +5,8 @@ pipeline:
   test:
     image: golang:1.8.0
     commands:
-      - go get github.com/Masterminds/glide
-      - make bootstrap test
+      - make bootstrap
+      - make test
   dist-canary:
     image: golang:1.8.0
     commands:
