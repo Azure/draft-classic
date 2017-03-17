@@ -13,7 +13,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -58,9 +57,6 @@ type Server struct {
 	RegistryOrg string
 	// RegistryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
 	RegistryURL string
-	// Requests is a mapping of URLs that are currently being accessed by someone
-	Requests     map[string]bool
-	RequestsLock *sync.Mutex
 }
 
 // Serve starts the HTTP server, accepting all new connections.
@@ -87,7 +83,7 @@ func (s *Server) createRouter() {
 			"/version": getVersion,
 		},
 		"POST": {
-			"/apps/:id": s.BuildMiddleware(buildApp),
+			"/apps/:id": buildApp,
 		},
 	}
 
@@ -119,32 +115,6 @@ func (s *Server) Middleware(h httprouter.Handle) httprouter.Handle {
 	}
 }
 
-// BuildMiddleware runs additional logic before handling build-related requests
-func (s *Server) BuildMiddleware(h httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		s.RequestsLock.Lock()
-		inUse := s.Requests[r.URL.Path]
-		s.RequestsLock.Unlock()
-		// if the request is currently in use, notify the user and tell them to try again later.
-		if inUse {
-			http.Error(
-				w,
-				fmt.Sprintf("Someone is currently using %s. Please try again later.", r.URL.Path),
-				http.StatusConflict)
-			return
-		}
-		s.RequestsLock.Lock()
-		s.Requests[r.URL.Path] = true
-		s.RequestsLock.Unlock()
-		// Delegate request to the given handle
-		h(w, r, p)
-		// release the URL
-		s.RequestsLock.Lock()
-		s.Requests[r.URL.Path] = false
-		s.RequestsLock.Unlock()
-	}
-}
-
 // NewServer sets up the required Server and does protocol specific checking.
 func NewServer(proto, addr string) (*Server, error) {
 	var (
@@ -160,8 +130,6 @@ func NewServer(proto, addr string) (*Server, error) {
 		a, err = nil, fmt.Errorf("invalid protocol format")
 	}
 	a.createRouter()
-	a.Requests = make(map[string]bool)
-	a.RequestsLock = &sync.Mutex{}
 	return a, err
 }
 
