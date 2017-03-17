@@ -150,32 +150,33 @@ That's it! You're now running your app in a Kubernetes cluster.
 // this file left intentionally blank.
 const prowHelpers = ``
 
+// DefaultChartFiles represent the default chart files relevant to a Prow chart installation
 var DefaultChartFiles = []*chartutil.BufferedFile{
-	&chartutil.BufferedFile{
+	{
 		Name: chartutil.ChartfileName,
 		Data: []byte(fmt.Sprintf(prowChart, version.Release)),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: chartutil.ValuesfileName,
 		Data: []byte(fmt.Sprintf(prowValues, version.Release)),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: chartutil.IgnorefileName,
 		Data: []byte(prowIgnore),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: path.Join(chartutil.TemplatesDir, chartutil.DeploymentName),
 		Data: []byte(prowDeployment),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: path.Join(chartutil.TemplatesDir, chartutil.ServiceName),
 		Data: []byte(prowService),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: path.Join(chartutil.TemplatesDir, chartutil.NotesName),
 		Data: []byte(prowNotes),
 	},
-	&chartutil.BufferedFile{
+	{
 		Name: path.Join(chartutil.TemplatesDir, chartutil.HelpersName),
 		Data: []byte(prowHelpers),
 	},

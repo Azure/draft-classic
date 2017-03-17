@@ -30,7 +30,7 @@ stopped before uploading, but that can be altered by the "--watch-delay" flag.
 
 const (
 	environmentEnvVar      = "PROW_ENV"
-	DefaultEnvironmentName = "development"
+	defaultEnvironmentName = "development"
 )
 
 type upCmd struct {
@@ -39,6 +39,7 @@ type upCmd struct {
 	Environments map[string]*Environment `json:"environments"`
 }
 
+// Environment represents the environment for a given app at build time
 type Environment struct {
 	AppName           string   `json:"name,omitempty"`
 	BuildTarPath      string   `json:"build_tar,omitempty"`
@@ -116,7 +117,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (e *Environment) Vals(cwd string) ([]byte, error) {
+func (e *Environment) vals(cwd string) ([]byte, error) {
 	base := map[string]interface{}{}
 
 	// load $PWD/chart/values.yaml as the base config
@@ -165,7 +166,7 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 	u.Client.OptionWait = env.Wait
 
-	rawVals, err := env.Vals(cwd)
+	rawVals, err := env.vals(cwd)
 	if err != nil {
 		return err
 	}
@@ -237,7 +238,7 @@ func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
 func defaultProwEnvironment() string {
 	env := os.Getenv(environmentEnvVar)
 	if env == "" {
-		env = DefaultEnvironmentName
+		env = defaultEnvironmentName
 	}
 	return env
 }

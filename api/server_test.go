@@ -65,11 +65,10 @@ func TestBuildMiddleware(t *testing.T) {
 	}
 	responseCodeCount := make(map[int]int)
 	for i := 0; i < numRequests; i++ {
-		select {
-		case code := <-responseCodes:
-			responseCodeCount[code]++
-		}
+		code := <-responseCodes
+		responseCodeCount[code]++
 	}
+
 	if responseCodeCount[http.StatusOK] != 2 {
 		t.Errorf("expected there to be %dx '200 OK' responses, got %d", 2, responseCodeCount[http.StatusOK])
 	}
@@ -83,10 +82,8 @@ func TestBuildMiddleware(t *testing.T) {
 	go getCode(srv, barReq, responseCodes)
 
 	for i := 0; i < 2; i++ {
-		select {
-		case code := <-responseCodes:
-			responseCodeCount[code]++
-		}
+		code := <-responseCodes
+		responseCodeCount[code]++
 	}
 
 	if responseCodeCount[http.StatusOK] != 4 {
@@ -94,7 +91,7 @@ func TestBuildMiddleware(t *testing.T) {
 	}
 }
 
-func getCode(srv *APIServer, req *http.Request, responseCodeChan chan int) {
+func getCode(srv *Server, req *http.Request, responseCodeChan chan int) {
 	r := httptest.NewRecorder()
 	srv.ServeRequest(r, req)
 	responseCodeChan <- r.Code

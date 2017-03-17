@@ -99,7 +99,11 @@ clean:
 
 .PHONY: test
 test: TESTFLAGS += -race -v
-test: test-unit
+test: test-lint test-unit
+
+.PHONY: test-lint
+test-lint:
+	_scripts/lint.sh
 
 .PHONY: test-unit
 test-unit:
@@ -109,12 +113,17 @@ test-unit:
 test-e2e:
 	./tests/e2e.sh
 
+HAS_GOMETALINTER := $(shell command -v gometalinter;)
 HAS_GLIDE := $(shell command -v glide;)
 HAS_GOX := $(shell command -v gox;)
 HAS_GIT := $(shell command -v git;)
 
 .PHONY: bootstrap
 bootstrap:
+ifndef HAS_GOMETALINTER
+	go get -u github.com/alecthomas/gometalinter
+	gometalinter --install
+endif
 ifndef HAS_GLIDE
 	go get -u github.com/Masterminds/glide
 endif
