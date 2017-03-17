@@ -34,6 +34,7 @@ import (
 	"github.com/deis/prow/pkg/version"
 )
 
+// WebsocketUpgrader represents the default websocket.Upgrader that prow employs
 var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
 	// reduce the WriteBufferSize so `docker build` and `docker push` responses aren't internally
@@ -42,8 +43,8 @@ var WebsocketUpgrader = websocket.Upgrader{
 	WriteBufferSize: 128,
 }
 
-// APIServer is an API Server which listens and responds to HTTP requests.
-type APIServer struct {
+// Server is an API Server which listens and responds to HTTP requests.
+type Server struct {
 	HTTPServer   *http.Server
 	Listener     net.Listener
 	DockerClient *docker.Client
@@ -63,21 +64,21 @@ type APIServer struct {
 }
 
 // Serve starts the HTTP server, accepting all new connections.
-func (s *APIServer) Serve() error {
+func (s *Server) Serve() error {
 	return s.HTTPServer.Serve(s.Listener)
 }
 
 // Close shuts down the HTTP server, dropping all current connections.
-func (s *APIServer) Close() error {
+func (s *Server) Close() error {
 	return s.Listener.Close()
 }
 
 // ServeRequest processes a single HTTP request.
-func (s *APIServer) ServeRequest(w http.ResponseWriter, req *http.Request) {
+func (s *Server) ServeRequest(w http.ResponseWriter, req *http.Request) {
 	s.HTTPServer.Handler.ServeHTTP(w, req)
 }
 
-func (s *APIServer) createRouter() {
+func (s *Server) createRouter() {
 	r := httprouter.New()
 
 	routerMap := map[string]map[string]httprouter.Handle{
@@ -96,22 +97,30 @@ func (s *APIServer) createRouter() {
 			if route != "/ping" {
 				funct = logRequestMiddleware(funct)
 			}
-			r.Handle(method, route, s.ServerMiddleware(funct))
+			r.Handle(method, route, s.Middleware(funct))
 		}
 	}
 	s.HTTPServer.Handler = r
 }
 
-func (s *APIServer) ServerMiddleware(h httprouter.Handle) httprouter.Handle {
+type contextKey string
+
+func (c contextKey) String() string {
+	return "api context key " + string(c)
+}
+
+// Middleware adds additional context before handling requests
+func (s *Server) Middleware(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		// attach the API server to the request params so that it can retrieve info about itself
-		ctx := context.WithValue(r.Context(), "server", s)
+		ctx := context.WithValue(r.Context(), contextKey("server"), s)
 		// Delegate request to the given handle
 		h(w, r.WithContext(ctx), p)
 	}
 }
 
-func (s *APIServer) BuildMiddleware(h httprouter.Handle) httprouter.Handle {
+// BuildMiddleware runs additional logic before handling build-related requests
+func (s *Server) BuildMiddleware(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		s.RequestsLock.Lock()
 		inUse := s.Requests[r.URL.Path]
@@ -137,9 +146,9 @@ func (s *APIServer) BuildMiddleware(h httprouter.Handle) httprouter.Handle {
 }
 
 // NewServer sets up the required Server and does protocol specific checking.
-func NewServer(proto, addr string) (*APIServer, error) {
+func NewServer(proto, addr string) (*Server, error) {
 	var (
-		a   *APIServer
+		a   *Server
 		err error
 	)
 	switch proto {
@@ -148,7 +157,7 @@ func NewServer(proto, addr string) (*APIServer, error) {
 	case "unix":
 		a, err = setupUnixHTTP(addr)
 	default:
-		a, err = nil, fmt.Errorf("Invalid protocol format.")
+		a, err = nil, fmt.Errorf("invalid protocol format")
 	}
 	a.createRouter()
 	a.Requests = make(map[string]bool)
@@ -156,20 +165,20 @@ func NewServer(proto, addr string) (*APIServer, error) {
 	return a, err
 }
 
-func setupTCPHTTP(addr string) (*APIServer, error) {
+func setupTCPHTTP(addr string) (*Server, error) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 
-	a := &APIServer{
+	a := &Server{
 		HTTPServer: &http.Server{Addr: addr},
 		Listener:   l,
 	}
 	return a, nil
 }
 
-func setupUnixHTTP(addr string) (*APIServer, error) {
+func setupUnixHTTP(addr string) (*Server, error) {
 	if err := syscall.Unlink(addr); err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
@@ -185,7 +194,7 @@ func setupUnixHTTP(addr string) (*APIServer, error) {
 		return nil, err
 	}
 
-	a := &APIServer{
+	a := &Server{
 		HTTPServer: &http.Server{Addr: addr},
 		Listener:   l,
 	}
@@ -222,7 +231,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var imagePrefix string
 	baseValues := map[string]interface{}{}
 	appName := p.ByName("id")
-	server := r.Context().Value("server").(*APIServer)
+	server := r.Context().Value("server").(*Server)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 

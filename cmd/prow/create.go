@@ -21,8 +21,6 @@ import (
 const (
 	createDesc = `This command transforms the local directory to be deployable via 'prow up'.
 `
-	defaultDockerfile = `FROM nginx:latest
-`
 )
 
 type createCmd struct {
@@ -87,6 +85,9 @@ func (c *createCmd) run() error {
 		// --pack was explicitly defined, so we can just lazily use that here. No detection required.
 		lpack := filepath.Join(c.home.Packs(), c.pack)
 		err = pack.CreateFrom(cfile, "", lpack)
+		if err != nil {
+			return err
+		}
 	} else {
 		// pack detection time
 		packPath, output, err := doPackDetection(c.home.Packs(), c.out)
@@ -96,10 +97,11 @@ func (c *createCmd) run() error {
 		}
 		fmt.Fprintf(c.out, "--> %s app detected\n", output)
 		err = pack.CreateFrom(cfile, "", packPath)
+		if err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
+
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
 }

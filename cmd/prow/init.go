@@ -137,11 +137,11 @@ func (i *initCmd) run() error {
 		if i.helmClient == nil {
 			clientset, config, err := getKubeClient(kubeContext)
 			if err != nil {
-				return fmt.Errorf("Could not get a kube client", err)
+				return fmt.Errorf("Could not get a kube client: %s", err)
 			}
 			tunnel, err := portforwarder.New(i.tillerNamespace, clientset, config)
 			if err != nil {
-				return fmt.Errorf("Could not get a connection to tiller", err)
+				return fmt.Errorf("Could not get a connection to tiller: %s", err)
 			}
 			i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 		}
