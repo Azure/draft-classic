@@ -221,7 +221,7 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 	excludes = append(excludes, filepath.Join(contextDir, "chart"))
 
 	if err := builder.ValidateContextDirectory(contextDir, excludes); err != nil {
-		return nil, fmt.Errorf("Error checking docker context: '%s'.", err)
+		return nil, fmt.Errorf("error checking docker context: '%s'", err)
 	}
 
 	// If .dockerignore mentions .dockerignore or the Dockerfile
