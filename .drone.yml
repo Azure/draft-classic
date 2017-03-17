@@ -23,7 +23,7 @@ pipeline:
       - VERSION=${DRONE_TAG} make dist checksum
     when:
       event: tag
-  dist-upload:
+  dist-upload-canary:
     image: plugins/s3
     acl: public-read
     region: us-west-2
@@ -35,7 +35,19 @@ pipeline:
     target: /
     when:
       branch: master
-      event: [push, tag]
+      event: push
+  dist-upload-release:
+    image: plugins/s3
+    acl: public-read
+    region: us-west-2
+    bucket: deis-prow
+    access_key: ${AWS_ACCESS_KEY_ID}
+    secret_key: ${AWS_SECRET_ACCESS_KEY}
+    source: _dist/*
+    strip_prefix: _dist/
+    target: /
+    when:
+      event: tag
   docker-canary:
     image: plugins/docker
     repo: quay.io/deis/prowd
