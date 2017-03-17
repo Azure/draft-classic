@@ -6,8 +6,8 @@ image:
   registry: quay.io
   org: deis
   name: prowd
-  tag: canary
-  pullPolicy: Always
+  tag: v0.2.0-rc5
+  pullPolicy: IfNotPresent
 debug: false
 service:
   http:
