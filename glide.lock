@@ -1,5 +1,5 @@
-hash: 6fe4509092f17817a3150db3334d94863eb54bd175668127b915c4ff0be3a06c
-updated: 2017-03-14T15:05:57.356293973-07:00
+hash: 6a58667bd17474458accb75c6f12f2b8239e0d36e943776691e86195447c2f0c
+updated: 2017-03-20T15:24:38.386672516-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -139,7 +139,7 @@ imports:
 - name: github.com/facebookgo/symwalk
   version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+  version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -229,7 +229,7 @@ imports:
 - name: github.com/Masterminds/semver
   version: 59c29afe1a994eacb71c833025ca7acf874bb1da
 - name: github.com/Masterminds/sprig
-  version: 2d2df7bd8bda53b5a55ed04422173cedd50500ea
+  version: 23597e5f6ad0e4d590e71314bfd0251a4a3cf849
 - name: github.com/Microsoft/go-winio
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
