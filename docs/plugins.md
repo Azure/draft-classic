@@ -58,7 +58,7 @@ that adds support for Keybase operations:
 ```
 name: "keybase"
 version: "0.1.0"
-usage: "Integreate Keybase.io tools with Draft"
+usage: "Integrate Keybase.io tools with Draft"
 description: |-
   This plugin provides Keybase services to Draft.
 ignoreFlags: false
