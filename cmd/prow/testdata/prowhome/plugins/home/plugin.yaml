@@ -1,0 +1,4 @@
+name: home
+usage: "home stuff"
+description: "show PROW_HOME"
+command: "echo $PROW_HOME"

@@ -57,6 +57,11 @@ func TestLoadPlugins(t *testing.T) {
 
 	out := bytes.NewBuffer(nil)
 	cmd := &cobra.Command{}
+	// add `--home` flag to cmd (which is what cmd.Parent() resolves to for the loaded plugin)
+	// so that it can be overridden in tests below
+	p := cmd.PersistentFlags()
+	p.StringVar(&prowHome, "home", prowHome, "location of your Prow config. Overrides $PROW_HOME")
+
 	loadPlugins(cmd, ph, out)
 
 	envs := strings.Join([]string{
@@ -67,18 +72,32 @@ func TestLoadPlugins(t *testing.T) {
 		os.Args[0],
 	}, "\n")
 
-	// Test that the YAML file was correctly converted to a command.
-	tests := []struct {
-		use    string
-		short  string
-		long   string
+	// testVariant represents an expect and args variant of a given test/plugin
+	type testVariant struct {
 		expect string
 		args   []string
+	}
+
+	// Test that the YAML file was correctly converted to a command.
+	tests := []struct {
+		use      string
+		short    string
+		long     string
+		variants []testVariant
 	}{
-		{"args", "echo args", "This echos args", "-a -b -c\n", []string{"-a", "-b", "-c"}},
-		{"echo", "echo stuff", "This echos stuff", "hello\n", []string{}},
-		{"env", "env stuff", "show the env", ph.String() + "\n", []string{}},
-		{"fullenv", "show env vars", "show all env vars", envs + "\n", []string{}},
+		{"args", "echo args", "This echos args", []testVariant{
+			{expect: "-a -b -c\n", args: []string{"-a", "-b", "-c"}},
+		}},
+		{"echo", "echo stuff", "This echos stuff", []testVariant{
+			{expect: "hello\n", args: []string{}},
+		}},
+		{"fullenv", "show env vars", "show all env vars", []testVariant{
+			{expect: envs + "\n", args: []string{}},
+		}},
+		{"home", "home stuff", "show PROW_HOME", []testVariant{
+			{expect: ph.String() + "\n", args: []string{}},
+			{expect: "/my/prow/home\n", args: []string{"--home", "/my/prow/home"}},
+		}},
 	}
 
 	plugins := cmd.Commands()
@@ -88,7 +107,6 @@ func TestLoadPlugins(t *testing.T) {
 	}
 
 	for i := 0; i < len(plugins); i++ {
-		out.Reset()
 		tt := tests[i]
 		pp := plugins[i]
 		if pp.Use != tt.use {
@@ -101,14 +119,17 @@ func TestLoadPlugins(t *testing.T) {
 			t.Errorf("%d: Expected Use=%q, got %q", i, tt.long, pp.Long)
 		}
 
-		// Currently, plugins assume a Linux subsystem. Skip the execution
-		// tests until this is fixed
-		if runtime.GOOS != "windows" {
-			if err := pp.RunE(pp, tt.args); err != nil {
-				t.Errorf("Error running %s: %s", tt.use, err)
-			}
-			if out.String() != tt.expect {
-				t.Errorf("Expected %s to output:\n%s\ngot\n%s", tt.use, tt.expect, out.String())
+		for _, variant := range tt.variants {
+			out.Reset()
+			// Currently, plugins assume a Linux subsystem. Skip the execution
+			// tests until this is fixed
+			if runtime.GOOS != "windows" {
+				if err := pp.RunE(pp, variant.args); err != nil {
+					t.Errorf("Error running %s: %s", tt.use, err)
+				}
+				if out.String() != variant.expect {
+					t.Errorf("Expected %s to output:\n%s\ngot\n%s", tt.use, variant.expect, out.String())
+				}
 			}
 		}
 	}
