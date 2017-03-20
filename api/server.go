@@ -199,7 +199,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var imagePrefix string
 	baseValues := map[string]interface{}{}
 	appName := p.ByName("id")
-	server := r.Context().Value("server").(*Server)
+	server := r.Context().Value(contextKey("server")).(*Server)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
 
