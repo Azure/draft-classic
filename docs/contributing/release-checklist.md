@@ -84,15 +84,40 @@ This new branch is going to be the base for the release, which we are going to i
 
 Package `pkg/version` stores release-related information for Prow, including which version of
 `prowd` is installed when running `prow init`. We want to change the `Release` field to the first
-release candidate which we are releasing (more on that in step 5).
+release candidate which we are releasing (more on that in step 5), along with a few chart-related
+fields.
 
 ```
-$ git diff pkg/
+diff --git a/chart/Chart.yaml b/chart/Chart.yaml
+index 122df44..259724c 100644
+--- a/chart/Chart.yaml
++++ b/chart/Chart.yaml
+@@ -1,4 +1,4 @@
+ name: prowd
+ description: The prow server
+-version: canary
++version: v0.2.0-rc1
+ apiVersion: v1
+diff --git a/chart/values.yaml b/chart/values.yaml
+index cd80a4a..f90a963 100644
+--- a/chart/values.yaml
++++ b/chart/values.yaml
+@@ -6,8 +6,8 @@ image:
+   registry: quay.io
+   org: deis
+   name: prowd
+-  tag: canary
+-  pullPolicy: Always
++  tag: v0.2.0-rc1
++  pullPolicy: IfNotPresent
+ debug: false
+ service:
+   http:
 diff --git a/pkg/version/version.go b/pkg/version/version.go
-index 38d7917..1ab3418 100644
+index a6fa8e7..06937e4 100644
 --- a/pkg/version/version.go
 +++ b/pkg/version/version.go
-@@ -19,7 +19,7 @@ var (
+@@ -21,7 +21,7 @@ var (
         // Increment major number for new feature additions and behavioral changes.
         // Increment minor number for bug fixes and performance enhancements.
         // Increment patch number for critical fixes to existing releases.
@@ -101,22 +126,6 @@ index 38d7917..1ab3418 100644
  
         // BuildMetadata is extra build time data
         BuildMetadata = ""
-```
-
-We also want to change the chart version for prowd as well.
-
-```
-$ git diff chart/Chart.yaml 
-diff --git a/chart/Chart.yaml b/chart/Chart.yaml
-index da0d206..1a3e498 100644
---- a/chart/Chart.yaml
-+++ b/chart/Chart.yaml
-@@ -1,4 +1,4 @@
- name: prowd
- description: The prow server
--version: canary
-+version: 0.2.0-rc1
- apiVersion: v1
 ```
 
 For patch releases, the old version number will be the latest patch release, so just bump the patch
@@ -198,9 +207,25 @@ git tag $RELEASE_NAME-rc1
 git push upstream $RELEASE_NAME-rc1
 ```
 
-Drone will automatically create a tagged release image to test with, but testers and users alike
-will need to build the client binary from source following the [hacking guide](hacking.md) until
-[#142](https://github.com/deis/prow/issues/142) is implemented.
+Drone will automatically create a tagged release image and client binary to test with. For testers,
+the process to start testing after Drone finishes building the artifacts involves the following
+steps to grab the client from S3:
+
+linux/amd64, using /bin/bash:
+
+    $ wget https://s3-us-west-2.amazonaws.com/deis-prow/prow-$RELEASE_NAME-rc1-linux-amd64.tar.gz
+
+darwin/amd64, using Terminal.app:
+
+    $ wget https://s3-us-west-2.amazonaws.com/deis-prow/prow-$RELEASE_NAME-rc1-darwin-amd64.tar.gz
+
+windows/amd64, using PowerShell:
+
+    PS C:\> $ReleaseName = "v0.2.0"
+    PS C:\> Invoke-WebRequest -Uri "https://s3-us-west-2.amazonaws.com/deis-prow/prow-$ReleaseName-rc1-windows-amd64.tar.gz" -OutFile "prow-$ReleaseName-rc1-windows-amd64.tar.gz"
+
+Then, unpack and move the binary to somewhere on your $PATH, or move it somewhere and add it to
+your $PATH (e.g. /usr/local/bin/helm for linux/macOS, C:\Program Files\helm\helm.exe for Windows).
 
 ## 6. Iterate on Successive Release Candidates
 
