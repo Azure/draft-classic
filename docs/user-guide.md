@@ -15,7 +15,7 @@ environments:
     watch: true
     watch_delay: 1
   staging:
-  	name: draft-qa
+    name: draft-qa
     namespace: kube-system
     build-tar: build.tar.gz
     chart-tar: chart.tar.gz
