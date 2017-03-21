@@ -11,7 +11,7 @@ is as follows:
 environments:
   development:
     name: prow-dev
-    set: "foo=bar,car=star"
+    set: ["foo=bar", "car=star"]
     watch: true
     watch_delay: 1
   staging:
@@ -19,8 +19,8 @@ environments:
     namespace: kube-system
     build-tar: build.tar.gz
     chart-tar: chart.tar.gz
-    set: "foo=bar,car=star"
-    values: "values/qa.yaml"
+    set: ["foo=bar", "car=star"]
+    values: ["values/qa.yaml"]
     wait: true
 ```
 
@@ -47,8 +47,8 @@ runtime using `prow up --environment=staging`.
     build_tar: build.tar.gz
     chart_tar: chart.tar.gz
     namespace: kube-system
-    set: "foo=bar,car=star"
-    values: "values/qa.yaml"
+    set: ["foo=bar", "car=star"]
+    values: ["values/qa.yaml"]
     wait: false
     watch: false
     watch_delay: 2

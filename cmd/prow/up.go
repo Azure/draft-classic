@@ -29,8 +29,10 @@ stopped before uploading, but that can be altered by the "--watch-delay" flag.
 `
 
 const (
-	environmentEnvVar      = "PROW_ENV"
-	defaultEnvironmentName = "development"
+	environmentEnvVar        = "PROW_ENV"
+	defaultEnvironmentName   = "development"
+	defaultNamespace         = "default"
+	defaultWatchDelaySeconds = 2
 )
 
 type upCmd struct {
@@ -94,8 +96,8 @@ func newUpCmd(out io.Writer) *cobra.Command {
 					return err
 				}
 			} else {
-				if err = yaml.Unmarshal(prowYaml, up.Environments[runningEnvironment]); err != nil {
-					return err
+				if err = yaml.Unmarshal(prowYaml, up); err != nil {
+					return fmt.Errorf("could not unmarshal prow.yaml: %v", err)
 				}
 			}
 			return up.run(runningEnvironment)
@@ -104,7 +106,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVarP(&appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
-	f.StringVarP(&namespace, "namespace", "n", "default", "kubernetes namespace to install the chart")
+	f.StringVarP(&namespace, "namespace", "n", defaultNamespace, "kubernetes namespace to install the chart")
 	f.StringVarP(&runningEnvironment, "environment", "e", defaultProwEnvironment(), "the environment (development, staging, qa, etc) that prow will run under")
 	f.StringVar(&buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set")
 	f.StringVar(&chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set")
@@ -112,7 +114,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.StringArrayVarP(&rawValueFilePaths, "values", "f", []string{}, "specify prowd values in a YAML file (can specify multiple)")
 	f.BoolVarP(&wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
 	f.BoolVarP(&watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
-	f.IntVarP(&watchDelay, "watch-delay", "", 2, "wait for local file changes to have stopped for this many seconds before deploying")
+	f.IntVarP(&watchDelay, "watch-delay", "", defaultWatchDelaySeconds, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
