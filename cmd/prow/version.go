@@ -18,7 +18,8 @@ Show the client version for prow.
 This will print the client version of prow. The output will look something like
 this:
 
-v1.0.0
+Client: &version.Version{SemVer:"v0.1.0", GitCommit:"4f97233d2cc2c7017b07f94211e55bb2670f990d", GitTreeState:"clean"}
+Server: &version.Version{SemVer:"v0.1.0", GitCommit:"4f97233d2cc2c7017b07f94211e55bb2670f990d", GitTreeState:"clean"}
 `
 
 type versionCmd struct {
