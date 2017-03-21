@@ -253,7 +253,7 @@ You will also want to update the release version number and the CHANGELOG as we 
 require you to rebase the commits such that they're on top.
 
 ```
-git rebase -i
+git rebase -i HEAD~3
 ```
 
 After that, tag it and notify users of the new release candidate:
@@ -278,9 +278,9 @@ git add .
 git commit -m "bump version to $RELEASE_NAME"
 ```
 
-Then with `git rebase -i`, re-arrange the commits such that this new commit is below the original
-bump commit. Mark the bump commit as "reword" and the new commit as a "fixup" so it will be merged
-into the original. Re-word the original bump commit.
+Then with `git rebase -i HEAD~3`, re-arrange the commits such that this new commit is below the
+original bump commit. Mark the bump commit as "reword" and the new commit as a "fixup" so it will
+be merged into the original. Re-word the original bump commit.
 
 ```
 bump version to $RELEASE_NAME
