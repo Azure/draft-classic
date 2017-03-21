@@ -176,13 +176,13 @@ Now when we navigate to `localhost:8080` we see our app in action!  A beautiful 
 
 ## Extra Credit
 
-As a bonus section, we can utilize [Prow packs](packs.md) to create a Python-specific "pack" for scaffolding future Python apps.  As seen in the packs [doc](packs.md), as long as we place our custom pack in `~/.prow/packs`, Prow will be able to find and use them.
+As a bonus section, we can utilize [Prow packs](packs.md) to create a Python-specific "pack" for scaffolding future Python apps.  As seen in the packs [doc](packs.md), as long as we place our custom pack in `$(prow home)/packs`, Prow will be able to find and use them.
 
 For now, let's just copy over our `Dockerfile` and `chart/` assets to this location, to be built on at a later date:
 
 ```shell
-$ mkdir -p ~/.prow/packs/python
-$ cp -r Dockerfile chart ~/.prow/packs/python/
+$ mkdir -p $(prow home)/packs/python
+$ cp -r Dockerfile chart $(prow home)/packs/python/
 ```
 
 Now when we wish to create and deploy our new-fangled "Hello Universe" app, we can use our `python` Prow pack:

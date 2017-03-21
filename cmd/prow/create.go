@@ -106,7 +106,7 @@ func (c *createCmd) run() error {
 	return nil
 }
 
-// doPackDetection performs pack detection across all the packs available in ~/.prow/packs in
+// doPackDetection performs pack detection across all the packs available in $(prow home)/packs in
 // alphabetical order, returning the pack dirpath, the "formal name" returned from the detect
 // script's output and any errors that occurred during the pack detection.
 func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) {
