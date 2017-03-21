@@ -56,3 +56,5 @@ runtime using `draft up --environment=staging`.
 
 These fields all behave the exact same as they do as the option flags on `draft up`. See
 `draft up --help` for more information.
+
+Note:  All updates to the `draft.yaml` will take effect the next time `draft up --environment=<affected environment>` is invoked _except_ the `namespace` key/value pair.  Once a deployment has occurred in the original namespace, it won't be transferred over to another.
