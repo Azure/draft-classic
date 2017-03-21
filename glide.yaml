@@ -19,3 +19,5 @@ import:
 - package: k8s.io/helm
   # TODO: update to v2.3.0 once that is released
   version: 1aee50f5dbc38dcd444b2dfd0f2d46df862892ee
+- package: github.com/ghodss/yaml
+  version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
