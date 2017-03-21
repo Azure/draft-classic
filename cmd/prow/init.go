@@ -30,8 +30,7 @@ To set up just a local environment, use '--client-only'. That will configure
 $PROW_HOME, but not attempt to connect to a remote cluster and install the Prowd
 deployment.
 
-To dump a manifest containing the Prowd deployment YAML, combine the
-'--dry-run' and '--debug' flags.
+To dump information about the Prowd chart, combine the '--dry-run' and '--debug' flags.
 `
 
 type initCmd struct {
