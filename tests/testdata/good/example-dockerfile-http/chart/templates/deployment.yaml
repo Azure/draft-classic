@@ -19,7 +19,6 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: 80
-          hostPort: 44144
         livenessProbe:
           httpGet:
             path: /
