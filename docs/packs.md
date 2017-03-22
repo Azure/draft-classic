@@ -16,7 +16,7 @@ starter packs.
 
 ## The Starter Pack Structure
 
-A starter pack is organized inside a directory in `~/.prow/packs`. Inside the pack's directory,
+A starter pack is organized inside a directory in `$(prow home)/packs`. Inside the pack's directory,
 there will be a template `chart/` and a `Dockerfile` that will be injected into the application
 when the starter pack is requested.
 
@@ -48,7 +48,7 @@ $ prow create --pack=python
 The easiest way to create and work with a starter pack is with the following commands:
 
 ```
-$ cd ~/.prow/packs
+$ cd $(prow home)/packs
 $ mkdir python
 $ cd python
 $ helm create chart
@@ -61,7 +61,7 @@ See [Helm's documentation on Charts][charts] for more information on the Chart f
 ## Pack Detection
 
 When `prow create` is executed on an application, prow starts iterating through the packs available
-in `~/.prow/packs`. Each pack optionally has an executable file named `detect` in the root
+in `$(prow home)/packs`. Each pack optionally has an executable file named `detect` in the root
 directory. The intention of this `detect` script is to determine if the pack should be used with
 the given application.
 
