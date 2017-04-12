@@ -1,6 +1,6 @@
 # Prow: Streamlined Kubernetes Development
 
-[![Build Status](http://drone.champagne.deis.com/api/badges/deis/prow/status.svg)](http://drone.champagne.deis.com/deis/prow)
+[![Build Status](https://ci.deis.io/buildStatus/icon?job=Deis/prow/master)](https://ci.deis.io/job/Deis/job/prow/job/master/)
 
 _NOTE: Prow is experimental and does not have a stable release yet._
 
@@ -19,9 +19,9 @@ Because Prow is currently experimental, there is no stable release out yet and u
 to be using the latest build of Prow for testing. Canary releases of the Prow client can be found
 at the following links:
 
- - [Linux amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-linux-amd64.tar.gz)
- - [macOS amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-darwin-amd64.tar.gz)
- - [Windows amd64](https://s3-us-west-2.amazonaws.com/deis-prow/prow-canary-windows-amd64.tar.gz)
+ - [Linux amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-linux-amd64.tar.gz)
+ - [macOS amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-darwin-amd64.tar.gz)
+ - [Windows amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-windows-amd64.tar.gz)
 
 Unpack the Prow binary and add it to your PATH and you are good to go!
 
