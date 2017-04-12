@@ -39,13 +39,12 @@ dist:
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf prow-${VERSION}-{}.tar.gz {} \; && \
-		$(DIST_DIRS) zip -r prow-${VERSION}-{}.zip {} \; \
+		$(DIST_DIRS) tar -zcf prow-${VERSION}-{}.tar.gz {} \; \
 	)
 
 .PHONY: checksum
 checksum:
-	for f in _dist/*.{gz,zip} ; do \
+	for f in _dist/*.gz ; do \
 		shasum -a 256 "$${f}"  | awk '{print $$1}' > "$${f}.sha256" ; \
 	done
 
