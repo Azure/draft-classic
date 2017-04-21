@@ -1,4 +1,4 @@
 name: args
 usage: "echo args"
 description: "This echos args"
-command: "$PROW_PLUGIN_DIR/args.sh"
+command: "$DRAFT_PLUGIN_DIR/args.sh"
