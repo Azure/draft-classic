@@ -9,11 +9,11 @@ spec:
   template:
     metadata:
       labels:
-        app: prow
-        name: prowd
+        app: draft
+        name: draftd
     spec:
       containers:
-      - name: prowd
+      - name: draftd
         image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
@@ -27,7 +27,7 @@ spec:
         ports:
         - containerPort: {{ .Values.service.http.internalPort }}
         env:
-        - name: PROW_NAMESPACE
+        - name: DRAFT_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
