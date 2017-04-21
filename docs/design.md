@@ -1,31 +1,31 @@
-# Prow Design
+# Draft (heh) Design
 
-This document outlines the general design principles of Prow; what it does, how it works, what it
+This document outlines the general design principles of Draft; what it does, how it works, what it
 can (and cannot) do, as well as define its intended audience and place in the market.
 
 ## What It Does
 
-Prow is a tool for developing, organizing, packaging, deploying, and managing applications in the
+Draft is a tool for developing, organizing, packaging, deploying, and managing applications in the
 Kubernetes ecosystem. It uses Helm for orchestration, but it provides a toolbox for developers
 building applications on top of Kubernetes.
 
 ## How To Use It
 
-Prow has two main commands:
+Draft has two main commands:
 
-- `prow create` takes your existing code and creates a new Kubernetes app
-- `prow up` deploys a development copy of your app into a Kubernetes cluster.
+- `draft create` takes your existing code and creates a new Kubernetes app
+- `draft up` deploys a development copy of your app into a Kubernetes cluster.
 
 ## Start from a Dockerfile
 
-Say you have an application that is already Dockerized, but not Helm-ified. Prow can start from
+Say you have an application that is already Dockerized, but not Helm-ified. Draft can start from
 your existing Dockerfile and create a new app:
 
 ```
 $ ls
 Dockerfile
 src/
-$ prow create
+$ draft create
 --> Default app detected
 --> Ready to sail
 $ ls
@@ -34,53 +34,53 @@ Dockerfile
 src/
 ```
 
-In the example above, `prow create` constructed a new Helm Chart for you, and stored it alongside
+In the example above, `draft create` constructed a new Helm Chart for you, and stored it alongside
 your source code so that you can add it to version control, and even manually edit it.
 
 ## Start from Scratch
 
-If you want to start with an empty Prow app, you can simply run `prow create` and it will scaffold
+If you want to start with an empty Draft app, you can simply run `draft create` and it will scaffold
 a chart and a Dockerfile for you.
 
 ## Start from Code
 
 The example in the _Start from Scratch_ section of this document showed starting from existing
-source code. In this case, you must use a [Prow _pack_](packs.md) (a preconfigured template for
-your chart) to tell Prow how to use your source code. Prow provides some default packs, but it's
+source code. In this case, you must use a [Draft _pack_](packs.md) (a preconfigured template for
+your chart) to tell Draft how to use your source code. Draft provides some default packs, but it's
 also easy to add custom ones.
 
 ## Start from an Existing Chart
 
 If you've already created Kubernetes applications, you can start with an existing chart, and simply
-begin using Prow. There are a few patterns you may need to follow to meet the expectations for
-Prow, but this is a matter of a few minutes of work; not a complete refactoring.
+begin using Draft. There are a few patterns you may need to follow to meet the expectations for
+Draft, but this is a matter of a few minutes of work; not a complete refactoring.
 
-In this case, you don't even need `prow create`. You can just create the directory structure and
+In this case, you don't even need `draft create`. You can just create the directory structure and
 sail onward.
 
 ## Running Your Code
 
-When you run `prow up`, Prow deploys your code to your Kubernetes cluster for you. It does the
+When you run `draft up`, Draft deploys your code to your Kubernetes cluster for you. It does the
 following:
 
 - Packages your code using a `docker build`.
 - Sends your code to a Docker Registry.
 - Installs (or upgrades) your chart using Helm
 
-And when you're done with development, Prow's "first class" objects are all supported by the
+And when you're done with development, Draft's "first class" objects are all supported by the
 Kubernetes toolchain. Simply deploy the chart to your production cluster in whatever way suits you.
 
-## Prow Packs
+## Draft Packs
 
-Prow creates new charts based on two pieces of data: The information it can learn from your
+Draft creates new charts based on two pieces of data: The information it can learn from your
 project's directory structure, and a pre-built "scaffold" called a _pack_.
 
-A Prow pack contains one or two things:
+A Draft pack contains one or two things:
 
 - A Helm Chart scaffold
 - A base Dockerfile
 
-Prow ships with a `default` pack and a few basic alternative packs. The default pack simply builds
+Draft ships with a `default` pack and a few basic alternative packs. The default pack simply builds
 a default Helm Chart and a Dockerfile that points to `nginx:latest`.
 
 From this, you can tailor packs to your specific needs.
@@ -93,18 +93,18 @@ From this, you can tailor packs to your specific needs.
 
 See [packs.md](packs.md) for more information.
 
-## How Prow Works
+## How Draft Works
 
-This is a look behind the curtain. Here's how Prow works:
+This is a look behind the curtain. Here's how Draft works:
 
-- Prow uses several existing components:
+- Draft uses several existing components:
  - A Kubernetes cluster
  - The Helm Tiller server
  - A Docker Registry
  - A directory full of "packs" for specific templates
-- `prow create` reads a scaffold out of the appropriate pack, creates the necessary file system
+- `draft create` reads a scaffold out of the appropriate pack, creates the necessary file system
  objects, and writes some basic configuration into your chart.
-- `prow up` delivers your chart into the Kubernetes cluster (think
+- `draft up` delivers your chart into the Kubernetes cluster (think
  `helm upgrade --install my-app my-app`)
 
 ## Directory Structure
@@ -118,7 +118,7 @@ myapp/
    app.py
 ```
 
-After running `prow create`, this directory would have a chart built for it:
+After running `draft create`, this directory would have a chart built for it:
 
 ```
 myapp/
@@ -136,7 +136,7 @@ myapp/
 The `chart/` directory is a complete Helm chart, tailored to your
 needs.
 
-Inside of the `values.yaml` file, Prow configures images for your chart:
+Inside of the `values.yaml` file, Draft configures images for your chart:
 
 ```
 image:
@@ -152,7 +152,7 @@ The contents of the `templates/` directory are determined by the particular Pack
 
 ### Questions and Answers
 
-_Can I have multiple Prow charts in the same repo?_
+_Can I have multiple Draft charts in the same repo?_
 
 At this time, no. You can however use a `requirements.yaml` in your chart to note what your chart
 depends on.
@@ -163,7 +163,7 @@ me?_
 You can modify the contents of the `chart/` directory as you wish.
 Consider them part of your source code.
 
-Keep in mind that there are three values injected from Prowd into the chart which you'll likely
+Keep in mind that there are three values injected from Draftd into the chart which you'll likely
 want to use:
 
 ```
@@ -174,27 +174,27 @@ image:
   tag: 08db751               # the release of the image in the registry
 ```
 
-_How do I add an existing chart to Prow?_
+_How do I add an existing chart to Draft?_
 
 Just copy (`helm fetch`) it into the `chart/` directory. You need to tweak the values file to
-read from `image.registry`, `image.org`, `image.name` and `image.tag` if you want Prow to regenerate Docker
+read from `image.registry`, `image.org`, `image.name` and `image.tag` if you want draft to regenerate Docker
 images for you. See above.
 
 _How do I deploy applications to production?_
 
-Prow is a developer tool. While you _could_ simply use `prow up` to do this, we'd recommend using
+Draft is a developer tool. While you _could_ simply use `draft up` to do this, we'd recommend using
 `helm package` in conjuction with a CI/CD pipeline.
 
-Remember: You can always package a Prow-generated chart with `helm package chart/` and load the
+Remember: You can always package a Draft-generated chart with `helm package chart/` and load the
 results up to a chart repository, taking advantage of the existing Helm ecosystem.
 
 ## Other Architectural Considerations
 
-Instead of a prowd HTTP server, we could spawn a prow pod "job" (via `prow up`) that runs only when
-`prow up` is called. In that case, the `prow` client would be the main focal point for server-side
+Instead of a draftd HTTP server, we could spawn a Draft pod "job" (via `draft up`) that runs only when
+`draft up` is called. In that case, the `draft` client would be the main focal point for server-side
 configuration. This has the advantage of requiring fewer resource demands server-side, but might
 make the client implementation (and security story) significantly more difficult. Furthermore, it
-might make two `prow up` operations between two clients differ (the "Works on My Machine!"
+might make two `draft up` operations between two clients differ (the "Works on My Machine!"
 problem).
 
 ## User Personas and Stories

@@ -1,4 +1,4 @@
-package: github.com/deis/prow
+package: github.com/deis/draft
 import:
 - package: github.com/gorilla/websocket
   repo: https://github.com/bacongobbler/websocket
