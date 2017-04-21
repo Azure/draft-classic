@@ -1,10 +1,10 @@
 DOCKER_REGISTRY ?= quay.io
 IMAGE_PREFIX    ?= deis
 IMAGE_TAG       ?= canary
-SHORT_NAME      ?= prowd
+SHORT_NAME      ?= draftd
 TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm windows/amd64
 DIST_DIRS       = find * -type d -exec
-APP             = prow
+APP             = draft
 
 # go option
 GO        ?= go
@@ -15,7 +15,7 @@ TESTFLAGS :=
 LDFLAGS   :=
 GOFLAGS   :=
 BINDIR    := $(CURDIR)/bin
-BINARIES  := prow
+BINARIES  := draft
 
 # Required for globs to work correctly
 SHELL=/bin/bash
@@ -25,13 +25,13 @@ all: build
 
 .PHONY: build
 build:
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/prow/cmd/...
+	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/...
 
-# usage: make clean build-cross dist APP=prow|prowd VERSION=v2.0.0-alpha.3
+# usage: make clean build-cross dist APP=draft|draftd VERSION=v2.0.0-alpha.3
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
-	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/prow/cmd/$(APP)
+	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/$(APP)
 
 .PHONY: dist
 dist:
@@ -39,7 +39,7 @@ dist:
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf prow-${VERSION}-{}.tar.gz {} \; \
+		$(DIST_DIRS) tar -zcf draft-${VERSION}-{}.tar.gz {} \; \
 	)
 
 .PHONY: checksum
@@ -66,7 +66,7 @@ check-helm:
 docker-binary: BINDIR = ./rootfs/bin
 docker-binary: GOFLAGS += -a -installsuffix cgo
 docker-binary:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o $(BINDIR)/prowd $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/prow/cmd/prowd
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o $(BINDIR)/draftd $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/draftd
 
 .PHONY: docker-build
 docker-build: check-docker docker-binary compress-binary
@@ -79,7 +79,7 @@ compress-binary:
 	@if [ -z $$(which upx) ]; then \
 	  echo "Missing \`upx\` tool to compress binaries"; \
 	else \
-	  upx --quiet ${BINDIR}/prowd; \
+	  upx --quiet ${BINDIR}/draftd; \
 	fi
 
 .PHONY: serve

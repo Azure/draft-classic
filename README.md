@@ -1,10 +1,10 @@
-# Prow: Streamlined Kubernetes Development
+# Draft: Streamlined Kubernetes Development
 
-[![Build Status](https://ci.deis.io/buildStatus/icon?job=Deis/prow/master)](https://ci.deis.io/job/Deis/job/prow/job/master/)
+[![Build Status](https://ci.deis.io/buildStatus/icon?job=Deis/draft/master)](https://ci.deis.io/job/Deis/job/draft/job/master/)
 
-_NOTE: Prow is experimental and does not have a stable release yet._
+_NOTE: Draft is experimental and does not have a stable release yet._
 
-Prow handles the heavy lifting involved in taking source code and deploying it to Kubernetes:
+Draft handles the heavy lifting involved in taking source code and deploying it to Kubernetes:
 
 - Builds a container image from application source code
 - Pushes the image to a registry
@@ -13,23 +13,23 @@ Prow handles the heavy lifting involved in taking source code and deploying it t
 
 ## Usage
 
-### Install Prow
+### Install Draft
 
-Because Prow is currently experimental, there is no stable release out yet and users are expected
-to be using the latest build of Prow for testing. Canary releases of the Prow client can be found
+Because Draft is currently experimental, there is no stable release out yet and users are expected
+to be using the latest build of Draft for testing. Canary releases of the Draft client can be found
 at the following links:
 
- - [Linux amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-linux-amd64.tar.gz)
- - [macOS amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-darwin-amd64.tar.gz)
- - [Windows amd64](https://deisprow.blob.core.windows.net/prow/prow-canary-windows-amd64.tar.gz)
+ - [Linux amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-linux-amd64.tar.gz)
+ - [macOS amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-darwin-amd64.tar.gz)
+ - [Windows amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-windows-amd64.tar.gz)
 
-Unpack the Prow binary and add it to your PATH and you are good to go!
+Unpack the Draft binary and add it to your PATH and you are good to go!
 
-To install the server-side of Prow, use `prow init` with your credentials to let Prow communicate
+To install the server-side of Draft, use `draft init` with your credentials to let Draft communicate
 with a Docker registry:
 
 ```
-$ prow init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme
+$ draft init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme
 ```
 
 The auth token field follows the format of Docker's X-Registry-Auth header. For credential-based
@@ -45,7 +45,7 @@ For token-based logins such as Google Container Registry and Amazon ECR, use
 $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
 ```
 
-If you're looking to build from source or get started hacking on Prow, please see the
+If you're looking to build from source or get started hacking on Draft, please see the
 [hacking guide][hacking] for more information.
 
 ### Use It!
