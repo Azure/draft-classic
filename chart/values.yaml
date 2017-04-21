@@ -1,11 +1,11 @@
-# Default values for prowd.
+# Default values for Draftd.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
   registry: quay.io
   org: deis
-  name: prowd
+  name: draftd
   tag: canary
   pullPolicy: Always
 debug: false

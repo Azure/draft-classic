@@ -3,9 +3,9 @@
 **IMPORTANT**: If your experience deviates from this document, please document the changes to keep
 it up-to-date.
 
-## A Maintainer's Guide to Releasing Prow
+## A Maintainer's Guide to Releasing Draft
 
-So you're in charge of a new release for Prow? Cool. Here's what to do...
+So you're in charge of a new release for Draft? Cool. Here's what to do...
 
 ![TODO: Nothing](../img/nothing.png)
 
@@ -16,7 +16,7 @@ number and Z is the patch release number. This project strictly follows
 [semantic versioning](http://semver.org/) so following this step is critical.
 
 It is important to note that this document assumes that the git remote in your repository that
-corresponds to "https://github.com/deis/prow" is named "upstream". If yours is not (for example, if
+corresponds to "https://github.com/deis/draft" is named "upstream". If yours is not (for example, if
 you've chosen to name it "origin" or something similar instead), be sure to adjust the listed
 snippets for your local environment accordingly. If you are not sure what your upstream remote is
 named, use a command like `git remote -v` to find out.
@@ -24,7 +24,7 @@ named, use a command like `git remote -v` to find out.
 If you don't have an upstream remote, you can add one easily using something like:
 
 ```
-git remote add upstream git@github.com:deis/prow.git
+git remote add upstream git@github.com:deis/draft.git
 ```
 
 In this doc, we are going to reference a few environment variables as well, which you may want to
@@ -82,8 +82,8 @@ This new branch is going to be the base for the release, which we are going to i
 
 ## 2. Change the Version Number in Git
 
-Package `pkg/version` stores release-related information for Prow, including which version of
-`prowd` is installed when running `prow init`. We want to change the `Release` field to the first
+Package `pkg/version` stores release-related information for Draft, including which version of
+`draftd` is installed when running `draft init`. We want to change the `Release` field to the first
 release candidate which we are releasing (more on that in step 5), along with a few chart-related
 fields.
 
@@ -93,8 +93,8 @@ index 122df44..259724c 100644
 --- a/chart/Chart.yaml
 +++ b/chart/Chart.yaml
 @@ -1,4 +1,4 @@
- name: prowd
- description: The prow server
+ name: draftd
+ description: The Draft server
 -version: canary
 +version: v0.2.0-rc1
  apiVersion: v1
@@ -105,7 +105,7 @@ index cd80a4a..f90a963 100644
 @@ -6,8 +6,8 @@ image:
    registry: quay.io
    org: deis
-   name: prowd
+   name: draftd
 -  tag: canary
 -  pullPolicy: Always
 +  tag: v0.2.0-rc1
@@ -158,11 +158,11 @@ sufficient, listing the features in one of the four categories:
 
 ### Client
 
-* Implemented `prow up --set` [#139](https://github.com/deis/prow/pull/139)
+* Implemented `draft up --set` [#139](https://github.com/deis/draft/pull/139)
 
 ### Test Infrastructure
 
-* Added drone.yml for CI automation [#128](https://github.com/deis/prow/pull/128)
+* Added drone.yml for CI automation [#128](https://github.com/deis/draft/pull/128)
 ```
 
 For patch releases, do the same, but make note of the symptoms and who is affected.
@@ -175,7 +175,7 @@ being properly parsed as intended. Users are encouraged to upgrade for the best 
 
 ### Client
 
-* Fixed .dockerignore logic [#141](https://github.com/deis/prow/pull/141)
+* Fixed .dockerignore logic [#141](https://github.com/deis/draft/pull/141)
 ```
 
 Let's commit that now.
@@ -213,23 +213,23 @@ steps to grab the client from S3:
 
 linux/amd64, using /bin/bash:
 
-    $ wget https://s3-us-west-2.amazonaws.com/deis-prow/prow-$RELEASE_NAME-rc1-linux-amd64.tar.gz
+    $ wget https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-linux-amd64.tar.gz
 
 darwin/amd64, using Terminal.app:
 
-    $ wget https://s3-us-west-2.amazonaws.com/deis-prow/prow-$RELEASE_NAME-rc1-darwin-amd64.tar.gz
+    $ wget https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-darwin-amd64.tar.gz
 
 windows/amd64, using PowerShell:
 
     PS C:\> $ReleaseName = "v0.2.0"
-    PS C:\> Invoke-WebRequest -Uri "https://s3-us-west-2.amazonaws.com/deis-prow/prow-$ReleaseName-rc1-windows-amd64.tar.gz" -OutFile "prow-$ReleaseName-rc1-windows-amd64.tar.gz"
+    PS C:\> Invoke-WebRequest -Uri "https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-windows-amd64.tar.gz" -OutFile "draft-$ReleaseName-rc1-windows-amd64.tar.gz"
 
 Then, unpack and move the binary to somewhere on your $PATH, or move it somewhere and add it to
 your $PATH (e.g. /usr/local/bin/helm for linux/macOS, C:\Program Files\helm\helm.exe for Windows).
 
 ## 6. Iterate on Successive Release Candidates
 
-Spend several days explicitly investing time and resources to try and break Prow in every possible
+Spend several days explicitly investing time and resources to try and break Draft in every possible
 way, documenting any findings pertinent to the release. This time should be spent testing and
 finding ways in which the release might have caused various features or upgrade environments to
 have issues, not coding. During this time, the release is in code freeze, and any additional code

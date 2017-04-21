@@ -1,4 +1,4 @@
-name: prowd
-description: The prow server
+name: draftd
+description: The Draft server
 version: canary
 apiVersion: v1
