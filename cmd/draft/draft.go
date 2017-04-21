@@ -1,0 +1,154 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"k8s.io/helm/pkg/kube"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/client/restclient"
+
+	"github.com/deis/draft/pkg/draft"
+	"github.com/deis/draft/pkg/draft/draftpath"
+	"github.com/deis/draft/pkg/draftd/portforwarder"
+)
+
+const (
+	hostEnvVar      = "DRAFT_HOST"
+	homeEnvVar      = "DRAFT_HOME"
+	namespaceEnvVar = "DRAFT_NAMESPACE"
+)
+
+var (
+	// flagDebug is a signal that the user wants additional output.
+	flagDebug   bool
+	kubeContext string
+	// draftdTunnel is a tunnelled connection used to send requests to Draftd.
+	// TODO refactor out this global var
+	draftdTunnel *kube.Tunnel
+	// draftHome depicts the home directory where all Draft config is stored.
+	draftHome string
+	// draftHost depicts where the Draftd server is hosted.
+	draftHost string
+	// draftNamespace depicts which kubernetes namespace the Draftd server is hosted.
+	draftNamespace string
+)
+
+var globalUsage = `The application deployment tool for Kubernetes.
+`
+
+func newRootCmd(out io.Writer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:          "draft",
+		Short:        "The application deployment tool for Kubernetes.",
+		Long:         globalUsage,
+		SilenceUsage: true,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if flagDebug {
+				log.SetLevel(log.DebugLevel)
+			}
+		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			teardown()
+		},
+	}
+	p := cmd.PersistentFlags()
+	p.StringVar(&draftHome, "home", defaultDraftHome(), "location of your Draft config. Overrides $DRAFT_HOME")
+	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
+	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
+	p.StringVar(&draftHost, "host", defaultDraftHost(), "address of Draftd. Overrides $DRAFT_HOST")
+	p.StringVar(&draftNamespace, "namespace", defaultDraftNamespace(), "namespace of Draftd. Overrides $DRAFT_NAMESPACE")
+
+	cmd.AddCommand(
+		newCreateCmd(out),
+		newHomeCmd(out),
+		newInitCmd(out),
+		newUpCmd(out),
+		newVersionCmd(out),
+	)
+
+	// Find and add plugins
+	loadPlugins(cmd, draftpath.Home(homePath()), out)
+
+	return cmd
+}
+
+func setupConnection(c *cobra.Command, args []string) error {
+	if draftHost == "" {
+		clientset, config, err := getKubeClient(kubeContext)
+		if err != nil {
+			return err
+		}
+		tunnel, err := portforwarder.New(draftNamespace, clientset, config)
+		if err != nil {
+			return err
+		}
+
+		draftHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
+		log.Debugf("Created tunnel using local port: '%d'", tunnel.Local)
+	}
+
+	log.Debugf("SERVER: %q", draftHost)
+	return nil
+}
+
+func teardown() {
+	if draftdTunnel != nil {
+		draftdTunnel.Close()
+	}
+}
+
+func ensureDraftClient(p *draft.Client) *draft.Client {
+	if p != nil {
+		return p
+	}
+	client, err := draft.NewFromString(draftHost, nil)
+	if err != nil {
+		panic(err)
+	}
+	return client
+}
+
+func defaultDraftHost() string {
+	return os.Getenv(hostEnvVar)
+}
+
+func defaultDraftNamespace() string {
+	return os.Getenv(namespaceEnvVar)
+}
+
+func defaultDraftHome() string {
+	if home := os.Getenv(homeEnvVar); home != "" {
+		return home
+	}
+	return filepath.Join(os.Getenv("HOME"), ".draft")
+}
+
+func homePath() string {
+	return os.ExpandEnv(draftHome)
+}
+
+// getKubeClient is a convenience method for creating kubernetes config and client
+// for a given kubeconfig context
+func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
+	config, err := kube.GetConfig(context).ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+	}
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
+	}
+	return client, config, nil
+}
+
+func main() {
+	cmd := newRootCmd(os.Stdout)
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
+}

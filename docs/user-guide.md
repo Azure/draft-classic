@@ -1,21 +1,21 @@
-# Prow User Guide
+# Draft User Guide
 
-This guide is an "advanced" setup on how a user can wire up their app's repository with Prow.
+This guide is an "advanced" setup on how a user can wire up their app's repository with draft.
 
-## prow.yaml
+## draft.yaml
 
-Prow configuration is stored in `prow.yaml` in your app's root directory. The format of this file
+Draft configuration is stored in `draft.yaml` in your app's root directory. The format of this file
 is as follows:
 
 ```
 environments:
   development:
-    name: prow-dev
+    name: draft-dev
     set: ["foo=bar", "car=star"]
     watch: true
     watch_delay: 1
   staging:
-  	name: prow-qa
+  	name: draft-qa
     namespace: kube-system
     build-tar: build.tar.gz
     chart-tar: chart.tar.gz
@@ -37,13 +37,13 @@ that in a second.
   development:
 ```
 
-This is the environment name. Applications deployed by Prow can be configured in different manners
-based on the present environment. By default, `prow up` deploys using the `development` environment,
-but this can be tweaked by either setting `$PROW_ENV` or by supplying the environment name at
-runtime using `prow up --environment=staging`.
+This is the environment name. Applications deployed by Draft can be configured in different manners
+based on the present environment. By default, `draft up` deploys using the `development` environment,
+but this can be tweaked by either setting `$DRAFT_ENV` or by supplying the environment name at
+runtime using `draft up --environment=staging`.
 
 ```
-    name: prow
+    name: draft
     build_tar: build.tar.gz
     chart_tar: chart.tar.gz
     namespace: kube-system
@@ -54,5 +54,5 @@ runtime using `prow up --environment=staging`.
     watch_delay: 2
 ```
 
-These fields all behave the exact same as they do as the option flags on `prow up`. See
-`prow up --help` for more information.
+These fields all behave the exact same as they do as the option flags on `draft up`. See
+`draft up --help` for more information.
