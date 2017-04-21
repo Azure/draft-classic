@@ -51,7 +51,7 @@ image:
   pullPolicy: IfNotPresent
 service:
   name: nginx
-  type: ClusterIP
+  type: LoadBalancer
   externalPort: 80
   internalPort: 80
 resources:

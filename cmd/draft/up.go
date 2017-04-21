@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 
@@ -24,9 +23,10 @@ const upDesc = `
 This command archives the current directory into a tar archive and uploads it to
 the draft server.
 
-Adding the "--watch" flag makes draft automatically archive and upload whenever
-local files are saved. Draft delays a couple seconds to ensure that changes have
-stopped before uploading, but that can be altered by the "--watch-delay" flag.
+Adding the "watch" option to draft.toml makes draft automatically archive and
+upload whenever local files are saved. Draft delays a couple seconds to ensure
+that changes have stopped before uploading, but that can be altered by the
+"watch_delay" option.
 `
 
 const (
@@ -45,14 +45,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 			Out:      out,
 			Manifest: manifest.New(),
 		}
-		appName            string
-		namespace          string
-		buildTarPath       string
-		chartTarPath       string
 		runningEnvironment string
-		wait               bool
-		watch              bool
-		watchDelay         int
 	)
 
 	cmd := &cobra.Command{
@@ -62,15 +55,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			up.Client = ensureDraftClient(up.Client)
-			up.Manifest.Environments[runningEnvironment] = &manifest.Environment{
-				AppName:      appName,
-				BuildTarPath: buildTarPath,
-				ChartTarPath: chartTarPath,
-				Namespace:    namespace,
-				Wait:         wait,
-				Watch:        watch,
-				WatchDelay:   watchDelay,
-			}
+			up.Manifest = manifest.New()
 			draftToml, err := ioutil.ReadFile("draft.toml")
 			if err != nil {
 				if !os.IsNotExist(err) {
@@ -86,14 +71,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
-	f.StringVarP(&namespace, "namespace", "n", manifest.DefaultNamespace, "kubernetes namespace to install the chart")
 	f.StringVarP(&runningEnvironment, "environment", "e", defaultDraftEnvironment(), "the environment (development, staging, qa, etc) that draft will run under")
-	f.StringVar(&buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set")
-	f.StringVar(&chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set")
-	f.BoolVarP(&wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
-	f.BoolVarP(&watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
-	f.IntVarP(&watchDelay, "watch-delay", "", manifest.DefaultWatchDelaySeconds, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
@@ -119,9 +97,6 @@ func (u *upCmd) run(environment string) (err error) {
 	cwd, e := os.Getwd()
 	if e != nil {
 		return e
-	}
-	if env.AppName == "" {
-		env.AppName = path.Base(cwd)
 	}
 	u.Client.OptionWait = env.Wait
 
@@ -182,9 +157,9 @@ func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
 		if e != nil {
 			return e
 		}
-		err = u.Client.Up(env.AppName, env.Namespace, u.Out, buildTar, chartTar, vals)
+		err = u.Client.Up(env.Name, env.Namespace, u.Out, buildTar, chartTar, vals)
 	} else {
-		err = u.Client.UpFromDir(env.AppName, env.Namespace, u.Out, cwd, vals)
+		err = u.Client.UpFromDir(env.Name, env.Namespace, u.Out, cwd, vals)
 	}
 
 	// format error before returning
