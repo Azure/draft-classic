@@ -2,7 +2,7 @@
 #
 # Usage: ./e2e.sh
 #
-# This script assumes an existing single node k8s cluster with helm and prowd installed. It
+# This script assumes an existing single node k8s cluster with helm and draftd installed. It
 # installs all the apps under testdata and checks that they pass or fail, depending on their
 # success condition.
 
@@ -15,7 +15,7 @@ for app in */; do
     pushd "${app}" > /dev/null
     # strip trailing forward slash
     app=${app%/}
-    prow up
+    draft up
     echo "checking that ${app} v1 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "1" ]]; then
@@ -24,7 +24,7 @@ for app in */; do
     fi
     echo "GOOD"
     # deploy the app again and check that the update is seen upstream
-    prow up
+    draft up
     echo "checking that ${app} v2 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "2" ]]; then
@@ -47,7 +47,7 @@ for app in */; do
     pushd "${app}" > /dev/null
     # strip trailing forward slash
     app=${app%/}
-    prow up
+    draft up
     echo "checking that ${app} v1 was NOT released"
     release=$(helm list | grep "${app}")
     if [[ "$release" != "" ]]; then

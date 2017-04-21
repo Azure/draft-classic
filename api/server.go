@@ -30,10 +30,10 @@ import (
 	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/helm/pkg/strvals"
 
-	"github.com/deis/prow/pkg/version"
+	"github.com/deis/draft/pkg/version"
 )
 
-// WebsocketUpgrader represents the default websocket.Upgrader that prow employs
+// WebsocketUpgrader represents the default websocket.Upgrader that Draft employs
 var WebsocketUpgrader = websocket.Upgrader{
 	EnableCompression: true,
 	// reduce the WriteBufferSize so `docker build` and `docker push` responses aren't internally

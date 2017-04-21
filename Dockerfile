@@ -4,5 +4,5 @@ COPY rootfs /
 
 EXPOSE 44135
 
-ENTRYPOINT ["/bin/prowd"]
+ENTRYPOINT ["/bin/draftd"]
 CMD ["start"]

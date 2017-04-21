@@ -1,7 +1,7 @@
 # Getting Started
 
-This document shows how to deploy a "Hello World" app with Prow. To follow along, be sure you
-have completed the [Hacking on Prow](contributing/hacking.md) guide.
+This document shows how to deploy a "Hello World" app with Draft. To follow along, be sure you
+have completed the [Hacking on Draft](contributing/hacking.md) guide.
 
 ## App setup
 
@@ -27,20 +27,20 @@ $ ls
 hello.py  requirements.txt
 ```
 
-## Prow Create
+## Draft Create
 
-We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Prow can create a
-[Helm][] chart and `Dockerfile` with `prow create`:
+We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Draft can create a
+[Helm][] chart and `Dockerfile` with `draft create`:
 
 ```shell
-$ prow create
+$ draft create
 --> Default app detected
 --> Ready to sail
 ```
 
 ## App-specific Modifications
 
-The `chart/` and `Dockerfile` assets created by Prow default to a basic [nginx][]
+The `chart/` and `Dockerfile` assets created by Draft default to a basic [nginx][]
 configuration. For this exercise, let's replace the `Dockerfile` with one more Pythonic:
 
 ```shell
@@ -60,11 +60,11 @@ will install the dependencies in `requirements.txt` and copy the current directo
 into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile
 exposes port 80 from the container.
 
-## Prow Up
+## Draft Up
 
 Now we're ready to deploy `hello.py` to a Kubernetes cluster.
 
-Prow handles these tasks with one `prow up` command:
+Draft handles these tasks with one `draft up` command:
 
 - builds a Docker image from the `Dockerfile`
 - pushes the image to a registry
@@ -74,7 +74,7 @@ Prow handles these tasks with one `prow up` command:
 Let's use the `--watch` flag so we can let this run in the background while we make changes later on...
 
 ```shell
-$ prow up --watch
+$ draft up --watch
 --> Building Dockerfile
 Step 1 : FROM python:onbuild
 onbuild: Pulling from library/python
@@ -141,9 +141,9 @@ if __name__ == "__main__":
 EOF
 ```
 
-## Prow Up(grade)
+## Draft Up(grade)
 
-Now if we watch the terminal that we initially called `prow up --watch` with, Prow will notice that there were changes made locally and call `prow up` again. Prow then determines that the Helm release already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
+Now if we watch the terminal that we initially called `draft up --watch` with, Draft will notice that there were changes made locally and call `draft up` again. Draft then determines that the Helm release already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
 
 ```shell
 --> Building Dockerfile
@@ -164,7 +164,7 @@ The push refers to a repository [quay.io/deis/hello-world]
 
 ## Great Success
 
-Every `prow up` recreates the application pod, so we need to re-run the export and port-forward
+Every `draft up` recreates the application pod, so we need to re-run the export and port-forward
 steps from above.
 
 ```shell
@@ -172,29 +172,29 @@ $ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hel
 $ kubectl port-forward $POD_NAME 8080:80
 ```
 
-Now when we navigate to `localhost:8080` we see our app in action!  A beautiful `Hello World!` greets us.  Our first app has been deployed to our [Kubernetes][] cluster via Prow.
+Now when we navigate to `localhost:8080` we see our app in action!  A beautiful `Hello World!` greets us.  Our first app has been deployed to our [Kubernetes][] cluster via Draft.
 
 ## Extra Credit
 
-As a bonus section, we can utilize [Prow packs](packs.md) to create a Python-specific "pack" for scaffolding future Python apps.  As seen in the packs [doc](packs.md), as long as we place our custom pack in `$(prow home)/packs`, Prow will be able to find and use them.
+As a bonus section, we can utilize [Draft packs](packs.md) to create a Python-specific "pack" for scaffolding future Python apps.  As seen in the packs [doc](packs.md), as long as we place our custom pack in `$(draft home)/packs`, Draft will be able to find and use them.
 
 For now, let's just copy over our `Dockerfile` and `chart/` assets to this location, to be built on at a later date:
 
 ```shell
-$ mkdir -p $(prow home)/packs/python
-$ cp -r Dockerfile chart $(prow home)/packs/python/
+$ mkdir -p $(draft home)/packs/python
+$ cp -r Dockerfile chart $(draft home)/packs/python/
 ```
 
-Now when we wish to create and deploy our new-fangled "Hello Universe" app, we can use our `python` Prow pack:
+Now when we wish to create and deploy our new-fangled "Hello Universe" app, we can use our `python` Draft pack:
 
 ```shell
 $ mkdir hello-universe
 $ cp hello.py requirements.txt hello-universe
 $ cd hello-universe
 $ perl -i -0pe 's/World/Universe/' hello.py
-$ prow create --pack=python
+$ draft create --pack=python
 --> Ready to sail
-$ prow up
+$ draft up
 ...
 $ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-universe-hello-universe" -o jsonpath="{.items[0].metadata.name}")
 $ kubectl port-forward $POD_NAME 8080:80 &>/dev/null &
