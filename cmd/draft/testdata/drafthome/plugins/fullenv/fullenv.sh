@@ -1,6 +1,6 @@
 #!/bin/sh
-echo $PROW_PLUGIN_NAME
-echo $PROW_PLUGIN_DIR
-echo $PROW_PLUGIN
-echo $PROW_HOME
-echo $PROW_BIN
+echo $DRAFT_PLUGIN_NAME
+echo $DRAFT_PLUGIN_DIR
+echo $DRAFT_PLUGIN
+echo $DRAFT_HOME
+echo $DRAFT_BIN
