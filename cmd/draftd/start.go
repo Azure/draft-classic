@@ -3,17 +3,12 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/helm"
-	"k8s.io/helm/pkg/helm/portforwarder"
-	"k8s.io/helm/pkg/kube"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/deis/draft/api"
 )
@@ -40,6 +35,8 @@ type startCmd struct {
 	registryOrg string
 	// registryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
 	registryURL string
+	// tillerURI is the URI used to connect to tiller.
+	tillerURI string
 }
 
 func newStartCmd(out io.Writer) *cobra.Command {
@@ -64,6 +61,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
 	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
+	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy", "the URI used to connect to tiller")
 
 	return cmd
 }
@@ -85,21 +83,6 @@ func (c *startCmd) run() error {
 		return err
 	}
 
-	// tiller is assumed to be running in the same namespace as draft due to `draft init`.
-	tillerNamespace := os.Getenv("DRAFT_NAMESPACE")
-	if tillerNamespace == "" {
-		tillerNamespace = "kube-system"
-	}
-
-	clientset, config, err := getKubeClient("")
-	if err != nil {
-		return fmt.Errorf("Could not get a kube client: %s", err)
-	}
-	tunnel, err := portforwarder.New(tillerNamespace, clientset, config)
-	if err != nil {
-		return fmt.Errorf("Could not get a connection to tiller: %s", err)
-	}
-
 	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
 	if err != nil {
 		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
@@ -108,21 +91,7 @@ func (c *startCmd) run() error {
 	server.RegistryAuth = c.registryAuth
 	server.RegistryOrg = c.registryOrg
 	server.RegistryURL = c.registryURL
-	server.HelmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
+	server.HelmClient = helm.NewClient(helm.Host(c.tillerURI))
 	log.Printf("server is now listening at %s", c.listenAddr)
 	return server.Serve()
-}
-
-// getKubeClient is a convenience method for creating kubernetes config and client
-// for a given kubeconfig context
-func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
-	config, err := kube.GetConfig(context).ClientConfig()
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
-	}
-	client, err := internalclientset.NewForConfig(config)
-	if err != nil {
-		return nil, nil, err
-	}
-	return client, config, nil
 }
