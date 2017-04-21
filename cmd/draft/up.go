@@ -36,7 +36,7 @@ const (
 )
 
 type upCmd struct {
-	Client       *draft.Client            `json:"-"`
+	Client       *draft.Client           `json:"-"`
 	Out          io.Writer               `json:"-"`
 	Environments map[string]*Environment `json:"environments"`
 }
