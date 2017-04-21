@@ -151,7 +151,8 @@ $ draft up
      Now you can deploy an app using Draft!
 
         $ cd my-app
-        $ draft up --namespace=foo
+        $ draft create
+        $ draft up
         --> Building Dockerfile
         --> Pushing my-app:latest
         --> Deploying to Kubernetes

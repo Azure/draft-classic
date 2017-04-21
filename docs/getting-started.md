@@ -1,15 +1,15 @@
 # Getting Started
 
 This document shows how to deploy a "Hello World" app with Draft. To follow along, be sure you
-have completed the [Hacking on Draft](contributing/hacking.md) guide.
+have Draft up and installed according to the [README](../README.md#install-draft).
 
 ## App setup
 
 Let's create a sample Python app using [Flask](http://flask.pocoo.org/).
 
 ```shell
-$ mkdir hello-world
-$ cd hello-world
+$ mkdir /tmp/hello-world
+$ cd /tmp/hello-world
 $ cat <<EOF > hello.py
 from flask import Flask
 
@@ -20,7 +20,7 @@ def hello():
     return "Hello World!\n"
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=80)
 EOF
 $ echo "flask" > requirements.txt
 $ ls
@@ -34,31 +34,33 @@ We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Draf
 
 ```shell
 $ draft create
---> Default app detected
+--> Python app detected
 --> Ready to sail
+$ ls
+chart  Dockerfile  draft.toml  hello.py  requirements.txt
 ```
 
-## App-specific Modifications
-
-The `chart/` and `Dockerfile` assets created by Draft default to a basic [nginx][]
-configuration. For this exercise, let's replace the `Dockerfile` with one more Pythonic:
-
-```shell
-$ cat Dockerfile
-FROM nginx:latest
-$ cat <<EOF > Dockerfile
-FROM python:onbuild
-
-CMD [ "python", "./hello.py" ]
-
-EXPOSE 80
-EOF
-```
-
-This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which
-will install the dependencies in `requirements.txt` and copy the current directory
+The `chart/` and `Dockerfile` assets created by Draft default to a basic [Python][]
+configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/)
+image, which will install the dependencies in `requirements.txt` and copy the current directory
 into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile
 exposes port 80 from the container.
+
+The `draft.toml` file contains basic configuration about the application like the name, which
+namespace it will be deployed to, and whether to deploy the app automatically when local files
+change.
+
+```shell
+$ cat draft.toml
+[environments]
+  [environments.development]
+    name = "snug-lamb"
+    watch = true
+    watch_delay = 2
+```
+
+See [the Draft User Guide](user-guide.md) for more information and available configuration on the
+`draft.toml`.
 
 ## Draft Up
 
@@ -66,15 +68,17 @@ Now we're ready to deploy `hello.py` to a Kubernetes cluster.
 
 Draft handles these tasks with one `draft up` command:
 
-- builds a Docker image from the `Dockerfile`
-- pushes the image to a registry
-- installs the Helm chart under `chart/`, referencing the Docker registry image
+- reads configuration from `draft.toml`
+- compresses the `chart/` directory and the application directory as two separate tarballs
+- uploads the tarballs to `draftd`, the server-side component
+- `draftd` then builds the docker image and pushes the image to a registry
+- `draftd` instructs helm to install the Helm chart, referencing the Docker registry image just built
 
-
-Let's use the `--watch` flag so we can let this run in the background while we make changes later on...
+With the `watch` option set to `true`, we can let this run in the background while we make changes
+later on...
 
 ```shell
-$ draft up --watch
+$ draft up
 --> Building Dockerfile
 Step 1 : FROM python:onbuild
 onbuild: Pulling from library/python
@@ -89,42 +93,29 @@ The push refers to a repository [quay.io/deis/hello-world]
 --> Status: DEPLOYED
 --> Notes:
      1. Get the application URL by running these commands:
-  export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl port-forward $POD_NAME 8080:80
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get svc -w hello-world-hello-world'
+  export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:80
 
 Watching local files for changes...
 ```
 
-## Interact with Deployed App
+## Interact with the Deployed App
 
-Using the handy output that follows successful deployment, we can now contact our app:
-
-```shell
-$ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
-$ kubectl port-forward $POD_NAME 8080:80
-```
-
-Oops! When we curl our app at `localhost:8080` we don't see "Hello World".  Indeed, if we were to check in on the application pod we would see its `Readiness` and `Liveness` checks failing:
+Using the handy output that follows successful deployment, we can now contact our app. Note that it
+may take a few minutes before the load balancer is provisioned by Kubernetes. Be patient!
 
 ```shell
-$ curl localhost:8080
-curl: (52) Empty reply from server
-$ kubectl describe pod $POD_NAME
-Name:		hello-world-hello-world-2214191811-gt5s7
-...
-Events:
-  FirstSeen	LastSeen	Count	From			SubObjectPath			Type		Reason		Message
-  ---------	--------	-----	----			-------------			--------	------		-------
-  2m		2m		1	{default-scheduler }					Normal		Scheduled	Successfully assigned hello-world-hello-world-2214191811-gt5s7 to minikube
-...
-  1m		17s		5	{kubelet minikube}	spec.containers{hello-world}	Warning		Unhealthy	Liveness probe failed: Get http://172.17.0.9:80/: dial tcp 172.17.0.9:80: getsockopt: connection refused
-  2m		7s		13	{kubelet minikube}	spec.containers{hello-world}	Warning		Unhealthy	Readiness probe failed: Get http://172.17.0.9:80/: dial tcp 172.17.0.9:80: getsockopt: connection refused
+$ export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+$ curl http://$SERVICE_IP
 ```
 
-## Update App
+When we `curl` our app, we see our app in action! A beautiful "Hello World!" greets us.
 
-Ah, of course.  We need to change the `app.run()` command in `hello.py` to explicitly run on port 80 so that our app handles connections where we've intended:
+## Update the App
+
+Now, let's change the "Hello World!" output in `hello.py` to output "Hello Draft!" instead:
 
 ```shell
 $ cat <<EOF > hello.py
@@ -134,7 +125,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello World!\n"
+    return "Hello Draft!\n"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
@@ -143,7 +134,9 @@ EOF
 
 ## Draft Up(grade)
 
-Now if we watch the terminal that we initially called `draft up --watch` with, Draft will notice that there were changes made locally and call `draft up` again. Draft then determines that the Helm release already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
+Now if we watch the terminal that we initially called `draft up` with, Draft will notice that there
+were changes made locally and call `draft up` again. Draft then determines that the Helm release
+already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
 
 ```shell
 --> Building Dockerfile
@@ -157,51 +150,18 @@ The push refers to a repository [quay.io/deis/hello-world]
 --> Status: DEPLOYED
 --> Notes:
      1. Get the application URL by running these commands:
-  export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl port-forward $POD_NAME 8080:80
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get svc -w hello-world-hello-world'
+  export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:80
 ```
 
-## Great Success
+## Great Success!
 
-Every `draft up` recreates the application pod, so we need to re-run the export and port-forward
-steps from above.
+Now when we run `curl http://$SERVICE_IP`, our first app has been deployed and updated to our
+[Kubernetes][] cluster via Draft!
 
-```shell
-$ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-world-hello-world" -o jsonpath="{.items[0].metadata.name}")
-$ kubectl port-forward $POD_NAME 8080:80
-```
-
-Now when we navigate to `localhost:8080` we see our app in action!  A beautiful `Hello World!` greets us.  Our first app has been deployed to our [Kubernetes][] cluster via Draft.
-
-## Extra Credit
-
-As a bonus section, we can utilize [Draft packs](packs.md) to create a Python-specific "pack" for scaffolding future Python apps.  As seen in the packs [doc](packs.md), as long as we place our custom pack in `$(draft home)/packs`, Draft will be able to find and use them.
-
-For now, let's just copy over our `Dockerfile` and `chart/` assets to this location, to be built on at a later date:
-
-```shell
-$ mkdir -p $(draft home)/packs/python
-$ cp -r Dockerfile chart $(draft home)/packs/python/
-```
-
-Now when we wish to create and deploy our new-fangled "Hello Universe" app, we can use our `python` Draft pack:
-
-```shell
-$ mkdir hello-universe
-$ cp hello.py requirements.txt hello-universe
-$ cd hello-universe
-$ perl -i -0pe 's/World/Universe/' hello.py
-$ draft create --pack=python
---> Ready to sail
-$ draft up
-...
-$ export POD_NAME=$(kubectl get pods --namespace default -l "app=hello-universe-hello-universe" -o jsonpath="{.items[0].metadata.name}")
-$ kubectl port-forward $POD_NAME 8080:80 &>/dev/null &
-$ curl localhost:8080 && echo
-Hello Universe!
-```
 
 [Helm]: https://github.com/kubernetes/helm
-[nginx]: https://nginx.org/en/
 [Kubernetes]: https://kubernetes.io/
+[Python]: https://www.python.org/

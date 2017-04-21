@@ -10,7 +10,6 @@ import (
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/technosophos/moniker"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
@@ -57,12 +56,10 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 
 func (c *createCmd) run() error {
 	var err error
-	if c.appName == "" {
-		c.appName = generateName()
-	}
+	mfest := manifest.New()
 
 	cfile := &chart.Metadata{
-		Name:        c.appName,
+		Name:        mfest.Environments[manifest.DefaultEnvironmentName].Name,
 		Description: "A Helm chart for Kubernetes",
 		Version:     "0.1.0",
 		ApiVersion:  chartutil.ApiVersionV1,
@@ -98,12 +95,6 @@ func (c *createCmd) run() error {
 		if err != nil {
 			return err
 		}
-	}
-
-	// write metadata to draft.toml
-	mfest := manifest.New()
-	mfest.Environments[manifest.DefaultEnvironmentName] = &manifest.Environment{
-		AppName: c.appName,
 	}
 	draftToml, err := os.OpenFile("draft.toml", os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -143,10 +134,4 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) 
 		}
 	}
 	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
-}
-
-// generateName generates a random name
-func generateName() string {
-	namer := moniker.New()
-	return namer.NameSep("-")
 }

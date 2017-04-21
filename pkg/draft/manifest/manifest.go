@@ -1,5 +1,7 @@
 package manifest
 
+import "github.com/technosophos/moniker"
+
 const (
 	// DefaultEnvironmentName is the name invoked from draft.toml on `draft up` when
 	// --environment is not supplied.
@@ -18,7 +20,7 @@ type Manifest struct {
 
 // Environment represents the environment for a given app at build time
 type Environment struct {
-	AppName      string   `toml:"name,omitempty"`
+	Name         string   `toml:"name,omitempty"`
 	BuildTarPath string   `toml:"build_tar,omitempty"`
 	ChartTarPath string   `toml:"chart_tar,omitempty"`
 	Namespace    string   `toml:"namespace,omitempty"`
@@ -34,8 +36,16 @@ func New() *Manifest {
 		Environments: make(map[string]*Environment),
 	}
 	m.Environments[DefaultEnvironmentName] = &Environment{
+		Name:       generateName(),
 		Namespace:  DefaultNamespace,
+		Watch:      true,
 		WatchDelay: DefaultWatchDelaySeconds,
 	}
 	return &m
+}
+
+// generateName generates a random name
+func generateName() string {
+	namer := moniker.New()
+	return namer.NameSep("-")
 }
