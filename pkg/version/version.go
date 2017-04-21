@@ -12,7 +12,7 @@ func (v *Version) String() string {
 }
 
 var (
-	// Release is the current release of Prow.
+	// Release is the current release of Draft.
 	// Update this whenever making a new release.
 	// The release is of the format Major.Minor.Patch[-Prerelease][+BuildMetadata]
 	//
