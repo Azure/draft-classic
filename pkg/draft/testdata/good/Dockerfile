@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
-ENV POWERED_BY Prow
+ENV POWERED_BY Draft
 
 COPY rootfs /
 
