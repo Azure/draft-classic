@@ -18,8 +18,8 @@ import (
 	kerrors "k8s.io/kubernetes/pkg/api/errors"
 
 	"github.com/deis/draft/cmd/draft/installer"
-	"github.com/deis/draft/pkg/draft/pack"
 	"github.com/deis/draft/pkg/draft/draftpath"
+	"github.com/deis/draft/pkg/draft/pack"
 )
 
 const initDesc = `
