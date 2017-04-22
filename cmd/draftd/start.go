@@ -61,7 +61,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
 	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
-	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy", "the URI used to connect to tiller")
+	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
 
 	return cmd
 }
