@@ -26,6 +26,14 @@ def registries = [
   ]
 ]
 
+def wrapId = { String envVar, credentialsId ->
+  [[
+    $class: 'StringBinding',
+    credentialsId: credentialsId,
+    variable: envVar,
+  ]]
+}
+
 def isMaster = { String branch ->
   branch == "remotes/origin/master"
 }
@@ -46,7 +54,6 @@ def dist = { String commit ->
   String version = "git-${commit}"
 
   sh """
-    make build-cross docker-binary
     VERSION=${version} make dist checksum
     VERSION="canary" make dist checksum
   """
@@ -64,57 +71,49 @@ def dockerBuildAndPush = { Map registry, String commit ->
   """
 }
 
-pipeline {
-  agent {
-    node {
-      label 'linux'
-    }
-  }
+node('linux') {
+  env.GOBIN = env.GOPATH + "/bin"
+  env.PATH = env.GOBIN + ":" + env.PATH
+  def workdir = env.GOPATH + "/src/github.com/deis/draft"
 
-  stages {
+  dir(workdir) {
     stage('Checkout & Git Info') {
-      steps {
-        checkout scm
-        gitBranch = sh(returnStdout: true, script: 'git describe --all').trim()
-        gitCommit = deriveCommit()
-      }
+      checkout scm
+      gitBranch = sh(returnStdout: true, script: 'git describe --all').trim()
+      gitCommit = deriveCommit()
     }
 
     stage('Bootstrap') {
-      steps {
-        sh 'make bootstrap'
-      }
+      sh 'make bootstrap'
     }
 
     stage('Test') {
-      steps {
-        sh 'make test'
-      }
+      sh 'make test'
     }
 
     stage('Build') {
-      steps {
-        sh 'make build-cross docker-binary compress-binary'
-      }
+      def buildTarget = isMaster(gitBranch) ? 'build-cross' : 'build'
+
+      sh "make ${buildTarget}"
     }
 
     stage('Publish Binaries - Azure') {
-      environment {
-        AZURE_STORAGE_ACCOUNT = azure.storageAccount
-        AZURE_STORAGE_KEY = credentials(azure.storageKey)
-      }
-      steps {
+      if (isMaster(gitBranch)) {
         dist(gitCommit.take(7))
-        sh 'az storage blob upload-batch --source _dist/ --destination ${azure.container}'
+
+        env.AZURE_STORAGE_ACCOUNT = azure.storageAccount
+        withCredentials(wrapId('AZURE_STORAGE_KEY', azure.storageKey)) {
+          sh "az storage blob upload-batch --source _dist/ --destination ${azure.container}"
+        }
+      } else {
+        echo "git branch not 'master'; skipping binary publishing."
       }
     }
 
     stage('Docker Push - Quay.io') {
       def registry = isMaster(gitBranch) ? registries.quay.production : registries.quay.staging
-      environment {
-        REGISTRY_PASSWORD = credentials(registry.credentials)
-      }
-      steps {
+
+      withCredentials(wrapId('REGISTRY_PASSWORD', registry.credentials)) {
         dockerBuildAndPush(registry, gitCommit.take(7))
       }
     }
