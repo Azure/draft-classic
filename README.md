@@ -54,10 +54,9 @@ Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll s
 
 # License
 
-This software is covered under the Apache v2.0 license. You can read the license [here][license].
+This software is covered under the MIT license. You can read the license [here][license].
 
-This software contains a large amount of code from [Helm][], which is also covered by the Apache
-v2.0 license.
+This software contains code from [Helm][], which is covered by the Apache v2.0 license.
 
 
 [Getting Started]: docs/getting-started.md
