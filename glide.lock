@@ -1,5 +1,5 @@
-hash: 6a58667bd17474458accb75c6f12f2b8239e0d36e943776691e86195447c2f0c
-updated: 2017-03-20T15:24:38.386672516-07:00
+hash: 0981f563d7332fc2d9f289ca615c4e8eddb7eb818be99f3874f031edaf370a40
+updated: 2017-04-21T16:01:58.567687218-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -227,9 +227,11 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/Masterminds/semver
-  version: 59c29afe1a994eacb71c833025ca7acf874bb1da
+  version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
 - name: github.com/Masterminds/sprig
   version: 23597e5f6ad0e4d590e71314bfd0251a4a3cf849
+- name: github.com/Masterminds/vcs
+  version: 795e20f901c3d561de52811fb3488a2cb2c8588b
 - name: github.com/Microsoft/go-winio
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
@@ -269,6 +271,8 @@ imports:
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
+- name: github.com/technosophos/moniker
+  version: ab470f5e105a44d0c87ea21bacd6a335c4816d83
 - name: github.com/ugorji/go
   version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
   subpackages:
@@ -283,14 +287,8 @@ imports:
 - name: golang.org/x/crypto
   version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
-  - bcrypt
-  - blowfish
-  - curve25519
   - pbkdf2
-  - pkcs12
-  - pkcs12/internal/rc2
   - scrypt
-  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
@@ -362,7 +360,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: a3f3340b5840cee44f372bddb5880fcbc419b46a
 - name: k8s.io/helm
-  version: 1aee50f5dbc38dcd444b2dfd0f2d46df862892ee
+  version: 32562a3040bb5ca690339b9840b6f60f8ce25da4
   subpackages:
   - pkg/chartutil
   - pkg/engine
@@ -382,7 +380,7 @@ imports:
   - pkg/tiller/environment
   - pkg/version
 - name: k8s.io/kubernetes
-  version: 00a1fb254bd8e5235575fba1398b958943e39078
+  version: ea8f6637b639246faa14a8d5c6f864100fcb77a9
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install
