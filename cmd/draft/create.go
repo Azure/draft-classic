@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
-	"path"
 	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"github.com/technosophos/moniker"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/deis/draft/pkg/draft/draftpath"
+	"github.com/deis/draft/pkg/draft/manifest"
 	"github.com/deis/draft/pkg/draft/pack"
 	"github.com/deis/draft/pkg/osutil"
 )
@@ -56,11 +57,7 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 func (c *createCmd) run() error {
 	var err error
 	if c.appName == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		c.appName = path.Base(cwd)
+		c.appName = generateName()
 	}
 
 	cfile := &chart.Metadata{
@@ -102,6 +99,19 @@ func (c *createCmd) run() error {
 		}
 	}
 
+	// write metadata to draft.yaml
+	mfest := manifest.New()
+	mfest.Environments[defaultEnvironmentName] = &manifest.Environment{
+		AppName: c.appName,
+	}
+	data, err := yaml.Marshal(mfest)
+	if err != nil {
+		return fmt.Errorf("could not marshal draft metadata to yaml: %v", err)
+	}
+	if err = ioutil.WriteFile("draft.yaml", data, 0644); err != nil {
+		return fmt.Errorf("could not write metadata to draft.yaml: %v", err)
+	}
+
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
 }
@@ -130,4 +140,10 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) 
 		}
 	}
 	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
+}
+
+// generateName generates a random name
+func generateName() string {
+	namer := moniker.New()
+	return namer.NameSep("-")
 }

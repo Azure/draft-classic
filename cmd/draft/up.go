@@ -16,6 +16,7 @@ import (
 	"k8s.io/helm/pkg/strvals"
 
 	"github.com/deis/draft/pkg/draft"
+	"github.com/deis/draft/pkg/draft/manifest"
 	"github.com/deis/draft/pkg/draft/pack"
 )
 
@@ -36,29 +37,16 @@ const (
 )
 
 type upCmd struct {
-	Client       *draft.Client           `json:"-"`
-	Out          io.Writer               `json:"-"`
-	Environments map[string]*Environment `json:"environments"`
-}
-
-// Environment represents the environment for a given app at build time
-type Environment struct {
-	AppName           string   `json:"name,omitempty"`
-	BuildTarPath      string   `json:"build_tar,omitempty"`
-	ChartTarPath      string   `json:"chart_tar,omitempty"`
-	Namespace         string   `json:"namespace,omitempty"`
-	Values            []string `json:"set,omitempty"`
-	RawValueFilePaths []string `json:"values,omitempty"`
-	Wait              bool     `json:"wait,omitempty"`
-	Watch             bool     `json:"watch,omitempty"`
-	WatchDelay        int      `json:"watch_delay,omitempty"`
+	Client   *draft.Client
+	Out      io.Writer
+	Manifest *manifest.Manifest
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
 	var (
 		up = &upCmd{
-			Out:          out,
-			Environments: make(map[string]*Environment),
+			Out:      out,
+			Manifest: manifest.New(),
 		}
 		appName            string
 		namespace          string
@@ -79,7 +67,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			up.Client = ensureDraftClient(up.Client)
-			up.Environments[runningEnvironment] = &Environment{
+			up.Manifest.Environments[runningEnvironment] = &manifest.Environment{
 				AppName:           appName,
 				BuildTarPath:      buildTarPath,
 				ChartTarPath:      chartTarPath,
@@ -96,7 +84,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 					return err
 				}
 			} else {
-				if err = yaml.Unmarshal(draftYaml, up); err != nil {
+				if err = yaml.Unmarshal(draftYaml, up.Manifest); err != nil {
 					return fmt.Errorf("could not unmarshal draft.yaml: %v", err)
 				}
 			}
@@ -119,7 +107,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (e *Environment) vals(cwd string) ([]byte, error) {
+func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 	base := map[string]interface{}{}
 
 	// load $PWD/chart/values.yaml as the base config
@@ -158,7 +146,7 @@ func (e *Environment) vals(cwd string) ([]byte, error) {
 }
 
 func (u *upCmd) run(environment string) (err error) {
-	env := u.Environments[environment]
+	env := u.Manifest.Environments[environment]
 	cwd, e := os.Getwd()
 	if e != nil {
 		return e
@@ -168,7 +156,7 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 	u.Client.OptionWait = env.Wait
 
-	rawVals, err := env.vals(cwd)
+	rawVals, err := vals(env, cwd)
 	if err != nil {
 		return err
 	}
@@ -215,7 +203,7 @@ func (u *upCmd) run(environment string) (err error) {
 }
 
 func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
-	env := u.Environments[environment]
+	env := u.Manifest.Environments[environment]
 	if env.BuildTarPath != "" && env.ChartTarPath != "" {
 		buildTar, e := os.Open(env.BuildTarPath)
 		if e != nil {
