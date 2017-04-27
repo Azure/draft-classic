@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
@@ -15,7 +16,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/strvals"
 	"k8s.io/helm/pkg/tiller/environment"
-	kerrors "k8s.io/kubernetes/pkg/api/errors"
 
 	"github.com/deis/draft/cmd/draft/installer"
 	"github.com/deis/draft/pkg/draft/draftpath"
@@ -146,7 +146,7 @@ func (i *initCmd) run() error {
 		}
 
 		if err := installer.Install(i.helmClient, chartConfig, i.tillerNamespace); err != nil {
-			if !kerrors.IsAlreadyExists(err) {
+			if !IsReleaseAlreadyExists(err) {
 				return fmt.Errorf("error installing: %s", err)
 			}
 			if i.upgrade {
@@ -236,4 +236,11 @@ func mergeValues(dest map[string]interface{}, src map[string]interface{}) map[st
 		dest[k] = mergeValues(destMap, nextMap)
 	}
 	return dest
+}
+
+// IsReleaseAlreadyExists returns true if err matches the "release already exists"
+// error from Helm; else returns false
+func IsReleaseAlreadyExists(err error) bool {
+	alreadyExistsRegExp := regexp.MustCompile("a release named \"(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+\" already exists")
+	return alreadyExistsRegExp.MatchString(err.Error())
 }
