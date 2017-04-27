@@ -4,8 +4,8 @@ def gitBranch = ''
 def gitCommit = ''
 
 def azure = [
-  container: 'prow',
-  storageAccount: 'deisprow',
+  container: 'draft',
+  storageAccount: 'azuredraft',
   storageKey: '5c0a4a1e-dd9f-4189-90a1-e1a58508394e',
 ]
 
