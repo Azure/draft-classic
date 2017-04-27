@@ -213,16 +213,16 @@ steps to grab the client from S3:
 
 linux/amd64, using /bin/bash:
 
-    $ wget https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-linux-amd64.tar.gz
+    $ wget https://azuredraft.blob.core.windows.net/draft/draft-$RELEASE_NAME-rc1-linux-amd64.tar.gz
 
 darwin/amd64, using Terminal.app:
 
-    $ wget https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-darwin-amd64.tar.gz
+    $ wget https://azuredraft.blob.core.windows.net/draft/draft-$RELEASE_NAME-rc1-darwin-amd64.tar.gz
 
 windows/amd64, using PowerShell:
 
     PS C:\> $ReleaseName = "v0.2.0"
-    PS C:\> Invoke-WebRequest -Uri "https://deisprow.blob.core.windows.net/prow/draft-$RELEASE_NAME-rc1-windows-amd64.tar.gz" -OutFile "draft-$ReleaseName-rc1-windows-amd64.tar.gz"
+    PS C:\> Invoke-WebRequest -Uri "https://azuredraft.blob.core.windows.net/draft/draft-$RELEASE_NAME-rc1-windows-amd64.tar.gz" -OutFile "draft-$ReleaseName-rc1-windows-amd64.tar.gz"
 
 Then, unpack and move the binary to somewhere on your $PATH, or move it somewhere and add it to
 your $PATH (e.g. /usr/local/bin/helm for linux/macOS, C:\Program Files\helm\helm.exe for Windows).
