@@ -19,9 +19,9 @@ Because Draft is currently experimental, there is no stable release out yet and 
 to be using the latest build of Draft for testing. Canary releases of the Draft client can be found
 at the following links:
 
- - [Linux amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-linux-amd64.tar.gz)
- - [macOS amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-darwin-amd64.tar.gz)
- - [Windows amd64](https://deisprow.blob.core.windows.net/prow/draft-canary-windows-amd64.tar.gz)
+ - [Linux amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz)
+ - [macOS amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
+ - [Windows amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-windows-amd64.tar.gz)
 
 Unpack the Draft binary and add it to your PATH and you are good to go!
 
