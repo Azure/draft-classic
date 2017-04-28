@@ -30,7 +30,7 @@ hello.py  requirements.txt
 ## Draft Create
 
 We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Draft can create a
-[Helm][] chart, a `Dockerfile` and a `draft.yaml` with `draft create`:
+[Helm][] chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
