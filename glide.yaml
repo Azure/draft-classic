@@ -20,3 +20,4 @@ import:
   version: ~v2.3.0
 - package: github.com/ghodss/yaml
   version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
+- package: github.com/BurntSushi/toml

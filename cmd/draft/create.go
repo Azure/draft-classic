@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
+	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/technosophos/moniker"
 	"k8s.io/helm/pkg/chartutil"
@@ -99,17 +100,19 @@ func (c *createCmd) run() error {
 		}
 	}
 
-	// write metadata to draft.yaml
+	// write metadata to draft.toml
 	mfest := manifest.New()
-	mfest.Environments[defaultEnvironmentName] = &manifest.Environment{
+	mfest.Environments[manifest.DefaultEnvironmentName] = &manifest.Environment{
 		AppName: c.appName,
 	}
-	data, err := yaml.Marshal(mfest)
+	draftToml, err := os.OpenFile("draft.toml", os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		return fmt.Errorf("could not marshal draft metadata to yaml: %v", err)
+		return err
 	}
-	if err = ioutil.WriteFile("draft.yaml", data, 0644); err != nil {
-		return fmt.Errorf("could not write metadata to draft.yaml: %v", err)
+	defer draftToml.Close()
+
+	if err := toml.NewEncoder(draftToml).Encode(mfest); err != nil {
+		return fmt.Errorf("could not write metadata to draft.toml: %v", err)
 	}
 
 	fmt.Fprintln(c.out, "--> Ready to sail")
