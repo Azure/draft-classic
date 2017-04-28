@@ -3,28 +3,28 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  registry: quay.io
-  org: deis
-  name: draftd
-  tag: canary
-  pullPolicy: Always
+	registry: quay.io
+	org: deis
+	name: draftd
+	tag: canary
+	pullPolicy: Always
 debug: false
 service:
-  http:
-    externalPort: 80
-    internalPort: 44135
+	http:
+		externalPort: 80
+		internalPort: 44135
 registry:
-  url: quay.io
-  org: deis
-  # This field follows the format of Docker's X-Registry-Auth header.
-  #
-  # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
-  #
-  # For credential-based logins, use
-  #
-  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
-  #
-  # For token-based logins, use
-  #
-  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
-  authtoken: changeme
+	url: quay.io
+	org: deis
+	# This field follows the format of Docker's X-Registry-Auth header.
+	#
+	# See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
+	#
+	# For credential-based logins, use
+	#
+	# $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
+	#
+	# For token-based logins, use
+	#
+	# $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
+	authtoken: changeme
