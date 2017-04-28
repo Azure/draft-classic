@@ -66,7 +66,7 @@ func newInitCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVar(&i.tillerNamespace, "tiller-namespace", environment.DefaultTillerNamespace, "the namespace tiller is deployed to. This will also be where Draftd is deployed to.")
 	f.StringArrayVar(&i.values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVarP(&i.rawValueFilePaths, "values", "f", []string{}, "specify Draftd values in a YAML file (can specify multiple)")
+	f.StringArrayVarP(&i.rawValueFilePaths, "values", "f", []string{}, "specify Draftd values from a values.yaml file (can specify multiple)")
 	f.BoolVar(&i.upgrade, "upgrade", false, "upgrade if Draftd is already installed")
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "if set does not install Draftd")
 	f.BoolVar(&i.dryRun, "dry-run", false, "do not install local or remote")

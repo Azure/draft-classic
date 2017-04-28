@@ -1,5 +1,0 @@
-environments:
-  development:
-    name: draft
-    namespace: kube-system
-    wait: false
