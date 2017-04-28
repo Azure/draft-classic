@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
 	"github.com/ghodss/yaml"
 	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
-	"k8s.io/helm/pkg/strvals"
 
 	"github.com/deis/draft/pkg/draft"
 	"github.com/deis/draft/pkg/draft/manifest"
@@ -30,10 +30,7 @@ stopped before uploading, but that can be altered by the "--watch-delay" flag.
 `
 
 const (
-	environmentEnvVar        = "DRAFT_ENV"
-	defaultEnvironmentName   = "development"
-	defaultNamespace         = "default"
-	defaultWatchDelaySeconds = 2
+	environmentEnvVar = "DRAFT_ENV"
 )
 
 type upCmd struct {
@@ -52,8 +49,6 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		namespace          string
 		buildTarPath       string
 		chartTarPath       string
-		values             []string
-		rawValueFilePaths  []string
 		runningEnvironment string
 		wait               bool
 		watch              bool
@@ -68,24 +63,22 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			up.Client = ensureDraftClient(up.Client)
 			up.Manifest.Environments[runningEnvironment] = &manifest.Environment{
-				AppName:           appName,
-				BuildTarPath:      buildTarPath,
-				ChartTarPath:      chartTarPath,
-				Namespace:         namespace,
-				Values:            values,
-				RawValueFilePaths: rawValueFilePaths,
-				Wait:              wait,
-				Watch:             watch,
-				WatchDelay:        watchDelay,
+				AppName:      appName,
+				BuildTarPath: buildTarPath,
+				ChartTarPath: chartTarPath,
+				Namespace:    namespace,
+				Wait:         wait,
+				Watch:        watch,
+				WatchDelay:   watchDelay,
 			}
-			draftYaml, err := ioutil.ReadFile("draft.yaml")
+			draftToml, err := ioutil.ReadFile("draft.toml")
 			if err != nil {
 				if !os.IsNotExist(err) {
 					return err
 				}
 			} else {
-				if err = yaml.Unmarshal(draftYaml, up.Manifest); err != nil {
-					return fmt.Errorf("could not unmarshal draft.yaml: %v", err)
+				if err = toml.Unmarshal(draftToml, up.Manifest); err != nil {
+					return fmt.Errorf("could not unmarshal draft.toml: %v", err)
 				}
 			}
 			return up.run(runningEnvironment)
@@ -94,15 +87,13 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVarP(&appName, "app", "a", "", "name of the helm release. By default this is the basename of the current working directory")
-	f.StringVarP(&namespace, "namespace", "n", defaultNamespace, "kubernetes namespace to install the chart")
+	f.StringVarP(&namespace, "namespace", "n", manifest.DefaultNamespace, "kubernetes namespace to install the chart")
 	f.StringVarP(&runningEnvironment, "environment", "e", defaultDraftEnvironment(), "the environment (development, staging, qa, etc) that draft will run under")
 	f.StringVar(&buildTarPath, "build-tar", "", "path to a gzipped build tarball. --chart-tar must also be set")
 	f.StringVar(&chartTarPath, "chart-tar", "", "path to a gzipped chart tarball. --build-tar must also be set")
-	f.StringArrayVar(&values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVarP(&rawValueFilePaths, "values", "f", []string{}, "specify draftd values in a YAML file (can specify multiple)")
 	f.BoolVarP(&wait, "wait", "", false, "specifies whether or not to wait for all resources to be ready")
 	f.BoolVarP(&watch, "watch", "w", false, "whether to deploy the app automatically when local files change")
-	f.IntVarP(&watchDelay, "watch-delay", "", defaultWatchDelaySeconds, "wait for local file changes to have stopped for this many seconds before deploying")
+	f.IntVarP(&watchDelay, "watch-delay", "", manifest.DefaultWatchDelaySeconds, "wait for local file changes to have stopped for this many seconds before deploying")
 
 	return cmd
 }
@@ -118,28 +109,6 @@ func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 	}
 	if err := yaml.Unmarshal(bytes, &base); err != nil {
 		return []byte{}, fmt.Errorf("failed to parse %s: %s", valuesPath, err)
-	}
-
-	// User specified a values files via -f/--values
-	for _, filePath := range e.RawValueFilePaths {
-		currentMap := map[string]interface{}{}
-		bytes, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			return []byte{}, err
-		}
-
-		if err := yaml.Unmarshal(bytes, &currentMap); err != nil {
-			return []byte{}, fmt.Errorf("failed to parse %s: %s", filePath, err)
-		}
-		// Merge with the previous map
-		base = mergeValues(base, currentMap)
-	}
-
-	// User specified a value via --set
-	for _, value := range e.Values {
-		if err := strvals.ParseInto(value, base); err != nil {
-			return []byte{}, fmt.Errorf("failed parsing --set data: %s", err)
-		}
 	}
 
 	return yaml.Marshal(base)
@@ -228,7 +197,7 @@ func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
 func defaultDraftEnvironment() string {
 	env := os.Getenv(environmentEnvVar)
 	if env == "" {
-		env = defaultEnvironmentName
+		env = manifest.DefaultEnvironmentName
 	}
 	return env
 }
