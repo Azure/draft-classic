@@ -56,6 +56,8 @@ Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll s
 
 This software is covered under the MIT license. You can read the license [here][license].
 
+This software contains code from Heroku Buildpacks, which are also covered by the MIT license. You can read their license [here][NOTICE]
+
 This software contains code from [Helm][], which is covered by the Apache v2.0 license.
 
 
