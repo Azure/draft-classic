@@ -80,7 +80,7 @@ func TestFromDir(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
-	if _, err := Create(path.Base(dir), path.Dir(dir)); err != nil {
+	if _, err := Create(path.Base(dir), path.Dir(dir), fooPackFiles()); err != nil {
 		t.Fatal(err)
 	}
 	// load a pack with an un-readable Dockerfile (file perms 0000)
@@ -91,7 +91,7 @@ func TestFromDir(t *testing.T) {
 		t.Errorf("expected err to be non-nil when reading the Dockerfile")
 	}
 
-	// revert file perms for the Dockerfile in prep for the detect scrit
+	// revert file perms for the Dockerfile in prep for the detect script
 	if err := os.Chmod(filepath.Join(dir, DockerfileName), 0644); err != nil {
 		t.Fatal(err)
 	}
