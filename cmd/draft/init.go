@@ -18,6 +18,7 @@ import (
 	"k8s.io/helm/pkg/tiller/environment"
 
 	"github.com/deis/draft/cmd/draft/installer"
+	"github.com/deis/draft/pkg/draft/defaultpacks"
 	"github.com/deis/draft/pkg/draft/draftpath"
 	"github.com/deis/draft/pkg/draft/pack"
 )
@@ -196,10 +197,16 @@ func ensureDirectories(home draftpath.Home, out io.Writer) error {
 //
 // If the pack does not exist, this function will create it.
 func ensurePacks(home draftpath.Home, out io.Writer) error {
-	packNames := []string{"zzznginx"}
-	for _, packName := range packNames {
+	packNames := map[string][]*pack.File{
+		"python": defaultpacks.PythonFiles(),
+		"golang": defaultpacks.GolangFiles(),
+		"php":    defaultpacks.PHPFiles(),
+		"java":   defaultpacks.JavaFiles(),
+		"ruby":   defaultpacks.RubyFiles(),
+	}
+	for packName, packFiles := range packNames {
 		fmt.Fprintf(out, "Creating pack %s\n", packName)
-		if _, err := pack.Create(packName, home.Packs()); err != nil {
+		if _, err := pack.Create(packName, home.Packs(), packFiles); err != nil {
 			return err
 		}
 	}

@@ -30,6 +30,13 @@ fi
 echo "Python"
 `
 
+const testDockerfile = `FROM nginx:latest
+`
+
+const testDetect = `#!/bin/sh
+echo "Test"
+`
+
 func TestDetect(t *testing.T) {
 	p := &Pack{
 		DetectScript: []byte(pythonScript),
@@ -92,8 +99,8 @@ func TestSaveDir(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Dockerfile:   []byte(defaultDockerfile),
-		DetectScript: []byte(defaultDetect),
+		Dockerfile:   []byte(testDockerfile),
+		DetectScript: []byte(testDetect),
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")
 	if err != nil {
@@ -122,8 +129,8 @@ func TestSaveDirDockerfileExists(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Dockerfile:   []byte(defaultDockerfile),
-		DetectScript: []byte(defaultDetect),
+		Dockerfile:   []byte(testDockerfile),
+		DetectScript: []byte(testDetect),
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")
 	if err != nil {
