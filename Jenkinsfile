@@ -103,7 +103,7 @@ node('linux') {
 
         env.AZURE_STORAGE_ACCOUNT = azure.storageAccount
         withCredentials(wrapId('AZURE_STORAGE_KEY', azure.storageKey)) {
-          sh "az storage blob upload-batch --source _dist/ --destination ${azure.container}"
+          sh "az storage blob upload-batch --source _dist/ --destination ${azure.container} --pattern *.tar.gz*"
         }
       } else {
         echo "git branch not 'master'; skipping binary publishing."
