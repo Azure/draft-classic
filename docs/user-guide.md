@@ -10,17 +10,17 @@ as follows:
 
 ```
 [environments]
-	[environments.development]
-	name = "draft-dev"
-	set = ["foo=bar", "car=star"]
-	watch = true
-	watch_delay = 1
+    [environments.development]
+    name = "draft-dev"
+    set = ["foo=bar", "car=star"]
+    watch = true
+    watch_delay = 1
 
-	[environments.staging]
-	name = "draft-dev"
-	namespace = "kube-system"
-	build_tar = "build.tar.gz"
-	chart_tar = "chart.tar.gz"
+    [environments.staging]
+    name = "draft-dev"
+    namespace = "kube-system"
+    build_tar = "build.tar.gz"
+    chart_tar = "chart.tar.gz"
 ```
 
 Let's break it down by section:
@@ -33,7 +33,7 @@ The root of the TOML file. Each definition under this node is considered an "env
 that in a second.
 
 ```
-	[environments.development]
+    [environments.development]
 ```
 
 This is the environment name. Applications deployed by Draft can be configured in different manners
@@ -42,14 +42,14 @@ but this can be tweaked by either setting `$DRAFT_ENV` or by supplying the envir
 runtime using `draft up --environment=staging`.
 
 ```
-	name = "draft"
-	namespace = "kube-system"
-	build_tar = "build.tar.gz"
-	chart_tar = "chart.tar.gz"
-	set = ["foo=bar", "car=star"]
-	wait = false
-	watch = false
-	watch_delay = 2
+    name = "draft"
+    namespace = "kube-system"
+    build_tar = "build.tar.gz"
+    chart_tar = "chart.tar.gz"
+    set = ["foo=bar", "car=star"]
+    wait = false
+    watch = false
+    watch_delay = 2
 ```
 
 Here is a run-down on each of the fields:
