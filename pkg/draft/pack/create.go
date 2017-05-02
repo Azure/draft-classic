@@ -213,7 +213,7 @@ func Create(name, dir string) (string, error) {
 	if fi, err := os.Stat(path); err != nil {
 		return path, err
 	} else if !fi.IsDir() {
-		return path, fmt.Errorf("no such directory %s", path)
+		return path, fmt.Errorf("%s is not a directory", path)
 	}
 
 	pdir := filepath.Join(path, name)
