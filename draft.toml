@@ -1,6 +1,6 @@
 [environments]
 
-	[environments.development]
-	name = "draft"
-	namespace = "kube-system"
-	wait = false
+    [environments.development]
+    name = "draft"
+    namespace = "kube-system"
+    wait = false
