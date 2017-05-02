@@ -1,6 +1,7 @@
 package pack
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -19,9 +20,66 @@ func TestCreate(t *testing.T) {
 	}
 	defer os.RemoveAll(tdir)
 
-	c, err := Create(packName, tdir)
+	// first test: run Create() on a path that's actually a file
+	filePath := filepath.Join(tdir, "foo.txt")
+	if err = ioutil.WriteFile(filePath, []byte(""), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Create("foo.txt", tdir); err == nil {
+		t.Error("expected error supplying path to a file")
+	} else {
+		expectedErr := fmt.Sprintf("file %s already exists and is not a directory", filePath)
+		if err.Error() != expectedErr {
+			t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+		}
+	}
+
+	// second test: run Create() on a path that doesn't exist
+	if _, err := Create("", filepath.Join(tdir, "bar")); err == nil {
+		t.Error("expected error supplying path to a non-existent dir")
+	} else {
+		expectedErr := fmt.Sprintf("stat %s: no such file or directory", filepath.Join(tdir, "bar"))
+		if err.Error() != expectedErr {
+			t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+		}
+	}
+
+	// third test: run Create() on a base path that is a file
+	if _, err := Create("", filepath.Join(tdir, "foo.txt")); err == nil {
+		t.Error("expected error supplying path to a file")
+	} else {
+		expectedErr := fmt.Sprintf("%s is not a directory", filepath.Join(tdir, "foo.txt"))
+		if err.Error() != expectedErr {
+			t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+		}
+	}
+
+	// fourth test: run Create() on a valid path with bad write permissions
+	badPermsDir, err := ioutil.TempDir(tdir, "badpack-")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if err := os.Chmod(badPermsDir, 0000); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Create(packName, badPermsDir); err == nil {
+		t.Error("expected error when creating pack in dir with bad write permissions")
+	} else {
+		expectedErr := fmt.Sprintf("mkdir %s: permission denied", filepath.Join(badPermsDir, packName))
+		if err.Error() != expectedErr {
+			t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+		}
+	}
+
+	// now actually create a valid pack and perform further tests
+	c, err := Create(packName, tdir)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// re-run Create(), expecting to pass and skip overwriting existing files
+	if _, err := Create(packName, tdir); err != nil {
+		t.Error(err)
 	}
 
 	dir := filepath.Join(tdir, packName)
