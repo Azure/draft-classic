@@ -22,31 +22,31 @@ const draftValues = `# Default values for Draftd.
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-	registry: quay.io
-	org: deis
-	name: draftd
-	tag: %s
-	pullPolicy: Always
+  registry: quay.io
+  org: deis
+  name: draftd
+  tag: %s
+  pullPolicy: Always
 debug: false
 service:
-	http:
-		externalPort: 80
-		internalPort: 44135
+  http:
+    externalPort: 80
+    internalPort: 44135
 registry:
-	url: quay.io
-	org: deis
-	# This field follows the format of Docker's X-Registry-Auth header.
-	#
-	# See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
-	#
-	# For credential-based logins, use
-	#
-	# $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64 -w 0
-	#
-	# For token-based logins, use
-	#
-	# $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
-	authtoken: changeme
+  url: quay.io
+  org: deis
+  # This field follows the format of Docker's X-Registry-Auth header.
+  #
+  # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
+  #
+  # For credential-based logins, use
+  #
+  # $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64 -w 0
+  #
+  # For token-based logins, use
+  #
+  # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
+  authtoken: changeme
 `
 
 const draftIgnore = `# Patterns to ignore when building packages.
@@ -75,75 +75,75 @@ const draftIgnore = `# Patterns to ignore when building packages.
 const draftDeployment = `apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-	name: draftd
-	labels:
-		chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  name: draftd
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
-	replicas: {{ .Values.replicaCount }}
-	template:
-		metadata:
-			labels:
-				app: draft
-				name: draftd
-		spec:
-			containers:
-			- name: draftd
-				image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-				imagePullPolicy: {{ .Values.image.pullPolicy }}
-				args:
-				- start
-				- --registry-url={{ .Values.registry.url }}
-				- --registry-org={{ .Values.registry.org }}
-				- --registry-auth={{ .Values.registry.authtoken }}
-				{{- if .Values.debug }}
-				- --debug
-				{{- end }}
-				ports:
-				- containerPort: {{ .Values.service.http.internalPort }}
-				env:
-				- name: DRAFT_NAMESPACE
-					valueFrom:
-						fieldRef:
-							fieldPath: metadata.namespace
-				livenessProbe:
-					httpGet:
-						path: /ping
-						port: {{ .Values.service.http.internalPort }}
-				readinessProbe:
-					httpGet:
-						path: /ping
-						port: {{ .Values.service.http.internalPort }}
-				volumeMounts:
-				- mountPath: /var/run/docker.sock
-					name: docker-socket
-			volumes:
-			- name: docker-socket
-				hostPath:
-					path: /var/run/docker.sock
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: draft
+        name: draftd
+    spec:
+      containers:
+      - name: draftd
+        image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - start
+        - --registry-url={{ .Values.registry.url }}
+        - --registry-org={{ .Values.registry.org }}
+        - --registry-auth={{ .Values.registry.authtoken }}
+        {{- if .Values.debug }}
+        - --debug
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.http.internalPort }}
+        env:
+        - name: DRAFT_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: {{ .Values.service.http.internalPort }}
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: {{ .Values.service.http.internalPort }}
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
 `
 
 const draftService = `apiVersion: v1
 kind: Service
 metadata:
-	name: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
 spec:
-	ports:
-		- name: http
-			port: {{ .Values.service.http.externalPort }}
-			targetPort: {{ .Values.service.http.internalPort }}
-	selector:
-		app: {{ .Chart.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.service.http.externalPort }}
+      targetPort: {{ .Values.service.http.internalPort }}
+  selector:
+    app: {{ .Chart.Name }}
 `
 
 const draftNotes = `Now you can deploy an app using Draft!
 
-	$ cd my-app
-	$ draft create
-	$ draft up
-	--> Building Dockerfile
-	--> Pushing my-app:latest
-	--> Deploying to Kubernetes
-	--> Deployed!
+  $ cd my-app
+  $ draft create
+  $ draft up
+  --> Building Dockerfile
+  --> Pushing my-app:latest
+  --> Deploying to Kubernetes
+  --> Deployed!
 
 That's it! You're now running your app in a Kubernetes cluster.
 `
