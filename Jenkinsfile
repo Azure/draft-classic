@@ -6,7 +6,7 @@ def gitCommit = ''
 def azure = [
   container: 'draft',
   storageAccount: 'azuredraft',
-  storageKey: '5c0a4a1e-dd9f-4189-90a1-e1a58508394e',
+  storageKey: '84724ec5-f4a8-4eff-8a66-10db32ea5d3e',
 ]
 
 def registries = [
