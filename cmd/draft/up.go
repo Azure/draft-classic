@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -135,8 +136,15 @@ func (u *upCmd) run(environment string) (err error) {
 		select {
 		case evt := <-ch:
 			log.Debugf("Event %s", evt)
-			// reset the timer when files have changed
-			timer.Reset(delay)
+			// Only rebuild if the changed file is a file we care about
+			// ie, not a *.swp,*.tmp,*.temp file or a .git* file
+			if !strings.HasSuffix(evt.Path(), ".swp") &&
+				!strings.HasSuffix(evt.Path(), ".tmp") &&
+				!strings.HasSuffix(evt.Path(), ".temp") &&
+				!strings.HasPrefix(evt.Path(), fmt.Sprintf("%s/.git", cwd)) {
+				// reset the timer when files have changed
+				timer.Reset(delay)
+			}
 		case <-timer.C:
 			if err = u.doUp(environment, cwd, rawVals); err != nil {
 				return err
