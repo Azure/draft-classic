@@ -201,6 +201,7 @@ func ensurePacks(home draftpath.Home, out io.Writer) error {
 		"python": defaultpacks.PythonFiles(),
 		"golang": defaultpacks.GolangFiles(),
 		"php":    defaultpacks.PHPFiles(),
+		"node":   defaultpacks.NodeFiles(),
 		"java":   defaultpacks.JavaFiles(),
 		"ruby":   defaultpacks.RubyFiles(),
 	}
