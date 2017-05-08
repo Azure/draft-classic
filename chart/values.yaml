@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   registry: docker.io
   org: microsoft
-  name: draftd
+  name: draft
   tag: canary
   pullPolicy: Always
 debug: false
