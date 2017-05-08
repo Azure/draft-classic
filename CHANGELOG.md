@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.3.0
+
+### Client
+
+* Create default packs on `draft init` for 6 different languages
+* Add basedomain logic for ingress resources in default starter packs
+* Ignore temporary files from file-watcher
+* Switched from `draft.yaml` to `draft.toml`
+* Autogenerate release name on `draft create`
+
+### Server
+
+* Connect to tiller via kubernetes service
+
+### Documentation
+
+* Add example applications for all 6 languages
+* Update getting-started documentation to use python example application
+* Add Governance model
+
+### Test Infrastructure
+
+* Improved test coverage
+* Switched to Jenkins for CI
+* Push client binaries to azuredraft storage account
+
 ## v0.2.0
 
 ### Client
