@@ -7,7 +7,7 @@ import (
 
 	"k8s.io/helm/pkg/chartutil"
 
-	"github.com/deis/draft/pkg/osutil"
+	"github.com/Azure/draft/pkg/osutil"
 )
 
 // FromDir takes a string name, tries to resolve it to a file or directory, and then loads it.

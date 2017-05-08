@@ -3,7 +3,7 @@ package defaultpacks
 import (
 	"path/filepath"
 
-	"github.com/deis/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/draft/pack"
 )
 
 const pythonValues = `# Default values for python.
