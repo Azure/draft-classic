@@ -32,6 +32,10 @@ def isMaster = { String branch ->
   branch == "remotes/origin/master"
 }
 
+def isTag = { String branch ->
+  branch.startsWith("remotes/origin/tags/")
+}
+
 def deriveCommit = {
   commit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
   mergeCommitParents = sh(returnStdout: true, script: "echo ${commit} | git log --pretty=%P -n 1 --date-order").trim()
@@ -44,18 +48,15 @@ def deriveCommit = {
   commit
 }
 
-def dist = { String commit ->
-  String version = "git-${commit}"
-
+def dist = { String version ->
   sh """
     VERSION=${version} make dist checksum
     VERSION="canary" make dist checksum
   """
 }
 
-def dockerBuildAndPush = { Map registry, String commit ->
+def dockerBuildAndPush = { Map registry, String version ->
   String registryPrefix = 'docker.io/'
-  String version = registry.name.contains('staging') ? "git-${commit}" : 'canary'
 
   sh """
     docker login -e="${registry.email}" -u="${registry.username}" -p="\${REGISTRY_PASSWORD}"
@@ -75,6 +76,11 @@ node('linux') {
       gitCommit = deriveCommit()
     }
 
+    def tag = gitBranch.tokenize('/')[-1]
+    if (tag == "master") {
+      tag = "git-${gitCommit.take(7)}"
+    }
+
     stage('Bootstrap') {
       sh 'make bootstrap'
     }
@@ -84,31 +90,31 @@ node('linux') {
     }
 
     stage('Build') {
-      def buildTarget = isMaster(gitBranch) ? 'build-cross' : 'build'
+      def buildTarget = (isMaster(gitBranch) || isTag(gitBranch)) ? 'build-cross' : 'build'
 
       sh "make ${buildTarget}"
     }
 
     stage('Publish Binaries - Azure') {
-      if (isMaster(gitBranch)) {
-        dist(gitCommit.take(7))
+      if (isMaster(gitBranch) || isTag(gitBranch)) {
+        dist(tag)
 
         env.AZURE_STORAGE_ACCOUNT = azure.storageAccount
         withCredentials(wrapId('AZURE_STORAGE_KEY', azure.storageKey)) {
           sh "az storage blob upload-batch --source _dist/ --destination ${azure.container} --pattern *.tar.gz*"
         }
       } else {
-        echo "git branch not 'master'; skipping binary publishing."
+        echo "git ref ${gitBranch} not releasable; skipping binary publishing."
       }
     }
 
     stage('Docker Push - DockerHub') {
-      if (isMaster(gitBranch)) {
+      if (isMaster(gitBranch) || isTag(gitBranch)) {
         withCredentials(wrapId('REGISTRY_PASSWORD', registries.dockerhub.production.credentials)) {
-          dockerBuildAndPush(registries.dockerhub.production, gitCommit.take(7))
+          dockerBuildAndPush(registries.dockerhub.production, tag)
         }
       } else {
-        echo "git branch not 'master'; skipping dockerhub publishing."
+        echo "git ref ${gitBranch} not releasable; skipping dockerhub publishing."
       }
     }
   }
