@@ -79,7 +79,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   rules:
-  - host: {{ template "fullname" . }}.{{ .Values.basedomain }}
+  - host: {{ .Release.Name }}.{{ .Values.basedomain }}
     http:
       paths:
       - path: /
