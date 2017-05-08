@@ -21,6 +21,7 @@ const draftValues = `# Default values for Draftd.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
+basedomain: example.com
 image:
   registry: quay.io
   org: deis
@@ -95,6 +96,7 @@ spec:
         - --registry-url={{ .Values.registry.url }}
         - --registry-org={{ .Values.registry.org }}
         - --registry-auth={{ .Values.registry.authtoken }}
+        - --basedomain={{ .Values.basedomain }}
         {{- if .Values.debug }}
         - --debug
         {{- end }}

@@ -57,6 +57,8 @@ type Server struct {
 	RegistryOrg string
 	// RegistryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
 	RegistryURL string
+	// Basedomain is the basedomain used to construct the ingress rules
+	Basedomain string
 }
 
 // Serve starts the HTTP server, accepting all new connections.
@@ -355,6 +357,10 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if err != nil {
 		handleClosingError(conn, "Could not load chart archive", err)
 	}
+
+	// combinedVars takes the basedomain configured in draftd and appends that to the rawVals
+	combinedVars := append([]byte(fmt.Sprintf("basedomain: %s\n", server.Basedomain))[:], []byte(rawVals)[:]...)
+
 	// If a release does not exist, install it. If another error occurs during
 	// the check, ignore the error and continue with the upgrade.
 	//
@@ -370,7 +376,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			chart,
 			namespace,
 			helm.ReleaseName(appName),
-			helm.ValueOverrides([]byte(rawVals)),
+			helm.ValueOverrides(combinedVars),
 			helm.InstallWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not install release", err)
@@ -382,7 +388,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		releaseResp, err := server.HelmClient.UpdateReleaseFromChart(
 			appName,
 			chart,
-			helm.UpdateValueOverrides([]byte(rawVals)),
+			helm.UpdateValueOverrides(combinedVars),
 			helm.UpgradeWait(optionWait))
 		if err != nil {
 			handleClosingError(conn, "Could not upgrade release", err)
