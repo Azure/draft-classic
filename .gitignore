@@ -3,3 +3,6 @@ _dist/
 vendor/
 *.exe
 *.tar.gz
+examples/**/Dockerfile
+examples/**/chart
+examples/**/draft.toml
