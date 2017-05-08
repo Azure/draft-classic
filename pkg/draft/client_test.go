@@ -15,7 +15,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 
-	"github.com/deis/draft/api"
+	"github.com/Azure/draft/api"
 )
 
 const expectedURLPath = "/apps/testdata"

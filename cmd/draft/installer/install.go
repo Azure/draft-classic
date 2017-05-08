@@ -8,7 +8,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	"github.com/deis/draft/pkg/version"
+	"github.com/Azure/draft/pkg/version"
 )
 
 const draftChart = `name: draftd

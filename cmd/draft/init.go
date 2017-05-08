@@ -17,10 +17,10 @@ import (
 	"k8s.io/helm/pkg/strvals"
 	"k8s.io/helm/pkg/tiller/environment"
 
-	"github.com/deis/draft/cmd/draft/installer"
-	"github.com/deis/draft/pkg/draft/defaultpacks"
-	"github.com/deis/draft/pkg/draft/draftpath"
-	"github.com/deis/draft/pkg/draft/pack"
+	"github.com/Azure/draft/cmd/draft/installer"
+	"github.com/Azure/draft/pkg/draft/defaultpacks"
+	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/draft/pack"
 )
 
 const initDesc = `

@@ -8,8 +8,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/deis/draft/pkg/draft"
-	"github.com/deis/draft/pkg/version"
+	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/version"
 )
 
 const versionDesc = `
