@@ -52,7 +52,11 @@ If you're looking to build from source or get started hacking on Draft, please s
 
 Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
-# License
+## Contributing
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## License
 
 This software is covered under the MIT license. You can read the license [here][license].
 
