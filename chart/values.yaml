@@ -7,8 +7,8 @@ image:
   registry: docker.io
   org: microsoft
   name: draftd
-  tag: canary
-  pullPolicy: Always
+  tag: v0.3.0-rc1
+  pullPolicy: IfNotPresent
 debug: false
 service:
   http:
