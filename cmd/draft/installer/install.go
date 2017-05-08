@@ -23,8 +23,8 @@ const draftValues = `# Default values for Draftd.
 replicaCount: 1
 basedomain: example.com
 image:
-  registry: quay.io
-  org: deis
+  registry: docker.io
+  org: microsoft
   name: draftd
   tag: %s
   pullPolicy: Always
@@ -34,8 +34,8 @@ service:
     externalPort: 80
     internalPort: 44135
 registry:
-  url: quay.io
-  org: deis
+  url: docker.io
+  org: microsoft
   # This field follows the format of Docker's X-Registry-Auth header.
   #
   # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
