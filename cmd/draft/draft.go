@@ -12,9 +12,9 @@ import (
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/client/restclient"
 
-	"github.com/deis/draft/pkg/draft"
-	"github.com/deis/draft/pkg/draft/draftpath"
-	"github.com/deis/draft/pkg/draftd/portforwarder"
+	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/draftd/portforwarder"
 )
 
 const (
