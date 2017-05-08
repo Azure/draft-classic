@@ -5,26 +5,12 @@ have Draft up and installed according to the [README](../README.md#install-draft
 
 ## App setup
 
-Let's create a sample Python app using [Flask](http://flask.pocoo.org/).
+There are multiple example applications included within the [examples directory](../examples).
+For this walkthrough, we'll be using the [python example application](../examples/python) which
+uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
 
 ```shell
-$ mkdir /tmp/hello-world
-$ cd /tmp/hello-world
-$ cat <<EOF > hello.py
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    return "Hello World!\n"
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
-EOF
-$ echo "flask" > requirements.txt
-$ ls
-hello.py  requirements.txt
+$ cd examples/python
 ```
 
 ## Draft Create
