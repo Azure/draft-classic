@@ -25,7 +25,7 @@ basedomain: example.com
 image:
   registry: docker.io
   org: microsoft
-  name: draftd
+  name: draft
   tag: %s
   pullPolicy: Always
 debug: false

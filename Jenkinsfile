@@ -13,9 +13,9 @@ def registries = [
   dockerhub: [
     production: [
       name: 'microsoft',
-      email: '',
-      username: '',
-      credentials: '',
+      email: 'matt.fisher@microsoft.com',
+      username: 'bacongobbler',
+      credentials: '6169daa6-723d-4e20-bf7e-ff7db308f381',
     ],
   ]
 ]
