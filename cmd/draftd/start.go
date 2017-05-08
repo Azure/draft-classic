@@ -35,6 +35,8 @@ type startCmd struct {
 	registryOrg string
 	// registryURL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
 	registryURL string
+	// basedomain is the base domain used to construct the ingress host name to applications.
+	basedomain string
 	// tillerURI is the URI used to connect to tiller.
 	tillerURI string
 }
@@ -61,6 +63,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
 	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
+	f.StringVar(&sc.basedomain, "basedomain", "", "the base domain in which a wildcard DNS entry points to an ingress controller")
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
 
 	return cmd
@@ -91,6 +94,7 @@ func (c *startCmd) run() error {
 	server.RegistryAuth = c.registryAuth
 	server.RegistryOrg = c.registryOrg
 	server.RegistryURL = c.registryURL
+	server.Basedomain = c.basedomain
 	server.HelmClient = helm.NewClient(helm.Host(c.tillerURI))
 	log.Printf("server is now listening at %s", c.listenAddr)
 	return server.Serve()
