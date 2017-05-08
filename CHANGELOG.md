@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.3.0
+
+### Client
+
+* Added default draft packs for 6 different languages
+* Ignore temporary files from file watcher
+* Switched to `draft.toml`
+* Draft auto-generates the application name on `draft create`
+
+### Server
+
+* Connect to tiller via kubernetes service
+
+### Documentation
+
+* Added example applications for 6 different languages
+* Switched getting-started documentation over to use python example app
+* Added basedomain logic to ingress hosts
+* Added Governance Model
+
+### Test Infrastructure
+
+* Switched to Jenkins
+* Upload build artifacts to Azure Blob Storage
+* Improved code coverage
+
 ## v0.2.0
 
 ### Client
