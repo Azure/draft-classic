@@ -3,7 +3,7 @@
 cd $(dirname $0)
 
 docker run \
-    -v $PWD/..:/go/src/github.com/deis/draft \
-    --workdir /go/src/github.com/deis/draft \
+    -v $PWD/..:/go/src/github.com/Azure/draft \
+    --workdir /go/src/github.com/Azure/draft \
     deis/go-dev:v0.22.0 \
     make $@

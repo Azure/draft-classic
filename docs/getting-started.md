@@ -70,8 +70,8 @@ Step 1 : FROM python:onbuild
 onbuild: Pulling from library/python
 ...
 Successfully built 38f35b50162c
---> Pushing quay.io/deis/hello-world:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
-The push refers to a repository [quay.io/deis/hello-world]
+--> Pushing docker.io/microsoft/hello-world:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
+The push refers to a repository [docker.io/microsoft/hello-world]
 ...
 5a3c633ae76c9bdb81b55f5d4a783398bf00658e: digest: sha256:9d9e9fdb8ee3139dd77a110fa2d2b87573c3ff5ec9c045db6009009d1c9ebf5b size: 16384
 --> Deploying to Kubernetes
@@ -129,8 +129,8 @@ already exists and will perform a `helm upgrade` rather than attempting another 
 Step 1 : FROM python:onbuild
 ...
 Successfully built 9c90b0445146
---> Pushing quay.io/deis/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
-The push refers to a repository [quay.io/deis/hello-world]
+--> Pushing docker.io/microsoft/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
+The push refers to a repository [docker.io/microsoft/hello-world]
 ...
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
