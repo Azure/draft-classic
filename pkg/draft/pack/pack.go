@@ -15,6 +15,39 @@ import (
 	"github.com/deis/draft/pkg/osutil"
 )
 
+const (
+	// ChartfileName is the default Chart file name.
+	ChartfileName = "Chart.yaml"
+	// ChartDir is the relative directory name for the packaged chart with a pack.
+	ChartDir = "chart"
+	// DetectName is the name of the detect script.
+	DetectName = "detect"
+	// DockerfileName is the name of the Dockerfile.
+	DockerfileName = "Dockerfile"
+	// ValuesfileName is the default values file name.
+	ValuesfileName = "values.yaml"
+	// IgnorefileName is the name of the Helm ignore file.
+	IgnorefileName = ".helmignore"
+	// DeploymentName is the name of the deployment file.
+	DeploymentName = "deployment.yaml"
+	// ServiceName is the name of the service file.
+	ServiceName = "service.yaml"
+	// IngressName is the name of the ingress file.
+	IngressName = "ingress.yaml"
+	// NotesName is the name of the NOTES.txt file.
+	NotesName = "NOTES.txt"
+	// HelpersName is the name of the helpers file.
+	HelpersName = "_helpers.tpl"
+	// TemplatesDir is the relative directory name for templates.
+	TemplatesDir = "templates"
+	// ChartsDir is the relative directory name for charts dependencies.
+	ChartsDir = "charts"
+	// HerokuLicenseName is the name of the Neroku License
+	HerokuLicenseName = "NOTICE"
+	// DockerignoreName is the name of the Docker ignore file
+	DockerignoreName = ".dockerignore"
+)
+
 // Pack defines a Draft Starter Pack.
 type Pack struct {
 	// Chart is the Helm chart to be installed with the Pack.
@@ -24,6 +57,13 @@ type Pack struct {
 	// DetectScript is a command that determines if the Pack is a candidate for an app. When
 	// .Detect() is called on the Pack, the data here is piped as stdin to `/bin/bash -s`.
 	DetectScript []byte
+}
+
+// File represents a file within a Pack
+type File struct {
+	Path    string
+	Content []byte
+	Perm    os.FileMode
 }
 
 // Detect determines if this pack is viable for the given application in dir.
