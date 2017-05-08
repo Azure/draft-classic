@@ -4,32 +4,31 @@
 
 ### Client
 
-* New command: `prow home` [#124](https://github.com/deis/prow/pull/124)
-* New command: `prow init` [#126](https://github.com/deis/prow/pull/126)
-* Introduced pack detection into `prow create` [#138](https://github.com/deis/prow/pull/138)
-* New option flags on `prow up`: `-f`, `--set`, and `--values` [#139](https://github.com/deis/prow/pull/139)
-* Intruduced a default Ingress resource with the default nginx pack [#151](https://github.com/deis/prow/pull/151)
-* Introduced `prow.yaml` [#140](https://github.com/deis/prow/pull/140)
-  * See https://github.com/deis/prow/blob/master/docs/user-guide.md#prowyaml for more information
+* New command: `draft home`
+* New command: `draft init`
+* Introduced pack detection into `draft create`
+* New option flags on `draft up`: `-f`, `--set`, and `--values`
+* Intruduced a default Ingress resource with the default nginx pack
+* Introduced `draft.yaml`
 
 ### Server
 
-* Initialized connection to Helm on startup rather than at build time [#106](https://github.com/deis/prow/pull/106)
-* Bumped Helm to commit 1aee50f [#155](https://github.com/deis/prow/pull/155)
+* Initialized connection to Helm on startup rather than at build time
+* Bumped Helm to commit 1aee50f
 
 ### Documentation
 
-* Introduced the --watch flag in the Getting Started Guide [#108](https://github.com/deis/prow/pull/108)
-* Documented the release process [#143](https://github.com/deis/prow/pull/143)
+* Introduced the --watch flag in the Getting Started Guide 
+* Documented the release process
 
 ### Test Infrastructure
 
-* Introduced Drone CI! [#128](https://github.com/deis/prow/pull/128)
-  * Canary images are uploaded to quay.io/deis/prowd
+* Introduced Drone CI!
+  * Canary images are uploaded to docker registry
   * Canary clients are uploaded to S3 for linux-arm, linux-i386, linux-amd64, darwin-amd64, and windows-amd64
   * Release images and clients are uploaded, too!
-* Unit tests for the client and server were improved over this release. [#172](https://github.com/deis/prow/pull/172) [#173](https://github.com/deis/prow/pull/173)
-* Introduced `hack/docker-make.sh` to run the test suite inside a container [#177](https://github.com/deis/prow/pull/177)
+* Unit tests for the client and server were improved over this release.
+* Introduced `hack/docker-make.sh` to run the test suite inside a container 
 
 ## v0.1.0
 
