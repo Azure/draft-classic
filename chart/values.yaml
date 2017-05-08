@@ -7,7 +7,7 @@ image:
   registry: docker.io
   org: microsoft
   name: draft
-  tag: v0.3.0-rc1
+  tag: v0.3.0
   pullPolicy: IfNotPresent
 debug: false
 service:
