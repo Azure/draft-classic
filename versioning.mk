@@ -16,9 +16,9 @@ BINARY_VERSION ?= ${GIT_TAG}-${GIT_SHA}
 IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${SHORT_NAME}:${DOCKER_VERSION}
 MUTABLE_IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${SHORT_NAME}:${MUTABLE_VERSION}
 
-LDFLAGS += -X github.com/deis/draft/pkg/version.Version=${GIT_TAG}
-LDFLAGS += -X github.com/deis/draft/pkg/version.GitCommit=${GIT_COMMIT}
-LDFLAGS += -X github.com/deis/draft/pkg/version.GitTreeState=${GIT_DIRTY}
+LDFLAGS += -X github.com/Azure/draft/pkg/version.Version=${GIT_TAG}
+LDFLAGS += -X github.com/Azure/draft/pkg/version.GitCommit=${GIT_COMMIT}
+LDFLAGS += -X github.com/Azure/draft/pkg/version.GitTreeState=${GIT_DIRTY}
 
 DOCKER_PUSH = docker push
 ifeq ($(DOCKER_REGISTRY),gcr.io)

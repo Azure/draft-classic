@@ -10,18 +10,12 @@ def azure = [
 ]
 
 def registries = [
-  quay: [
-    staging: [
-      name: 'quay-staging',
-      email: 'deisci+jenkins@deis.com',
-      username: 'deisci+jenkins',
-      credentials: 'c67dc0a1-c8c4-4568-a73d-53ad8530ceeb',
-    ],
+  dockerhub: [
     production: [
-      name: 'quay-production',
-      email: 'deis+jenkins@deis.com',
-      username: 'deis+jenkins',
-      credentials: '8317a529-10f7-40b5-abd4-a42f242f22f0',
+      name: 'microsoft',
+      email: '',
+      username: '',
+      credentials: '',
     ],
   ]
 ]
@@ -60,21 +54,20 @@ def dist = { String commit ->
 }
 
 def dockerBuildAndPush = { Map registry, String commit ->
-  String server = registry.name.contains('dockerhub') ? '' : 'quay.io'
-  String registryPrefix = registry.name.contains('quay') ? 'quay.io/' : ''
-  String imagePrefix = registry.name.contains('staging') ? 'deisci' : 'deis'
+  String server = 'docker.io'
+  String registryPrefix = 'docker.io/'
   String version = registry.name.contains('staging') ? "git-${commit}" : 'canary'
 
   sh """
     docker login -e="${registry.email}" -u="${registry.username}" -p="\${REGISTRY_PASSWORD}" ${server}
-    REGISTRY=${registryPrefix} IMAGE_PREFIX=${imagePrefix} VERSION=${version} make docker-build docker-push
+    REGISTRY=${registryPrefix} IMAGE_PREFIX=${registry.name} VERSION=${version} make docker-build docker-push
   """
 }
 
 node('linux') {
   env.GOBIN = env.GOPATH + "/bin"
   env.PATH = env.GOBIN + ":" + env.PATH
-  def workdir = env.GOPATH + "/src/github.com/deis/draft"
+  def workdir = env.GOPATH + "/src/github.com/Azure/draft"
 
   dir(workdir) {
     stage('Checkout & Git Info') {
@@ -110,11 +103,13 @@ node('linux') {
       }
     }
 
-    stage('Docker Push - Quay.io') {
-      def registry = isMaster(gitBranch) ? registries.quay.production : registries.quay.staging
-
-      withCredentials(wrapId('REGISTRY_PASSWORD', registry.credentials)) {
-        dockerBuildAndPush(registry, gitCommit.take(7))
+    stage('Docker Push - DockerHub') {
+      if (isMaster(gitBranch)) {
+        withCredentials(wrapId('REGISTRY_PASSWORD', registries.dockerhub.production.credentials)) {
+          dockerBuildAndPush(registries.dockerhub.production, gitCommit.take(7))
+        }
+      } else {
+        echo "git branch not 'master'; skipping dockerhub publishing."
       }
     }
   }

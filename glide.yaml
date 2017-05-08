@@ -1,4 +1,4 @@
-package: github.com/deis/draft
+package: github.com/Azure/draft
 import:
 - package: github.com/gorilla/websocket
   repo: https://github.com/bacongobbler/websocket

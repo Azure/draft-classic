@@ -1,5 +1,5 @@
-DOCKER_REGISTRY ?= quay.io
-IMAGE_PREFIX    ?= deis
+DOCKER_REGISTRY ?= docker.io
+IMAGE_PREFIX    ?= microsoft
 IMAGE_TAG       ?= canary
 SHORT_NAME      ?= draftd
 TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm windows/amd64
@@ -25,13 +25,13 @@ all: build
 
 .PHONY: build
 build:
-	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/...
+	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/...
 
 # usage: make clean build-cross dist APP=draft|draftd VERSION=v2.0.0-alpha.3
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
-	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/$(APP)
+	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/$(APP)
 
 .PHONY: dist
 dist:
@@ -66,7 +66,7 @@ check-helm:
 docker-binary: BINDIR = ./rootfs/bin
 docker-binary: GOFLAGS += -a -installsuffix cgo
 docker-binary:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o $(BINDIR)/draftd $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/deis/draft/cmd/draftd
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) build -o $(BINDIR)/draftd $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/draftd
 
 .PHONY: docker-build
 docker-build: check-docker docker-binary compress-binary
