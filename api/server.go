@@ -30,7 +30,7 @@ import (
 	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/helm/pkg/strvals"
 
-	"github.com/deis/draft/pkg/version"
+	"github.com/Azure/draft/pkg/version"
 )
 
 // WebsocketUpgrader represents the default websocket.Upgrader that Draft employs

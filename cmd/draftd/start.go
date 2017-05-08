@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/helm"
 
-	"github.com/deis/draft/api"
+	"github.com/Azure/draft/api"
 )
 
 const startDesc = `
