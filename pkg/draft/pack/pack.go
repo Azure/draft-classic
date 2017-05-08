@@ -73,7 +73,7 @@ type File struct {
 func (p *Pack) Detect(dir string) (string, error) {
 	if len(p.DetectScript) == 0 {
 		// If no detect script was implemented, we can assume it's a non-zero exit code.
-		// https://github.com/deis/draft/blob/master/docs/packs.md#pack-detection
+		// https://github.com/Azure/draft/blob/master/docs/packs.md#pack-detection
 		return "detect script not implemented", &exec.ExitError{}
 	}
 
