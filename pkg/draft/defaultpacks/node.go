@@ -9,7 +9,7 @@ import (
 const nodeValues = `# Default values for node.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-replicaCount: 1
+replicaCount: 2
 image:
   registry: docker.io
   org: library
