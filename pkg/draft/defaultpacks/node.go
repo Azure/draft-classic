@@ -55,7 +55,7 @@ func NodeFiles() []*pack.File {
 		{
 			// values.yaml
 			Path:    filepath.Join(pack.ChartDir, pack.ValuesfileName),
-			Content: []byte(pythonValues),
+			Content: []byte(nodeValues),
 			Perm:    0644,
 		},
 		{

@@ -115,7 +115,10 @@ func TestCreate(t *testing.T) {
 
 	// fourth test: run Create() on a valid path with bad write permissions
 	badPermsDir, err := ioutil.TempDir(tdir, "badpack-")
-	c, err := Create(packName, tdir, fooPackFiles())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = Create(packName, tdir, fooPackFiles())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +135,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	// now actually create a valid pack and perform further tests
-	c, err = Create(packName, tdir, fooPackFiles())
+	c, err := Create(packName, tdir, fooPackFiles())
 	if err != nil {
 		t.Error(err)
 	}
