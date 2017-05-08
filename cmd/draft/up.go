@@ -15,9 +15,9 @@ import (
 	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
 
-	"github.com/deis/draft/pkg/draft"
-	"github.com/deis/draft/pkg/draft/manifest"
-	"github.com/deis/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/draft/manifest"
+	"github.com/Azure/draft/pkg/draft/pack"
 )
 
 const upDesc = `
