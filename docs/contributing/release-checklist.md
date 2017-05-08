@@ -16,7 +16,7 @@ number and Z is the patch release number. This project strictly follows
 [semantic versioning](http://semver.org/) so following this step is critical.
 
 It is important to note that this document assumes that the git remote in your repository that
-corresponds to "https://github.com/deis/draft" is named "upstream". If yours is not (for example, if
+corresponds to "https://github.com/Azure/draft" is named "upstream". If yours is not (for example, if
 you've chosen to name it "origin" or something similar instead), be sure to adjust the listed
 snippets for your local environment accordingly. If you are not sure what your upstream remote is
 named, use a command like `git remote -v` to find out.
@@ -24,7 +24,7 @@ named, use a command like `git remote -v` to find out.
 If you don't have an upstream remote, you can add one easily using something like:
 
 ```
-git remote add upstream git@github.com:deis/draft.git
+git remote add upstream git@github.com:Azure/draft.git
 ```
 
 In this doc, we are going to reference a few environment variables as well, which you may want to
@@ -103,8 +103,8 @@ index cd80a4a..f90a963 100644
 --- a/chart/values.yaml
 +++ b/chart/values.yaml
 @@ -6,8 +6,8 @@ image:
-   registry: quay.io
-   org: deis
+   registry: docker.io
+   org: microsoft
    name: draftd
 -  tag: canary
 -  pullPolicy: Always
@@ -158,11 +158,11 @@ sufficient, listing the features in one of the four categories:
 
 ### Client
 
-* Implemented `draft up --set` [#139](https://github.com/deis/draft/pull/139)
+* Implemented `draft up --set` [#139](https://github.com/Azure/draft/pull/139)
 
 ### Test Infrastructure
 
-* Added drone.yml for CI automation [#128](https://github.com/deis/draft/pull/128)
+* Added drone.yml for CI automation [#128](https://github.com/Azure/draft/pull/128)
 ```
 
 For patch releases, do the same, but make note of the symptoms and who is affected.
@@ -175,7 +175,7 @@ being properly parsed as intended. Users are encouraged to upgrade for the best 
 
 ### Client
 
-* Fixed .dockerignore logic [#141](https://github.com/deis/draft/pull/141)
+* Fixed .dockerignore logic [#141](https://github.com/Azure/draft/pull/141)
 ```
 
 Let's commit that now.

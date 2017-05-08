@@ -45,11 +45,11 @@ $ GOOS=linux GOARCH=amd64 ./make.bash --no-clean
 ## Fork the Repository
 
 Begin at Github by forking Draft, then clone your fork locally. Since Draft is a Go package, it
-should be located at `$GOPATH/src/github.com/deis/draft`.
+should be located at `$GOPATH/src/github.com/Azure/draft`.
 
 ```shell
-$ mkdir -p $GOPATH/src/github.com/deis
-$ cd $GOPATH/src/github.com/deis
+$ mkdir -p $GOPATH/src/github.com/Azure
+$ cd $GOPATH/src/github.com/Azure
 $ git clone git@github.com:<username>/draft.git
 $ cd draft
 ```
@@ -58,7 +58,7 @@ Add the conventional [upstream][] `git` remote in order to fetch changes from Dr
 branch and to create pull requests:
 
 ```shell
-$ git remote add upstream https://github.com/deis/draft.git
+$ git remote add upstream https://github.com/Azure/draft.git
 ```
 
 ## Build Your Changes
@@ -144,7 +144,7 @@ To build your changes and upload it to draftd, run
 $ make build docker-binary
 $ draft up
 --> Building Dockerfile
---> Pushing quay.io/deis/draft:6f3b53003dcbf43821aea43208fc51455674d00e
+--> Pushing docker.io/microsoft/draftd:6f3b53003dcbf43821aea43208fc51455674d00e
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
 --> Notes:
