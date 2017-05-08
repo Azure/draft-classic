@@ -22,8 +22,8 @@ import (
 	"github.com/docker/docker/pkg/fileutils"
 	"github.com/gorilla/websocket"
 
-	"github.com/deis/draft/pkg/osutil"
-	"github.com/deis/draft/pkg/version"
+	"github.com/Azure/draft/pkg/osutil"
+	"github.com/Azure/draft/pkg/version"
 )
 
 // closingBuffer is a bytes.Buffer that implements .Close() so we can use it as an io.ReadCloser.

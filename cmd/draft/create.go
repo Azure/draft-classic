@@ -13,10 +13,10 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	"github.com/deis/draft/pkg/draft/draftpath"
-	"github.com/deis/draft/pkg/draft/manifest"
-	"github.com/deis/draft/pkg/draft/pack"
-	"github.com/deis/draft/pkg/osutil"
+	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/draft/manifest"
+	"github.com/Azure/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/osutil"
 )
 
 const (

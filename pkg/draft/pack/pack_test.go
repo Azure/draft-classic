@@ -11,7 +11,7 @@ import (
 
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	"github.com/deis/draft/pkg/osutil"
+	"github.com/Azure/draft/pkg/osutil"
 )
 
 const appPythonPath = "testdata/app-python"

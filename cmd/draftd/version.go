@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/deis/draft/pkg/version"
+	"github.com/Azure/draft/pkg/version"
 )
 
 const versionDesc = `
