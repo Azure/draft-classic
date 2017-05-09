@@ -23,7 +23,7 @@ $ draft create
 --> Python app detected
 --> Ready to sail
 $ ls
-chart  Dockerfile  draft.toml  hello.py  requirements.txt
+Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
 The `chart/` and `Dockerfile` assets created by Draft default to a basic [Python][]
@@ -40,7 +40,8 @@ change.
 $ cat draft.toml
 [environments]
   [environments.development]
-    name = "snug-lamb"
+    name = "tufted-lamb"
+    namespace = "default"
     watch = true
     watch_delay = 2
 ```
@@ -50,7 +51,7 @@ See [the Draft User Guide](user-guide.md) for more information and available con
 
 ## Draft Up
 
-Now we're ready to deploy `hello.py` to a Kubernetes cluster.
+Now we're ready to deploy `app.py` to a Kubernetes cluster.
 
 Draft handles these tasks with one `draft up` command:
 
@@ -101,10 +102,10 @@ When we `curl` our app, we see our app in action! A beautiful "Hello World!" gre
 
 ## Update the App
 
-Now, let's change the "Hello World!" output in `hello.py` to output "Hello Draft!" instead:
+Now, let's change the "Hello World!" output in `app.py` to output "Hello Draft!" instead:
 
 ```shell
-$ cat <<EOF > hello.py
+$ cat <<EOF > app.py
 from flask import Flask
 
 app = Flask(__name__)
