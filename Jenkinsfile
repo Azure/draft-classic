@@ -54,12 +54,11 @@ def dist = { String commit ->
 }
 
 def dockerBuildAndPush = { Map registry, String commit ->
-  String server = 'docker.io'
   String registryPrefix = 'docker.io/'
   String version = registry.name.contains('staging') ? "git-${commit}" : 'canary'
 
   sh """
-    docker login -e="${registry.email}" -u="${registry.username}" -p="\${REGISTRY_PASSWORD}" ${server}
+    docker login -e="${registry.email}" -u="${registry.username}" -p="\${REGISTRY_PASSWORD}"
     REGISTRY=${registryPrefix} IMAGE_PREFIX=${registry.name} VERSION=${version} make docker-build docker-push
   """
 }
