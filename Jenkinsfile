@@ -33,7 +33,7 @@ def isMaster = { String branch ->
 }
 
 def isTag = { String branch ->
-  branch.startsWith("remotes/origin/tags/")
+  branch.startsWith("tags/")
 }
 
 def deriveCommit = {
