@@ -1,3 +1,5 @@
+![Draft Logo](./docs/img/draft-logo.png)
+
 # Draft: Streamlined Kubernetes Development
 
 [![Build Status](https://ci.deis.io/buildStatus/icon?job=Azure/draft/master)](https://ci.deis.io/job/Azure/job/draft/job/master/)
