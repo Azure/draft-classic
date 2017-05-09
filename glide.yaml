@@ -1,8 +1,8 @@
 package: github.com/Azure/draft
 import:
 - package: github.com/gorilla/websocket
-  repo: https://github.com/bacongobbler/websocket
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
+  repo: https://github.com/bacongobbler/websocket
   vcs: git
 - package: github.com/docker/docker
   version: v17.03.0-ce
@@ -21,3 +21,5 @@ import:
 - package: github.com/ghodss/yaml
   version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
 - package: github.com/BurntSushi/toml
+- package: k8s.io/client-go
+  version: ~v2.0.0

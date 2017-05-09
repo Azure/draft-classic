@@ -24,6 +24,8 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
@@ -31,6 +33,13 @@ import (
 	"k8s.io/helm/pkg/strvals"
 
 	"github.com/Azure/draft/pkg/version"
+)
+
+const (
+	// name of the docker pull secret draftd will create in the desired destination namespace
+	pullSecretName = "draftd-pullsecret"
+	// name of the default service account draftd will modify with the imagepullsecret
+	defaultServiceAccountName = "default"
 )
 
 // WebsocketUpgrader represents the default websocket.Upgrader that Draft employs
@@ -48,6 +57,7 @@ type Server struct {
 	Listener     net.Listener
 	DockerClient *docker.Client
 	HelmClient   *helm.Client
+	KubeClient   *kubernetes.Clientset
 	// RegistryAuth is the authorization token used to push images up to the registry.
 	//
 	// This field follows the format of the X-Registry-Auth header.
@@ -59,6 +69,17 @@ type Server struct {
 	RegistryURL string
 	// Basedomain is the basedomain used to construct the ingress rules
 	Basedomain string
+}
+
+// DockerAuth is a container for the registry authentication credentials wrapped by the registry server name
+type DockerAuth map[string]RegistryAuth
+
+// RegistryAuth is the registry authentication credentials
+type RegistryAuth struct {
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	Email         string `json:"email"`
+	RegistryToken string `json:"registrytoken"`
 }
 
 // Serve starts the HTTP server, accepting all new connections.
@@ -356,6 +377,78 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
 		handleClosingError(conn, "Could not load chart archive", err)
+	}
+
+	// Determine if the destination namespace exists, create it if not.
+	_, err = server.KubeClient.CoreV1().Namespaces().Get(namespace)
+	if err != nil {
+		_, err = server.KubeClient.CoreV1().Namespaces().Create(&v1.Namespace{
+			ObjectMeta: v1.ObjectMeta{
+				Name: namespace,
+			},
+		})
+		if err != nil {
+			handleClosingError(conn, "Could not create namespace", err)
+		}
+	}
+
+	// Determine if the registry pull secret exists in the desired namespace, create it if not.
+	_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName)
+	if err != nil {
+		// Base64 decode the registryauth string.
+		data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
+		if err != nil {
+			handleClosingError(conn, "Could not base64 decode registry authentication string", err)
+		}
+
+		// Break up registry auth json string into a RegistryAuth object.
+		var regAuth RegistryAuth
+		err = json.Unmarshal(data, &regAuth)
+		if err != nil {
+			handleClosingError(conn, "Could not json decode registry authentication string", err)
+		}
+
+		// Create a new json string with the full dockerauth, including the registry URL.
+		jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
+		if err != nil {
+			handleClosingError(conn, "Could not json encode docker authentication string", err)
+		}
+
+		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      pullSecretName,
+				Namespace: namespace,
+			},
+			Type: v1.SecretTypeDockercfg,
+			StringData: map[string]string{
+				".dockercfg": string(jsonString),
+			},
+		})
+		if err != nil {
+			handleClosingError(conn, "Could not create registry pull secret", err)
+		}
+	}
+
+	// Determine if the default service account in the desired namespace has the correct imagePullSecret, add it if not.
+	serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName)
+	if err != nil {
+		handleClosingError(conn, "Could not load default service account", err)
+	}
+	foundPullSecret := false
+	for _, ps := range serviceAccount.ImagePullSecrets {
+		if ps.Name == pullSecretName {
+			foundPullSecret = true
+			break
+		}
+	}
+	if !foundPullSecret {
+		serviceAccount.ImagePullSecrets = append(serviceAccount.ImagePullSecrets, v1.LocalObjectReference{
+			Name: pullSecretName,
+		})
+		_, err = server.KubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
+		if err != nil {
+			handleClosingError(conn, "Could not modify default service account with registry pull secret", err)
+		}
 	}
 
 	// combinedVars takes the basedomain configured in draftd and appends that to the rawVals
