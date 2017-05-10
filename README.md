@@ -15,6 +15,11 @@ Draft handles the heavy lifting involved in taking source code and deploying it 
 
 ## Usage
 
+### Install Helm
+
+Draft expects [Helm][] to be installed on your Kubernetes cluster. Download [`helm` v2.3.1][] and
+do a `helm init` first, as described in [Installing Helm][].
+
 ### Install Draft
 
 Because Draft is currently experimental, there is no stable release out yet and users are expected
@@ -71,7 +76,9 @@ You can read third-party software licenses [here][Third-Party Licenses].
 
 [Getting Started]: docs/getting-started.md
 [hacking]: docs/contributing/hacking.md
+[`helm` v2.3.1]: https://github.com/kubernetes/helm/releases/tag/v2.3.1
 [Helm]: https://github.com/kubernetes/helm
+[Installing Helm]: https://github.com/kubernetes/helm/blob/master/docs/install.md
 [Kubernetes]: https://kubernetes.io/
 [license]: LICENSE
 [Third-Party Licenses]: NOTICE
