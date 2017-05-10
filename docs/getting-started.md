@@ -71,18 +71,18 @@ Step 1 : FROM python:onbuild
 onbuild: Pulling from library/python
 ...
 Successfully built 38f35b50162c
---> Pushing docker.io/microsoft/hello-world:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
-The push refers to a repository [docker.io/microsoft/hello-world]
+--> Pushing docker.io/microsoft/tufted-lamb:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
+The push refers to a repository [docker.io/microsoft/tufted-lamb]
 ...
 5a3c633ae76c9bdb81b55f5d4a783398bf00658e: digest: sha256:9d9e9fdb8ee3139dd77a110fa2d2b87573c3ff5ec9c045db6009009d1c9ebf5b size: 16384
 --> Deploying to Kubernetes
-    Release "hello-world" does not exist. Installing it now.
+    Release "tufted-lamb" does not exist. Installing it now.
 --> Status: DEPLOYED
 --> Notes:
      1. Get the application URL by running these commands:
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w hello-world-hello-world'
-  export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+           You can watch the status of by running 'kubectl get svc -w tufted-lamb-tufted-lamb'
+  export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo http://$SERVICE_IP:80
 
 Watching local files for changes...
@@ -94,7 +94,7 @@ Using the handy output that follows successful deployment, we can now contact ou
 may take a few minutes before the load balancer is provisioned by Kubernetes. Be patient!
 
 ```shell
-$ export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+$ export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 $ curl http://$SERVICE_IP
 ```
 
@@ -102,7 +102,7 @@ When we `curl` our app, we see our app in action! A beautiful "Hello World!" gre
 
 ## Update the App
 
-Now, let's change the "Hello World!" output in `app.py` to output "Hello Draft!" instead:
+Now, let's change the "Hello, World!" output in `app.py` to output "Hello, Draft!" instead:
 
 ```shell
 $ cat <<EOF > app.py
@@ -112,10 +112,10 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello Draft!\n"
+    return "Hello, Draft!\n"
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8080)
 EOF
 ```
 
@@ -130,16 +130,16 @@ already exists and will perform a `helm upgrade` rather than attempting another 
 Step 1 : FROM python:onbuild
 ...
 Successfully built 9c90b0445146
---> Pushing docker.io/microsoft/hello-world:f031eb675112e2c942369a10815850a0b8bf190e
-The push refers to a repository [docker.io/microsoft/hello-world]
+--> Pushing docker.io/microsoft/tufted-lamb:f031eb675112e2c942369a10815850a0b8bf190e
+The push refers to a repository [docker.io/microsoft/tufted-lamb]
 ...
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
 --> Notes:
      1. Get the application URL by running these commands:
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w hello-world-hello-world'
-  export SERVICE_IP=$(kubectl get svc --namespace default hello-world-hello-world -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+           You can watch the status of by running 'kubectl get svc -w tufted-lamb-tufted-lamb'
+  export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo http://$SERVICE_IP:80
 ```
 
