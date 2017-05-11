@@ -8,6 +8,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/helm"
 
 	"github.com/Azure/draft/api"
@@ -86,6 +88,15 @@ func (c *startCmd) run() error {
 		return err
 	}
 
+	kubeConfig, err := rest.InClusterConfig()
+	if err != nil {
+		return err
+	}
+	kubeClientset, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		return err
+	}
+
 	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
 	if err != nil {
 		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
@@ -96,6 +107,7 @@ func (c *startCmd) run() error {
 	server.RegistryURL = c.registryURL
 	server.Basedomain = c.basedomain
 	server.HelmClient = helm.NewClient(helm.Host(c.tillerURI))
+	server.KubeClient = kubeClientset
 	log.Printf("server is now listening at %s", c.listenAddr)
 	return server.Serve()
 }
