@@ -136,7 +136,7 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	for {
 		_, p, err := conn.NextReader()
 		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				// server closed the connection, so we're done!
 				return nil
 			}

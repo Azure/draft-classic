@@ -40,6 +40,8 @@ const (
 	pullSecretName = "draftd-pullsecret"
 	// name of the default service account draftd will modify with the imagepullsecret
 	defaultServiceAccountName = "default"
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
 )
 
 // WebsocketUpgrader represents the default websocket.Upgrader that Draft employs
@@ -106,7 +108,7 @@ func (s *Server) createRouter() {
 			"/version": getVersion,
 		},
 		"POST": {
-			"/apps/:id": buildApp,
+			"/apps/:id": serveWs,
 		},
 	}
 
@@ -218,25 +220,13 @@ func getVersion(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 }
 
-func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var imagePrefix string
+func serveWs(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	done := make(chan bool)
 	baseValues := map[string]interface{}{}
 	appName := p.ByName("id")
 	server := r.Context().Value(contextKey("server")).(*Server)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
-
-	// load client values as the base config
-	log.Debugf("Helm-Flag-Set: %s", r.Header.Get("Helm-Flag-Set"))
-
-	userVals, err := base64.StdEncoding.DecodeString(r.Header.Get("Helm-Flag-Set"))
-	if err != nil {
-		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
-	}
-	if err := yaml.Unmarshal([]byte(userVals), &baseValues); err != nil {
-		http.Error(w, fmt.Sprintf("error while unmarshalling header 'Helm-Flag-Set' to yaml: %v\n", err), http.StatusBadRequest)
-		return
-	}
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -245,6 +235,17 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// load client values as the base config
+	log.Debugf("Helm-Flag-Set: %s", r.Header.Get("Helm-Flag-Set"))
+	userVals, err := base64.StdEncoding.DecodeString(r.Header.Get("Helm-Flag-Set"))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Set': %v\n", err), http.StatusBadRequest)
+	}
+	if err := yaml.Unmarshal([]byte(userVals), &baseValues); err != nil {
+		http.Error(w, fmt.Sprintf("error while unmarshalling header 'Helm-Flag-Set' to yaml: %v\n", err), http.StatusBadRequest)
 		return
 	}
 
@@ -262,14 +263,12 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		http.Error(w, fmt.Sprintf("error while reading release-tar: %v\n", err), http.StatusBadRequest)
 		return
 	}
-	defer buildContext.Close()
 
 	chartFile, _, err := r.FormFile("chart-tar")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error while reading chart-tar: %v\n", err), http.StatusBadRequest)
 		return
 	}
-	defer chartFile.Close()
 
 	conn, err := WebsocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -279,13 +278,26 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	defer conn.Close()
 
 	conn.SetCloseHandler(func(code int, text string) error {
+		defer close(done)
 		// Note https://tools.ietf.org/html/rfc6455#section-5.5 which specifies control
 		// frames MUST be less than 125 bytes (This includes Close, Ping and Pong)
 		// Hence, sending text as TextMessage and then sending control message.
 		conn.WriteMessage(websocket.TextMessage, []byte(text))
-		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, ""), time.Now().Add(time.Second))
+		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, ""), time.Now().Add(writeWait))
 		return nil
 	})
+
+	go pingClient(conn, done)
+	go buildApp(conn, server, appName, buildContext, chartFile, namespace, baseValues, optionWait)
+
+	<-done
+}
+
+func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext io.ReadCloser, chartFile io.ReadCloser, namespace string, baseValues map[string]interface{}, optionWait bool) {
+	var imagePrefix string
+
+	defer buildContext.Close()
+	defer chartFile.Close()
 
 	// write build context to a buffer so we can also write to the sha1 hash
 	buf := new(bytes.Buffer)
@@ -315,16 +327,16 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		tag)
 
 	if err := strvals.ParseInto(imageVals, baseValues); err != nil {
-		handleClosingError(conn, "Could not inject registry data into values", err)
+		handleClosingError(ws, "Could not inject registry data into values", err)
 	}
 
 	rawVals, err := yaml.Marshal(baseValues)
 	if err != nil {
-		handleClosingError(conn, "Could not marshal values", err)
+		handleClosingError(ws, "Could not marshal values", err)
 	}
 
 	// send uploaded tar to docker as the build context
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
+	ws.WriteMessage(websocket.TextMessage, []byte("--> Building Dockerfile\n"))
 	buildResp, err := server.DockerClient.ImageBuild(
 		context.Background(),
 		buf,
@@ -332,16 +344,16 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			Tags: []string{imageName},
 		})
 	if err != nil {
-		handleClosingError(conn, "Could not build image from build context", err)
+		handleClosingError(ws, "Could not build image from build context", err)
 	}
 	defer buildResp.Body.Close()
-	writer, err := conn.NextWriter(websocket.TextMessage)
+	writer, err := ws.NextWriter(websocket.TextMessage)
 	if err != nil {
-		handleClosingError(conn, "There was an error fetching a text message writer", err)
+		handleClosingError(ws, "There was an error fetching a text message writer", err)
 	}
 	outFd, isTerm := term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(buildResp.Body, writer, outFd, isTerm, nil); err != nil {
-		handleClosingError(conn, "Error encountered streaming JSON response", err)
+		handleClosingError(ws, "Error encountered streaming JSON response", err)
 	}
 
 	_, _, err = server.DockerClient.ImageInspectWithRaw(
@@ -349,34 +361,34 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		imageName)
 	if err != nil {
 		if docker.IsErrImageNotFound(err) {
-			handleClosingError(conn, fmt.Sprintf("Could not locate image for %s", appName), err)
+			handleClosingError(ws, fmt.Sprintf("Could not locate image for %s", appName), err)
 		} else {
-			handleClosingError(conn, "ImageInspectWithRaw error", err)
+			handleClosingError(ws, "ImageInspectWithRaw error", err)
 		}
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
+	ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
 	pushResp, err := server.DockerClient.ImagePush(
 		context.Background(),
 		imageName,
 		types.ImagePushOptions{RegistryAuth: server.RegistryAuth})
 	if err != nil {
-		handleClosingError(conn, fmt.Sprintf("Could not push %s to registry", imageName), err)
+		handleClosingError(ws, fmt.Sprintf("Could not push %s to registry", imageName), err)
 	}
 	defer pushResp.Close()
-	writer, err = conn.NextWriter(websocket.TextMessage)
+	writer, err = ws.NextWriter(websocket.TextMessage)
 	if err != nil {
-		handleClosingError(conn, "There was an error fetching a text message writer", err)
+		handleClosingError(ws, "There was an error fetching a text message writer", err)
 	}
 	outFd, isTerm = term.GetFdInfo(writer)
 	if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
-		handleClosingError(conn, "Error encountered streaming JSON response", err)
+		handleClosingError(ws, "Error encountered streaming JSON response", err)
 	}
 
-	conn.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
+	ws.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
 	chart, err := chartutil.LoadArchive(chartFile)
 	if err != nil {
-		handleClosingError(conn, "Could not load chart archive", err)
+		handleClosingError(ws, "Could not load chart archive", err)
 	}
 
 	// Determine if the destination namespace exists, create it if not.
@@ -388,7 +400,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			},
 		})
 		if err != nil {
-			handleClosingError(conn, "Could not create namespace", err)
+			handleClosingError(ws, "Could not create namespace", err)
 		}
 	}
 
@@ -398,20 +410,20 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		// Base64 decode the registryauth string.
 		data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
 		if err != nil {
-			handleClosingError(conn, "Could not base64 decode registry authentication string", err)
+			handleClosingError(ws, "Could not base64 decode registry authentication string", err)
 		}
 
 		// Break up registry auth json string into a RegistryAuth object.
 		var regAuth RegistryAuth
 		err = json.Unmarshal(data, &regAuth)
 		if err != nil {
-			handleClosingError(conn, "Could not json decode registry authentication string", err)
+			handleClosingError(ws, "Could not json decode registry authentication string", err)
 		}
 
 		// Create a new json string with the full dockerauth, including the registry URL.
 		jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
 		if err != nil {
-			handleClosingError(conn, "Could not json encode docker authentication string", err)
+			handleClosingError(ws, "Could not json encode docker authentication string", err)
 		}
 
 		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
@@ -425,14 +437,14 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			},
 		})
 		if err != nil {
-			handleClosingError(conn, "Could not create registry pull secret", err)
+			handleClosingError(ws, "Could not create registry pull secret", err)
 		}
 	}
 
 	// Determine if the default service account in the desired namespace has the correct imagePullSecret, add it if not.
 	serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName)
 	if err != nil {
-		handleClosingError(conn, "Could not load default service account", err)
+		handleClosingError(ws, "Could not load default service account", err)
 	}
 	foundPullSecret := false
 	for _, ps := range serviceAccount.ImagePullSecrets {
@@ -447,7 +459,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		})
 		_, err = server.KubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
 		if err != nil {
-			handleClosingError(conn, "Could not modify default service account with registry pull secret", err)
+			handleClosingError(ws, "Could not modify default service account with registry pull secret", err)
 		}
 	}
 
@@ -462,7 +474,7 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// inside of the grpc.rpcError message.
 	_, err = server.HelmClient.ReleaseContent(appName, helm.ContentReleaseVersion(1))
 	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
-		conn.WriteMessage(
+		ws.WriteMessage(
 			websocket.TextMessage,
 			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
 		releaseResp, err := server.HelmClient.InstallReleaseFromChart(
@@ -472,9 +484,9 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			helm.ValueOverrides(combinedVars),
 			helm.InstallWait(optionWait))
 		if err != nil {
-			handleClosingError(conn, "Could not install release", err)
+			handleClosingError(ws, "Could not install release", err)
 		}
-		conn.WriteMessage(
+		ws.WriteMessage(
 			websocket.TextMessage,
 			formatReleaseStatus(releaseResp.Release))
 	} else {
@@ -484,25 +496,37 @@ func buildApp(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 			helm.UpdateValueOverrides(combinedVars),
 			helm.UpgradeWait(optionWait))
 		if err != nil {
-			handleClosingError(conn, "Could not upgrade release", err)
+			handleClosingError(ws, "Could not upgrade release", err)
 		}
-		conn.WriteMessage(
+		ws.WriteMessage(
 			websocket.TextMessage,
 			formatReleaseStatus(releaseResp.Release))
 	}
 
 	// gently tell the client that we are closing the connection
-	conn.WriteControl(
+	ws.WriteControl(
 		websocket.CloseMessage,
 		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
-		time.Now().Add(time.Second))
+		time.Now().Add(writeWait))
+}
+
+func pingClient(ws *websocket.Conn, done chan bool) {
+	for {
+		_, _, err := ws.ReadMessage()
+		if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			ws.WriteControl(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseGoingAway, "client closed the connection"),
+				time.Now().Add(writeWait))
+		}
+	}
 }
 
 // handleClosingError formats the err and corresponding verbiage and invokes
 // conn.CloseHandler() as set by conn.SetCloseHandler()
 func handleClosingError(conn *websocket.Conn, verbiage string, err error) {
 	conn.CloseHandler()(
-		websocket.CloseInternalServerErr,
+		websocket.CloseGoingAway,
 		fmt.Sprintf("%s: %v\n", verbiage, err))
 }
 
