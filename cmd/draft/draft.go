@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	hostEnvVar      = "DRAFT_HOST"
-	homeEnvVar      = "DRAFT_HOME"
-	namespaceEnvVar = "DRAFT_NAMESPACE"
+	hostEnvVar = "DRAFT_HOST"
+	homeEnvVar = "DRAFT_HOME"
 )
 
 var (
@@ -36,10 +35,8 @@ var (
 	draftdTunnel *kube.Tunnel
 	// draftHome depicts the home directory where all Draft config is stored.
 	draftHome string
-	// draftHost depicts where the Draftd server is hosted.
+	// draftHost depicts where the Draftd server is hosted. This is used when the port forwarding logic by Kubernetes is unavailable.
 	draftHost string
-	// draftNamespace depicts which kubernetes namespace the Draftd server is hosted.
-	draftNamespace string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -65,7 +62,6 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
 	p.StringVar(&draftHost, "host", defaultDraftHost(), "address of Draftd. Overrides $DRAFT_HOST")
-	p.StringVar(&draftNamespace, "namespace", defaultDraftNamespace(), "namespace of Draftd. Overrides $DRAFT_NAMESPACE")
 
 	cmd.AddCommand(
 		newCreateCmd(out),
@@ -87,7 +83,7 @@ func setupConnection(c *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		tunnel, err := portforwarder.New(draftNamespace, clientset, config)
+		tunnel, err := portforwarder.New(clientset, config)
 		if err != nil {
 			return err
 		}
@@ -119,10 +115,6 @@ func ensureDraftClient(p *draft.Client) *draft.Client {
 
 func defaultDraftHost() string {
 	return os.Getenv(hostEnvVar)
-}
-
-func defaultDraftNamespace() string {
-	return os.Getenv(namespaceEnvVar)
 }
 
 func defaultDraftHome() string {
