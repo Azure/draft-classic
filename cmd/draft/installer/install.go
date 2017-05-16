@@ -9,6 +9,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/Azure/draft/pkg/version"
+	"k8s.io/helm/pkg/tiller/environment"
 )
 
 const draftChart = `name: draftd
@@ -188,14 +189,14 @@ var DefaultChartFiles = []*chartutil.BufferedFile{
 // Install uses the helm client to install Draftd with the given config.
 //
 // Returns an error if the command failed.
-func Install(client *helm.Client, chartConfig *chart.Config, namespace string) error {
+func Install(client *helm.Client, chartConfig *chart.Config) error {
 	chart, err := chartutil.LoadFiles(DefaultChartFiles)
 	if err != nil {
 		return err
 	}
 	_, err = client.InstallReleaseFromChart(
 		chart,
-		namespace,
+		environment.DefaultTillerNamespace,
 		helm.ReleaseName("draft"),
 		helm.ValueOverrides([]byte(chartConfig.Raw)))
 	return err

@@ -15,12 +15,12 @@ import (
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/strvals"
-	"k8s.io/helm/pkg/tiller/environment"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	"github.com/Azure/draft/pkg/draft/defaultpacks"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack"
+	"k8s.io/helm/pkg/tiller/environment"
 )
 
 const initDesc = `
@@ -43,7 +43,6 @@ type initCmd struct {
 	helmClient        *helm.Client
 	values            []string
 	rawValueFilePaths []string
-	tillerNamespace   string
 }
 
 func newInitCmd(out io.Writer) *cobra.Command {
@@ -65,7 +64,6 @@ func newInitCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVar(&i.tillerNamespace, "tiller-namespace", environment.DefaultTillerNamespace, "the namespace tiller is deployed to. This will also be where Draftd is deployed to.")
 	f.StringArrayVar(&i.values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	f.StringArrayVarP(&i.rawValueFilePaths, "values", "f", []string{}, "specify Draftd values from a values.yaml file (can specify multiple)")
 	f.BoolVar(&i.upgrade, "upgrade", false, "upgrade if Draftd is already installed")
@@ -139,14 +137,14 @@ func (i *initCmd) run() error {
 			if err != nil {
 				return fmt.Errorf("Could not get a kube client: %s", err)
 			}
-			tunnel, err := portforwarder.New(i.tillerNamespace, clientset, config)
+			tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, clientset, config)
 			if err != nil {
 				return fmt.Errorf("Could not get a connection to tiller: %s", err)
 			}
 			i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 		}
 
-		if err := installer.Install(i.helmClient, chartConfig, i.tillerNamespace); err != nil {
+		if err := installer.Install(i.helmClient, chartConfig); err != nil {
 			if !IsReleaseAlreadyExists(err) {
 				return fmt.Errorf("error installing: %s", err)
 			}

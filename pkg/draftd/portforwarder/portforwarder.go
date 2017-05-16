@@ -18,7 +18,7 @@ const (
 )
 
 // New returns a tunnel to the Draft pod.
-func New(namespace string, client *internalclientset.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
+func New(client *internalclientset.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
 	podName, err := getDraftPodName(client.Core())
 	if err != nil {
 		return nil, err
