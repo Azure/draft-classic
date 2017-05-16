@@ -1,25 +1,27 @@
 package: github.com/Azure/draft
 import:
+- package: github.com/BurntSushi/toml
+- package: github.com/docker/distribution
+  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
+- package: github.com/docker/docker
+  version: v17.03.1-ce
+- package: github.com/docker/go-units
+  version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
+- package: github.com/emicklei/go-restful
+  version: v1.2
+- package: github.com/ghodss/yaml
 - package: github.com/gorilla/websocket
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
   vcs: git
-- package: github.com/docker/docker
-  version: v17.03.0-ce
-- package: github.com/docker/distribution
-  version: 28602af35aceda2f8d571bad7ca37a54cf0250bc
 - package: github.com/julienschmidt/httprouter
-  version: 8a45e95fc75cb77048068a62daed98cc22fdac7c
 - package: github.com/rjeczalik/notify
-  version: 9d5aa0c3b735c3340018a4627446c3ea5a04a097
-- package: github.com/Sirupsen/logrus
-  version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - package: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
-- package: k8s.io/helm
-  version: ~v2.3.0
-- package: github.com/ghodss/yaml
-  version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
-- package: github.com/BurntSushi/toml
+- package: github.com/technosophos/moniker
+- package: k8s.io/apimachinery
 - package: k8s.io/client-go
-  version: ~v2.0.0
+  version: 8aceb98010c1c18b6b54a35b52fd5b46905e3d7f
+- package: k8s.io/helm
+  version: ~v2.4.0
+- package: k8s.io/kubernetes
+  version: v1.6.2
