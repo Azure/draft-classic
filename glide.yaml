@@ -2,7 +2,7 @@ package: github.com/Azure/draft
 import:
 - package: github.com/BurntSushi/toml
 - package: github.com/docker/distribution
-  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
+  version: ~2.6.1
 - package: github.com/docker/docker
   version: v17.03.1-ce
 - package: github.com/docker/go-units
@@ -22,6 +22,10 @@ import:
 - package: k8s.io/client-go
   version: 8aceb98010c1c18b6b54a35b52fd5b46905e3d7f
 - package: k8s.io/helm
-  version: ~v2.4.0
+  version: ~2.4.0
 - package: k8s.io/kubernetes
   version: v1.6.2
+- package: github.com/Sirupsen/logrus
+  version: ~0.11.5
+- package: github.com/pkg/errors
+  version: ~0.8.0

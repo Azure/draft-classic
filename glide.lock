@@ -1,5 +1,5 @@
-hash: 72c3c7d3f28f96e7aa18da2dd7933285e54b42fcbe7df1d31e0508c39f23c33c
-updated: 2017-05-17T17:19:04.538568652-07:00
+hash: 889a26cd0241728277754bf1d93dbaa65d1f33a9f6d8b5ff70a1600b76cc97f8
+updated: 2017-05-26T16:58:59.7607122-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -9,7 +9,7 @@ imports:
 - name: github.com/aokoli/goutils
   version: e57d01ace047c1a43e6a49ecf3ecc50ed2be81d1
 - name: github.com/Azure/go-ansiterm
-  version: fa152c58bc15761d0200cb75fe958b89a9d4888e
+  version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
   - winterm
 - name: github.com/BurntSushi/toml
@@ -35,7 +35,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
+  version: a25b9ef0c9fe242ac04bb20d3a028442b7d266b6
   subpackages:
   - context
   - digest
@@ -182,9 +182,9 @@ imports:
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/gorilla/context
-  version: 14f550f51af52180c2eefed15e5fd18d63c0a64a
+  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
 - name: github.com/gorilla/mux
-  version: e444e69cbd2e2e3e0749a2f3c717cec491552bbf
+  version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
 - name: github.com/gorilla/websocket
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
@@ -218,7 +218,7 @@ imports:
 - name: github.com/Masterminds/sprig
   version: 9526be0327b26ad31aa70296a7b10704883976d5
 - name: github.com/Microsoft/go-winio
-  version: d311c76e775b5092c023569caacdbb4e569c3243
+  version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/opencontainers/runc
@@ -235,7 +235,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/errors
-  version: a22138067af1c4942683050411a841ade67fe1eb
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
@@ -245,7 +245,7 @@ imports:
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
-  version: 55eb11d21d2a31a3cc93838241d04800f52e823d
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
@@ -312,11 +312,11 @@ imports:
   - unicode/norm
   - width
 - name: golang.org/x/time
-  version: 8be79e1e0910c292df4e79c241bb7e8f7e725959
+  version: a4bde12657593d5e90d0533a3e4fd95e635124cb
   subpackages:
   - rate
 - name: google.golang.org/appengine
-  version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
   subpackages:
   - internal
   - internal/app_identity
