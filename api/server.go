@@ -24,12 +24,12 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
-	"k8s.io/helm/pkg/storage/driver"
 	"k8s.io/helm/pkg/strvals"
 
 	"github.com/Azure/draft/pkg/version"
@@ -392,10 +392,10 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 	}
 
 	// Determine if the destination namespace exists, create it if not.
-	_, err = server.KubeClient.CoreV1().Namespaces().Get(namespace)
+	_, err = server.KubeClient.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
 	if err != nil {
 		_, err = server.KubeClient.CoreV1().Namespaces().Create(&v1.Namespace{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: namespace,
 			},
 		})
@@ -405,7 +405,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 	}
 
 	// Determine if the registry pull secret exists in the desired namespace, create it if not.
-	_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName)
+	_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName, metav1.GetOptions{})
 	if err != nil {
 		// Base64 decode the registryauth string.
 		data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
@@ -427,7 +427,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		}
 
 		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:      pullSecretName,
 				Namespace: namespace,
 			},
@@ -442,7 +442,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 	}
 
 	// Determine if the default service account in the desired namespace has the correct imagePullSecret, add it if not.
-	serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName)
+	serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName, metav1.GetOptions{})
 	if err != nil {
 		handleClosingError(ws, "Could not load default service account", err)
 	}
@@ -473,7 +473,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 	// So we're stuck doing string matching against the wrapped error, which is nested somewhere
 	// inside of the grpc.rpcError message.
 	_, err = server.HelmClient.ReleaseContent(appName, helm.ContentReleaseVersion(1))
-	if err != nil && strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+	if err != nil && strings.Contains(err.Error(), "not found") {
 		ws.WriteMessage(
 			websocket.TextMessage,
 			[]byte(fmt.Sprintf("    Release %q does not exist. Installing it now.\n", appName)))
