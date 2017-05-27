@@ -13,9 +13,9 @@ import (
 )
 
 const versionDesc = `
-Show the client version for draft.
+Show the version for draft.
 
-This will print the client version of draft. The output will look something like
+This prints the client and server versions of draft. The output will look something like
 this:
 
 Client: &version.Version{SemVer:"v0.1.0", GitCommit:"4f97233d2cc2c7017b07f94211e55bb2670f990d", GitTreeState:"clean"}
@@ -25,9 +25,9 @@ Server: &version.Version{SemVer:"v0.1.0", GitCommit:"4f97233d2cc2c7017b07f94211e
 type versionCmd struct {
 	out        io.Writer
 	client     *draft.Client
-	showClient bool
-	showServer bool
 	short      bool
+	clientOnly bool
+	serverOnly bool
 }
 
 func newVersionCmd(out io.Writer) *cobra.Command {
@@ -40,11 +40,7 @@ func newVersionCmd(out io.Writer) *cobra.Command {
 		Short: "print the client version information",
 		Long:  versionDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// If neither is explicitly set, show both.
-			if !version.showClient && !version.showServer {
-				version.showClient, version.showServer = true, true
-			}
-			if version.showServer {
+			if !version.clientOnly {
 				// We do this manually instead of in PreRun because we only
 				// need a tunnel if server version is requested.
 				setupConnection(cmd, args)
@@ -53,16 +49,20 @@ func newVersionCmd(out io.Writer) *cobra.Command {
 			return version.run()
 		},
 	}
+	f := cmd.Flags()
+	f.BoolVarP(&version.clientOnly, "client", "c", false, "client version only")
+	f.BoolVarP(&version.serverOnly, "server", "s", false, "server version only")
+
 	return cmd
 }
 
 func (v *versionCmd) run() error {
-	if v.showClient {
+	if !v.serverOnly {
 		cv := version.New()
 		fmt.Fprintf(v.out, "Client: %s\n", formatVersion(cv, v.short))
 	}
 
-	if !v.showServer {
+	if v.clientOnly {
 		return nil
 	}
 
