@@ -102,7 +102,7 @@ test: test-lint test-unit
 
 .PHONY: test-lint
 test-lint:
-	_scripts/lint.sh
+	scripts/lint.sh
 
 .PHONY: test-unit
 test-unit:
@@ -133,5 +133,6 @@ ifndef HAS_GIT
 	$(error You must install git)
 endif
 	glide install --strip-vendor
+	scripts/setup-apimachinery.sh
 
 include versioning.mk

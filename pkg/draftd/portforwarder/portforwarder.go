@@ -3,12 +3,11 @@ package portforwarder
 import (
 	"fmt"
 
-	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
-	"k8s.io/kubernetes/pkg/client/restclient"
-	"k8s.io/kubernetes/pkg/labels"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api/v1"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
 )
 
@@ -18,29 +17,29 @@ const (
 )
 
 // New returns a tunnel to the Draft pod.
-func New(client *internalclientset.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
-	podName, err := getDraftPodName(client.Core())
+func New(clientset *kubernetes.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
+	podName, err := getDraftPodName(clientset)
 	if err != nil {
 		return nil, err
 	}
 	const draftPort = 44135
-	t := kube.NewTunnel(client.Core().RESTClient(), config, DraftNamespace, podName, draftPort)
+	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, DraftNamespace, podName, draftPort)
 	return t, t.ForwardPort()
 }
 
-func getDraftPodName(client internalversion.PodsGetter) (string, error) {
+func getDraftPodName(clientset *kubernetes.Clientset) (string, error) {
 	// TODO use a const for labels
 	selector := labels.Set{"app": "draft", "name": "draftd"}.AsSelector()
-	pod, err := getFirstRunningPod(client, selector)
+	pod, err := getFirstRunningPod(clientset, selector)
 	if err != nil {
 		return "", err
 	}
 	return pod.ObjectMeta.GetName(), nil
 }
 
-func getFirstRunningPod(client internalversion.PodsGetter, selector labels.Selector) (*api.Pod, error) {
-	options := api.ListOptions{LabelSelector: selector}
-	pods, err := client.Pods(DraftNamespace).List(options)
+func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector) (*v1.Pod, error) {
+	options := metav1.ListOptions{LabelSelector: selector.String()}
+	pods, err := clientset.CoreV1().Pods(DraftNamespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +47,7 @@ func getFirstRunningPod(client internalversion.PodsGetter, selector labels.Selec
 		return nil, fmt.Errorf("could not find draftd")
 	}
 	for _, p := range pods.Items {
-		if api.IsPodReady(&p) {
+		if v1.IsPodReady(&p) {
 			return &p, nil
 		}
 	}

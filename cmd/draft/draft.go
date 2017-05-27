@@ -12,9 +12,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/restclient"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -130,12 +130,12 @@ func homePath() string {
 
 // getKubeClient is a convenience method for creating kubernetes config and client
 // for a given kubeconfig context
-func getKubeClient(context string) (*internalclientset.Clientset, *restclient.Config, error) {
+func getKubeClient(context string) (*kubernetes.Clientset, *restclient.Config, error) {
 	config, err := kube.GetConfig(context).ClientConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
 	}
-	client, err := internalclientset.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
 	}
