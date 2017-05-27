@@ -38,6 +38,7 @@ type upCmd struct {
 	Client   *draft.Client
 	Out      io.Writer
 	Manifest *manifest.Manifest
+	src      string
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -50,14 +51,26 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "up",
+		Use:     "up [path]",
 		Short:   "upload the current directory to the draft server for deployment",
 		Long:    upDesc,
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				up.src = args[0]
+			}
 			up.Client = ensureDraftClient(up.Client)
 			up.Manifest = manifest.New()
-			draftToml, err := ioutil.ReadFile("draft.toml")
+
+			if up.src == "" || up.src == "." {
+				var err error
+				up.src, err = os.Getwd()
+				if err != nil {
+					return err
+				}
+			}
+
+			draftToml, err := ioutil.ReadFile(filepath.Join(up.src, "draft.toml"))
 			if err != nil {
 				if !os.IsNotExist(err) {
 					return err
@@ -95,10 +108,7 @@ func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 
 func (u *upCmd) run(environment string) (err error) {
 	env := u.Manifest.Environments[environment]
-	cwd, e := os.Getwd()
-	if e != nil {
-		return e
-	}
+	cwd := u.src
 	u.Client.OptionWait = env.Wait
 
 	rawVals, err := vals(env, cwd)
