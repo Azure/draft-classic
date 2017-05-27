@@ -6,7 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
+	"k8s.io/client-go/pkg/api/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
 )
@@ -23,7 +23,7 @@ func New(clientset *kubernetes.Clientset, config *restclient.Config) (*kube.Tunn
 		return nil, err
 	}
 	const draftPort = 44135
-	t := tunnel.New(clientset.CoreV1().RESTClient(), config, DraftNamespace, podName, draftPort)
+	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, DraftNamespace, podName, draftPort)
 	return t, t.ForwardPort()
 }
 
@@ -37,7 +37,7 @@ func getDraftPodName(clientset *kubernetes.Clientset) (string, error) {
 	return pod.ObjectMeta.GetName(), nil
 }
 
-func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector) (*api.Pod, error) {
+func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector) (*v1.Pod, error) {
 	options := metav1.ListOptions{LabelSelector: selector.String()}
 	pods, err := clientset.CoreV1().Pods(DraftNamespace).List(options)
 	if err != nil {
@@ -47,7 +47,7 @@ func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selecto
 		return nil, fmt.Errorf("could not find draftd")
 	}
 	for _, p := range pods.Items {
-		if api.IsPodReady(&p) {
+		if v1.IsPodReady(&p) {
 			return &p, nil
 		}
 	}
