@@ -15,10 +15,10 @@ Draft handles the heavy lifting involved in taking source code and deploying it 
 
 ## Usage
 
-### Install Helm
+### Install & Configure Helm
 
-Draft expects [Helm][] to be installed on your Kubernetes cluster. Download [`helm` v2.3.1][] and
-do a `helm init` first, as described in [Installing Helm][].
+Draft depends on [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download [`helm` v2.4.x](https://github.com/kubernetes/helm/releases) and
+do a `helm init` in your local environment first, as described in [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md).
 
 ### Install Draft
 

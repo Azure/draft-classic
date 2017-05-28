@@ -13,7 +13,7 @@ To compile and test Draft binaries and to build Docker images, you will need:
  - [Go][] 1.7 or later, with support for compiling to `linux/amd64`
  - [glide][]
  - a [Kubernetes][] cluster. We recommend [minikube][]
- - [helm][] v2.3.x (see https://github.com/Azure/draft/issues/32)
+ - [helm][] v2.4.x
  - [upx][] (optional) to compress binaries for a smaller Docker image
 
 In most cases, install the prerequisite according to its instructions. See the next section
