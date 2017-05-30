@@ -17,7 +17,7 @@ Draft handles the heavy lifting involved in taking source code and deploying it 
 
 ### Dependencies
 
-- Draft will need a running Kubernetes cluster to deploy your app
+- Draft will need a running Kubernetes cluster to deploy your app. [Minikube](https://github.com/kubernetes/minikube) is a great free option.
 - Draft expects [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download Download [`helm` v2.4.x](https://github.com/kubernetes/helm/releases) and
 do a `helm init` first, as described in [Installing Helm][].
 - Draft needs to push images to a registry, so you'll need to configure Draft with your Docker registry credentials. If don't already have one, you can create a Docker registry for free on both [Dockerhub.com](https://dockerhub.com) and [Quay.io](https://quay.io).
