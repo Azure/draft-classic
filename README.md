@@ -19,7 +19,7 @@ Draft handles the heavy lifting involved in taking source code and deploying it 
 
 - Draft will need a running Kubernetes cluster to deploy your app. [Minikube](https://github.com/kubernetes/minikube) is a great free option.
 - Draft expects [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download [`helm` v2.4.x](https://github.com/kubernetes/helm/releases) and
-do a `helm init` first, as described in [Installing Helm][].
+run the `helm init` command first, as described in [Installing Helm][].
 - Draft needs to push images to a Docker registry, so you'll need to configure Draft with your Docker registry credentials. If don't already have one, you can create a Docker registry for free on either [Dockerhub.com](https://dockerhub.com) or [Quay.io](https://quay.io).
 
 ### Install Draft
@@ -37,21 +37,21 @@ Unpack the Draft binary and add it to your PATH and you are good to go!
 
 ### Configure Draft
 
-To install the server-side of Draft, use `draft init` with your credentials to let Draft communicate
-with a Docker registry by using the following command:
+To configure Draft to work in your cluster, run the `draft init` command and pass in your Docker registry credentials using the `--set` flag as shown below. This command will install Draft's server side component into your cluster and let Draft communicate with a Docker registry to push and pull the container images for your application.
 
 ```
 $ draft init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme
 ```
 
-The auth token field follows the format of Docker's X-Registry-Auth header.
-For credential-based logins such as Docker Hub and Quay, use:
+The auth token field (passed in the command above as the value for `registry.authtoken`) follows the format of Docker's X-Registry-Auth header.
+
+To generate the auth token field for **credential-based logins** such as Docker Hub and Quay, use:
 
 ```
 $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
 ```
 
-For token-based logins such as Google Container Registry and Amazon ECR, use:
+For **token-based logins** such as Google Container Registry and Amazon ECR, use:
 
 ```
 $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
