@@ -17,7 +17,7 @@ Draft handles the heavy lifting involved in taking source code and deploying it 
 
 Review the [Installation Guide][Installation Guide] to configure and install Draft on to your Kubernetes cluster.
 
-## Take Draft for a Spin
+### Take Draft for a Spin
 
 Climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
