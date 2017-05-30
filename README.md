@@ -45,7 +45,7 @@ $ draft init --set registry.url=docker.io,registry.org=changeme,registry.authtok
 
 The auth token field (passed in the command above as the value for `registry.authtoken`) follows the format of Docker's X-Registry-Auth header.
 
-To generate the auth token field for **credential-based logins** such as Docker Hub and Quay, use:
+To generate the auth token field for **credential-based logins** such as Azure Container Registry, Docker Hub and Quay, use:
 
 ```
 $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
