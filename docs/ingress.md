@@ -35,9 +35,9 @@ Using a domain that you manage, create a DNS wildcard `A Record` pointing to the
 
 Remember the domain you use, it will be needed in the next step of installation as the `basedomain` passed to `draft init`.
 
-| Name          | Type | Data                    |
-|---------------|------|-------------------------|
-| *.example.com | A    | <ip address from above> |
+| Name          | Type | Data                      |
+|---------------|------|---------------------------|
+| *.example.com | A    | `<ip address from above>` |
 
 ## Next steps
 
