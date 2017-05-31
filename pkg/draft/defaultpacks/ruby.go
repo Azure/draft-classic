@@ -20,7 +20,7 @@ service:
   name: ruby
   type: ClusterIP
   externalPort: 80
-  internalPort: 4567
+  internalPort: 8080
 resources:
   limits:
     cpu: 100m
@@ -43,8 +43,7 @@ fi
 
 const rubyDockerfile = `FROM ruby:onbuild
 EXPOSE 8080
-ENTRYPOINT ruby
-CMD app.rb
+CMD ["ruby", "app.rb"]
 `
 
 // RubyFiles returns all of the files needed for the Ruby default pack
