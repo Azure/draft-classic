@@ -2,7 +2,7 @@
 
 - Draft will need a running Kubernetes cluster to deploy your app. [Minikube](https://github.com/kubernetes/minikube) is a great free option.
 - Draft expects [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download [`helm` v2.4.x](https://github.com/kubernetes/helm/releases) and
-do a `helm init` first, as described in [Installing Helm][].
+do a `helm init` first, as described in [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md).
 - Draft needs to push images to a Docker registry, so you'll need to configure Draft with your Docker registry credentials. If don't already have one, you can create a Docker registry for free on either [Dockerhub.com](https://dockerhub.com) or [Quay.io](https://quay.io).
 - An ingress controller installed within your Kubernetes cluster with a wildcard domain pointing to it. Review the [Ingress Guide][Ingress Guide] for more information about what Draft expects and how to set up an ingress controller.
 
@@ -14,7 +14,7 @@ at the following links:
 
  - [Linux amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz)
  - [macOS amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
- - [Windows amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-windows-amd64.tar.gz)
+ - Windows amd64 [coming soon!](https://github.com/Azure/draft/issues/61)
 
 Unpack the Draft binary and add it to your PATH.
 
