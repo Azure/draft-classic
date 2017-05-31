@@ -6,12 +6,15 @@
 
 _NOTE: Draft is experimental and does not have a stable release yet._
 
-Draft handles the heavy lifting involved in taking source code and deploying it to Kubernetes:
+Draft makes it easy to build applications that run on Kubernetes.  Draft targets the "inner loop" of a developer's workflow: as they hack on code, but before code is committed to version control.
 
-- Builds a container image from application source code
-- Pushes the image to a registry
-- Packages a [Helm][] chart from application source code
-- Installs the chart to Kubernetes, deploying the application
+Using Draft is as simple as:
+
+1. `draft create` to containerize your application based on Draft [packs](docs/packs.md)
+2. `draft up` to deploy your application to a Kubernetes dev sandbox, accessible via a public URL
+3. Use a local editor to modify the application, with changes deployed to Kubernetes in seconds
+
+Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm](https://github.com/kubernetes/helm) and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
 ## Installation
 
