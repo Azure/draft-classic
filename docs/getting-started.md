@@ -1,7 +1,7 @@
 # Getting Started
 
-This document shows how to deploy a "Hello World" app with Draft. To follow along, be sure you
-have Draft up and installed according to the [README](../README.md#install-draft).
+This document shows how to deploy a "Hello World" app with Draft. If you havent done so already,
+be sure you have Draft installed according to the [Installation Guide][Installation Guide].
 
 ## App setup
 
@@ -148,7 +148,7 @@ The push refers to a repository [docker.io/microsoft/tufted-lamb]
 Now when we run `curl http://$SERVICE_IP`, our first app has been deployed and updated to our
 [Kubernetes][] cluster via Draft!
 
-
+[Installation Guide]: install.md
 [Helm]: https://github.com/kubernetes/helm
 [Kubernetes]: https://kubernetes.io/
 [Python]: https://www.python.org/
