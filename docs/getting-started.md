@@ -15,7 +15,7 @@ $ cd examples/python
 
 ## Draft Create
 
-We need some "scaffolding" to deploy our app into a [Kubernetes][https://kubernetes.io/] cluster. Draft can create a [Helm][https://helm.sh/] chart, a `Dockerfile` and a `draft.toml` with `draft create`:
+We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
@@ -137,7 +137,7 @@ The push refers to a repository [docker.io/microsoft/tufted-lamb]
 
 ## Great Success!
 
-Now when we run `curl http://tufted-lamb.example.com`, we can see our app has been updated deployed to Kubernetes automatically!
+Now when we run `curl http://tufted-lamb.example.com`, we can see our app has been updated and deployed to Kubernetes automatically!
 
 [Installation Guide]: install.md
 [Helm]: https://github.com/kubernetes/helm
