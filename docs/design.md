@@ -5,9 +5,7 @@ can (and cannot) do, as well as define its intended audience and place in the ma
 
 ## What It Does
 
-Draft is a tool for developing, organizing, packaging, deploying, and managing applications in the
-Kubernetes ecosystem. It uses Helm for orchestration, but it provides a toolbox for developers
-building applications on top of Kubernetes.
+Draft makes it easy to build applications that run on Kubernetes.  Draft targets the "inner loop" of a developer's workflow: as they hack on code, but before code is committed to version control.  Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm](https://github.com/kubernetes/helm) and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
 ## How To Use It
 
