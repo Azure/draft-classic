@@ -47,5 +47,5 @@ to install Draft.
 Continue with the [Installation Guide][Installation Guide]!
 
 
-[Installation Guide]: docs/install.md#install-draft
+[Installation Guide]: install.md#install-draft
 [Kubernetes Ingress Documentation]: https://kubernetes.io/docs/concepts/services-networking/ingress/
