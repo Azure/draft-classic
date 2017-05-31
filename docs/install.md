@@ -20,8 +20,7 @@ Unpack the Draft binary and add it to your PATH.
 
 ## Configure Draft
 
-To install the server-side of Draft, use `draft init` with your ingress' basedomain and credentials
-to let Draft communicate with a Docker registry by using the following command:
+To install the server-side of Draft, use `draft init` with your ingress' `basedomain` and credentials to let Draft communicate with a Docker registry by using the following command:
 
 ```
 $ draft init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme,basedomain=changeme

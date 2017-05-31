@@ -15,8 +15,7 @@ $ cd examples/python
 
 ## Draft Create
 
-We need some "scaffolding" to deploy our app into a [Kubernetes][] cluster. Draft can create a
-[Helm][] chart, a `Dockerfile` and a `draft.toml` with `draft create`:
+We need some "scaffolding" to deploy our app into a [Kubernetes][https://kubernetes.io/] cluster. Draft can create a [Helm][https://helm.sh/] chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
@@ -26,7 +25,7 @@ $ ls
 Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
-The `chart/` and `Dockerfile` assets created by Draft default to a basic [Python][]
+The `chart/` and `Dockerfile` assets created by Draft default to a basic Python
 configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/)
 image, which will install the dependencies in `requirements.txt` and copy the current directory
 into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile
@@ -79,30 +78,26 @@ The push refers to a repository [docker.io/microsoft/tufted-lamb]
     Release "tufted-lamb" does not exist. Installing it now.
 --> Status: DEPLOYED
 --> Notes:
-     1. Get the application URL by running these commands:
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w tufted-lamb-tufted-lamb'
-  export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo http://$SERVICE_IP:80
+     
+  http://tufted-lamb.example.com to access your application
 
 Watching local files for changes...
 ```
 
 ## Interact with the Deployed App
 
-Using the handy output that follows successful deployment, we can now contact our app. Note that it
-may take a few minutes before the load balancer is provisioned by Kubernetes. Be patient!
+Using the handy output that follows successful deployment, we can now contact our app.
 
 ```shell
-$ export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-$ curl http://$SERVICE_IP
+$ curl http://tufted-lamb.example.com
+Hello Draft!
 ```
 
-When we `curl` our app, we see our app in action! A beautiful "Hello World!" greets us.
+When we `curl` our app, we see our app in action! A beautiful "Hello Draft!" greets us.  If not, make sure you've followed the [Ingress Guide](ingress.md).
 
 ## Update the App
 
-Now, let's change the "Hello, World!" output in `app.py` to output "Hello, Draft!" instead:
+Now, let's change the output in `app.py` to output "Hello Kubernetes!" instead:
 
 ```shell
 $ cat <<EOF > app.py
@@ -112,7 +107,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello, Draft!\n"
+    return "Hello Kubernetes!\n"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
@@ -136,17 +131,13 @@ The push refers to a repository [docker.io/microsoft/tufted-lamb]
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
 --> Notes:
-     1. Get the application URL by running these commands:
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w tufted-lamb-tufted-lamb'
-  export SERVICE_IP=$(kubectl get svc --namespace default tufted-lamb-tufted-lamb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo http://$SERVICE_IP:80
+     
+  http://tufted-lamb.example.com to access your application
 ```
 
 ## Great Success!
 
-Now when we run `curl http://$SERVICE_IP`, our first app has been deployed and updated to our
-[Kubernetes][] cluster via Draft!
+Now when we run `curl http://tufted-lamb.example.com`, we can see our app has been updated deployed to Kubernetes automatically!
 
 [Installation Guide]: install.md
 [Helm]: https://github.com/kubernetes/helm
