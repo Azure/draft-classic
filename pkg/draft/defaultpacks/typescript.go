@@ -39,7 +39,7 @@ if [ ! -f $BUILD_DIR/tsconfig.json ]; then
   exit 1
 fi
 
-echo Node.js
+echo Typescript
 `
 
 const typescriptDockerfile = `FROM node:onbuild
