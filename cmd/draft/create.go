@@ -29,6 +29,7 @@ type createCmd struct {
 	out     io.Writer
 	pack    string
 	home    draftpath.Home
+	dest    string
 }
 
 func newCreateCmd(out io.Writer) *cobra.Command {
@@ -37,10 +38,13 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create",
+		Use:   "create [path]",
 		Short: "transform the local directory to be deployable to Kubernetes",
 		Long:  createDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				cc.dest = args[0]
+			}
 			return cc.run()
 		},
 	}
@@ -65,21 +69,21 @@ func (c *createCmd) run() error {
 		ApiVersion:  chartutil.ApiVersionV1,
 	}
 
-	chartExists, err := osutil.Exists("chart")
+	chartExists, err := osutil.Exists(filepath.Join(c.dest, "chart"))
 	if err != nil {
 		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
 	if chartExists {
 		// chart dir already exists, so we just tell the user that we are happily skipping the
 		// process.
-		fmt.Fprintln(c.out, "--> chart/ already exists. Ready to sail!")
+		fmt.Fprintln(c.out, "--> chart directory already exists. Ready to sail!")
 		return nil
 	}
 
 	if c.pack != "" {
 		// --pack was explicitly defined, so we can just lazily use that here. No detection required.
 		lpack := filepath.Join(c.home.Packs(), c.pack)
-		err = pack.CreateFrom(cfile, "", lpack)
+		err = pack.CreateFrom(cfile, c.dest, lpack)
 		if err != nil {
 			return err
 		}
@@ -91,12 +95,13 @@ func (c *createCmd) run() error {
 			return err
 		}
 		fmt.Fprintf(c.out, "--> %s app detected\n", output)
-		err = pack.CreateFrom(cfile, "", packPath)
+		err = pack.CreateFrom(cfile, c.dest, packPath)
 		if err != nil {
 			return err
 		}
 	}
-	draftToml, err := os.OpenFile("draft.toml", os.O_RDWR|os.O_CREATE, 0644)
+	tomlFile := filepath.Join(c.dest, "draft.toml")
+	draftToml, err := os.OpenFile(tomlFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
