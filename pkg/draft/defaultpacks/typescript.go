@@ -43,8 +43,9 @@ echo Typescript
 `
 
 const typescriptDockerfile = `FROM node:onbuild
-EXPOSE 8080
+RUN npm install -g typescript
 RUN npm install
+EXPOSE 8080
 CMD ["npm", "start"]
 `
 
