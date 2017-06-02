@@ -2,7 +2,7 @@ DOCKER_REGISTRY ?= docker.io
 IMAGE_PREFIX    ?= microsoft
 IMAGE_TAG       ?= canary
 SHORT_NAME      ?= draft
-TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm
+TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm windows/amd64
 DIST_DIRS       = find * -type d -exec
 APP             = draft
 

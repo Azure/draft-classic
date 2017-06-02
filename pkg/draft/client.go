@@ -16,8 +16,8 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/docker/docker/builder"
 	"github.com/docker/docker/builder/dockerignore"
+	"github.com/docker/docker/cli/command/image/build"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/fileutils"
 	"github.com/gorilla/websocket"
@@ -191,7 +191,7 @@ func (c *Client) Version() (*version.Version, error) {
 
 // tarBuildContext archives the given directory and returns the archive as an io.ReadCloser.
 func tarBuildContext(dir string) (io.ReadCloser, error) {
-	contextDir, relDockerfile, err := builder.GetContextFromLocalDir(dir, "")
+	contextDir, relDockerfile, err := build.GetContextFromLocalDir(dir, "")
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare docker context: %s", err)
@@ -220,7 +220,7 @@ func tarBuildContext(dir string) (io.ReadCloser, error) {
 	// do not include the chart directory. That will be packaged separately.
 	excludes = append(excludes, filepath.Join(contextDir, "chart"))
 
-	if err := builder.ValidateContextDirectory(contextDir, excludes); err != nil {
+	if err := build.ValidateContextDirectory(contextDir, excludes); err != nil {
 		return nil, fmt.Errorf("error checking docker context: '%s'", err)
 	}
 
