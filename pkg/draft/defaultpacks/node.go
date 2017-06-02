@@ -42,7 +42,7 @@ fi
 echo Node.js
 `
 
-const nodeDockerfile = `FROM node:onbuild
+const nodeDockerfile = `FROM node:6-onbuild
 EXPOSE 8080
 RUN npm install
 CMD ["npm", "start"]
