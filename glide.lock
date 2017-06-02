@@ -1,5 +1,5 @@
-hash: 889a26cd0241728277754bf1d93dbaa65d1f33a9f6d8b5ff70a1600b76cc97f8
-updated: 2017-05-26T16:58:59.7607122-07:00
+hash: 0a3624ca7754a89d5353d1f0c27e2c64f0b71e93ace9c8c73644fc5ef367ab90
+updated: 2017-06-01T20:15:24.363479679-04:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -9,7 +9,7 @@ imports:
 - name: github.com/aokoli/goutils
   version: e57d01ace047c1a43e6a49ecf3ecc50ed2be81d1
 - name: github.com/Azure/go-ansiterm
-  version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
+  version: 388960b655244e76e24c75f48631564eaefade62
   subpackages:
   - winterm
 - name: github.com/BurntSushi/toml
@@ -35,24 +35,25 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: a25b9ef0c9fe242ac04bb20d3a028442b7d266b6
+  version: b38e5838b7b2f2ad48e06ec4b500011976080621
   subpackages:
   - context
-  - digest
+  - digestset
   - reference
   - uuid
 - name: github.com/docker/docker
-  version: c6d412e329c85f32a4b2269b49aaa0794affcf88
+  version: 89658bed64c2a8fe05a978e5b87dbec409d57a0f
   subpackages:
+  - api
   - api/types
   - api/types/backend
   - api/types/blkiodev
   - api/types/container
   - api/types/events
   - api/types/filters
+  - api/types/image
   - api/types/mount
   - api/types/network
-  - api/types/reference
   - api/types/registry
   - api/types/strslice
   - api/types/swarm
@@ -64,7 +65,6 @@ imports:
   - client
   - daemon/graphdriver
   - image
-  - image/v1
   - layer
   - oci
   - pkg/archive
@@ -96,7 +96,6 @@ imports:
   - pkg/tlsconfig
   - pkg/urlutil
   - plugin/v2
-  - reference
 - name: github.com/docker/engine-api
   version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
   subpackages:
@@ -121,6 +120,8 @@ imports:
   - tlsconfig
 - name: github.com/docker/go-units
   version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
+- name: github.com/docker/libtrust
+  version: aabc10ec26b754e797f9028f4589c5b7bd90dc20
 - name: github.com/docker/spdystream
   version: 449fdfce4d962303d702fec724ef0ad181c92528
   subpackages:
@@ -221,6 +222,10 @@ imports:
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
+- name: github.com/Nvveen/Gotty
+  version: cd527374f1e5bff4938207604a14f2e38a9cf512
+- name: github.com/opencontainers/go-digest
+  version: eaa60544f31ccf3b0653b1a118b76d33418ff41b
 - name: github.com/opencontainers/runc
   version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
@@ -312,7 +317,7 @@ imports:
   - unicode/norm
   - width
 - name: golang.org/x/time
-  version: a4bde12657593d5e90d0533a3e4fd95e635124cb
+  version: f51c12702a4d776e4c1fa9b0fabab841babae631
   subpackages:
   - rate
 - name: google.golang.org/appengine

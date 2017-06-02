@@ -1,12 +1,18 @@
 package: github.com/Azure/draft
 import:
 - package: github.com/BurntSushi/toml
+
+- package: github.com/Azure/go-ansiterm
+  version: 388960b655244e76e24c75f48631564eaefade62
 - package: github.com/docker/distribution
-  version: ~2.6.1
+  version: b38e5838b7b2f2ad48e06ec4b500011976080621
+- package: github.com/docker/cli
+  version: 30af87981d8d464c385b247f524fcbc503207940
 - package: github.com/docker/docker
-  version: v17.03.1-ce
+  version: v17.05.0-ce
 - package: github.com/docker/go-units
   version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
+
 - package: github.com/emicklei/go-restful
   version: v1.2
 - package: github.com/ghodss/yaml
