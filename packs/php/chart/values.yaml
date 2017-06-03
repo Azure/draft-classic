@@ -1,0 +1,23 @@
+# Default values for PHP.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+basedomain: example.com
+replicaCount: 2
+image:
+  registry: docker.io
+  org: library
+  name: php
+  tag: 7.1-apache
+  pullPolicy: IfNotPresent
+service:
+  name: php
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 80
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

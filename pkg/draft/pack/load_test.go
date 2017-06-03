@@ -3,7 +3,6 @@ package pack
 import (
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"testing"
 )
@@ -80,24 +79,24 @@ func TestFromDir(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
-	if _, err := Create(path.Base(dir), path.Dir(dir), fooPackFiles()); err != nil {
+	if _, err := Create(packName, dir, fooPackFiles()); err != nil {
 		t.Fatal(err)
 	}
 	// load a pack with an un-readable Dockerfile (file perms 0000)
-	if err := os.Chmod(filepath.Join(dir, DockerfileName), 0000); err != nil {
-		t.Fatal(err)
+	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0000); err != nil {
+		t.Fatalf("dir %s: %s", dir, err)
 	}
 	if _, err := FromDir(dir); err == nil {
 		t.Errorf("expected err to be non-nil when reading the Dockerfile")
 	}
 
 	// revert file perms for the Dockerfile in prep for the detect script
-	if err := os.Chmod(filepath.Join(dir, DockerfileName), 0644); err != nil {
+	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0644); err != nil {
 		t.Fatal(err)
 	}
 
 	// make the detect script available but unreadable
-	if err := os.Chmod(filepath.Join(dir, DetectName), 0000); err != nil {
+	if err := os.Chmod(filepath.Join(dir, packName, DetectName), 0000); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := FromDir(dir); err == nil {

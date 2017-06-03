@@ -1,5 +1,6 @@
 bin/
 _dist/
+_scratch/
 vendor/
 *.exe
 *.tar.gz
