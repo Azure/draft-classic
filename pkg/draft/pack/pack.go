@@ -59,13 +59,6 @@ type Pack struct {
 	DetectScript []byte
 }
 
-// File represents a file within a Pack
-type File struct {
-	Path    string
-	Content []byte
-	Perm    os.FileMode
-}
-
 // Detect determines if this pack is viable for the given application in dir.
 //
 // returns a nil err if it is a viable pack. The string returned is the output of the

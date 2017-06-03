@@ -19,7 +19,6 @@ import (
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 
 	"github.com/Azure/draft/cmd/draft/installer"
-	"github.com/Azure/draft/pkg/draft/defaultpacks"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack"
 )
@@ -200,17 +199,13 @@ func ensureDirectories(home draftpath.Home, out io.Writer) error {
 //
 // If the pack does not exist, this function will create it.
 func ensurePacks(home draftpath.Home, out io.Writer) error {
-	packNames := map[string][]*pack.File{
-		"python": defaultpacks.PythonFiles(),
-		"golang": defaultpacks.GolangFiles(),
-		"php":    defaultpacks.PHPFiles(),
-		"node":   defaultpacks.NodeFiles(),
-		"java":   defaultpacks.JavaFiles(),
-		"ruby":   defaultpacks.RubyFiles(),
+	all, err := pack.Builtins()
+	if err != nil {
+		return err
 	}
-	for packName, packFiles := range packNames {
+	for packName, files := range all {
 		fmt.Fprintf(out, "Creating pack %s\n", packName)
-		if _, err := pack.Create(packName, home.Packs(), packFiles); err != nil {
+		if _, err := pack.Create(packName, home.Packs(), files); err != nil {
 			return err
 		}
 	}
