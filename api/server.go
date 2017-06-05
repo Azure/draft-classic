@@ -227,6 +227,9 @@ func serveWs(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	server := r.Context().Value(contextKey("server")).(*Server)
 	namespace := r.Header.Get("Kubernetes-Namespace")
 	flagWait := r.Header.Get("Helm-Flag-Wait")
+	pushImage := r.Header.Get("Docker-Push")
+
+	log.Debugf("REQUEST: %s %s %s", r.Method, r.URL.String(), r.Header)
 
 	// NOTE(bacongobbler): If no header was set, we default back to the default namespace.
 	if namespace == "" {
@@ -252,6 +255,13 @@ func serveWs(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	optionWait, err := strconv.ParseBool(flagWait)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error while parsing header 'Helm-Flag-Wait': %v\n", err), http.StatusBadRequest)
+		return
+	}
+
+	log.Debugf("Docker-Push: %s", pushImage)
+	optionPushImage, err := strconv.ParseBool(pushImage)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error while parsing header 'Docker-push': %v\n", err), http.StatusBadRequest)
 		return
 	}
 
@@ -288,12 +298,12 @@ func serveWs(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	})
 
 	go pingClient(conn, done)
-	go buildApp(conn, server, appName, buildContext, chartFile, namespace, baseValues, optionWait)
+	go buildApp(conn, server, appName, buildContext, chartFile, namespace, baseValues, optionWait, optionPushImage)
 
 	<-done
 }
 
-func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext io.ReadCloser, chartFile io.ReadCloser, namespace string, baseValues map[string]interface{}, optionWait bool) {
+func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext io.ReadCloser, chartFile io.ReadCloser, namespace string, baseValues map[string]interface{}, optionWait, optionPushImage bool) {
 	var imagePrefix string
 
 	defer buildContext.Close()
@@ -367,22 +377,24 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		}
 	}
 
-	ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
-	pushResp, err := server.DockerClient.ImagePush(
-		context.Background(),
-		imageName,
-		types.ImagePushOptions{RegistryAuth: server.RegistryAuth})
-	if err != nil {
-		handleClosingError(ws, fmt.Sprintf("Could not push %s to registry", imageName), err)
-	}
-	defer pushResp.Close()
-	writer, err = ws.NextWriter(websocket.TextMessage)
-	if err != nil {
-		handleClosingError(ws, "There was an error fetching a text message writer", err)
-	}
-	outFd, isTerm = term.GetFdInfo(writer)
-	if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
-		handleClosingError(ws, "Error encountered streaming JSON response", err)
+	if optionPushImage {
+		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("--> Pushing %s\n", imageName)))
+		pushResp, err := server.DockerClient.ImagePush(
+			context.Background(),
+			imageName,
+			types.ImagePushOptions{RegistryAuth: server.RegistryAuth})
+		if err != nil {
+			handleClosingError(ws, fmt.Sprintf("Could not push %s to registry", imageName), err)
+		}
+		defer pushResp.Close()
+		writer, err = ws.NextWriter(websocket.TextMessage)
+		if err != nil {
+			handleClosingError(ws, "There was an error fetching a text message writer", err)
+		}
+		outFd, isTerm = term.GetFdInfo(writer)
+		if err := jsonmessage.DisplayJSONMessagesStream(pushResp, writer, outFd, isTerm, nil); err != nil {
+			handleClosingError(ws, "Error encountered streaming JSON response", err)
+		}
 	}
 
 	ws.WriteMessage(websocket.TextMessage, []byte("--> Deploying to Kubernetes\n"))
@@ -404,62 +416,66 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		}
 	}
 
-	// Determine if the registry pull secret exists in the desired namespace, create it if not.
-	_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName, metav1.GetOptions{})
-	if err != nil {
-		// Base64 decode the registryauth string.
-		data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
+	// Since it was requested that the image was not pushed to the remote registry
+	// we do not need to check for proper auth.
+	if optionPushImage {
+		// Determine if the registry pull secret exists in the desired namespace, create it if not.
+		_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName, metav1.GetOptions{})
 		if err != nil {
-			handleClosingError(ws, "Could not base64 decode registry authentication string", err)
+			// Base64 decode the registryauth string.
+			data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
+			if err != nil {
+				handleClosingError(ws, "Could not base64 decode registry authentication string", err)
+			}
+
+			// Break up registry auth json string into a RegistryAuth object.
+			var regAuth RegistryAuth
+			err = json.Unmarshal(data, &regAuth)
+			if err != nil {
+				handleClosingError(ws, "Could not json decode registry authentication string", err)
+			}
+
+			// Create a new json string with the full dockerauth, including the registry URL.
+			jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
+			if err != nil {
+				handleClosingError(ws, "Could not json encode docker authentication string", err)
+			}
+
+			_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pullSecretName,
+					Namespace: namespace,
+				},
+				Type: v1.SecretTypeDockercfg,
+				StringData: map[string]string{
+					".dockercfg": string(jsonString),
+				},
+			})
+			if err != nil {
+				handleClosingError(ws, "Could not create registry pull secret", err)
+			}
 		}
 
-		// Break up registry auth json string into a RegistryAuth object.
-		var regAuth RegistryAuth
-		err = json.Unmarshal(data, &regAuth)
+		// Determine if the default service account in the desired namespace has the correct imagePullSecret, add it if not.
+		serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName, metav1.GetOptions{})
 		if err != nil {
-			handleClosingError(ws, "Could not json decode registry authentication string", err)
+			handleClosingError(ws, "Could not load default service account", err)
 		}
-
-		// Create a new json string with the full dockerauth, including the registry URL.
-		jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
-		if err != nil {
-			handleClosingError(ws, "Could not json encode docker authentication string", err)
+		foundPullSecret := false
+		for _, ps := range serviceAccount.ImagePullSecrets {
+			if ps.Name == pullSecretName {
+				foundPullSecret = true
+				break
+			}
 		}
-
-		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      pullSecretName,
-				Namespace: namespace,
-			},
-			Type: v1.SecretTypeDockercfg,
-			StringData: map[string]string{
-				".dockercfg": string(jsonString),
-			},
-		})
-		if err != nil {
-			handleClosingError(ws, "Could not create registry pull secret", err)
-		}
-	}
-
-	// Determine if the default service account in the desired namespace has the correct imagePullSecret, add it if not.
-	serviceAccount, err := server.KubeClient.CoreV1().ServiceAccounts(namespace).Get(defaultServiceAccountName, metav1.GetOptions{})
-	if err != nil {
-		handleClosingError(ws, "Could not load default service account", err)
-	}
-	foundPullSecret := false
-	for _, ps := range serviceAccount.ImagePullSecrets {
-		if ps.Name == pullSecretName {
-			foundPullSecret = true
-			break
-		}
-	}
-	if !foundPullSecret {
-		serviceAccount.ImagePullSecrets = append(serviceAccount.ImagePullSecrets, v1.LocalObjectReference{
-			Name: pullSecretName,
-		})
-		_, err = server.KubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
-		if err != nil {
-			handleClosingError(ws, "Could not modify default service account with registry pull secret", err)
+		if !foundPullSecret {
+			serviceAccount.ImagePullSecrets = append(serviceAccount.ImagePullSecrets, v1.LocalObjectReference{
+				Name: pullSecretName,
+			})
+			_, err = server.KubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
+			if err != nil {
+				handleClosingError(ws, "Could not modify default service account with registry pull secret", err)
+			}
 		}
 	}
 

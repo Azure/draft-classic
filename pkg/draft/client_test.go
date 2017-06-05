@@ -188,7 +188,7 @@ func TestUpFromDir(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.UpFromDir("foo", "default", ioutil.Discard, "/ahsdkfjhaksdf", []byte{})
+	err = client.UpFromDir("foo", "default", true, ioutil.Discard, "/ahsdkfjhaksdf", []byte{})
 	if err == nil {
 		t.Error("expected .UpFromDir() with invalid path to fail")
 	}
@@ -196,7 +196,7 @@ func TestUpFromDir(t *testing.T) {
 		t.Errorf("expected .UpFromDir() with invalid path to fail as expected, got '%s'", err.Error())
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good", []byte{}); err != nil {
+	if err := client.UpFromDir("testdata", "default", true, ioutil.Discard, "./testdata/good", []byte{}); err != nil {
 		t.Errorf("expected .UpFromDir() with valid path to pass, got %v", err)
 	}
 
@@ -207,7 +207,7 @@ func TestUpFromDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/good", []byte{})
+	err = client.UpFromDir("testdata", "default", true, ioutil.Discard, "./testdata/good", []byte{})
 	if err == nil {
 		t.Error("expected .UpFromDir() with bad server to fail")
 	}
@@ -220,11 +220,11 @@ func TestBadData(t *testing.T) {
 	// don't care about setting up anything because we shouldn't hit the server.
 	client := &Client{}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-dockerfile", []byte{}); err == nil {
+	if err := client.UpFromDir("testdata", "default", true, ioutil.Discard, "./testdata/no-dockerfile", []byte{}); err == nil {
 		t.Error("expected .UpFromDir() with no Dockerfile to return an err")
 	}
 
-	if err := client.UpFromDir("testdata", "default", ioutil.Discard, "./testdata/no-chart", []byte{}); err != ErrChartNotExist {
+	if err := client.UpFromDir("testdata", "default", true, ioutil.Discard, "./testdata/no-chart", []byte{}); err != ErrChartNotExist {
 		t.Errorf("expected .UpFromDir() with no Dockerfile to return ErrChartNotExist, got %v", err)
 	}
 }
@@ -255,7 +255,7 @@ func TestUpHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.UpFromDir("testdata", expectedNamespace, ioutil.Discard, "./testdata/good", []byte("hello: world\ngoodbye: world"))
+	client.UpFromDir("testdata", expectedNamespace, true, ioutil.Discard, "./testdata/good", []byte("hello: world\ngoodbye: world"))
 }
 
 func TestVersion(t *testing.T) {

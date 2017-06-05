@@ -70,5 +70,37 @@ spec:
 
 You can now use Draft, on Minikube, as documented.
 
+
+### Local experience
+
+When using minikube, we can have a fully local experience without having to
+refer to an external docker registry.
+
+If you wish to start working with draft without having an external registry
+setup, you can use the following procedure:
+
+
+When you perform the `up` command, use the `--skip-push-image` option.
+This will instruct the server to skip the image push and use only the local
+image in the daemon.
+
+You must make sure that the image pull policy, in your `deployment.yaml` file,
+is set to `IfNotPresent` and not `Always`. If not, your must change or override
+it through a custom values.yaml.
+
+```
+$ draft up --skip-image-push -f minikube-values.yaml
+```
+
+
+You can start draft with the default credentials but you must specify your
+domain
+
+```
+draft init --set basedomain=change.me
+```
+
+[Installation Guide]: install.md
 [Installation Guide]: install.md
 [Minikube][https://github.com/kubernetes/minikube]
+
