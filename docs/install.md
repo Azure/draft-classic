@@ -33,11 +33,31 @@ For credential-based logins such as Azure Container Registry, Docker Hub and Qua
 $ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
 ```
 
-For token-based logins such as Google Container Registry and Amazon ECR, use:
+For token-based logins including Amazon ECR, use:
 
 ```
 $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
 ```
+
+### For Google Container Registry:
+
+```
+$ ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+$ AUTH_TOKEN=$(echo "{\"username\":\"_token\",\"password\":\"$ACCESS_TOKEN\"}" | base64 --wrap=0)
+```
+Then:
+```
+$PROJECT=[YOUR-GOOGLE-PROJECT-ID]
+$DOMAIN=[YOUR-WILDCARD-DOMAIN]
+
+draft init \
+--set \
+registry.url=gcr.io,\
+registry.org=${PROJECT},\
+registry.authtoken=${AUTH_TOKEN},\
+basedomain=$YOUR_DOMAIN
+```
+
 
 ## Take Draft for a Spin
 
