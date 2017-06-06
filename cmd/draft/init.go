@@ -204,9 +204,13 @@ func ensurePacks(home draftpath.Home, out io.Writer) error {
 		return err
 	}
 	for packName, files := range all {
-		fmt.Fprintf(out, "Creating pack %s\n", packName)
+		fmt.Fprintf(out, "Creating pack %s...\n", packName)
 		if _, err := pack.Create(packName, home.Packs(), files); err != nil {
-			return err
+			if err == pack.ErrPackExists {
+				fmt.Fprintf(out, "Pack %s already exists. Skipping!\n", packName)
+			} else {
+				return err
+			}
 		}
 	}
 	return nil

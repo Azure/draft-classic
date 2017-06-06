@@ -1,6 +1,7 @@
 package pack
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -10,7 +11,11 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/Azure/draft/pkg/draft/pack/generated"
+	"github.com/Azure/draft/pkg/osutil"
 )
+
+// ErrPackExists is returned when a user calls Create() but the pack already exists.
+var ErrPackExists = errors.New("pack already exists")
 
 // File represents a file within a Pack
 type File struct {
@@ -90,6 +95,10 @@ func Create(name, dir string, files []*File) (string, error) {
 	ret := filepath.Join(path, name)
 	if fi, err := os.Stat(ret); err == nil && !fi.IsDir() {
 		return ret, fmt.Errorf("file %s already exists and is not a directory", ret)
+	}
+
+	if dirExists, err := osutil.Exists(ret); err == nil && dirExists {
+		return ret, ErrPackExists
 	}
 
 	// Next, we can simply loop through files and create each.
