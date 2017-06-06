@@ -9,6 +9,7 @@ import (
 const pythonValues = `# Default values for python.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+basedomain: example.com
 replicaCount: 2
 image:
   registry: docker.io
