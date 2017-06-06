@@ -24,11 +24,13 @@ SHELL=/bin/bash
 all: build
 
 .PHONY: build
+build: generate
 build:
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/...
 
 # usage: make clean build-cross dist APP=draft|draftd VERSION=v2.0.0-alpha.3
 .PHONY: build-cross
+build-cross: generate
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
 	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/$(APP)
@@ -112,10 +114,15 @@ test-unit:
 test-e2e:
 	./tests/e2e.sh
 
+.PHONY: generate
+generate:
+	go generate ./pkg/draft/pack/generated
+
 HAS_GOMETALINTER := $(shell command -v gometalinter;)
 HAS_GLIDE := $(shell command -v glide;)
 HAS_GOX := $(shell command -v gox;)
 HAS_GIT := $(shell command -v git;)
+HAS_BINDATA := $(shell command -v go-bindata;)
 
 .PHONY: bootstrap
 bootstrap:
@@ -131,6 +138,9 @@ ifndef HAS_GOX
 endif
 ifndef HAS_GIT
 	$(error You must install git)
+endif
+ifndef HAS_BINDATA
+	go get github.com/jteeuwen/go-bindata/...
 endif
 	glide install --strip-vendor
 	scripts/setup-apimachinery.sh

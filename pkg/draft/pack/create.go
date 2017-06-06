@@ -5,10 +5,62 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"github.com/Azure/draft/pkg/draft/pack/generated"
 )
+
+// File represents a file within a Pack
+type File struct {
+	Path    string
+	Content []byte
+	Perm    os.FileMode
+}
+
+// Builtins fetches all built-in packs as a map of packname=>files.
+func Builtins() (map[string][]*File, error) {
+	res := map[string][]*File{}
+	fnames := generated.AssetNames()
+	for _, fname := range fnames {
+		parts := strings.SplitN(fname, "/", 2)
+		if len(parts) != 2 {
+			// Skip files and empty directories.
+			continue
+		}
+		pname := parts[0]
+		if files, ok := res[pname]; ok {
+			f, err := file(fname)
+			if err != nil {
+				return res, err
+			}
+			files = append(files, f)
+			res[pname] = files
+			continue
+		}
+		f, err := file(fname)
+		if err != nil {
+			return res, err
+		}
+		res[pname] = []*File{f}
+	}
+	return res, nil
+}
+
+// file loads an Asset as a *File
+func file(name string) (*File, error) {
+	fi, err := generated.AssetInfo(name)
+	if err != nil {
+		return nil, err
+	}
+
+	asset, err := generated.Asset(name)
+	if err != nil {
+		return nil, err
+	}
+	return &File{Path: name, Content: asset, Perm: fi.Mode()}, nil
+}
 
 // Create creates a new Pack in a directory.
 //
@@ -35,42 +87,29 @@ func Create(name, dir string, files []*File) (string, error) {
 		return path, fmt.Errorf("%s is not a directory", path)
 	}
 
-	pdir := filepath.Join(path, name)
-	cdir := filepath.Join(pdir, ChartDir)
-	if fi, err := os.Stat(pdir); err == nil && !fi.IsDir() {
-		return pdir, fmt.Errorf("file %s already exists and is not a directory", pdir)
-	}
-	if err := os.MkdirAll(pdir, 0755); err != nil {
-		return pdir, err
+	ret := filepath.Join(path, name)
+	if fi, err := os.Stat(ret); err == nil && !fi.IsDir() {
+		return ret, fmt.Errorf("file %s already exists and is not a directory", ret)
 	}
 
-	if err := os.MkdirAll(cdir, 0755); err != nil {
-		return pdir, err
-	}
-
-	for _, d := range []string{TemplatesDir, ChartsDir} {
-		if err := os.MkdirAll(filepath.Join(cdir, d), 0755); err != nil {
-			return pdir, err
+	// Next, we can simply loop through files and create each.
+	// We call MkdirAll for a safe way to create any missing dirs.
+	for _, f := range files {
+		fullpath := filepath.Join(path, f.Path)
+		dir := filepath.Dir(fullpath)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return ret, err
 		}
-	}
-
-	cf := filepath.Join(cdir, ChartfileName)
-	if _, err := os.Stat(cf); err != nil {
-		if err := chartutil.SaveChartfile(cf, &chart.Metadata{Name: name}); err != nil {
-			return pdir, err
-		}
-	}
-
-	for _, file := range files {
-		if _, err := os.Stat(filepath.Join(pdir, file.Path)); err == nil {
-			// File exists and is okay. Skip it.
+		// Don't everwrite existing files.
+		if _, err := os.Stat(fullpath); err == nil {
 			continue
 		}
-		if err := ioutil.WriteFile(filepath.Join(pdir, file.Path), file.Content, file.Perm); err != nil {
-			return pdir, err
+		if err := ioutil.WriteFile(fullpath, f.Content, f.Perm); err != nil {
+			return ret, err
 		}
 	}
-	return pdir, nil
+
+	return ret, nil
 }
 
 // CreateFrom scaffolds a directory with the src pack.

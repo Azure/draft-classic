@@ -16,56 +16,62 @@ const packName = "foo"
 func fooPackFiles() []*File {
 	return []*File{
 		{
+			// Chart.yaml
+			Path:    filepath.Join(packName, ChartDir, ChartfileName),
+			Content: []byte("name: foo\n"),
+			Perm:    0644,
+		},
+		{
 			// values.yaml
-			Path:    filepath.Join(ChartDir, ValuesfileName),
+			Path:    filepath.Join(packName, ChartDir, ValuesfileName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// .helmignore
-			Path:    filepath.Join(ChartDir, IgnorefileName),
+			Path:    filepath.Join(packName, ChartDir, IgnorefileName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// deployment.yaml
-			Path:    filepath.Join(ChartDir, TemplatesDir, DeploymentName),
+			Path:    filepath.Join(packName, ChartDir, TemplatesDir, DeploymentName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// service.yaml
-			Path:    filepath.Join(ChartDir, TemplatesDir, ServiceName),
+			Path:    filepath.Join(packName, ChartDir, TemplatesDir, ServiceName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// ingress.yaml
-			Path:    filepath.Join(ChartDir, TemplatesDir, IngressName),
+			Path:    filepath.Join(packName, ChartDir, TemplatesDir, IngressName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// NOTES.txt
-			Path:    filepath.Join(ChartDir, TemplatesDir, NotesName),
+			Path:    filepath.Join(packName, ChartDir, TemplatesDir, NotesName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// _helpers.tpl
-			Path:    filepath.Join(ChartDir, TemplatesDir, HelpersName),
+			Path:    filepath.Join(packName, ChartDir, TemplatesDir, HelpersName),
 			Content: nil,
 			Perm:    0644,
 		},
 		{
 			// detect
-			Path:    filepath.Join(DetectName),
+			Path:    filepath.Join(packName, DetectName),
 			Content: nil,
 			Perm:    0755,
 		},
 		{
 			// Dockerfile
-			Path:    filepath.Join(DockerfileName),
+			Path:    filepath.Join(packName, DockerfileName),
 			Content: nil,
 			Perm:    0644,
 		},
@@ -158,7 +164,7 @@ func TestCreate(t *testing.T) {
 		t.Errorf("Expected name to be 'foo', got %q", mychart.Metadata.Name)
 	}
 
-	for _, d := range []string{TemplatesDir, ChartsDir} {
+	for _, d := range []string{TemplatesDir} {
 		if fi, err := os.Stat(filepath.Join(dir, ChartDir, d)); err != nil {
 			t.Errorf("Expected %s dir: %s", d, err)
 		} else if !fi.IsDir() {
@@ -205,5 +211,28 @@ func TestCreateFrom(t *testing.T) {
 
 	if err := CreateFrom(&chart.Metadata{Name: "foo"}, tdir, "testdata/pack-does-not-exist"); err == nil {
 		t.Error("expected err to be non-nil with an invalid source pack")
+	}
+}
+
+func TestBuiltins(t *testing.T) {
+	b, err := Builtins()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c := len(b); c != 6 {
+		t.Errorf("Expected 6 packs, got %d", c)
+	}
+
+	gopack, ok := b["golang"]
+	if !ok {
+		t.Fatal("Go pack not found")
+	}
+
+	if c := len(gopack); c != 12 {
+		t.Errorf("Expected 12 files in pack, got %d", c)
+		for _, f := range gopack {
+			t.Log(f.Path)
+		}
 	}
 }
