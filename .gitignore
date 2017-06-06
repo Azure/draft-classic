@@ -1,6 +1,7 @@
 bin/
 _dist/
 vendor/
+coverage.txt
 *.exe
 *.tar.gz
 examples/**/Dockerfile

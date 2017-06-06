@@ -2,6 +2,8 @@
 
 def gitBranch = ''
 def gitCommit = ''
+def codecovToken = ''
+
 
 def azure = [
   container: 'draft',
@@ -87,6 +89,12 @@ node('linux') {
 
     stage('Test') {
       sh 'make test'
+    }
+
+    stage('Code Coverage') {
+      withCredentials(wrapId('CODECOV_TOKEN', codecovToken)) {
+        sh 'bash <(curl -s https://codecov.io/bash)'
+      }
     }
 
     stage('Build') {
