@@ -20,6 +20,8 @@ Here is a video demonstrating how to set up Draft on Azure Container Services:
 
 [![video demonstrating draft on Azure Container Services](http://img.youtube.com/vi/7N7vdOa-TPI/0.jpg)](http://www.youtube.com/watch?v=7N7vdOa-TPI "Using Draft to streamline development on Kubernetes w/Azure Container Service and         Container Registry")
 
+[Join the conversation in Slack!](https://kubernetes.slack.com/messages/draft-users) If you don't already have a Kubernetes slack account, sign up [here](http://slack.k8s.io/).
+
 ## Installation
 
 Review the [Installation Guide][Installation Guide] to configure and install Draft on to your Kubernetes cluster.
