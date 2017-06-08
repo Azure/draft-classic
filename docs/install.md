@@ -27,6 +27,7 @@ $ draft init --set registry.url=changeme,registry.org=changeme,registry.authtoke
 ```
 
 * registry.url: Docker Registry Server URL. e.g. Azure Container Registry -> xxxx.azurecr.io
+* basedomain: Using a domain that you manage. e.g. `draft.example.com`
 
 The auth token field follows the format of Docker's X-Registry-Auth header.
 For credential-based logins such as Azure Container Registry, Docker Hub and Quay, use:
