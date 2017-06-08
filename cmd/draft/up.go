@@ -47,7 +47,8 @@ func newUpCmd(out io.Writer) *cobra.Command {
 			Out:      out,
 			Manifest: manifest.New(),
 		}
-		runningEnvironment string
+		runningEnvironment  string
+		dockerSkipImagePush bool
 	)
 
 	cmd := &cobra.Command{
@@ -80,12 +81,14 @@ func newUpCmd(out io.Writer) *cobra.Command {
 					return fmt.Errorf("could not unmarshal draft.toml: %v", err)
 				}
 			}
-			return up.run(runningEnvironment)
+
+			return up.run(runningEnvironment, dockerSkipImagePush)
 		},
 	}
 
 	f := cmd.Flags()
 	f.StringVarP(&runningEnvironment, "environment", "e", defaultDraftEnvironment(), "the environment (development, staging, qa, etc) that draft will run under")
+	f.BoolVarP(&dockerSkipImagePush, "skip-push-image", "s", false, "if set will instruct to skip the docker image push on the registry")
 
 	return cmd
 }
@@ -106,7 +109,7 @@ func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 	return yaml.Marshal(base)
 }
 
-func (u *upCmd) run(environment string) (err error) {
+func (u *upCmd) run(environment string, dockerSkipImagePush bool) (err error) {
 	env := u.Manifest.Environments[environment]
 	cwd := u.src
 	u.Client.OptionWait = env.Wait
@@ -116,7 +119,7 @@ func (u *upCmd) run(environment string) (err error) {
 		return err
 	}
 
-	if err = u.doUp(environment, cwd, rawVals); err != nil {
+	if err = u.doUp(environment, dockerSkipImagePush, cwd, rawVals); err != nil {
 		return err
 	}
 
@@ -156,7 +159,7 @@ func (u *upCmd) run(environment string) (err error) {
 				timer.Reset(delay)
 			}
 		case <-timer.C:
-			if err = u.doUp(environment, cwd, rawVals); err != nil {
+			if err = u.doUp(environment, dockerSkipImagePush, cwd, rawVals); err != nil {
 				return err
 			}
 			fmt.Fprintln(u.Out, "Watching local files for changes...")
@@ -164,8 +167,9 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 }
 
-func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
+func (u *upCmd) doUp(environment string, dockerSkipImagePush bool, cwd string, vals []byte) (err error) {
 	env := u.Manifest.Environments[environment]
+	dockerPushImage := dockerSkipImagePush || env.DockerSkipImagePush
 	if env.BuildTarPath != "" && env.ChartTarPath != "" {
 		buildTar, e := os.Open(env.BuildTarPath)
 		if e != nil {
@@ -175,9 +179,9 @@ func (u *upCmd) doUp(environment string, cwd string, vals []byte) (err error) {
 		if e != nil {
 			return e
 		}
-		err = u.Client.Up(env.Name, env.Namespace, u.Out, buildTar, chartTar, vals)
+		err = u.Client.Up(env.Name, env.Namespace, dockerPushImage, u.Out, buildTar, chartTar, vals)
 	} else {
-		err = u.Client.UpFromDir(env.Name, env.Namespace, u.Out, cwd, vals)
+		err = u.Client.UpFromDir(env.Name, env.Namespace, dockerPushImage, u.Out, cwd, vals)
 	}
 
 	// format error before returning

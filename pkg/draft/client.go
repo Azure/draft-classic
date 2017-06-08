@@ -74,7 +74,7 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 // Up uploads the build context and chart to draftd, then writes messages from draftd to out.
 // appName specifies the Helm release to create/update, and namespace specifies which namespace
 // to deploy the application into.
-func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chartReader io.ReadCloser, rawVals []byte) error {
+func (c Client) Up(appName, namespace string, dockerPushImage bool, out io.Writer, buildContext, chartReader io.ReadCloser, rawVals []byte) error {
 	// this is the multipart form buffer
 	b := closingBuffer{new(bytes.Buffer)}
 
@@ -115,6 +115,7 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 	req.Body = &b
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.Header.Set("Kubernetes-Namespace", namespace)
+	req.Header.Set("Docker-Push", strconv.FormatBool(dockerPushImage))
 	req.Header.Set("Helm-Flag-Wait", strconv.FormatBool(c.OptionWait))
 	req.Header.Set("Helm-Flag-Set", base64.StdEncoding.EncodeToString(rawVals))
 
@@ -148,7 +149,7 @@ func (c Client) Up(appName, namespace string, out io.Writer, buildContext, chart
 
 // UpFromDir prepares the contents of appDir to create a build context and chart archive, then
 // calls Up().
-func (c Client) UpFromDir(appName, namespace string, out io.Writer, appDir string, rawVals []byte) error {
+func (c Client) UpFromDir(appName, namespace string, dockerPushImage bool, out io.Writer, appDir string, rawVals []byte) error {
 
 	log.Debug("assembling build context archive")
 	buildContext, err := tarBuildContext(appDir)
@@ -162,7 +163,7 @@ func (c Client) UpFromDir(appName, namespace string, out io.Writer, appDir strin
 		return err
 	}
 
-	return c.Up(appName, namespace, out, buildContext, chartTar, rawVals)
+	return c.Up(appName, namespace, dockerPushImage, out, buildContext, chartTar, rawVals)
 }
 
 // Version returns the server version.

@@ -62,6 +62,7 @@ Here is a run-down on each of the fields:
  - `wait`: specifies whether or not to wait for all resources to be ready when Helm installs the chart.
  - `watch`: whether or not to deploy the app automatically when local files change.
  - `watch_delay`: the delay for local file changes to have stopped before deploying again (in seconds).
+ - `docker_skip_image_push`: specifies to skip the push to registry step. Only usefull when working with a single node cluster such as Minikube.
 
 Note: All updates to the `draft.toml` will take effect the next time `draft up --environment=<affected environment>` is invoked _except_ the `namespace` key/value pair. Once a deployment has occurred in the original namespace, it won't be transferred over to another.
 
