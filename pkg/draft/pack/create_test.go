@@ -124,10 +124,6 @@ func TestCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = Create(packName, tdir, fooPackFiles())
-	if err != nil {
-		t.Fatal(err)
-	}
 	if err := os.Chmod(badPermsDir, 0000); err != nil {
 		t.Fatal(err)
 	}
@@ -146,9 +142,9 @@ func TestCreate(t *testing.T) {
 		t.Error(err)
 	}
 
-	// re-run Create(), expecting to pass and skip overwriting existing files
-	if _, err := Create(packName, tdir, fooPackFiles()); err != nil {
-		t.Error(err)
+	// re-run Create(), expecting to fail with ErrPackExists
+	if _, err := Create(packName, tdir, fooPackFiles()); err != ErrPackExists {
+		t.Errorf("expected ErrPackExists, got '%v'", err)
 	}
 
 	dir := filepath.Join(tdir, packName)
