@@ -56,7 +56,14 @@ Remember the domain you use, it wiLl be needed in the next step of installation 
 
 ### I don't manage a domain
 
-If you don't manage a domain, you can always edit your `/etc/hosts` file to point
+If you don't manage a domain, when you will perform the request, you can use the
+host header to use ingress the host base routing.
+
+```
+$ curl --header Host:<application domain> <ip address from above>
+```
+
+You could also edit your `/etc/hosts` file to point
 to the ingressed out application domain to your cluster.
 
 The following snippet would allow you to access an application
