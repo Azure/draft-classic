@@ -404,40 +404,54 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		}
 	}
 
-	// Determine if the registry pull secret exists in the desired namespace, create it if not.
-	_, err = server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName, metav1.GetOptions{})
+	// Base64 decode the registryauth string.
+	data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
 	if err != nil {
-		// Base64 decode the registryauth string.
-		data, err := base64.StdEncoding.DecodeString(server.RegistryAuth)
-		if err != nil {
-			handleClosingError(ws, "Could not base64 decode registry authentication string", err)
-		}
+		handleClosingError(ws, "Could not base64 decode registry authentication string", err)
+	}
 
-		// Break up registry auth json string into a RegistryAuth object.
-		var regAuth RegistryAuth
-		err = json.Unmarshal(data, &regAuth)
-		if err != nil {
-			handleClosingError(ws, "Could not json decode registry authentication string", err)
-		}
+	// Break up registry auth json string into a RegistryAuth object.
+	var regAuth RegistryAuth
+	err = json.Unmarshal(data, &regAuth)
+	if err != nil {
+		handleClosingError(ws, "Could not json decode registry authentication string", err)
+	}
 
-		// Create a new json string with the full dockerauth, including the registry URL.
-		jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
-		if err != nil {
-			handleClosingError(ws, "Could not json encode docker authentication string", err)
-		}
+	// Create a new json string with the full dockerauth, including the registry URL.
+	jsonString, err := json.Marshal(DockerAuth{server.RegistryURL: regAuth})
+	if err != nil {
+		handleClosingError(ws, "Could not json encode docker authentication string", err)
+	}
 
-		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(&v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      pullSecretName,
-				Namespace: namespace,
-			},
-			Type: v1.SecretTypeDockercfg,
-			StringData: map[string]string{
-				".dockercfg": string(jsonString),
-			},
-		})
+	pullSecret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pullSecretName,
+			Namespace: namespace,
+		},
+		Type: v1.SecretTypeDockercfg,
+		StringData: map[string]string{
+			".dockercfg": string(jsonString),
+		},
+	}
+
+	// Determine if the registry pull secret exists in the desired namespace, create it if not.
+	existingPullSecret, err := server.KubeClient.CoreV1().Secrets(namespace).Get(pullSecretName, metav1.GetOptions{})
+	if err != nil {
+		_, err = server.KubeClient.CoreV1().Secrets(namespace).Create(pullSecret)
 		if err != nil {
 			handleClosingError(ws, "Could not create registry pull secret", err)
+		}
+	}
+
+	// If the registry pull service exists, determine if it needs to be updated.
+	if existingPullSecret != nil {
+		if stringData, ok := existingPullSecret.StringData[".dockercfg"]; ok {
+			if stringData != pullSecret.StringData[".dockercfg"] {
+				_, err = server.KubeClient.CoreV1().Secrets(namespace).Update(pullSecret)
+				if err != nil {
+					handleClosingError(ws, "Could not update registry pull secret", err)
+				}
+			}
 		}
 	}
 
