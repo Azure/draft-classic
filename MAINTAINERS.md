@@ -6,6 +6,7 @@
 
 - Matt Boersma <@mboersma>
 - Matt Tucker <@ultimateboy>
+- Michelle Noorali <@michelleN>
 - Vaughn Dice <@vdice>
 
 # Commodore
