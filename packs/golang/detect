@@ -8,7 +8,7 @@ build=$(cd "$1/" && pwd)
 if test -f "${build}/Godeps/Godeps.json" || # godeps
    test -f "${build}/vendor/vendor.json" || # govendor
    test -f "${build}/glide.yaml" || # glide
-   (test -d "${build}/src" && test -n "$(find "${build}/src" -mindepth 2 -type f -name '*.go' | sed 1q)") # gb
+   test -n "$(find "${build}" -type f -name '*.go' | sed 1q)" # found a file with a .go extension
 then
   echo Go
 else
