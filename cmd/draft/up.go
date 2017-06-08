@@ -56,6 +56,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		Long:    upDesc,
 		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
 			if len(args) > 0 {
 				up.src = args[0]
 			}
@@ -63,23 +64,17 @@ func newUpCmd(out io.Writer) *cobra.Command {
 			up.Manifest = manifest.New()
 
 			if up.src == "" || up.src == "." {
-				var err error
 				up.src, err = os.Getwd()
 				if err != nil {
 					return err
 				}
 			}
 
-			draftToml, err := ioutil.ReadFile(filepath.Join(up.src, "draft.toml"))
+			up.Manifest, err = loadDraftToml(up.src)
 			if err != nil {
-				if !os.IsNotExist(err) {
-					return err
-				}
-			} else {
-				if err = toml.Unmarshal(draftToml, up.Manifest); err != nil {
-					return fmt.Errorf("could not unmarshal draft.toml: %v", err)
-				}
+				return err
 			}
+
 			return up.run(runningEnvironment)
 		},
 	}
@@ -193,4 +188,19 @@ func defaultDraftEnvironment() string {
 		env = manifest.DefaultEnvironmentName
 	}
 	return env
+}
+
+func loadDraftToml(appDir string) (*manifest.Manifest, error) {
+	mfest := manifest.New()
+	draftToml, err := ioutil.ReadFile(filepath.Join(appDir, "draft.toml"))
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+	} else {
+		if err = toml.Unmarshal(draftToml, mfest); err != nil {
+			return nil, fmt.Errorf("could not unmarshal draft.toml: %v", err)
+		}
+	}
+	return mfest, nil
 }
