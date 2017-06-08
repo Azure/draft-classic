@@ -320,11 +320,12 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s",
+	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s",
 		appName,
 		server.RegistryOrg,
 		server.RegistryURL,
-		tag)
+		tag,
+		server.Basedomain)
 
 	if err := strvals.ParseInto(imageVals, baseValues); err != nil {
 		handleClosingError(ws, "Could not inject registry data into values", err)
@@ -463,9 +464,6 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		}
 	}
 
-	// combinedVars takes the basedomain configured in draftd and appends that to the rawVals
-	combinedVars := append([]byte(fmt.Sprintf("basedomain: %s\n", server.Basedomain))[:], []byte(rawVals)[:]...)
-
 	// If a release does not exist, install it. If another error occurs during
 	// the check, ignore the error and continue with the upgrade.
 	//
@@ -481,7 +479,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 			chart,
 			namespace,
 			helm.ReleaseName(appName),
-			helm.ValueOverrides(combinedVars),
+			helm.ValueOverrides(rawVals),
 			helm.InstallWait(optionWait))
 		if err != nil {
 			handleClosingError(ws, "Could not install release", err)
@@ -493,7 +491,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 		releaseResp, err := server.HelmClient.UpdateReleaseFromChart(
 			appName,
 			chart,
-			helm.UpdateValueOverrides(combinedVars),
+			helm.UpdateValueOverrides(rawVals),
 			helm.UpgradeWait(optionWait))
 		if err != nil {
 			handleClosingError(ws, "Could not upgrade release", err)
