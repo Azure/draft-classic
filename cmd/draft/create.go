@@ -52,7 +52,7 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 	cc.home = draftpath.Home(homePath())
 
 	f := cmd.Flags()
-	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default this is the basename of the current working directory")
+	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default, this is a randomly generated name")
 	f.StringVarP(&cc.pack, "pack", "p", "", "the named Draft starter pack to scaffold the app with")
 
 	return cmd
