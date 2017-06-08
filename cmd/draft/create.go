@@ -62,6 +62,10 @@ func (c *createCmd) run() error {
 	var err error
 	mfest := manifest.New()
 
+	if c.appName != "" {
+		mfest.Environments[manifest.DefaultEnvironmentName].Name = c.appName
+	}
+
 	cfile := &chart.Metadata{
 		Name:        mfest.Environments[manifest.DefaultEnvironmentName].Name,
 		Description: "A Helm chart for Kubernetes",
