@@ -26,7 +26,7 @@ To install the server-side of Draft, use `draft init` with your ingress' `basedo
 $ draft init --set registry.url=changeme,registry.org=changeme,registry.authtoken=changeme,basedomain=changeme
 ```
 
-* registry.url: Docker Registry Server URL. e.g. Azure Container Registry -> xxxx.azurecr.io
+* registry.url: Docker Registry Server URL. e.g. Azure Container Registry -> xxxx.azurecr.io, DockerHub -> docker.io
 * basedomain: Using a domain that you manage. e.g. `draft.example.com`
 
 The auth token field follows the format of Docker's X-Registry-Auth header.
