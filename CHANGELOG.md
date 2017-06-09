@@ -6,7 +6,7 @@
 
 * Added -o/--dest flag to `draft create`
 * Fixed unused --app flag on `draft create`
-* go-bindata is now used to package the default packs, making it easier to contibute new packs
+* go-bindata is now used to package the default packs, making it easier to contribute new packs
 
 ### Server
 
