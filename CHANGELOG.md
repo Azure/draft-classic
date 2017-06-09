@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.4.0
+
+### Client
+
+* Added -o/--dest flag to `draft create`
+* Fixed unused --app flag on `draft create`
+* go-bindata is now used to package the default packs, making it easier to contibute new packs
+
+### Server
+
+* Bumped to Helm v2.4 compatibility
+* Refactored and cleaned up package `api`
+
+### Documentation
+
+* Added a Draft logo
+* Added a nice video tutorial for Draft on Azure Container Services
+* Documented `basedomain` and basic ingress setups
+* Added descriptions to some of the fields in `draft init`
+* Added documentation on getting started with Minikube
+
+### Test Infrastructure
+
+* CI will now publish binaries on tagged releases of Draft
+
 ## v0.3.0
 
 ### Client
