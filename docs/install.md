@@ -25,8 +25,11 @@ Unpack the Draft binary and add it to your PATH.
 To install the server-side of Draft, use `draft init` with your ingress' `basedomain` and credentials to let Draft communicate with a Docker registry by using the following command:
 
 ```
-$ draft init --set registry.url=docker.io,registry.org=changeme,registry.authtoken=changeme,basedomain=changeme
+$ draft init --set registry.url=changeme,registry.org=changeme,registry.authtoken=changeme,basedomain=changeme
 ```
+
+* registry.url: Docker Registry Server URL. e.g. Azure Container Registry -> xxxx.azurecr.io, DockerHub -> docker.io
+* basedomain: Using a domain that you manage. e.g. `draft.example.com`
 
 The auth token field follows the format of Docker's X-Registry-Auth header.
 For credential-based logins such as Azure Container Registry, Docker Hub and Quay, use:
