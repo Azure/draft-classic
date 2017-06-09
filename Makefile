@@ -97,6 +97,7 @@ unserve: check-helm
 clean:
 	-rm bin/*
 	-rm rootfs/bin/*
+	-rm -rf _dist/
 
 .PHONY: test
 test: TESTFLAGS += -race -v
