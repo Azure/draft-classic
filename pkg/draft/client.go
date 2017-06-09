@@ -71,6 +71,44 @@ func NewFromString(endpoint string, client *http.Client) (*Client, error) {
 	return New(e, client), nil
 }
 
+// ShipitFromDir produces a docker build context and chart archive in appDir's path.
+func (c Client) ShipitFromDir(appName, appDir string) error {
+	log.Info("assembling build context archive")
+	buildContext, err := tarBuildContext(appDir)
+	if err != nil {
+		return err
+	}
+	defer buildContext.Close()
+
+	dockerArchive, err := os.Create(filepath.Join(appDir, "docker.tar.gz"))
+	if err != nil {
+		return err
+	}
+	defer dockerArchive.Close()
+
+	if _, err := io.Copy(dockerArchive, buildContext); err != nil {
+		return err
+	}
+
+	log.Info("assembling chart archive")
+	chartTar, err := tarChart(appDir)
+	if err != nil {
+		return err
+	}
+	defer chartTar.Close()
+
+	chartArchive, err := os.Create(filepath.Join(appDir, "chart.tar.gz"))
+	if err != nil {
+		return err
+	}
+	defer chartArchive.Close()
+
+	if _, err := io.Copy(chartArchive, chartTar); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Up uploads the build context and chart to draftd, then writes messages from draftd to out.
 // appName specifies the Helm release to create/update, and namespace specifies which namespace
 // to deploy the application into.

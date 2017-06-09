@@ -67,6 +67,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		newCreateCmd(out),
 		newHomeCmd(out),
 		newInitCmd(out),
+		newShipitCmd(out),
 		newUpCmd(out),
 		newVersionCmd(out),
 	)
