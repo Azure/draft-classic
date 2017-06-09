@@ -59,7 +59,7 @@ Remember the domain you use, it will be needed in the next step of installation 
 ### I don't manage a domain
 
 If you don't manage a domain you can't directly use the domain in your request.
-To fullill the load balancer request to have the Host header provided, you can
+To fulfill the load balancer request to have the Host header provided, you can
 explicitly provide it:
 
 ```
