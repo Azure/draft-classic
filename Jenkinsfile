@@ -32,10 +32,6 @@ def isMaster = { String branch ->
   branch == "remotes/origin/master"
 }
 
-def isTag = { String branch ->
-  branch.startsWith("tags/")
-}
-
 def deriveCommit = {
   commit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
   mergeCommitParents = sh(returnStdout: true, script: "echo ${commit} | git log --pretty=%P -n 1 --date-order").trim()
@@ -90,13 +86,13 @@ node('linux') {
     }
 
     stage('Build') {
-      def buildTarget = (isMaster(gitBranch) || isTag(gitBranch)) ? 'build-cross' : 'build'
+      def buildTarget = isMaster(gitBranch) ? 'build-cross' : 'build'
 
       sh "make ${buildTarget}"
     }
 
     stage('Publish Binaries - Azure') {
-      if (isMaster(gitBranch) || isTag(gitBranch)) {
+      if (isMaster(gitBranch)) {
         dist(tag)
 
         env.AZURE_STORAGE_ACCOUNT = azure.storageAccount
@@ -109,7 +105,7 @@ node('linux') {
     }
 
     stage('Docker Push - DockerHub') {
-      if (isMaster(gitBranch) || isTag(gitBranch)) {
+      if (isMaster(gitBranch)) {
         withCredentials(wrapId('REGISTRY_PASSWORD', registries.dockerhub.production.credentials)) {
           dockerBuildAndPush(registries.dockerhub.production, tag)
         }
