@@ -182,7 +182,7 @@ helm delete --purge draft
 [go]: https://golang.org/
 [helm]: https://github.com/kubernetes/helm
 [Homebrew]: https://brew.sh/
-[Kubernetes]: https://github.com/kubernetes/minikube
+[Kubernetes]: https://github.com/kubernetes/kubernetes
 [minikube]: https://github.com/kubernetes/minikube
 [Quay]: https://quay.io/
 [upstream]: https://help.github.com/articles/fork-a-repo/
