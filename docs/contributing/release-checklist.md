@@ -207,9 +207,26 @@ git tag $RELEASE_NAME-rc1
 git push upstream $RELEASE_NAME-rc1
 ```
 
-Drone will automatically create a tagged release image and client binary to test with. For testers,
-the process to start testing after Drone finishes building the artifacts involves the following
-steps to grab the client from S3:
+~~Jenkins will automatically create a tagged release image and client binary to test with.~~
+
+At the present time, [Jenkins does not support](https://issues.jenkins-ci.org/browse/JENKINS-34395)
+building releases from tags, so it is up to the release maintainer to create the release candidate
+binaries themselves and upload the docker image to DockerHub. This can be done by running
+
+```
+make clean
+make bootstrap
+make build-cross
+VERSION=$RELEASE_NAME-rc1 make dist checksum
+DOCKER_REGISTRY=docker.io IMAGE_PREFIX=microsoft VERSION=$RELEASE_NAME-rc1 make docker-binary docker-build docker-push
+```
+
+Afterwards, the release maintainer will need to upload the binaries and checksums to Azure Blob
+Storage. If the release maintainer does not have access to the container, PM @bacongobbler for
+more information.
+
+For testers, the process to start testing after Jenkins finishes building the artifacts involves
+the following steps to grab the client from Azure Blob Storage:
 
 linux/amd64, using /bin/bash:
 
