@@ -1,6 +1,8 @@
 ## Dependencies
 
-- Draft will need a cloud-provided Kubernetes cluster to deploy your app. It's _possible_ to use Minikube, but Draft requires a wildcard domain and an ingress controller which can be difficult to set up properly on one's laptop.
+- Draft will need a Kubernetes cluster to deploy your app.
+  [Minikube][minikube], Azure Container Services and Google Container Engine
+  are a few examples that will work with Draft, but any Kubernetes cluster will do.
 - Draft expects [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download [`helm` v2.4.x](https://github.com/kubernetes/helm/releases) and
 do a `helm init` first, as described in [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md).
 - Draft needs to push images to a Docker registry, so you'll need to configure Draft with your Docker registry credentials. If you don't already have one, you can create a Docker registry for free on either [Docker Hub](https://hub.docker.com/) or [Quay.io](https://quay.io).
@@ -45,3 +47,4 @@ Once you've completed the above steps, you're ready to climb aboard and explore 
 
 [Ingress Guide]: ingress.md
 [Getting Started]: getting-started.md
+[minikube]: https://github.com/kubernetes/minikube
