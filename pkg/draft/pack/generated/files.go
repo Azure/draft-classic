@@ -140,7 +140,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 	return nil
 }
 
-var _readmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x51\xc1\x6a\xc3\x30\x0c\xbd\xfb\x2b\x1e\xec\xba\x24\xb0\xe3\x6e\x5d\xbb\xd3\xd8\xe8\xa1\x1f\x10\xd5\x56\x12\x11\xc7\x0e\x8e\x42\x09\xf4\xe3\x87\xb3\x94\x76\x9b\xc0\x60\x3f\xe9\x49\xf2\x7b\x4f\x78\x9b\xc5\x6b\x21\x01\x47\xb2\xfd\x64\xcc\xa9\x93\x09\x4e\x12\x5b\x8d\x69\x81\x8d\x41\x49\xc2\x84\xf3\xad\xee\x90\xa8\x51\x8c\xb9\xba\x34\x66\x65\x41\x02\xf4\x37\x8f\x12\x83\x66\x8d\x03\xa9\x58\xf2\x7e\x59\x19\xd4\xb2\x83\x04\x8d\xd0\x8e\x41\xe3\xe8\xc5\x92\x4a\x0c\x25\x4e\x1d\x9b\x26\xa6\x81\x14\xb1\xf9\xdb\x4d\xa6\x57\x63\xea\xba\x36\xeb\xd8\xca\x00\xd7\x7c\x0a\x1c\x77\xfb\x8f\xaf\xdd\xe7\x7b\x7e\x21\xc7\xf5\x7e\x2b\x60\x3b\x4a\x5a\xdd\x91\x0d\xde\x67\xb8\x5c\x68\xf0\xff\x52\x65\x59\x3e\x36\x38\x44\xdb\x73\x6a\xc4\xf3\x23\xea\x58\xd9\xea\x23\xb2\xd1\xee\x3b\xbd\x18\x6c\x71\x2d\x72\x32\xef\xbe\x69\x95\x95\x39\xcf\xc1\x79\x76\x98\x27\x09\x2d\xea\x81\x7a\x46\xcb\x81\x13\x29\xd7\xcf\xb8\x74\x62\x3b\x5c\xc4\x7b\xd8\xc4\xa4\x0c\xc2\x59\x02\xa5\x05\x89\xc7\xc4\x13\x07\x5d\x65\x33\xab\x54\xfc\xf3\x51\x50\x70\x98\x34\x26\x86\x76\xa4\xd9\x94\x7a\xec\xdb\xca\x65\xc3\xaa\xac\x5c\x75\x9b\xe1\xea\xd2\x7c\x07\x00\x00\xff\xff\x42\x6c\xc1\xb5\xfb\x01\x00\x00")
+var _readmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x91\x41\x8b\xdb\x30\x10\x85\xef\xfa\x15\x0f\xda\x43\x0b\x1b\x1b\x7a\xec\x6d\xbb\xdb\x43\x29\x2d\x39\xec\x7d\x35\x91\xc7\xf6\x10\x59\x32\xd2\x98\x60\xc8\x8f\x2f\x92\x63\x92\xb6\x02\x83\xfd\xf4\x9e\xf4\x79\xde\x07\x7c\x5b\xc4\xeb\x41\x02\x8e\xe4\xce\xd9\x98\xb7\x51\x32\x3a\x49\xec\x34\xa6\x15\x2e\x06\x25\x09\x19\xa7\xdd\xf7\x9a\xa8\x57\xcc\xc5\xdd\x18\xf3\xfe\xa3\xc7\x1a\x17\x50\x62\x48\x50\x4e\x9c\x95\x3b\x48\x80\x4b\x4c\x2a\x61\x28\xdb\x09\xf1\x12\xb6\xcc\xfb\x53\xf5\x3b\x0a\xc8\x32\xcd\x7e\xdd\x8c\x0c\x1d\x63\x66\x53\x3d\x25\x5e\x53\x3e\x3a\xf2\xb0\x1f\x3f\x75\xf5\xd2\x31\x4e\xfc\xb9\xad\x16\xbb\x31\x0e\x05\xb2\x31\xe6\xb8\xc7\xf4\x6f\xfc\x82\x45\x8b\xc6\x89\x54\x1c\x79\xbf\x56\x08\x1a\x2a\xa2\x46\xe8\xc8\xa0\x79\xf6\xe2\x48\x25\x86\x06\x6f\x23\x9b\x3e\xa6\x89\x14\xb1\xff\xf7\x34\xc9\x5f\x8d\xb1\xd6\x6e\x94\xad\x01\xae\xe5\x39\xe0\xf8\xfc\xf2\xf3\xf7\xf3\xaf\xef\xe5\x0b\x65\x5d\xef\x6f\x07\xb8\x91\x92\xb6\x77\xe5\x26\xbf\x14\xb9\x59\x69\xf2\xff\x6d\x35\x4d\xf3\x78\xc0\x6b\x74\x67\x4e\xbd\x78\x7e\x54\x3b\x56\x76\xfa\xa8\xdc\x62\x77\xa6\x2f\x06\xb7\x75\x3d\x94\xcd\xc2\x7e\x9b\x55\x99\xcc\x69\x09\x9d\xe7\x0e\x4b\x2e\x3d\xd9\x89\xce\x8c\x81\x03\x27\x52\xb6\x4f\xb8\x8c\xe2\x46\x5c\xc4\xfb\xbd\x23\xc2\x49\x02\xa5\x15\x89\xe7\xc4\x99\x83\xd6\xb1\x99\x3a\x2a\xde\x7e\x14\x14\x3a\x64\x8d\xa9\x54\x4a\x5a\x4a\xb1\xf3\x79\x68\x6b\x85\xb5\xbc\x76\xbf\xa3\xb3\x8d\xf9\x13\x00\x00\xff\xff\x50\x11\x7d\xa0\x82\x02\x00\x00")
 
 func readmeMdBytes() ([]byte, error) {
 	return bindataRead(
@@ -155,7 +155,7 @@ func readmeMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "README.md", size: 507, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "README.md", size: 642, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -175,7 +175,7 @@ func golangDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -195,7 +195,7 @@ func golangDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/Dockerfile", size: 32, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/Dockerfile", size: 32, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -215,7 +215,7 @@ func golangNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -235,7 +235,7 @@ func golangChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -255,7 +255,7 @@ func golangChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -275,7 +275,7 @@ func golangChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -295,7 +295,7 @@ func golangChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -315,7 +315,7 @@ func golangChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -335,7 +335,7 @@ func golangChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -355,12 +355,12 @@ func golangChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _golangChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x8f\xd4\x40\x0c\x85\xfb\xf9\x15\x4f\xba\x9a\x55\xee\xaa\xd5\x74\xe8\xb6\x59\x89\x45\x29\x68\x28\x9d\xc4\x09\x16\x9e\x38\x78\x3c\x2b\xf2\xef\x51\x22\x1a\xa8\xae\xb3\xad\xa7\xcf\xef\x7b\xc1\x8d\x67\x6a\x1a\x78\x92\x36\xae\x98\xcd\xb1\x98\xd2\xba\x5c\xd2\x0b\xbe\xfd\x90\x0a\xa9\x20\x7c\xff\xfc\xf8\xf2\x69\x36\x2f\x14\xc1\x13\x66\x51\x3e\x02\x37\x1e\x95\x9c\xf1\x24\x17\x1a\x94\x2b\xc2\x30\x30\x36\xaa\x95\x27\xc8\x1a\x86\xdd\x9a\x23\xb8\x6c\x4a\xc1\xf5\x92\x9c\x37\x95\x91\xde\xad\xad\x91\xf1\x96\xa4\xd0\xc2\x39\x01\xce\x8b\xd4\xf0\x3d\x63\xb2\xf1\x27\xfb\x45\x2c\x01\xe6\x4b\x86\xca\xe0\xe4\x7b\x02\x56\x2a\x9c\xff\x56\x4c\x40\xd0\x92\x61\xeb\xd0\x44\xa7\x04\x6c\x4d\xb5\x37\x95\x71\xcf\xb8\xcf\x5f\x2d\x7a\xe7\xca\x6b\xa4\xca\xfe\x94\xf1\x7c\xf3\x3f\x61\xdf\x38\xe3\x5d\x5b\x0d\xf6\x7b\x9f\x00\xfe\x1d\xec\x2b\x69\x6f\x1e\x19\xd7\x2e\xe1\x10\xf9\xe7\x74\xed\x92\x73\xb5\xe6\x23\xd7\x83\xa9\x52\x24\xce\x09\x18\xb7\x96\xf1\xda\x75\xe5\xdc\x0a\x17\x3b\x94\x5e\xdf\xae\x0f\x39\x25\x7f\x35\xae\x1f\xc9\xfe\x09\x00\x00\xff\xff\x24\x04\x82\x1f\x9c\x01\x00\x00")
+var _golangChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x6f\x14\x41\x0c\x85\xfb\xf9\x15\x4f\x4a\xcd\xe9\x92\xea\x34\x1d\x4a\x9a\x48\x04\x5d\x41\x43\xe9\x9d\xf5\x2e\x16\x9e\xf1\xe2\xf1\x9c\x6e\xff\x3d\xba\x15\x0d\x54\x74\xb6\xf5\xf4\xf9\x7d\x4f\x78\xe3\x85\x86\x06\x6e\xa4\x83\x3b\x16\x73\xac\xa6\xd4\xd6\x53\x7a\xc2\xb7\x1f\xd2\x21\x1d\x84\xef\x9f\x3f\xbe\x7c\x5a\xcc\x2b\x45\xf0\x8c\x45\x94\x1f\x81\x37\x2e\x4a\xce\xb8\x91\x0b\x4d\xca\x1d\x61\x98\x18\x1b\xf5\xce\x33\xa4\x85\x61\xb7\xe1\x08\xae\x9b\x52\x70\x3f\xa5\x89\x3a\xcf\x56\x49\x5a\x06\xdf\xa9\x6e\xca\xa7\x62\x35\x39\x6f\x2a\x85\x5e\x6d\xb4\xc8\x78\x49\x52\x69\xe5\x9c\x00\xe7\x55\x7a\xf8\x9e\x31\x5b\xf9\xc9\x7e\x12\x4b\x80\xf9\x9a\xa1\x32\x39\xf9\x9e\x80\x46\x95\xf3\x9f\xea\x09\x08\x5a\x33\xac\x4d\x43\x74\x4e\xc0\x36\x54\xaf\xa6\x52\xf6\x8c\xf7\xe5\xab\xc5\xd5\xb9\x73\x8b\xd4\xd9\x6f\x52\x8e\x37\xff\x12\xf6\x8d\x33\x5e\x75\xf4\x60\x7f\xbf\x26\x80\xef\xc1\xde\x48\xaf\xe6\x91\x71\x39\x27\x3c\x04\xff\x3a\x5d\xce\xc9\xb9\xdb\xf0\xc2\xfd\xc1\x54\xa9\x12\xc7\x04\x94\x6d\x64\x3c\x9f\xcf\xf5\xd8\x2a\x57\x7b\x28\x3d\xbf\x5c\x3e\xe4\x90\xfc\x35\xb8\xff\x4f\xf6\x77\x00\x00\x00\xff\xff\x7b\xc1\x5b\x67\xb4\x01\x00\x00")
 
 func golangChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -375,12 +375,12 @@ func golangChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/values.yaml", size: 412, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/chart/values.yaml", size: 436, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _golangDetect = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x6c\x8e\xc1\x6e\xb3\x30\x10\x84\xef\xfb\x14\xf3\x1b\x94\xc0\x2f\x19\x44\xcf\x6d\xaf\x79\x0e\x60\x17\x70\x05\x36\xc5\x4e\xda\xa8\xf4\xdd\x2b\x43\x2a\xb5\x6a\x4e\x23\x7f\xfe\x46\x3b\x94\xfc\x2b\xcf\x7e\x29\x1b\x63\x4b\xb1\x17\x34\xb5\x1f\x28\x41\x7c\xb2\x04\x69\x03\x1e\x9b\xb3\x19\x59\xb3\x59\x9e\xc9\x4b\x80\x16\xa2\x0d\x3d\xa5\x59\xcb\x50\x69\x55\x2a\x1c\x0e\x98\xdf\x38\x27\x32\x1d\x82\xf8\x00\xdd\x41\xa5\x1f\x9b\xf7\x59\x9e\x1c\xcb\xec\x6f\x51\xbc\x78\x67\x15\xd6\x15\x09\xfa\x8d\x10\x70\xa7\x74\x11\xcb\x6e\xb9\xc5\xef\xd2\xce\xee\xd7\xfa\xd1\xb0\x14\xd7\x7a\x1a\xbf\xf5\x08\xa2\x9b\xed\x32\xff\x90\xfd\xd2\x6e\xdb\xf7\x1f\x0b\x95\x66\x9d\xb1\x7f\x0c\x3d\x19\xcb\x32\x87\x01\x0f\xd0\xe1\x3a\x0b\x3a\x68\x5b\x4f\x82\xe3\xff\xa2\x77\x47\xac\xf0\xc2\xa8\x5e\x73\x95\xc7\x8b\x0d\x85\x41\x2c\x01\xd2\x0e\x0e\x27\x47\x32\xfa\x38\x41\xde\x4d\x40\x45\x9d\xa1\xaf\x00\x00\x00\xff\xff\xc3\x7f\xe5\x0e\x77\x01\x00\x00")
+var _golangDetect = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x6c\x8d\xdd\x6a\x83\x40\x10\x46\xef\xe7\x29\xbe\xae\x92\x9f\x82\x8a\xf7\x6d\x6f\xf3\x1c\xea\xce\xea\x14\x33\x6b\xdd\x35\x3f\xd4\xbe\x7b\xd1\xa6\x84\x40\xae\x3e\xe6\x70\x0e\x43\xc9\x4b\x31\x85\xb1\xa8\x45\x0b\xd6\x13\xea\x2a\x74\x94\x60\x39\x2d\x47\x6e\x22\xde\xea\x49\x7a\x9b\x59\x19\x3f\x28\x70\x44\xc6\x44\x2b\x7a\x4f\x77\x8d\x85\x49\xcb\xc2\x60\xb3\xc1\x70\xb6\x7b\x22\x71\x88\x1c\x22\x32\x07\x93\x7e\xaf\xde\x4f\x71\xf0\x96\x87\x70\x9b\xfc\x33\x78\x35\x98\x67\x24\x68\x57\x42\xc0\x93\xe8\xc4\x6a\xfd\x78\x9b\xc7\xe8\x8f\x3d\xcf\xda\x5e\x2c\xe7\xd7\xea\xd8\xff\xeb\x0b\xb8\xbb\x0a\x93\xee\x9c\xa8\xbd\x37\x06\x59\xbc\x0e\x0c\x87\x4c\xab\x23\x63\xfb\x9a\xb7\x7e\x8b\x19\x81\x2d\xca\xaf\xbd\x41\x02\xe7\x27\xb5\xa8\xe0\xa4\x67\x9c\x25\x76\xa8\x90\xb7\x1e\x7c\x89\xac\x41\xbc\x52\xec\x58\x09\xe0\xa6\xf3\x38\x78\xe2\x3e\x2c\x5f\xf9\x22\x11\x25\x39\xa1\xdf\x00\x00\x00\xff\xff\xb8\xb6\xfd\x76\x6a\x01\x00\x00")
 
 func golangDetectBytes() ([]byte, error) {
 	return bindataRead(
@@ -395,7 +395,7 @@ func golangDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/detect", size: 375, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "golang/detect", size: 362, mode: os.FileMode(493), modTime: time.Unix(1496947586, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -415,12 +415,12 @@ func javaDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _javaDockerfile = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x0b\xf2\xf7\x55\xc8\x4d\x2c\x4b\xcd\xb3\xca\xcf\x4b\x2a\xcd\xcc\x49\xe1\x72\x8d\x08\xf0\x0f\x76\x55\x30\x31\x35\x33\xe7\x72\xf5\x0b\x09\x8a\x0c\xf0\xf7\xf4\x0b\x51\xc8\x4a\x2c\x4b\xe4\x72\xf6\x75\x51\x88\x56\xd2\xcd\x4a\x2c\x52\xd2\x51\x50\x2a\x49\x2c\x4a\x4f\x2d\xd1\xcf\x48\xcd\xc9\xc9\x2f\xcf\x2f\xca\x49\x01\x49\xe8\x96\x67\x96\x64\xe8\xa6\xa4\x16\xa4\xe6\xa5\xa4\xe6\x25\x67\xa6\x16\xeb\x81\x94\xc7\x72\x01\x02\x00\x00\xff\xff\x9e\xa7\xc2\x54\x6b\x00\x00\x00")
+var _javaDockerfile = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x0b\xf2\xf7\x55\xc8\x4d\x2c\x4b\xcd\xb3\xca\xcf\x4b\x2a\xcd\xcc\x49\xe1\x72\x8d\x08\xf0\x0f\x76\x55\x30\x31\x35\x33\xe7\x72\xf6\x75\x51\x88\x56\xca\x4a\x2c\x4b\x54\xd2\x51\x50\xd2\xcd\x4a\x2c\x02\xd1\x25\x89\x45\xe9\xa9\x25\xfa\x19\xa9\x39\x39\xf9\xe5\xf9\x45\x39\x29\x20\x09\xdd\xf2\xcc\x92\x0c\xdd\x94\xd4\x82\xd4\xbc\x94\xd4\xbc\xe4\xcc\xd4\x62\x3d\x90\xf2\x58\x2e\x40\x00\x00\x00\xff\xff\x04\x6d\xad\xb8\x63\x00\x00\x00")
 
 func javaDockerfileBytes() ([]byte, error) {
 	return bindataRead(
@@ -435,7 +435,7 @@ func javaDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/Dockerfile", size: 107, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/Dockerfile", size: 99, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -455,7 +455,7 @@ func javaNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -475,7 +475,7 @@ func javaChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -495,7 +495,7 @@ func javaChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -515,7 +515,7 @@ func javaChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -535,7 +535,7 @@ func javaChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -555,7 +555,7 @@ func javaChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -575,7 +575,7 @@ func javaChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -595,12 +595,12 @@ func javaChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _javaChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x3f\x4f\xc3\x40\x0c\xc5\xf7\xfb\x14\x4f\xea\x4c\xd5\x56\xfc\xa9\x6e\x43\xed\x52\x44\x51\x06\x16\x46\x27\x71\x82\xe1\x2e\x17\x7c\xbe\x88\x7c\x7b\x94\xb0\x30\xb2\xd9\xd6\xf3\xef\xe9\xb7\xc1\x99\x3b\x2a\xc1\x30\x51\x28\x9c\xd1\x25\xc5\x13\x4d\xb4\x75\x1b\xbc\xbe\x4b\x86\x64\x10\xde\x1e\xaf\xcf\x37\x5d\xd2\x48\x66\xdc\xa2\x93\xc0\x4b\xe0\xcc\x4d\x20\x65\x4c\xa4\x42\x75\xe0\x0c\x4b\xa8\x19\x23\xe5\xcc\x2d\x64\xb0\x84\x39\x15\x85\x71\x1c\x03\x19\xe7\xad\x53\x1e\x83\x34\x74\x4a\x65\x30\x8f\x83\x93\x48\x3d\x7b\x07\x28\xf7\x92\x4d\x67\x8f\x36\x35\x9f\xac\x5b\x49\x0e\x48\xda\x7b\x04\xa9\x95\x74\x76\xc0\x40\x91\x3d\x22\x4d\x3c\x38\xc0\xa8\xf7\x48\x43\x5d\x24\xb4\x0e\x18\x4b\x08\x55\x0a\xd2\xcc\x1e\x97\xee\x25\x59\xa5\x9c\x79\x30\x97\x59\x27\x69\xd6\x96\x5f\xc0\x07\x4d\xb4\xfc\xcf\x23\x7b\x9c\x42\xc9\xc6\x7a\xa9\x1c\xc0\xdf\xc6\x3a\x50\xa8\x92\x9a\xc7\x71\xe7\xb0\x58\xfc\x39\xdd\xde\xdd\x3f\x38\xe5\x9c\x8a\x36\x9c\x17\x62\x90\x28\xb6\x4e\x40\x33\x16\x8f\xfd\x6e\x17\xd7\x2d\x72\x4c\x8b\xcf\xfe\x70\xbc\xca\x6a\xf8\x55\x38\xff\x27\xfb\x13\x00\x00\xff\xff\x9d\x27\x7c\x54\x97\x01\x00\x00")
+var _javaChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\xbd\x6e\xdc\x40\x0c\x84\xfb\x7d\x8a\x01\x5c\xe7\x70\x36\xf2\x63\x6c\x17\xd8\x8d\x83\x38\xb8\x22\x4d\x4a\x4a\xa2\x2e\x4c\xb8\x4b\x85\xcb\x15\x4e\x6f\x1f\x48\x69\x52\xba\x23\x89\xe1\x37\xf8\xee\xf0\xcc\x33\x75\x0d\xac\xa4\x9d\x1b\x66\x73\x7c\xa1\x95\x4e\xe9\x0e\xdf\x7f\x4a\x83\x34\x10\x7e\x7c\x7e\xfd\xfa\x6e\x36\x2f\x14\xc1\x13\x66\x51\xde\x03\xcf\x3c\x2a\x39\x63\x25\x17\x1a\x94\x1b\xc2\x30\x30\x16\x6a\x8d\x27\x48\x0d\xc3\x66\xdd\x11\x5c\x16\xa5\xe0\x76\x4a\x03\x35\x9e\xac\x90\xd4\x0c\xbe\x51\x59\x94\x4f\xa3\x95\xe4\xbc\xa8\x8c\xf4\x64\xbd\x46\xc6\x43\x92\x42\x57\xce\x09\x70\xbe\x4a\x0b\xdf\x32\x26\x1b\x7f\xb3\x9f\xc4\x12\x60\x7e\xcd\x50\x19\x9c\x7c\x4b\x40\xa5\xc2\x19\x85\x56\xae\x09\x08\xba\x66\x58\x1d\xba\xe8\x94\x80\xa5\xab\x5e\x4c\x65\xdc\x32\x5e\xe6\x6f\x16\x17\xe7\xc6\x35\x52\x63\x5f\x65\x3c\x5a\xfe\x01\x7e\xd1\x4a\xfb\xff\xb6\x70\xc6\x93\xf6\x16\xec\x2f\x97\x04\xf0\x2d\xd8\x2b\xe9\xc5\x3c\x32\x1e\xcf\x09\xbb\xdd\x7f\xa7\xf7\x1f\x3e\x7e\x4a\xce\xcd\xba\x8f\xdc\x76\xa2\x4a\x91\x38\x26\x60\x5c\x7a\xc6\xfd\xf9\x5c\x8e\xad\x70\xb1\xdd\xe7\xfe\xe1\xf1\x55\x0e\xc3\x3f\x9d\xdb\x5b\xb2\x7f\x03\x00\x00\xff\xff\x83\xd6\xf7\x8a\xaf\x01\x00\x00")
 
 func javaChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -615,7 +615,7 @@ func javaChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/chart/values.yaml", size: 407, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/chart/values.yaml", size: 431, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -635,7 +635,7 @@ func javaDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "java/detect", size: 125, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "java/detect", size: 125, mode: os.FileMode(493), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -655,7 +655,7 @@ func nodeDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -675,7 +675,7 @@ func nodeDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/Dockerfile", size: 69, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/Dockerfile", size: 69, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -695,7 +695,7 @@ func nodeNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -715,7 +715,7 @@ func nodeChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -735,7 +735,7 @@ func nodeChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -755,7 +755,7 @@ func nodeChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -775,7 +775,7 @@ func nodeChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -795,7 +795,7 @@ func nodeChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -815,7 +815,7 @@ func nodeChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -835,12 +835,12 @@ func nodeChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _nodeChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\xb1\x4e\xc3\x40\x0c\x86\xf7\x7b\x8a\x5f\xea\x4c\x95\x76\xaa\x6e\x43\xed\x52\x89\xa2\x0c\x2c\x8c\x97\xc4\x09\x16\xbe\x38\xf8\x7c\x15\x79\x7b\xd4\x6c\x30\xb1\xd9\xd6\x67\xfb\xff\x76\xb8\xd0\x98\xaa\x38\xee\x49\x2a\x15\x8c\x6a\x98\x75\xa0\x7d\xd8\xe1\xed\x83\x0b\xb8\x20\xe1\xfd\xf9\xf6\xf2\x34\xaa\xe5\xe4\x4e\x03\x46\x96\x0d\xb8\x50\x2f\xc9\x08\xf7\x64\x9c\x3a\xa1\x02\x57\x74\x84\x25\x95\x42\x03\x78\x76\xc5\xaa\xd5\xe0\x94\x17\x49\x4e\x65\x1f\x8c\x16\xe1\x3e\x9d\xb5\xce\x1e\x71\x0c\x9c\xd3\x44\x31\x00\x46\x13\x17\xb7\x35\x62\xd0\xfe\x93\x6c\xcf\x1a\x00\xb5\x29\x42\xb8\xb3\x64\x6b\x00\xe6\x94\x29\x6e\x01\x03\xe0\x69\x8a\xd0\xb9\xab\x2c\x43\x00\x96\x2a\xd2\xaa\x70\xbf\x46\x5c\xc7\x57\xf5\xd6\xa8\xd0\xec\xa1\x90\xdd\xb9\xdf\x9e\xfc\xde\x5f\x17\x8a\x38\x4b\x2d\x4e\x76\x6d\x03\x40\xdf\x4e\x36\x27\x69\xd5\x3c\xe2\xd4\x9c\x9a\x80\x87\xc6\xdf\xa1\x51\xd1\x6a\x3d\x95\xc7\x4d\xe1\xcc\xbe\x55\x40\xbf\xd4\x88\x43\xd3\xe4\xad\xcb\x94\xf5\x21\x74\x38\x9e\x6e\xbc\x29\x7e\x55\x2a\xff\x61\x7f\x02\x00\x00\xff\xff\x0b\xf7\x95\x54\x98\x01\x00\x00")
+var _nodeChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\xb1\x6e\xdb\x40\x0c\x86\xf7\x7b\x8a\x1f\xc8\x5c\xc3\xc9\x64\xdc\x56\x24\x4b\x80\xa6\xf0\xd0\xa5\x23\x75\xa2\x54\xa2\xbc\xa3\xca\xe3\x19\xd6\xdb\x17\xd6\xd6\x4e\xd9\x48\xe2\x23\xf9\x7f\x4f\x78\xe3\x85\x86\x06\x6e\xa4\x83\x3b\x16\x73\x34\x9b\xf9\x94\x9e\xf0\xe3\x97\x74\x48\x07\xe1\xe7\xd7\x8f\x6f\x5f\x16\xf3\x4a\x11\x3c\x63\x11\x3d\x80\x37\x2e\x4a\xce\xb8\x91\x0b\x4d\xca\x1d\x61\x98\x18\x1b\xf5\xce\x33\xa4\x85\x61\xb7\xe1\x08\xae\x9b\x52\x70\x3f\xa5\x89\x3a\xcf\x56\x49\x5a\x06\xdf\xa9\x6e\xca\xa7\x62\x35\x39\x6f\x2a\x85\x5e\x6d\xb4\xc8\x78\x49\x52\x69\xe5\x9c\x00\xe7\x55\x7a\xf8\x9e\x31\x5b\xf9\xcd\x7e\x12\x4b\x80\xf9\x9a\xa1\x32\x39\xf9\x9e\x80\x46\x95\xf3\x11\x3c\x01\x41\x6b\x86\xb5\x69\x88\xce\x09\xd8\x86\xea\xd5\x54\xca\x9e\xf1\xbe\x7c\xb7\xb8\x3a\x77\x6e\x91\x3a\xfb\x4d\xca\xf1\xe4\xdf\xfd\x7d\xe3\x8c\x57\x1d\x3d\xd8\xdf\xaf\x09\xe0\x7b\xb0\x37\xd2\xab\x79\x64\x5c\xce\x97\x73\xc2\x43\xef\xff\xa1\x73\xb7\xe1\x85\xfb\xe3\xa6\x4a\x95\x38\x2a\xa0\x6c\x23\xe3\xf9\x7c\xae\x47\x57\xb9\xda\x43\xe8\xf9\xe5\xf2\x21\x87\xe2\x9f\xc1\xfd\x33\xec\xdf\x00\x00\x00\xff\xff\xde\xe8\x8a\x9f\xb0\x01\x00\x00")
 
 func nodeChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -855,7 +855,7 @@ func nodeChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/values.yaml", size: 408, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/chart/values.yaml", size: 432, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -875,7 +875,7 @@ func nodeDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/detect", size: 147, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "node/detect", size: 147, mode: os.FileMode(493), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -895,7 +895,7 @@ func phpDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -915,7 +915,7 @@ func phpDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/Dockerfile", size: 52, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/Dockerfile", size: 52, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -935,7 +935,7 @@ func phpNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -955,7 +955,7 @@ func phpChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -975,7 +975,7 @@ func phpChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/Chart.yaml", size: 10, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/Chart.yaml", size: 10, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -995,7 +995,7 @@ func phpChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1015,7 +1015,7 @@ func phpChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1035,7 +1035,7 @@ func phpChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1055,7 +1055,7 @@ func phpChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1075,12 +1075,12 @@ func phpChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _phpChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x6f\xe3\x30\x0c\x46\x77\xfd\x8a\x0f\xc8\x1c\x23\xc9\x72\x81\xb6\x43\x32\x5c\x80\x4b\xe1\xa1\x4b\x47\x46\xa1\x1d\xa2\x92\xa5\x52\x54\x50\xff\xfb\xc2\xde\xb2\x75\x23\x89\x87\x47\xbc\x0d\xce\x3c\x50\x8b\x86\x27\xc5\xc6\x15\x43\x56\xf4\xff\xfa\xce\x6d\xf0\xfe\x90\x0a\xa9\x20\x7c\xfc\xbd\xfe\xdf\x0e\x59\x13\x99\xf1\x1d\x83\x44\x5e\x80\x33\x87\x48\xca\x78\x92\x0a\xdd\x22\x57\x58\xc6\x8d\x51\xa8\x56\xbe\x43\x26\xcb\x98\x73\x53\x18\xa7\x12\xc9\xb8\x76\x4e\xb9\x44\x09\x74\xca\x6d\x32\x8f\x83\x93\x44\x23\x7b\x07\x28\x8f\x52\x4d\x67\x8f\x7b\x0e\x9f\xac\x9d\x64\x07\x64\x1d\x3d\xa2\xdc\x94\x74\x76\xc0\x44\x89\x3d\xca\xa3\x38\xc0\x68\xf4\xf8\xd3\xed\xb7\x54\x28\x3c\xd8\x01\xa5\xc5\xd8\xe7\x28\x61\xf6\xb8\x0c\x6f\xd9\x7a\xe5\xca\x93\xb9\xca\xfa\x94\xb0\xbe\x79\x31\xcc\x85\x3d\x4e\xb1\x55\x63\xbd\xf4\x0e\xe0\x6f\x63\x9d\x28\xf6\x59\xcd\xe3\xb8\x73\x58\x2a\x5e\x4f\xca\x35\x37\x0d\x5c\x17\x5d\x94\x24\xb6\x4e\x40\x28\xcd\x63\xbf\xdb\xa5\x75\x4b\x9c\xf2\x52\xb3\x3f\x1c\xaf\xb2\xf6\x7d\x35\xae\xbf\x61\x7f\x02\x00\x00\xff\xff\xe0\xf6\x98\xbd\x94\x01\x00\x00")
+var _phpChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x6f\xdc\x30\x0c\x46\x77\xfd\x8a\x0f\xc8\x1c\xe3\x2e\x4b\x03\x6d\x45\x32\x34\x40\x53\x78\xe8\xd2\x91\x96\x69\x1f\x51\xc9\x54\x29\xea\x10\xff\xfb\xc2\xde\xb2\x65\x23\x89\x87\x47\xbc\x07\xbc\xf2\x42\x3d\x3b\xee\x94\x3b\x37\x2c\x6a\x18\x7f\x8c\x43\x78\xc0\xef\x9b\x34\x48\x03\xe1\xcf\xf7\xf7\x9f\x8f\x8b\x5a\x21\x77\x9e\xb1\x48\xe6\x03\x78\xe5\x94\xc9\x18\x77\x32\xa1\x29\x73\x83\x2b\x26\x46\xa5\xd6\x78\x86\x6c\xae\xd8\xb5\x1b\x9c\x4b\xcd\xe4\xdc\x86\x30\x51\xe3\x59\x0b\xc9\x16\xc1\x1f\x54\x6a\xe6\x21\x69\x09\xc6\x35\x4b\xa2\x17\xed\x9b\x47\x3c\x05\x29\xb4\x72\x0c\x80\xf1\x2a\xcd\x6d\x8f\x98\x35\xfd\x65\x1b\x44\x03\xa0\xb6\x46\x64\x99\x8c\x6c\x0f\xc0\x46\x85\x23\xea\xad\x06\xc0\x69\x8d\xf8\x36\x5c\x1f\xa9\x52\xba\x71\x00\x6a\xcf\x79\xd4\x2c\x69\x8f\x78\x5b\x7e\xa9\x8f\xc6\x8d\x37\x0f\x8d\xed\x2e\xe9\x7c\xf3\xc9\xb0\x57\x8e\x78\xc9\xbd\x39\xdb\xdb\x18\x00\xfe\x70\xb6\x8d\xf2\xa8\xe6\x11\xcf\x97\x80\xa3\xee\xf3\xc9\xb8\x69\xb7\xc4\xed\xd0\x65\x29\xe2\xe7\x04\xa4\xda\x23\xae\x97\x4b\x39\xb7\xc2\x45\x8f\x9a\xeb\xd3\xf3\xbb\x9c\x7d\xff\x3a\xb7\xaf\xb0\xff\x03\x00\x00\xff\xff\x56\xf1\x43\x39\xac\x01\x00\x00")
 
 func phpChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1095,7 +1095,7 @@ func phpChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/values.yaml", size: 404, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/chart/values.yaml", size: 428, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1115,7 +1115,7 @@ func phpDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/detect", size: 120, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "php/detect", size: 120, mode: os.FileMode(493), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1135,7 +1135,7 @@ func pythonDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1155,7 +1155,7 @@ func pythonDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/Dockerfile", size: 69, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/Dockerfile", size: 69, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1175,7 +1175,7 @@ func pythonNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1195,7 +1195,7 @@ func pythonChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1215,7 +1215,7 @@ func pythonChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1235,7 +1235,7 @@ func pythonChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1255,7 +1255,7 @@ func pythonChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1275,7 +1275,7 @@ func pythonChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1295,7 +1295,7 @@ func pythonChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1315,12 +1315,12 @@ func pythonChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _pythonChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\xb1\x8e\xdb\x40\x0c\x44\xfb\xfd\x8a\x01\x5c\xc7\x90\x5d\x19\xdb\x05\x76\x63\x20\x0e\x54\xa4\x49\xb9\x92\x28\x99\x08\x57\x54\xb8\x5c\xe3\xf4\xf7\x07\x09\xd7\xdc\x55\xd7\x91\xc4\xe0\x71\xde\x01\x37\x1a\x53\x15\xc7\x2b\x49\xa5\x82\x51\x0d\xcb\xea\x4f\x9d\x8f\xe1\x80\x3f\x4f\x2e\xe0\x82\x84\xbf\x3f\x1f\xbf\x7e\x8c\x6a\x39\xb9\xd3\x80\x91\x85\xb6\xc0\x8d\x7a\x49\x46\x78\x25\xe3\xd4\x09\x15\xb8\xa2\x23\x2c\xa9\x14\x1a\xc0\xb3\x2b\x56\xad\x06\xa7\xbc\x48\x72\x2a\xc7\x60\xb4\x08\xf7\xe9\xaa\x75\xf6\x88\x73\xe0\x9c\x26\x8a\x01\x30\x9a\xb8\xb8\xad\x11\x83\xf6\xff\xc8\x8e\xac\x01\x50\x9b\x22\x84\x3b\x4b\xb6\x06\x60\x4e\x99\xe2\x47\xc5\x00\x78\x9a\x22\x74\xee\x2a\xcb\x10\x80\xa5\x8a\xb4\x2a\xdc\xaf\x11\xf7\xf1\xb7\x7a\x6b\x54\x68\xf6\x50\xc8\x5e\xdc\xef\x6f\xbe\x12\xd6\x85\x22\xae\x52\x8b\x93\xdd\xdb\x00\xd0\x9b\x93\xcd\x49\x5a\x35\x8f\xb8\x34\x01\x9b\xc8\xa7\xd3\xa5\x09\x46\x45\xab\xf5\x54\x36\xa6\x70\x66\xdf\x27\xa0\x5f\x6a\xc4\xa9\x69\xf2\xbe\x65\xca\xba\x29\x9d\xce\x97\x07\xef\x92\xff\x2b\x95\xef\x64\xdf\x03\x00\x00\xff\xff\x80\x72\xab\xd5\x9c\x01\x00\x00")
+var _pythonChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x6f\x1b\x31\x0c\x85\x77\xfd\x8a\x07\x64\xae\xe1\x64\x32\xb4\x15\xc9\x12\xa0\x29\x3c\x74\xe9\xc8\xd3\xf1\x1c\xa2\x94\xa8\x52\x94\x91\xfb\xf7\x85\x8d\x2e\xed\x94\x8d\x24\x1e\x3e\xbe\xef\x01\x2f\xbc\xd1\xd4\xc0\x95\x74\xf2\xc0\x66\x8e\xbe\xc7\xbb\xb5\x43\x7a\xc0\x8f\x77\x19\x90\x01\xc2\xcf\xaf\x6f\xdf\xbe\x6c\xe6\x95\x22\x78\xc5\x26\xca\xb7\xc0\x0b\x17\x25\x67\x5c\xc9\x85\x16\xe5\x81\x30\x2c\x8c\x4e\x63\xf0\x0a\x69\x61\xd8\x6d\x3a\x82\x6b\x57\x0a\x1e\x87\xb4\xd0\xe0\xd5\x2a\x49\xcb\xe0\x0f\xaa\x5d\xf9\x50\xac\x26\xe7\xae\x52\xe8\xd9\x66\x8b\x8c\xa7\x24\x95\x2e\x9c\x13\xe0\x7c\x91\x11\xbe\x67\xac\x56\x7e\xb1\x1f\xc4\x12\x60\x7e\xc9\x50\x59\x9c\x7c\x4f\x40\xa3\xca\xf9\x6f\xf5\x04\x04\x5d\x32\xac\x2d\x53\x74\x4d\x40\x9f\xaa\x67\x53\x29\x7b\xc6\xeb\xf6\xdd\xe2\xec\x3c\xb8\x45\x1a\xec\x57\x29\xf7\x37\xff\x13\xf6\xce\x19\xcf\x3a\x47\xb0\xbf\x9e\x13\xc0\x1f\xc1\xde\x48\xcf\xe6\x91\x71\x3a\x26\xdc\x04\xff\x39\x9d\x8e\xc9\x79\xd8\xf4\xc2\xe3\xc6\x54\xa9\x12\xf7\x09\x28\x7d\x66\x3c\x1e\x8f\xf5\xbe\x55\xae\x76\x53\x7a\x7c\x3a\xbd\xc9\x5d\xf2\xf7\xe4\xf1\x99\xec\x9f\x00\x00\x00\xff\xff\xc9\xcd\xc8\x9d\xb4\x01\x00\x00")
 
 func pythonChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1335,7 +1335,7 @@ func pythonChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/values.yaml", size: 412, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/chart/values.yaml", size: 436, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1355,7 +1355,7 @@ func pythonDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/detect", size: 212, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "python/detect", size: 212, mode: os.FileMode(493), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1375,12 +1375,12 @@ func rubyDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _rubyDockerfile = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x0b\xf2\xf7\x55\x28\x2a\x4d\xaa\xb4\xca\xcf\x4b\x2a\xcd\xcc\x49\xe1\x72\x8d\x08\xf0\x0f\x76\x55\xb0\x30\xb0\x30\xe0\x72\xf5\x0b\x09\x8a\x0c\xf0\xf7\xf4\x0b\x01\xab\xe1\x72\xf6\x75\x51\x48\x2c\x28\xd0\x2b\x4a\xe2\x02\x04\x00\x00\xff\xff\xb0\xf1\x95\x35\x39\x00\x00\x00")
+var _rubyDockerfile = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x0b\xf2\xf7\x55\x28\x2a\x4d\xaa\xb4\xca\xcf\x4b\x2a\xcd\xcc\x49\xe1\x72\x8d\x08\xf0\x0f\x76\x55\xb0\x30\xb0\x30\xe0\x72\xf6\x75\x51\x88\x56\x02\x49\x2b\xe9\x28\x28\x25\x16\x14\xe8\x15\x25\x29\xc5\x72\x01\x02\x00\x00\xff\xff\x49\x96\xb9\xb0\x35\x00\x00\x00")
 
 func rubyDockerfileBytes() ([]byte, error) {
 	return bindataRead(
@@ -1395,7 +1395,7 @@ func rubyDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/Dockerfile", size: 57, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/Dockerfile", size: 53, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1415,7 +1415,7 @@ func rubyNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1435,7 +1435,7 @@ func rubyChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1455,7 +1455,7 @@ func rubyChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1475,7 +1475,7 @@ func rubyChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1495,7 +1495,7 @@ func rubyChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1515,7 +1515,7 @@ func rubyChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1535,7 +1535,7 @@ func rubyChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1555,12 +1555,12 @@ func rubyChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _rubyChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\xbd\x6e\xe3\x40\x0c\x84\xfb\x7d\x8a\x01\x5c\x9f\x61\x1b\xf7\x63\x6c\x77\xb0\x1b\x03\xe7\x83\x70\xb8\x26\xe5\x4a\xa2\x14\x22\x5c\x51\xe1\x72\x8d\xe8\xed\x03\xa9\x4a\xba\x74\x1c\xe2\x23\x07\xdf\x0e\x57\x1a\x52\x15\xc7\x23\x49\xa5\x82\x41\x0d\xff\x6a\xbb\xec\xc3\x0e\xff\x9f\xb9\x80\x0b\x12\x9e\x7e\xdf\xff\x7c\x1b\xd4\x72\x72\xa7\x1e\x03\x0b\xad\xc0\x95\x3a\x49\x46\x78\x24\xe3\xd4\x0a\x15\xb8\xa2\x25\xcc\xa9\x14\xea\xc1\x93\x2b\x16\xad\x06\xa7\x3c\x4b\x72\x2a\xfb\x60\x34\x0b\x77\xe9\xa2\x75\xf2\x88\x53\xe0\x9c\x46\x8a\x01\x30\x1a\xb9\xb8\x2d\x11\xbd\x76\x2f\x64\x7b\xd6\x00\xa8\x8d\x11\xc2\xad\x25\x5b\x02\x30\xa5\x4c\x11\x56\xdb\x35\x78\x1a\x23\x74\x6a\x2b\x4b\x1f\x80\xb9\x8a\x34\x2a\xdc\x2d\x11\xb7\xe1\xaf\x7a\x63\x54\x68\xf2\x50\xc8\x1e\xdc\x6d\x25\x9f\xef\x97\x99\x22\x2e\x52\x8b\x93\xdd\x9a\x00\xd0\x9b\x93\x4d\x49\x1a\x35\x8f\x38\x1f\x02\x56\x89\x0f\xab\xef\x3f\x7e\xfe\x0a\x46\x45\xab\x75\x54\xd6\x8f\xc2\x99\x7d\x9b\x80\x6e\xae\x11\xc7\xc3\x21\x6f\x29\x53\xd6\x55\xe7\x78\x3a\xdf\x79\x13\x7c\xad\x54\xbe\xc2\xbe\x07\x00\x00\xff\xff\xf4\x60\x54\x10\x96\x01\x00\x00")
+var _rubyChartValuesYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x8f\x31\x8b\xdc\x40\x0c\x85\xfb\xf9\x15\x0f\xae\xce\xb2\x77\xd5\x32\x5d\xb8\x6b\x0e\x72\xc1\x84\x34\x29\xe5\xb1\xec\x88\x68\x2c\x47\xa3\x59\xce\xff\x3e\xd8\xdd\x76\xe9\xf4\xc4\x27\x3d\xbe\x27\xbc\xf1\x4c\x5d\x03\x77\xd2\xce\x0d\xb3\x39\x7e\xf4\x71\xbf\xa4\x27\xfc\xfc\x2d\x0d\xd2\x40\xf8\xf5\xf5\xe3\xdb\x97\xd9\xbc\x52\x04\x4f\x98\x45\xf9\x00\xde\xb8\x28\x39\xe3\x4e\x2e\x34\x2a\x37\x84\x61\x64\x6c\xd4\x1a\x4f\x90\x35\x0c\xbb\x75\x47\x70\xdd\x94\x82\xdb\x25\x8d\xd4\x78\xb2\x4a\xb2\x66\xf0\x27\xd5\x4d\xf9\x52\xac\x26\xe7\x4d\xa5\xd0\xab\xf5\x35\x32\x5e\x92\x54\x5a\x38\x27\xc0\x79\x91\x16\xbe\x67\x4c\x56\xfe\xb0\x5f\xc4\x12\x60\xbe\x64\xa8\x8c\x4e\xbe\x27\x60\xa5\xca\x19\xde\xc7\x23\x04\x2d\x19\xb6\x8e\x5d\x74\x4a\xc0\xd6\x55\x07\x53\x29\x7b\xc6\xfb\xfc\xdd\x62\x70\x6e\xbc\x46\x6a\xec\x77\x29\x67\xc9\xe3\xfd\xbe\x71\xc6\xab\xf6\x16\xec\xef\x43\x02\xf8\x33\xd8\x57\xd2\xc1\x3c\x32\x6e\xd7\x84\x43\xee\x61\x75\xbb\x26\xe7\x66\xdd\x0b\xb7\xe3\xa3\x4a\x95\x38\x27\xa0\x6c\x3d\xe3\xf9\x7a\xad\x67\xaa\x5c\xed\xd0\x79\x7e\xb9\x7d\xc8\x29\xf8\xb7\x73\xfb\x1f\xf6\x5f\x00\x00\x00\xff\xff\xa2\x73\xf1\x19\xae\x01\x00\x00")
 
 func rubyChartValuesYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1575,7 +1575,7 @@ func rubyChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/values.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/chart/values.yaml", size: 430, mode: os.FileMode(420), modTime: time.Unix(1496944770, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1595,7 +1595,7 @@ func rubyDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/detect", size: 196, mode: os.FileMode(493), modTime: time.Unix(1496504646, 0)}
+	info := bindataFileInfo{name: "ruby/detect", size: 196, mode: os.FileMode(493), modTime: time.Unix(1496874162, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
