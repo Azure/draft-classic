@@ -17,6 +17,8 @@ import (
 )
 
 const (
+	// MetadataName is the name of the pack metadata
+	MetadataName = "Pack.yaml"
 	// ChartfileName is the default Chart file name.
 	ChartfileName = "Chart.yaml"
 	// ChartDir is the relative directory name for the packaged chart with a pack.
@@ -43,14 +45,23 @@ const (
 	TemplatesDir = "templates"
 	// ChartsDir is the relative directory name for charts dependencies.
 	ChartsDir = "charts"
-	// HerokuLicenseName is the name of the Neroku License
+	// HerokuLicenseName is the name of the Heroku License
 	HerokuLicenseName = "NOTICE"
 	// DockerignoreName is the name of the Docker ignore file
 	DockerignoreName = ".dockerignore"
 )
 
+// Metadata defines the metadata for a Pack
+type Metadata struct {
+	// The name of the pack
+	Name    string
+	Version string
+}
+
 // Pack defines a Draft Starter Pack.
 type Pack struct {
+	// The metadata for the Pack
+	Metadata *Metadata
 	// Chart is the Helm chart to be installed with the Pack.
 	Chart *chart.Chart
 	// Dockerfile is the pre-defined Dockerfile that will be installed with the Pack.

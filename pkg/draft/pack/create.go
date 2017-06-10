@@ -104,7 +104,13 @@ func Create(name, dir string, files []*File) (string, error) {
 	// Next, we can simply loop through files and create each.
 	// We call MkdirAll for a safe way to create any missing dirs.
 	for _, f := range files {
-		fullpath := filepath.Join(path, f.Path)
+
+		// We need to strip the root path since we are re rooting
+		// TODO windows support might be needed here
+		parts := strings.Split(f.Path, "/")
+		parts[0] = ret
+		fullpath := filepath.Join(parts...)
+
 		dir := filepath.Dir(fullpath)
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return ret, err
