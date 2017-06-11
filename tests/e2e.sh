@@ -88,6 +88,7 @@ for app in */; do
     # loop over scenarios
     declare -a filesToClean
     desiredRevision=2
+    mkdir -p .git/subdir/ # we need a .git directory in some scenario and can't commit it
     while IFS='' read -r line; do
         # ignore comments and empty lines
         [[ "$line" =~ ^# ]] && continue
@@ -149,6 +150,7 @@ for app in */; do
     do
         rm -f "$f"
     done
+    rm -r .git
     helm delete --purge "${name}"
     echo "GOOD"
     popd > /dev/null

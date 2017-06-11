@@ -1,0 +1,20 @@
+# simple file change
+Y foo
+# multiple file changes
+Y foo bar
+# change multiple times same file
+Y foo foo
+
+# ignore files or folder content
+N foo.swp
+N foo.tmp
+N foo.temp
+N .gitfoo
+N .git/foo
+N .git/subdir/foo
+
+# subrepo containing ignore file
+N chart/foo.swp
+
+# mix of modified and ignored files
+Y foo foo.swp
