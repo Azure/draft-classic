@@ -19,6 +19,7 @@ for app in */; do
     draft up -e nowatch
     echo "checking that ${app} v1 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
+    name=$(helm list | grep "${app}" | awk '{print $1}')
     if [[ "$revision" != "1" ]]; then
         echo "Expected REVISION == 1, got $revision"
         exit 1
@@ -33,9 +34,9 @@ for app in */; do
         exit 1
     fi
     echo "GOOD"
-    echo "deleting the helm release for ${app}"
+    echo "deleting the helm release for ${app}: ${name}"
     # clean up
-    helm delete --purge "${app}"
+    helm delete --purge "${name}"
     echo "GOOD"
     popd > /dev/null
 done
