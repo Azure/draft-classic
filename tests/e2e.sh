@@ -95,6 +95,10 @@ for app in */; do
 
         read changeDesired files <<< $line
 
+        # wait between 2 draft deployments to workaround https://github.com/Azure/draft/issues/79
+        # speedup by only do that if changes are expected
+        [[ $changeDesired == "Y" ]] && sleep 20
+
         # modify files
         echo "Modifying files: $files"
         for f in $files; do
