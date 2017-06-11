@@ -16,7 +16,7 @@ for app in */; do
     pushd "${app}" > /dev/null
     # strip trailing forward slash
     app=${app%/}
-    draft up
+    draft up -e nowatch
     echo "checking that ${app} v1 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "1" ]]; then
@@ -25,7 +25,7 @@ for app in */; do
     fi
     echo "GOOD"
     # deploy the app again and check that the update is seen upstream
-    draft up
+    draft up -e nowatch
     echo "checking that ${app} v2 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "2" ]]; then
