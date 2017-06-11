@@ -33,6 +33,7 @@ that changes have stopped before uploading, but that can be altered by the
 
 const (
 	environmentEnvVar = "DRAFT_ENV"
+	ignoreFileName    = ".draftignore"
 )
 
 var defaultIgnores = []string{"*.swp", "*.tmp", "*.temp", ".git*"}
@@ -215,7 +216,16 @@ func defaultDraftEnvironment() string {
 func parseIgnores() (*ignore.Rules, error) {
 	// default ignored extensions
 	defaultsIR := strings.NewReader(strings.Join(defaultIgnores, "\n"))
-	return ignore.Parse(defaultsIR)
+
+	// open ignore file if present
+	f, err := os.Open(ignoreFileName)
+	if err != nil {
+		return ignore.Parse(defaultsIR)
+	}
+	defer f.Close()
+
+	patterns := io.MultiReader(f, defaultsIR)
+	return ignore.Parse(patterns)
 }
 
 // removedFileInfo fake file info for
