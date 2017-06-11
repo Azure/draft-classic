@@ -14,6 +14,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
+	"k8s.io/helm/pkg/ignore"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/manifest"
@@ -33,6 +34,8 @@ that changes have stopped before uploading, but that can be altered by the
 const (
 	environmentEnvVar = "DRAFT_ENV"
 )
+
+var defaultIgnores = []string{"*.swp", "*.tmp", "*.temp", ".git*"}
 
 type upCmd struct {
 	Client   *draft.Client
@@ -137,6 +140,11 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 	defer notify.Stop(ch)
 
+	r, err := parseIgnores()
+	if err != nil {
+		log.Fatalf("could not load ignore watch list %v", err)
+	}
+
 	// create a timer to enforce a "quiet period" before deploying the app
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()
@@ -146,15 +154,24 @@ func (u *upCmd) run(environment string) (err error) {
 		select {
 		case evt := <-ch:
 			log.Debugf("Event %s", evt)
-			// Only rebuild if the changed file is a file we care about
-			// ie, not a *.swp,*.tmp,*.temp file or a .git* file
-			if !strings.HasSuffix(evt.Path(), ".swp") &&
-				!strings.HasSuffix(evt.Path(), ".tmp") &&
-				!strings.HasSuffix(evt.Path(), ".temp") &&
-				!strings.HasPrefix(evt.Path(), fmt.Sprintf("%s/.git", cwd)) {
-				// reset the timer when files have changed
-				timer.Reset(delay)
+			p := strings.TrimPrefix(evt.Path(), cwd+"/")
+			fi, err := os.Stat(evt.Path())
+			if err != nil {
+				// create dummy file info for removed file or directory
+				fi = removedFileInfo(filepath.Base(evt.Path()))
 			}
+			// only rebuild if the changed file isn't in our ignore list
+			if r.Ignore(p, fi) {
+				continue
+			}
+			// ignore manually everything inside the .git/ directory as
+			// helm ignore file doesn't have directory and whole content
+			// (subdir of subdir) ignore support yet.
+			if filepath.HasPrefix(p, ".git/") {
+				continue
+			}
+			// reset the timer when files have changed
+			timer.Reset(delay)
 		case <-timer.C:
 			if err = u.doUp(environment, cwd, rawVals); err != nil {
 				return err
@@ -194,3 +211,20 @@ func defaultDraftEnvironment() string {
 	}
 	return env
 }
+
+func parseIgnores() (*ignore.Rules, error) {
+	// default ignored extensions
+	defaultsIR := strings.NewReader(strings.Join(defaultIgnores, "\n"))
+	return ignore.Parse(defaultsIR)
+}
+
+// removedFileInfo fake file info for
+// ignore library only use IsDir() in negative pattern
+type removedFileInfo string
+
+func (n removedFileInfo) Name() string     { return string(n) }
+func (removedFileInfo) Size() int64        { return 0 }
+func (removedFileInfo) Mode() os.FileMode  { return 0 }
+func (removedFileInfo) ModTime() time.Time { return time.Time{} }
+func (removedFileInfo) IsDir() bool        { return false }
+func (removedFileInfo) Sys() interface{}   { return nil }
