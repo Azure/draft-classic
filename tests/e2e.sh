@@ -9,7 +9,7 @@
 cd $(dirname $0)
 PATH="$(pwd)/../bin:$PATH"
 
-echo "testing apps that are expected to pass"
+echo "# testing apps that are expected to pass"
 pushd testdata/good > /dev/null
 for app in */; do
     echo "switching to ${app}"
@@ -42,7 +42,7 @@ for app in */; do
 done
 popd > /dev/null
 
-echo "testing apps that are expected to fail"
+echo "# testing apps that are expected to fail"
 pushd testdata/bad > /dev/null
 for app in */; do
     echo "switching to ${app}"
