@@ -101,9 +101,17 @@ for app in */; do
         [[ $changeDesired == "Y" ]] && sleep 20
 
         # modify files
-        echo "Modifying files: $files"
         for f in $files; do
-            echo "something" >> $f
+            file=${f#rm_}
+            if [ "$f" == "$file" ]; then
+                # Create or modify file
+                echo "Modifying $f"
+                echo "something" >> $f
+            else
+                # Remove file or directory
+                echo "Remove $file"
+                rm -r "$file"
+            fi
             filesToClean+=("$f")
         done
 

@@ -16,5 +16,10 @@ N .git/subdir/foo
 # subrepo containing ignore file
 N chart/foo.swp
 
+# Some removal handling
+N rm_foo.swp
+Y rm_foo
+N rm_.git/foo
+
 # mix of modified and ignored files
 Y foo foo.swp
