@@ -7,6 +7,7 @@
 # success condition.
 
 cd $(dirname $0)
+PATH="$(pwd)/../bin:$PATH"
 
 echo "testing apps that are expected to pass"
 pushd testdata/good > /dev/null
