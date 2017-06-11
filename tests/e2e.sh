@@ -9,6 +9,8 @@
 cd $(dirname $0)
 PATH="$(pwd)/../bin:$PATH"
 
+. $(dirname $0)/tools
+
 echo "# testing apps that are expected to pass"
 pushd testdata/good > /dev/null
 for app in */; do
@@ -56,6 +58,94 @@ for app in */; do
         echo "Expected no release to exist , got $release"
         exit 1
     fi
+    echo "GOOD"
+    popd > /dev/null
+done
+popd > /dev/null
+
+echo "# testing watch and changing files"
+pushd testdata/watch > /dev/null
+for app in */; do
+    echo "switching to ${app}"
+    pushd "${app}" > /dev/null
+    # strip trailing forward slash
+    app=${app%/}
+    # start draft up async
+    draftout=$(mktemp)
+    draftpid=$(draftUpAsync $draftout)
+
+    # wait for initial sync
+    changes=$(expectChangeAndWaitForSync $draftout)
+    if [[ $changes -ne 0 ]]; then
+        [[ $changes -eq -1 ]] && echo "Expected changes and nothing happened"
+        [[ $changes -eq -2 ]] && echo "Had changes, but didn't listened back"
+        echo "Draft logs:"
+        cat $draftout
+        $(cleanDraftUpAsync $draftout $draftpid)
+        exit 1
+    fi
+
+    # loop over scenarios
+    declare -a filesToClean
+    desiredRevision=2
+    while IFS='' read -r line; do
+        # ignore comments and empty lines
+        [[ "$line" =~ ^# ]] && continue
+        [[ -z "$line" ]] && continue
+
+        read changeDesired files <<< $line
+
+        # modify files
+        echo "Modifying files: $files"
+        for f in $files; do
+            echo "something" >> $f
+            filesToClean+=("$f")
+        done
+
+        if [[ $changeDesired == "N" ]]; then
+            if [[ $(hasChanged $draftout) == "true" ]]; then
+                echo "No rebuild was expected if modifying the following files: $files, but we got some"
+                echo "Draft logs:"
+                cat $draftout
+                $(cleanDraftUpAsync $draftout $draftpid)
+                exit 1
+            fi
+
+        elif [[ $changeDesired == "Y" ]]; then
+            echo "Waiting for build to happen"
+            changes=$(expectChangeAndWaitForSync $draftout)
+            if [[ $changes -ne 0 ]]; then
+                [[ $changes -eq -1 ]] && echo "Expected changes and nothing happened"
+                [[ $changes -eq -2 ]] && echo "Had changes, but didn't listened back"
+                echo "Draft logs:"
+                cat $draftout
+                $(cleanDraftUpAsync $draftout $draftpid)
+                exit 1
+            fi
+            echo "checking that ${app} v${desiredRevision} was released"
+            revision=$(helm list | grep "${app}" | awk '{print $2}')
+            name=$(helm list | grep "${app}" | awk '{print $1}')
+            if [[ "$revision" != "$desiredRevision" ]]; then
+                echo "Expected REVISION == $desiredRevision, got $revision"
+                echo "Draft logs:"
+                cat $draftout
+                $(cleanDraftUpAsync $draftout $draftpid)
+                exit 1
+            fi
+            desiredRevision=$(( $desiredRevision + 1 ))
+        fi
+
+    done < scenarios.test
+
+    echo "GOOD"
+    echo "deleting the helm release for ${app}: ${name}"
+    # clean up
+    $(cleanDraftUpAsync $draftout $draftpid)
+    for f in "${filesToClean[@]}"
+    do
+        rm -f "$f"
+    done
+    helm delete --purge "${name}"
     echo "GOOD"
     popd > /dev/null
 done
