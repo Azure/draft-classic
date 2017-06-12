@@ -123,6 +123,8 @@ spec:
       - name: docker-socket
         hostPath:
           path: /var/run/docker.sock
+      nodeSelector:
+        beta.kubernetes.io/os: linux
 `
 
 const draftService = `apiVersion: v1
