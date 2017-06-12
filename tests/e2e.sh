@@ -7,24 +7,26 @@
 # success condition.
 
 cd $(dirname $0)
+PATH="$(pwd)/../bin:$PATH"
 
-echo "testing apps that are expected to pass"
+echo "# testing apps that are expected to pass"
 pushd testdata/good > /dev/null
 for app in */; do
     echo "switching to ${app}"
     pushd "${app}" > /dev/null
     # strip trailing forward slash
     app=${app%/}
-    draft up
+    draft up -e nowatch
     echo "checking that ${app} v1 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
+    name=$(helm list | grep "${app}" | awk '{print $1}')
     if [[ "$revision" != "1" ]]; then
         echo "Expected REVISION == 1, got $revision"
         exit 1
     fi
     echo "GOOD"
     # deploy the app again and check that the update is seen upstream
-    draft up
+    draft up -e nowatch
     echo "checking that ${app} v2 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "2" ]]; then
@@ -32,15 +34,15 @@ for app in */; do
         exit 1
     fi
     echo "GOOD"
-    echo "deleting the helm release for ${app}"
+    echo "deleting the helm release for ${app}: ${name}"
     # clean up
-    helm delete --purge "${app}"
+    helm delete --purge "${name}"
     echo "GOOD"
     popd > /dev/null
 done
 popd > /dev/null
 
-echo "testing apps that are expected to fail"
+echo "# testing apps that are expected to fail"
 pushd testdata/bad > /dev/null
 for app in */; do
     echo "switching to ${app}"
