@@ -1,8 +1,8 @@
 # simple file change
 Y foo
 
-# default ignored file
-N foo.swp
+# default ignored file removed from file is ignored
+Y foo.swp
 
 # explicitely ignored file (direct, pattern, subdir)
 N bar
