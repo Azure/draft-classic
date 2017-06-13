@@ -36,8 +36,6 @@ const (
 	ignoreFileName    = ".draftignore"
 )
 
-var defaultIgnores = []string{"*.swp", "*.tmp", "*.temp", ".git*"}
-
 type upCmd struct {
 	Client   *draft.Client
 	Out      io.Writer
@@ -141,9 +139,12 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 	defer notify.Stop(ch)
 
-	r, err := parseIgnores()
+	r, err := ignore.ParseFile(ignoreFileName)
 	if err != nil {
-		log.Fatalf("could not load ignore watch list %v", err)
+		// only fail if file can't be parsed but exists
+		if _, err := os.Stat(ignoreFileName); os.IsExist(err) {
+			log.Fatalf("could not load ignore watch list %v", err)
+		}
 	}
 
 	// create a timer to enforce a "quiet period" before deploying the app
@@ -162,7 +163,7 @@ func (u *upCmd) run(environment string) (err error) {
 				fi = removedFileInfo(filepath.Base(evt.Path()))
 			}
 			// only rebuild if the changed file isn't in our ignore list
-			if r.Ignore(p, fi) {
+			if r != nil && r.Ignore(p, fi) {
 				continue
 			}
 			// ignore manually everything inside the .git/ directory as
@@ -211,21 +212,6 @@ func defaultDraftEnvironment() string {
 		env = manifest.DefaultEnvironmentName
 	}
 	return env
-}
-
-func parseIgnores() (*ignore.Rules, error) {
-	// default ignored extensions
-	defaultsIR := strings.NewReader(strings.Join(defaultIgnores, "\n"))
-
-	// open ignore file if present
-	f, err := os.Open(ignoreFileName)
-	if err != nil {
-		return ignore.Parse(defaultsIR)
-	}
-	defer f.Close()
-
-	patterns := io.MultiReader(f, defaultsIR)
-	return ignore.Parse(patterns)
 }
 
 // removedFileInfo fake file info for
