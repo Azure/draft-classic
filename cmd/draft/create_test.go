@@ -27,6 +27,9 @@ func TestCreate(t *testing.T) {
 		wantErr bool
 	}{
 		{"testdata/create/src/simple-go", false},
+		{"testdata/create/src/simple-go-with-draftignore", false},
+		{"testdata/create/src/simple-go-with-chart", false},
+		{"testdata/create/src/empty", false},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("create %s", tc.src), func(t *testing.T) {
