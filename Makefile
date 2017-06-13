@@ -100,7 +100,10 @@ clean:
 
 .PHONY: test
 test: TESTFLAGS += -race -v
-test: test-lint test-unit
+test: test-lint test-cover
+
+test-cover:
+	scripts/cover.sh
 
 .PHONY: test-lint
 test-lint:
