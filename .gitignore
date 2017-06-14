@@ -8,3 +8,4 @@ coverage.txt
 examples/**/Dockerfile
 examples/**/chart/
 examples/**/draft.toml
+examples/**/.draftignore
