@@ -1,0 +1,17 @@
+# Any file change trigger a change
+Y foo
+Y foo.swp
+Y foo.tmp
+Y foo.temp
+Y .gitfoo
+Y chart/foo.swp
+
+# .git/ subdirectories can't be ignored by the helm ignore parser
+# (no ** support), so those are unconditionnaly ignored.
+N .git/foo
+N .git/subdir/foo
+
+# Some removal handling
+Y rm_foo.swp
+Y rm_foo
+N rm_.git/foo
