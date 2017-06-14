@@ -37,9 +37,9 @@ that in a second.
 ```
 
 This is the environment name. Applications deployed by Draft can be configured in different manners
-based on the present environment. By default, `draft up` deploys using the `development` environment,
-but this can be tweaked by either setting `$DRAFT_ENV` or by supplying the environment name at
-runtime using `draft up --environment=staging`.
+based on the present environment. By default, `draft up` deploys using the `development`
+environment, but this can be tweaked by either setting `$DRAFT_ENV` or by supplying the environment
+name at runtime using `draft up --environment=staging`.
 
 ```
     name = "draft"
@@ -63,7 +63,9 @@ Here is a run-down on each of the fields:
  - `watch`: whether or not to deploy the app automatically when local files change.
  - `watch_delay`: the delay for local file changes to have stopped before deploying again (in seconds).
 
-Note: All updates to the `draft.toml` will take effect the next time `draft up --environment=<affected environment>` is invoked _except_ the `namespace` key/value pair. Once a deployment has occurred in the original namespace, it won't be transferred over to another.
+Note: All updates to the `draft.toml` will take effect the next time
+`draft up --environment=<affected environment>` is invoked _except_ the `namespace` key/value pair.
+Once a deployment has occurred in the original namespace, it won't be transferred over to another.
 
 
 [toml]: https://github.com/toml-lang/toml

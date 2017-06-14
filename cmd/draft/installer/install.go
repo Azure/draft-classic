@@ -36,7 +36,7 @@ service:
     internalPort: 44135
 registry:
   url: docker.io
-  org: microsoft
+  org: draft
   # This field follows the format of Docker's X-Registry-Auth header.
   #
   # See https://github.com/docker/docker/blob/master/docs/api/v1.22.md#push-an-image-on-the-registry
@@ -48,7 +48,7 @@ registry:
   # For token-based logins, use
   #
   # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
-  authtoken: changeme
+  authtoken: e30K
 `
 
 const draftIgnore = `# Patterns to ignore when building packages.

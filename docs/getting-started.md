@@ -21,8 +21,8 @@ We need some "scaffolding" to deploy our app into a [Kubernetes](https://kuberne
 $ draft create
 --> Python app detected
 --> Ready to sail
-$ ls
-Dockerfile  app.py  chart/  draft.toml  requirements.txt
+$ ls -a
+.draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
 The `chart/` and `Dockerfile` assets created by Draft default to a basic Python
@@ -144,6 +144,7 @@ The push refers to a repository [docker.io/microsoft/tufted-lamb]
 ## Great Success!
 
 Now when we run `curl http://tufted-lamb.example.com`, we can see our app has been updated and deployed to Kubernetes automatically!
+
 
 [Installation Guide]: install.md
 [Helm]: https://github.com/kubernetes/helm
