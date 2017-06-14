@@ -32,7 +32,7 @@ On minikube, you can simply enable the ingress controller addon
 $ minikube addon enable ingress
 ```
 
-The ingress IP addres is minikube's IP:
+The ingress IP address is minikube's IP:
 
 ```shell
 $ minikube ip
