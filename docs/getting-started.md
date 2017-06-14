@@ -48,6 +48,12 @@ $ cat draft.toml
 See [the Draft User Guide](user-guide.md) for more information and available configuration on the
 `draft.toml`.
 
+A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up`
+when watching for changes. The syntax is identical to
+[helm ignore feature](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
+
+Note that for technical reasons, the `.git/` directory is unconditionally ignored for now.
+
 ## Draft Up
 
 Now we're ready to deploy `app.py` to a Kubernetes cluster.
