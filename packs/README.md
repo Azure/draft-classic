@@ -3,7 +3,7 @@
 This directory contains built-in Draft packs.
 
 _If you are interested in creating your own packs_, you can simply create those
-packs in your local `$(draft home)/packs` direcgtory.
+packs in your local `$(draft home)/packs` directory.
 
 Packs in this directory are automatically packaged into the application. The
 format of this directory is:
