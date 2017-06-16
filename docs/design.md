@@ -1,11 +1,25 @@
-# Draft (heh) Design
+# Draft Design
 
 This document outlines the general design principles of Draft; what it does, how it works, what it
 can (and cannot) do, as well as define its intended audience and place in the market.
 
 ## What It Does
 
-Draft makes it easy to build applications that run on Kubernetes.  Draft targets the "inner loop" of a developer's workflow: as they hack on code, but before code is committed to version control.  Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm](https://github.com/kubernetes/helm) and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
+Draft makes it easy to build applications that run on Kubernetes.  Draft targets the "inner loop" of
+a developer's workflow: as they hack on code, but before code is committed to version control.
+
+Once the developer is happy with changes made via Draft, they commit and push to version control,
+after which a continuous integration (CI) system takes over.  Draft builds upon [Helm][helm] and the
+[Kubernetes Chart format][charts], making it easy to construct CI pipelines from Draft-enabled
+applications.
+
+## What it Does Not Do
+
+Draft is not any of the following, nor should it be used as the following:
+
+- a tool to be used in production deployments
+- a tool to be used in replacement for a CI/CD pipeline
+- a PaaS like [Deis Workflow](https://deis.com/workflow/)
 
 ## How To Use It
 
@@ -65,8 +79,13 @@ following:
 - Sends your code to a Docker Registry.
 - Installs (or upgrades) your chart using Helm
 
-And when you're done with development, Draft's "first class" objects are all supported by the
-Kubernetes toolchain. Simply deploy the chart to your production cluster in whatever way suits you.
+## Take to Production
+
+When you're done with development, Draft's "first class" objects are all supported by the Kubernetes
+toolchain. Simply deploy the chart to your production cluster in whatever way suits you, be it
+through a CI/CD pipeline or a `helm install`.
+
+For docs on taking your chart to production, see [Helm's Best Practices on Charts][best practices].
 
 ## Draft Packs
 
@@ -218,3 +237,8 @@ cluster.
 - As a user, I want to code, and have the deployed version auto-update
 - As a user, I want to be as ignorant of the internals as possible, but still be able to GSD.
 - As a user, I want to be able to hand off code artifacts without having to prepare them.
+
+
+[best practices]: https://docs.helm.sh/chart_best_practices/
+[charts]: https://docs.helm.sh/developing_charts/
+[helm]: https://helm.sh
