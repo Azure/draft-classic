@@ -7,7 +7,7 @@ image:
   org: nomisbeme
   name: swift-onbuild-bitnami
   tag: 3.0.2.1
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 service:
   name: swift
   type: ClusterIP
