@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -121,7 +122,13 @@ func defaultDraftHome() string {
 	if home := os.Getenv(homeEnvVar); home != "" {
 		return home
 	}
-	return filepath.Join(os.Getenv("HOME"), ".draft")
+
+	homeEnvPath := os.Getenv("HOME")
+	if homeEnvPath == "" && runtime.GOOS == "windows" {
+		homeEnvPath = os.Getenv("USERPROFILE")
+	}
+
+	return filepath.Join(homeEnvPath, ".draft")
 }
 
 func homePath() string {
