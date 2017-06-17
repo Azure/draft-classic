@@ -143,7 +143,7 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) 
 			if err != nil {
 				return "", "", fmt.Errorf("could not load pack %s: %v", packPath, err)
 			}
-			output, err := p.Detect("")
+			output, err := p.Detect(".")
 			log.Debugf("pack.Detect() result: %s, %v", output, err)
 			if err == nil {
 				return packPath, output, err
