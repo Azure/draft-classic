@@ -216,8 +216,8 @@ func TestBuiltins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if c := len(b); c != 6 {
-		t.Errorf("Expected 6 packs, got %d", c)
+	if c := len(b); c != 7 {
+		t.Errorf("Expected 7 packs, got %d", c)
 	}
 
 	gopack, ok := b["golang"]
