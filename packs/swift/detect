@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [[ -f "$1/Package.swift" ]]; then
+  echo "swift" && exit 0
+else
+  exit 1
+fi
+
