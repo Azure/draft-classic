@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"k8s.io/helm/pkg/chartutil"
@@ -80,7 +81,13 @@ func (p *Pack) Detect(dir string) (string, error) {
 		return "", fmt.Errorf("no such directory %s", path)
 	}
 
-	cmd := exec.Command("/bin/bash", "-s", path)
+	bashPath := "/bin/bash"
+	if runtime.GOOS == "windows" {
+		// There is no common absolute path on Windows, ensure bash.exe is in the PATH.
+		bashPath = "bash.exe"
+	}
+
+	cmd := exec.Command(bashPath, "-s", path)
 	cmd.Stdin = bytes.NewBuffer(p.DetectScript)
 	out, err := cmd.Output()
 	if err != nil {
