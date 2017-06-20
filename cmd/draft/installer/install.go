@@ -120,10 +120,6 @@ spec:
             port: {{ .Values.service.http.internalPort }}
       - name: dind-daemon 
         image: docker:dind 
-        resources: 
-            requests: 
-                cpu: 20m 
-                memory: 512Mi 
         securityContext: 
             privileged: true 
         volumeMounts: 
