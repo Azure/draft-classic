@@ -61,7 +61,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&sc.listenAddr, "listen-addr", "l", "tcp://0.0.0.0:44135", "the address the server listens on")
 	f.StringVarP(&sc.dockerAddr, "docker-addr", "", "unix:///var/run/docker.sock", "the address the docker engine listens on")
 	f.StringVarP(&sc.dockerVersion, "docker-version", "", "", "the API version of the docker engine")
-	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", false, "retrieve docker engine information from environment")
+	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", true, "retrieve docker engine information from environment")
 	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
 	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
