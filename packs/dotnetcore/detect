@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=$1
+
+cd $BUILD_DIR
+
+if ! grep --quiet '<Project Sdk="Microsoft.NET.Sdk\(.Web\)\?">' *.csproj; then
+    exit 1
+fi
+
+echo .NET Core
