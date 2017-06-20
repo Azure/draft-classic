@@ -16,7 +16,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/strvals"
 	"k8s.io/helm/pkg/tiller/environment"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -133,15 +132,11 @@ func (i *initCmd) run() error {
 
 	if !i.clientOnly {
 		if i.helmClient == nil {
-			_, config, err := getKubeClient(kubeContext)
+			client, config, err := getKubeClient(kubeContext)
 			if err != nil {
 				return fmt.Errorf("Could not get a kube client: %s", err)
 			}
-			internalclient, err := internalclientset.NewForConfig(config)
-			if err != nil {
-				return fmt.Errorf("Could not get a kube client: %s", err)
-			}
-			tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, internalclient, config)
+			tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, config)
 			if err != nil {
 				return fmt.Errorf("Could not get a connection to tiller: %s", err)
 			}
