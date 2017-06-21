@@ -1,5 +1,5 @@
-hash: 0a3624ca7754a89d5353d1f0c27e2c64f0b71e93ace9c8c73644fc5ef367ab90
-updated: 2017-06-01T20:15:24.363479679-04:00
+hash: f5a7f23585502f42141b89cfdc8a5c3881f1a308bfc2cea96e37c43b40068524
+updated: 2017-06-20T15:29:50.958065797-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aokoli/goutils
-  version: e57d01ace047c1a43e6a49ecf3ecc50ed2be81d1
+  version: 9c37978a95bd5c709a15883b6242714ea6709e64
 - name: github.com/Azure/go-ansiterm
   version: 388960b655244e76e24c75f48631564eaefade62
   subpackages:
@@ -34,19 +34,18 @@ imports:
   - spew
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
+- name: github.com/docker/cli
+  version: 30af87981d8d464c385b247f524fcbc503207940
 - name: github.com/docker/distribution
   version: b38e5838b7b2f2ad48e06ec4b500011976080621
   subpackages:
-  - context
   - digestset
   - reference
-  - uuid
 - name: github.com/docker/docker
   version: 89658bed64c2a8fe05a978e5b87dbec409d57a0f
   subpackages:
   - api
   - api/types
-  - api/types/backend
   - api/types/blkiodev
   - api/types/container
   - api/types/events
@@ -60,15 +59,10 @@ imports:
   - api/types/time
   - api/types/versions
   - api/types/volume
-  - builder
   - builder/dockerignore
+  - cli/command/image/build
   - client
-  - daemon/graphdriver
-  - image
-  - layer
-  - oci
   - pkg/archive
-  - pkg/chrootarchive
   - pkg/fileutils
   - pkg/gitutils
   - pkg/httputils
@@ -77,25 +71,16 @@ imports:
   - pkg/jsonlog
   - pkg/jsonmessage
   - pkg/longpath
-  - pkg/mount
-  - pkg/plugingetter
-  - pkg/plugins
-  - pkg/plugins/transport
   - pkg/pools
   - pkg/progress
   - pkg/promise
-  - pkg/random
-  - pkg/reexec
   - pkg/streamformatter
-  - pkg/stringid
   - pkg/symlink
   - pkg/system
-  - pkg/tarsum
   - pkg/term
   - pkg/term/windows
   - pkg/tlsconfig
   - pkg/urlutil
-  - plugin/v2
 - name: github.com/docker/engine-api
   version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
   subpackages:
@@ -182,10 +167,6 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
-- name: github.com/gorilla/context
-  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
-- name: github.com/gorilla/mux
-  version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
 - name: github.com/gorilla/websocket
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
@@ -229,14 +210,8 @@ imports:
 - name: github.com/opencontainers/runc
   version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
-  - libcontainer/configs
-  - libcontainer/devices
   - libcontainer/system
   - libcontainer/user
-- name: github.com/opencontainers/runtime-spec
-  version: 1c7c27d043c2a5e513a44084d2b10d77d1402b8c
-  subpackages:
-  - specs-go
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/errors
@@ -256,17 +231,11 @@ imports:
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/technosophos/moniker
-  version: ab470f5e105a44d0c87ea21bacd6a335c4816d83
+  version: 9f956786b91d9786ca11aa5be6104542fa911546
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
   - codec
-- name: github.com/vbatts/tar-split
-  version: b9127a139315e57ebc26030e7decf72d0a20acb4
-  subpackages:
-  - archive/tar
-  - tar/asm
-  - tar/storage
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
@@ -403,7 +372,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 156ed5ba2d435ec2db08d2f803fecb591b72c058
+  version: 2308857ad3b8b18abf74ff734853973eda9da94d
   subpackages:
   - pkg/authentication/authenticator
   - pkg/authentication/serviceaccount
@@ -495,7 +464,7 @@ imports:
   - util/integer
   - util/jsonpath
 - name: k8s.io/helm
-  version: 82d8e9498d96535cc6787a6a9194a76161d29b4c
+  version: 012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6
   subpackages:
   - pkg/chartutil
   - pkg/engine
@@ -650,6 +619,8 @@ imports:
   - pkg/version
 - name: vbom.ml/util
   version: db5cfe13f5cc80a4990d98e2e1b0707a4d1a5394
+  repo: https://github.com/fvbommel/util.git
+  vcs: git
   subpackages:
   - sortorder
 testImports: []
