@@ -193,26 +193,26 @@ image:
 
 _How do I add an existing chart to Draft?_
 
-Just copy (`helm fetch`) it into the `chart/` directory. You need to tweak the values file to
-read from `image.registry`, `image.org`, `image.name` and `image.tag` if you want draft to regenerate Docker
-images for you. See above.
+Just copy (`helm fetch`) it into the `chart/` directory. You need to tweak the values file to read
+from `image.registry`, `image.org`, `image.name` and `image.tag` if you want draft to regenerate
+Docker images for you. See above.
 
 _How do I deploy applications to production?_
 
 Draft is a developer tool. While you _could_ simply use `draft up` to do this, we'd recommend using
 `helm package` in conjuction with a CI/CD pipeline.
 
-Remember: You can always package a Draft-generated chart with `helm package chart/` and load the
-results up to a chart repository, taking advantage of the existing Helm ecosystem.
+Remember: You can always package a Draft-generated chart with `helm package` and load the results up
+to a chart repository, taking advantage of the existing Helm ecosystem.
 
 ## Other Architectural Considerations
 
-Instead of a draftd HTTP server, we could spawn a Draft pod "job" (via `draft up`) that runs only when
-`draft up` is called. In that case, the `draft` client would be the main focal point for server-side
-configuration. This has the advantage of requiring fewer resource demands server-side, but might
-make the client implementation (and security story) significantly more difficult. Furthermore, it
-might make two `draft up` operations between two clients differ (the "Works on My Machine!"
-problem).
+Instead of a draftd HTTP server, we could spawn a Draft pod "job" (via `draft up`) that runs only
+when `draft up` is called. In that case, the `draft` client would be the main focal point for
+server-side configuration. This has the advantage of requiring fewer resource demands server-side,
+but might make the client implementation (and security story) significantly more difficult.
+Furthermore, it might make two `draft up` operations between two clients differ (the "Works on My
+Machine!" problem).
 
 ## User Personas and Stories
 

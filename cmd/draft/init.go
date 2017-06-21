@@ -1,52 +1,62 @@
 package main
 
 import (
+	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-	"k8s.io/helm/pkg/chartutil"
+	"golang.org/x/crypto/ssh/terminal"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
-	"k8s.io/helm/pkg/proto/hapi/chart"
-	"k8s.io/helm/pkg/strvals"
 	"k8s.io/helm/pkg/tiller/environment"
 
+	"syscall"
+
 	"github.com/Azure/draft/cmd/draft/installer"
+	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack"
 )
 
-const initDesc = `
-This command installs Draftd (the Draft server side component) onto your
+const (
+	initDesc = `
+This command installs the server side component of Draft onto your
 Kubernetes Cluster and sets up local configuration in $DRAFT_HOME (default ~/.draft/)
 
 To set up just a local environment, use '--client-only'. That will configure
-$DRAFT_HOME, but not attempt to connect to a remote cluster and install the Draftd
+$DRAFT_HOME, but not attempt to connect to a remote cluster and install the Draft
 deployment.
 
-To dump information about the Draftd chart, combine the '--dry-run' and '--debug' flags.
+To dump information about the Draft chart, combine the '--dry-run' and '--debug' flags.
 `
+	chartConfigTpl = `
+basedomain: %s
+registry:
+  url: %s
+  org: %s
+  authtoken: %s
+`
+)
 
 type initCmd struct {
-	clientOnly        bool
-	upgrade           bool
-	dryRun            bool
-	out               io.Writer
-	home              draftpath.Home
-	helmClient        *helm.Client
-	values            []string
-	rawValueFilePaths []string
+	clientOnly bool
+	out        io.Writer
+	in         io.Reader
+	home       draftpath.Home
+	yes        bool
+	helmClient *helm.Client
 }
 
-func newInitCmd(out io.Writer) *cobra.Command {
+func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 	i := &initCmd{
 		out: out,
+		in:  in,
 	}
 
 	cmd := &cobra.Command{
@@ -63,65 +73,14 @@ func newInitCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringArrayVar(&i.values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVarP(&i.rawValueFilePaths, "values", "f", []string{}, "specify Draftd values from a values.yaml file (can specify multiple)")
-	f.BoolVar(&i.upgrade, "upgrade", false, "upgrade if Draftd is already installed")
-	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "if set does not install Draftd")
-	f.BoolVar(&i.dryRun, "dry-run", false, "do not install local or remote")
+	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
+	f.BoolVar(&i.yes, "yes", false, "automatically accept configuration defaults (if detected). Exits non-zero if --yes is enabled and no cloud provider was found")
 
 	return cmd
 }
 
-func (i *initCmd) vals() ([]byte, error) {
-	base := map[string]interface{}{}
-
-	// User specified a values files via -f/--values
-	for _, filePath := range i.rawValueFilePaths {
-		currentMap := map[string]interface{}{}
-		bytes, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			return []byte{}, err
-		}
-
-		if err := yaml.Unmarshal(bytes, &currentMap); err != nil {
-			return []byte{}, fmt.Errorf("failed to parse %s: %s", filePath, err)
-		}
-		// Merge with the previous map
-		base = mergeValues(base, currentMap)
-	}
-
-	// User specified a value via --set
-	for _, value := range i.values {
-		if err := strvals.ParseInto(value, base); err != nil {
-			return []byte{}, fmt.Errorf("failed parsing --set data: %s", err)
-		}
-	}
-
-	return yaml.Marshal(base)
-}
-
-// runInit initializes local config and installs Draftd to Kubernetes Cluster
+// runInit initializes local config and installs Draft to Kubernetes Cluster
 func (i *initCmd) run() error {
-	chartConfig := new(chart.Config)
-
-	rawVals, err := i.vals()
-	if err != nil {
-		return err
-	}
-	chartConfig.Raw = string(rawVals)
-
-	if flagDebug {
-		chart, err := chartutil.LoadFiles(installer.DefaultChartFiles)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(i.out, chart)
-	}
-
-	if i.dryRun {
-		return nil
-	}
-
 	if err := ensureDirectories(i.home, i.out); err != nil {
 		return err
 	}
@@ -131,36 +90,96 @@ func (i *initCmd) run() error {
 	fmt.Fprintf(i.out, "$DRAFT_HOME has been configured at %s.\n", draftHome)
 
 	if !i.clientOnly {
-		if i.helmClient == nil {
-			client, config, err := getKubeClient(kubeContext)
+		client, clientConfig, err := getKubeClient(kubeContext)
+		if err != nil {
+			return fmt.Errorf("Could not get a kube client: %s", err)
+		}
+		restClientConfig, err := clientConfig.ClientConfig()
+		if err != nil {
+			return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
+		}
+		tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, restClientConfig)
+		if err != nil {
+			return fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
+		}
+		i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
+
+		chartConfig, cloudProvider, err := installerConfig.FromClientConfig(clientConfig)
+		if err != nil {
+			return fmt.Errorf("Could not generate chart config from kube client config: %s", err)
+		}
+
+		if cloudProvider != "" {
+			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
+			fmt.Fprintf(i.out, "Draft will be using the following configuration:\n\n'''\n%s'''\n\n", chartConfig.GetRaw())
+			fmt.Fprint(i.out, "Is this okay? [Y/n] ")
+			reader := bufio.NewReader(i.in)
+			text, err := reader.ReadString('\n')
 			if err != nil {
-				return fmt.Errorf("Could not get a kube client: %s", err)
+				return fmt.Errorf("Could not read input: %s", err)
 			}
-			tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, config)
+			if text == "" || strings.ToLower(text) == "y" {
+				i.yes = true
+			}
+		}
+
+		if !i.yes || cloudProvider == "" {
+			// prompt for missing information
+			fmt.Fprintf(i.out, "\nIn order to install Draft, we need a bit more information...\n\n")
+			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io, quay.io, myregistry.azurecr.io): ")
+			reader := bufio.NewReader(i.in)
+			registryURL, err := reader.ReadString('\n')
 			if err != nil {
-				return fmt.Errorf("Could not get a connection to tiller: %s", err)
+				return fmt.Errorf("Could not read input: %s", err)
 			}
-			i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
+			registryURL = strings.TrimSpace(registryURL)
+			fmt.Fprint(i.out, "2. Enter your username: ")
+			dockerUser, err := reader.ReadString('\n')
+			if err != nil {
+				return fmt.Errorf("Could not read input: %s", err)
+			}
+			dockerUser = strings.TrimSpace(dockerUser)
+			fmt.Fprint(i.out, "3. Enter your password: ")
+			dockerPass, err := terminal.ReadPassword(syscall.Stdin)
+			if err != nil {
+				return fmt.Errorf("Could not read input: %s", err)
+			}
+			fmt.Fprintf(i.out, "\n4. Enter your org where Draft will push images [%s]: ", dockerUser)
+			dockerOrg, err := reader.ReadString('\n')
+			if err != nil {
+				return fmt.Errorf("Could not read input: %s", err)
+			}
+			dockerOrg = strings.TrimSpace(dockerOrg)
+			if dockerOrg == "" {
+				dockerOrg = dockerUser
+			}
+			fmt.Fprint(i.out, "5. Enter your top-level domain for ingress (e.g. draft.example.com): ")
+			basedomain, err := reader.ReadString('\n')
+			if err != nil {
+				return fmt.Errorf("Could not read input: %s", err)
+			}
+			basedomain = strings.TrimSpace(basedomain)
+
+			registryAuth := base64.StdEncoding.EncodeToString(
+				[]byte(fmt.Sprintf(
+					`{"username":"%s","password":"%s"}`,
+					dockerUser,
+					dockerPass)))
+			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, basedomain, registryURL, dockerOrg, registryAuth)
 		}
 
 		if err := installer.Install(i.helmClient, chartConfig); err != nil {
-			if !IsReleaseAlreadyExists(err) {
-				return fmt.Errorf("error installing: %s", err)
-			}
-			if i.upgrade {
-				if err := installer.Upgrade(i.helmClient, chartConfig); err != nil {
-					return fmt.Errorf("error when upgrading: %s", err)
-				}
-				fmt.Fprintln(i.out, "\nDraftd (the Draft server side component) has been upgraded to the current version.")
+			if IsReleaseAlreadyExists(err) {
+				fmt.Fprintln(i.out, "Warning: Draft is already installed in the cluster.\n"+
+					"Use --client-only to suppress this message.")
 			} else {
-				fmt.Fprintln(i.out, "Warning: Draftd is already installed in the cluster.\n"+
-					"(Use --client-only to suppress this message, or --upgrade to upgrade Draftd to the current version.)")
+				return fmt.Errorf("error installing Draft: %s", err)
 			}
 		} else {
-			fmt.Fprintln(i.out, "\nDraftd (the Draft server side component) has been installed into your Kubernetes Cluster.")
+			fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
 		}
 	} else {
-		fmt.Fprintln(i.out, "Not installing Draftd due to 'client-only' flag having been set")
+		fmt.Fprintln(i.out, "Not installing Draft due to 'client-only' flag having been set")
 	}
 
 	fmt.Fprintln(i.out, "Happy Sailing!")
@@ -209,38 +228,6 @@ func ensurePacks(home draftpath.Home, out io.Writer) error {
 		}
 	}
 	return nil
-}
-
-// Merges source and destination map, preferring values from the source map
-func mergeValues(dest map[string]interface{}, src map[string]interface{}) map[string]interface{} {
-	for k, v := range src {
-		// If the key doesn't exist already, then just set the key to that value
-		if _, exists := dest[k]; !exists {
-			dest[k] = v
-			continue
-		}
-		nextMap, ok := v.(map[string]interface{})
-		// If it isn't another map, overwrite the value
-		if !ok {
-			dest[k] = v
-			continue
-		}
-		// If the key doesn't exist already, then just set the key to that value
-		if _, exists := dest[k]; !exists {
-			dest[k] = nextMap
-			continue
-		}
-		// Edge case: If the key exists in the destination, but isn't a map
-		destMap, isMap := dest[k].(map[string]interface{})
-		// If the source map has a map for this key, prefer it
-		if !isMap {
-			dest[k] = v
-			continue
-		}
-		// If we got to this point, it is a map in both, so merge them
-		dest[k] = mergeValues(destMap, nextMap)
-	}
-	return dest
 }
 
 // IsReleaseAlreadyExists returns true if err matches the "release already exists"

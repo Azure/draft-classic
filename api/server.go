@@ -388,8 +388,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 
 	// Break up registry auth json string into a RegistryAuth object.
 	var regAuth RegistryAuth
-	err = json.Unmarshal(data, &regAuth)
-	if err != nil {
+	if err := json.Unmarshal(data, &regAuth); err != nil {
 		handleClosingError(ws, "Could not json decode registry authentication string", err)
 	}
 
