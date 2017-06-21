@@ -14,7 +14,7 @@ Using Draft is as simple as:
 2. `draft up` to deploy your application to a Kubernetes dev sandbox, accessible via a public URL
 3. Use a local editor to modify the application, with changes deployed to Kubernetes in seconds
 
-Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm](https://github.com/kubernetes/helm) and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
+Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
 Here is a video demonstrating how to set up Draft on Azure Container Services:
 
@@ -51,8 +51,7 @@ You can read third-party software licenses [here][Third-Party Licenses].
 [Installation Guide]: docs/install.md
 [Getting Started]: docs/getting-started.md
 [hacking]: docs/contributing/hacking.md
-[`helm` v2.4.2]: https://github.com/kubernetes/helm/releases/tag/v2.4.2
-[Helm]: https://github.com/kubernetes/helm
+[helm]: https://github.com/kubernetes/helm
 [Installing Helm]: https://github.com/kubernetes/helm/blob/master/docs/install.md
 [Kubernetes]: https://kubernetes.io/
 [license]: LICENSE

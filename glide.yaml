@@ -28,7 +28,7 @@ import:
 - package: k8s.io/client-go
   version: 8aceb98010c1c18b6b54a35b52fd5b46905e3d7f
 - package: k8s.io/helm
-  version: ~2.4.0
+  version: ~2.5.0
 - package: k8s.io/kubernetes
   version: v1.6.2
 - package: github.com/Sirupsen/logrus
