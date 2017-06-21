@@ -21,12 +21,51 @@ Draft is not any of the following, nor should it be used as the following:
 - a tool to be used in replacement for a CI/CD pipeline
 - a PaaS like [Deis Workflow](https://deis.com/workflow/)
 
-## How To Use It
+## Architecture
 
-Draft has two main commands:
+Draft is a tool for deploying applications to Kubernetes. Draft bootstraps new applications using
+[packs](packs.md). Draft can do the following:
 
-- `draft create` takes your existing code and creates a new Kubernetes app
+- bootstrap applications using packs
+- install applications into an existing Kubernetes cluster
+
+This is done through Draft's two main commands:
+
+- `draft create` takes your existing code and creates a new Kubernetes app from a pack
 - `draft up` deploys a development copy of your app into a Kubernetes cluster.
+
+Draft has two major components: the Draft client and the Draft server (referred to as draftd).
+
+The Draft client is a command-line client, as the name suggests. The client is responsible for the
+following domains:
+
+- installation of the server (through `draft init`)
+- interacting with the Draft server
+- interacting with [plugins](plugins.md)
+
+The Draft client interacts with the Draft server through the Kubernetes API server, using
+HTTP/Websockets as the communication protocol.
+
+The Draft server is a an in-cluster server interfaces with the Kubernetes API server, a Docker
+registry and a Tiller (Helm server) instance. The server is responsible for the following:
+
+- Listening for incoming requests from the Draft client
+- Building and pushing a Docker image to the Docker registry
+- Combining a chart and image to build a release through Tiller
+- Installing and Upgrading charts by interacting with Tiller
+
+Simply put, the client uploads local source code to the server, which is responsible for building
+and deploying the application.
+
+## Other Architectural Considerations
+
+Instead of a draftd HTTP server, we originally thought Draft could spawn a Draft pod "job"
+(via `draft up`) that runs only when `draft up` is called. In that case, the `draft` client would be
+the main focal point for client AND server-side configuration. This has the advantage of requiring
+fewer resource demands server-side (being that there's no perpetually running instance in the
+cluster), but might make the client implementation (and security story) significantly more
+difficult. Furthermore, it might make two `draft up` operations between two clients differ (the
+"Works on My Machine!" problem).
 
 ## Start from a Dockerfile
 
@@ -204,15 +243,6 @@ Draft is a developer tool. While you _could_ simply use `draft up` to do this, w
 
 Remember: You can always package a Draft-generated chart with `helm package` and load the results up
 to a chart repository, taking advantage of the existing Helm ecosystem.
-
-## Other Architectural Considerations
-
-Instead of a draftd HTTP server, we could spawn a Draft pod "job" (via `draft up`) that runs only
-when `draft up` is called. In that case, the `draft` client would be the main focal point for
-server-side configuration. This has the advantage of requiring fewer resource demands server-side,
-but might make the client implementation (and security story) significantly more difficult.
-Furthermore, it might make two `draft up` operations between two clients differ (the "Works on My
-Machine!" problem).
 
 ## User Personas and Stories
 
