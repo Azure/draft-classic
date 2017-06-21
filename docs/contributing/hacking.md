@@ -7,13 +7,12 @@ development environment for working on the Draft source code.
 
 To compile and test Draft binaries and to build Docker images, you will need:
 
+ - a [Kubernetes][] cluster with [Draft already installed][install]. We recommend [minikube][].
  - [docker][]
- - a [Docker Hub][] or [quay.io][quay] account
  - [git][]
- - [Go][] 1.7 or later, with support for compiling to `linux/amd64`
+ - [helm][], using the same version as recommended in the [installation guide][install].
+ - [Go][] 1.8 or later, with support for compiling to `linux/amd64`
  - [glide][]
- - a [Kubernetes][] cluster. We recommend [minikube][]
- - [helm][]
  - [upx][] (optional) to compress binaries for a smaller Docker image
 
 In most cases, install the prerequisite according to its instructions. See the next section
@@ -84,57 +83,6 @@ To test interactively, you will likely want to deploy your changes to Draft on a
 This requires a Docker registry where you can push your customized draftd images so Kubernetes can
 pull them.
 
-In most cases, a local Docker registry will not be accessible to your Kubernetes nodes. A public
-registry such as [Docker Hub][] or [Quay][] will suffice.
-
-To use DockerHub for draftd images:
-
-```shell
-$ export DOCKER_REGISTRY="docker.io"
-$ export IMAGE_PREFIX=<your DockerHub username>
-```
-
-To use quay.io:
-
-```shell
-$ export DOCKER_REGISTRY="quay.io"
-$ export IMAGE_PREFIX=<your quay.io username>
-```
-
-After your Docker registry is set up, you can deploy your images using:
-
-```shell
-$ make docker-build docker-push
-```
-
-Ensure that Helm's `tiller` server is running in the Kubernetes cluster:
-
-```shell
-$ helm init  # it may take a few seconds for tiller to install
-$ helm version
-Client: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89ef008fef5cdf89", GitTreeState:"clean"}
-Server: &version.Version{SemVer:"v2.2.0", GitCommit:"fc315ab59850ddd1b9b4959c89ef008fef5cdf89", GitTreeState:"clean"}
-```
-
-To install draftd, edit `chart/values.yaml` and change the fields under `registry` to your
-[Docker Hub][] or [quay.io][quay] account, and change the fields under `image` to the newly
-deployed draftd image:
-
-```
-$ $EDITOR chart/values.yaml
-```
-
-Then, install the chart:
-
-```shell
-$ draft init -f chart/values.yaml
-$ helm list  # check that Draft has a helm release
-NAME 	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
-draft	1       	Thu Feb 16 10:18:21 2017	DEPLOYED	draftd-0.1.0	kube-system
-```
-
-## Re-deploying Your Changes
-
 Because Draft deploys Kubernetes applications and Draft is a Kubernetes application itself, you can
 use Draft to deploy Draft. How neat is that?!
 
@@ -144,7 +92,7 @@ To build your changes and upload it to draftd, run
 $ make build docker-binary
 $ draft up
 --> Building Dockerfile
---> Pushing docker.io/microsoft/draftd:6f3b53003dcbf43821aea43208fc51455674d00e
+--> Pushing 10.0.0.237/draft/draftd:6f3b53003dcbf43821aea43208fc51455674d00e
 --> Deploying to Kubernetes
 --> Status: DEPLOYED
 --> Notes:
@@ -176,7 +124,6 @@ helm delete --purge draft
 
 
 [docker]: https://www.docker.com/
-[Docker Hub]: https://hub.docker.com/
 [git]: https://git-scm.com/
 [glide]: https://github.com/Masterminds/glide
 [go]: https://golang.org/
@@ -184,6 +131,5 @@ helm delete --purge draft
 [Homebrew]: https://brew.sh/
 [Kubernetes]: https://github.com/kubernetes/kubernetes
 [minikube]: https://github.com/kubernetes/minikube
-[Quay]: https://quay.io/
 [upstream]: https://help.github.com/articles/fork-a-repo/
 [upx]: https://upx.github.io

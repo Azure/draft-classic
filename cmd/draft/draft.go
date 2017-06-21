@@ -14,7 +14,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/Azure/draft/pkg/draft"
@@ -43,7 +43,7 @@ var (
 var globalUsage = `The application deployment tool for Kubernetes.
 `
 
-func newRootCmd(out io.Writer) *cobra.Command {
+func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "draft",
 		Short:        "The application deployment tool for Kubernetes.",
@@ -67,7 +67,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	cmd.AddCommand(
 		newCreateCmd(out),
 		newHomeCmd(out),
-		newInitCmd(out),
+		newInitCmd(out, in),
 		newUpCmd(out),
 		newVersionCmd(out),
 	)
@@ -84,7 +84,11 @@ func setupConnection(c *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		tunnel, err := portforwarder.New(clientset, config)
+		clientConfig, err := config.ClientConfig()
+		if err != nil {
+			return err
+		}
+		tunnel, err := portforwarder.New(clientset, clientConfig)
 		if err != nil {
 			return err
 		}
@@ -137,12 +141,13 @@ func homePath() string {
 
 // getKubeClient is a convenience method for creating kubernetes config and client
 // for a given kubeconfig context
-func getKubeClient(context string) (*kubernetes.Clientset, *restclient.Config, error) {
-	config, err := kube.GetConfig(context).ClientConfig()
+func getKubeClient(context string) (*kubernetes.Clientset, clientcmd.ClientConfig, error) {
+	config := kube.GetConfig(context)
+	clientConfig, err := config.ClientConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
 	}
-	client, err := kubernetes.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(clientConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
 	}
@@ -150,7 +155,7 @@ func getKubeClient(context string) (*kubernetes.Clientset, *restclient.Config, e
 }
 
 func main() {
-	cmd := newRootCmd(os.Stdout)
+	cmd := newRootCmd(os.Stdout, os.Stdin)
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}

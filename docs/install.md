@@ -1,54 +1,135 @@
+# Install Guide
+
+Get started with Draft in three easy steps:
+
+1. Install CLI tools for Helm, Kubectl, [Minikube][] and Draft
+2. Boot Minikube and install Draft
+3. Deploy your first application
+
 ## Dependencies
 
-- Draft will need a Kubernetes cluster to deploy your app.
-  [Minikube][minikube], Azure Container Services and Google Container Engine
-  are a few examples that will work with Draft, but any Kubernetes cluster will do.
-- Draft expects [Helm](https://github.com/kubernetes/helm) to be installed on your Kubernetes cluster. Download [`helm`](https://github.com/kubernetes/helm/releases) and
-do a `helm init` first, as described in [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md).
-- Draft needs to push images to a Docker registry, so you'll need to configure Draft with your Docker registry credentials. If you don't already have one, you can create a Docker registry for free on either [Docker Hub](https://hub.docker.com/) or [Quay.io](https://quay.io).
-- An ingress controller installed within your Kubernetes cluster with a wildcard domain pointing to it. Review the [Ingress Guide][Ingress Guide] for more information about what Draft expects and how to set up an ingress controller.
+In order to get started, you will need to fetch the following:
 
-## Install Draft
+- [the latest release of minikube](https://github.com/kubernetes/minikube/releases)
+- [the latest release of kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [the latest release of Helm](https://github.com/kubernetes/helm/releases)
+- [the latest release of Draft](https://github.com/Azure/draft/releases)
 
-Because Draft is currently experimental, there is no stable release out yet and users are expected
-to be using the latest build of Draft for testing. Canary releases of the Draft client can be found
-at the following links:
+Canary releases of the Draft client can be found at the following links:
 
  - [Linux amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz)
  - [macOS amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
- - Windows amd64 [coming soon!](https://github.com/Azure/draft/issues/61)
+ - [Windows amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
+
+Alternative downloads:
+
+- [Linux ARM](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-arm.tar.gz)
+- [Linux x86](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-386.tar.gz)
 
 Unpack the Draft binary and add it to your PATH.
 
-## Configure Draft
+## Enable Minikube Add-ons
 
-To install the server-side of Draft, use `draft init` with your ingress' `basedomain` and credentials to let Draft communicate with a Docker registry by using the following command:
+Now that we have minikube installed, we can go ahead and enable the `registry` and `ingress`
+add-ons.
 
-```
-$ draft init --set registry.url=changeme,registry.org=changeme,registry.authtoken=changeme,basedomain=changeme
-```
+The ingress add-on is used to allow inbound connections to reach the application.
 
-* registry.url: Docker Registry Server URL. e.g. Azure Container Registry -> xxxx.azurecr.io, DockerHub -> docker.io
-* basedomain: Using a domain that you manage. e.g. `draft.example.com` or use publicly available wildcard dns from [xip.io](https://xip.io). For minikube, as a result, basedomain could be `basedomain=$(minikube ip).xip.io`
+The registry add-on is used to store the built docker container within the cluster.
 
-
-The auth token field follows the format of Docker's X-Registry-Auth header.
-For credential-based logins such as Azure Container Registry, Docker Hub and Quay, use:
+You can enable the add-ons with
 
 ```
-$ echo '{"username":"jdoe","password":"secret","email":"jdoe@acme.com"}' | base64
+$ minikube addons enable ingress
+$ minikube addons enable registry
 ```
 
-For token-based logins such as Google Container Registry and Amazon ECR, use:
+## Boot Minikube
+
+At this point, you can boot up minikube!
 
 ```
-$ echo '{"registrytoken":"9cbaf023786cd7"}' | base64
+$ minikube start
+Starting local Kubernetes v1.6.4 cluster...
+Starting VM...
+oving files into cluster...
+Setting up certs...
+Starting cluster components...
+Connecting to cluster...
+Setting up kubeconfig...
+Kubectl is now configured to use the cluster.
 ```
+
+Now that the cluster is up and ready, minikube automatically configures kubectl on your machine with
+the appropriate authentication and endpoint information.
+
+```
+$ kubectl cluster-info
+Kubernetes master is running at https://192.168.99.100:8443
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+## Install Helm
+
+Once the cluster is ready, you will need to install Helm. Helm is a Kubernetes Package Manager and
+is how Draft deploys an application to Kubernetes.
+
+Installing Helm is quite simple:
+
+```
+$ helm init
+```
+
+Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch`
+to wait for tiller to come up.
+
+## Install Draft
+
+Now that everything else is set up, we can now install Draft.
+
+```
+$ draft init
+```
+
+Follow through the prompts. Draft will read your local kube configuration and notice that it is
+pointing at minikube. It will then install Draftd (the Draft server) communicating with the
+installed registry add-on, ingress controller and Tiller (Helm server) instances.
+
+## Configure Ingress Routes
+
+Draft uses a wildcard domain to make accessing draft-created applications easier. To do so, it
+specifies a custom host in the ingress from which tells the backing load balancer to route requests
+based on the Host header.
+
+When Draft was installed on Minikube, a base domain of `k8s.local` was used. To use this domain, you
+can edit your `/etc/hosts` file to point to the ingressed out application domain to your cluster.
+
+The following snippet would allow you to access an application:
+
+```
+$ sudo echo $(minikube ip) appname.k8s.local >> /etc/hosts
+```
+
+Unfortunately, `/etc/hosts` does not handle wildcard routes so each application deployed will need
+to result in a new route in `/etc/hosts`. Others have worked around this by using other more
+sophisticated tools like [dnsmasq][].
+
+To use wildcard domains with dnsmasq, add a new rule in `dnsmasq.conf`:
+
+```
+$ sudo echo "address=/k8s.local/$(minikube ip)" >> dnsmasq.conf
+```
+
+See the [Ingress Guide][] for a more detailed setup.
 
 ## Take Draft for a Spin
 
-Once you've completed the above steps, you're ready to climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
+Once you've completed the above steps, you're ready to climb aboard and explore the
+[Getting Started Guide][Getting Started] - you'll soon be sailing!
 
-[Ingress Guide]: ingress.md
+
+[dnsmasq]: https://wiki.archlinux.org/index.php/dnsmasq
 [Getting Started]: getting-started.md
+[Ingress Guide]: ingress.md
 [minikube]: https://github.com/kubernetes/minikube

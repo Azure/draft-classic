@@ -5,9 +5,9 @@ built-in Draft codebase. This guide explains how to use and create plugins.
 
 ## An Overview
 
-Draft plugins are add-on tools that integrate seamlessly with Draft. They provide a way to extend the
-core feature set of Draft, but without requiring every new feature to be written in Go and added to
-the core tool.
+Draft plugins are add-on tools that integrate seamlessly with Draft. They provide a way to extend
+the core feature set of Draft, but without requiring every new feature to be written in Go and added
+to the core tool.
 
 Draft plugins have the following features:
 

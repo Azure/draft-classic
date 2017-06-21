@@ -16,9 +16,9 @@ starter packs.
 
 ## The Starter Pack Structure
 
-A starter pack is organized inside a directory in `$(draft home)/packs`. Inside the pack's directory,
-there will be a template `chart/` and a `Dockerfile` that will be injected into the application
-when the starter pack is requested.
+A starter pack is organized inside a directory in `$(draft home)/packs`. Inside the pack's
+directory, there will be a template `chart/` and a `Dockerfile` that will be injected into the
+application when the starter pack is requested.
 
 Inside this directory, Draft will expect a structure like this:
 
@@ -60,10 +60,10 @@ See [Helm's documentation on Charts][charts] for more information on the Chart f
 
 ## Pack Detection
 
-When `draft create` is executed on an application, Draft starts iterating through the packs available
-in `$(draft home)/packs`. Each pack optionally has an executable file named `detect` in the root
-directory. The intention of this `detect` script is to determine if the pack should be used with
-the given application.
+When `draft create` is executed on an application, Draft starts iterating through the packs
+available in `$(draft home)/packs`. Each pack optionally has an executable file named `detect` in
+the root directory. The intention of this `detect` script is to determine if the pack should be used
+with the given application.
 
 A detect executable takes one argument: the directory in which `draft create` was executed. The
 executable should be portable across most systems (read: not a Ruby/Python script unless it's
@@ -89,5 +89,6 @@ echo Python
 If a pack does not include a detect executable, it is considered a "loser". Pack detection can be
 overridden with the `--pack` flag. The detect script will not be considered and Draft will bootstrap
 the app with the pack, no questions asked.
+
 
 [charts]: https://github.com/kubernetes/helm/blob/master/docs/charts.md
