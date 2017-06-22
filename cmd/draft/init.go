@@ -140,7 +140,9 @@ func (i *initCmd) run() error {
 			}
 			dockerUser = strings.TrimSpace(dockerUser)
 			fmt.Fprint(i.out, "3. Enter your password: ")
-			dockerPass, err := terminal.ReadPassword(syscall.Stdin)
+			// NOTE(bacongobbler): casting syscall.Stdin here to an int is intentional here as on
+			// Windows, syscall.Stdin is a Handler, which is of type uintptr.
+			dockerPass, err := terminal.ReadPassword(int(syscall.Stdin))
 			if err != nil {
 				return fmt.Errorf("Could not read input: %s", err)
 			}
