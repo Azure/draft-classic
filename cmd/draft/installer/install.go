@@ -21,7 +21,7 @@ apiVersion: v1
 const draftValues = `# Default values for Draftd.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-replicaCount: 3
+replicaCount: 1
 basedomain: example.com
 image:
   registry: docker.io
