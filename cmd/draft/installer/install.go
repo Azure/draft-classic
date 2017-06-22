@@ -120,6 +120,8 @@ spec:
             port: {{ .Values.service.http.internalPort }}
       - name: dind
         image: docker:17.05.0-ce-dind
+        args:
+        - --insecure-registry=10.0.0.0/24
         securityContext:
             privileged: true
         volumeMounts:
