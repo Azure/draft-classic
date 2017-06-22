@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -97,6 +98,10 @@ func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 
 	// load $PWD/chart/values.yaml as the base config
 	valuesPath := filepath.Join(cwd, pack.ChartDir, pack.ValuesfileName)
+
+	if _, err := os.Stat(valuesPath); os.IsNotExist(err) {
+		return []byte{}, errors.New("Could not detect a proper helm chart\nTry running a `draft create` first")
+	}
 	bytes, err := ioutil.ReadFile(valuesPath)
 	if err != nil {
 		return []byte{}, err
