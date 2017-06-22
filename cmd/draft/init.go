@@ -118,6 +118,7 @@ func (i *initCmd) run() error {
 			if err != nil {
 				return fmt.Errorf("Could not read input: %s", err)
 			}
+			text = strings.TrimSpace(text)
 			if text == "" || strings.ToLower(text) == "y" {
 				i.yes = true
 			}
