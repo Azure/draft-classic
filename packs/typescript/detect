@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=$1
+
+# Exit early if app is clearly not Typescript
+if [ ! -f $BUILD_DIR/tsconfig.json ]; then
+  exit 1
+fi
+
+# Exit early if the app is clearly not Typescript
+
+echo Typescript
