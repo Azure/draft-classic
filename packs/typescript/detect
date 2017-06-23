@@ -2,11 +2,9 @@
 
 BUILD_DIR=$1
 
-# Exit early if app is clearly not Typescript
+# Exit early if app doesn't have the telltale config file for Typescript
 if [ ! -f $BUILD_DIR/tsconfig.json ]; then
   exit 1
 fi
-
-# Exit early if the app is clearly not Typescript
 
 echo Typescript
