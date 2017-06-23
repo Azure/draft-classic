@@ -9,3 +9,5 @@ examples/**/Dockerfile
 examples/**/chart/
 examples/**/draft.toml
 examples/**/.draftignore
+examples/typescript/node_modules
+examples/typescript/dist
