@@ -112,15 +112,18 @@ func (i *initCmd) run() error {
 		if cloudProvider != "" {
 			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
 			fmt.Fprintf(i.out, "Draft will be using the following configuration:\n\n'''\n%s'''\n\n", chartConfig.GetRaw())
-			fmt.Fprint(i.out, "Is this okay? [Y/n] ")
-			reader := bufio.NewReader(i.in)
-			text, err := reader.ReadString('\n')
-			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
-			}
-			text = strings.TrimSpace(text)
-			if text == "" || strings.ToLower(text) == "y" {
-				i.yes = true
+
+			if !i.yes {
+				fmt.Fprint(i.out, "Is this okay? [Y/n] ")
+				reader := bufio.NewReader(i.in)
+				text, err := reader.ReadString('\n')
+				if err != nil {
+					return fmt.Errorf("Could not read input: %s", err)
+				}
+				text = strings.TrimSpace(text)
+				if text == "" || strings.ToLower(text) == "y" {
+					i.yes = true
+				}
 			}
 		}
 
