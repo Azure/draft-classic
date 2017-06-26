@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.1
+
+### Client
+
+* fix up --yes being ignored on `draft init`
+
+### Server
+
+* use overlayfs as the selected storage driver
+
 ## v0.5.0
 
 ### Client
