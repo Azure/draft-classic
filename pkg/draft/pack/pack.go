@@ -54,8 +54,10 @@ const (
 // Metadata defines the metadata for a Pack
 type Metadata struct {
 	// The name of the pack
-	Name    string
-	Version string
+	Name        string
+	Version     string
+	Description string
+	Keywords    []string
 }
 
 // Pack defines a Draft Starter Pack.
