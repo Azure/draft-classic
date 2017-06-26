@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.5.0
+
+### Client
+
+* added .draftignore file support
+* added .NET pack support
+* added gradle pack support
+* renamed java pack as maven
+* refactored the PHP and maven packs to utilize multi-stage Dockerfile builds
+* re-wrote `draft init` for a smoother installation experience
+
+### Server
+
+* image pull secrets are now updated on changes
+* fixed some bugs with running draft on Windows, specifically around `draft home` and `draft create`
+* the draft server now runs a docker-in-docker sidecar container instead of mounting the host socket
+* bumped to helm v2.5 compatibility
+
+### Documentation
+
+* install documentation has been overhauled with the new `draft init` behaviour
+* added project scope
+* added project archutecture
+
+### Test Infrastructure
+
+* added codecov integration to new pull requests
+
 ## v0.4.0
 
 ### Client
