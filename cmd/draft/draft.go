@@ -73,7 +73,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	)
 
 	// Find and add plugins
-	loadPlugins(cmd, draftpath.Home(homePath()), out)
+	loadPlugins(cmd, draftpath.Home(homePath()), out, in)
 
 	return cmd
 }
