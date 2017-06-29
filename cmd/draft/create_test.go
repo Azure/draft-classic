@@ -61,6 +61,30 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+func TestNormalizeApplicationName(t *testing.T) {
+	testCases := []string{
+		"AppName",
+		"appName",
+		"appname",
+	}
+
+	expected := "appname"
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("normalizeApplicationName %s", tc), func(t *testing.T) {
+			create := &createCmd{
+				appName: tc,
+				out:     os.Stdout,
+				home:    draftpath.Home("../../"),
+				dest:    "",
+			}
+
+			create.normalizeApplicationName()
+			assertEqualString(t, create.appName, expected)
+		})
+	}
+}
+
 // tempDir create and clean a temporary directory to work in our tests
 func tempDir(t *testing.T, description string) (string, func()) {
 	path, err := ioutil.TempDir("", description)
@@ -98,6 +122,15 @@ func addGitKeep(t *testing.T, p string) {
 	}); err != nil {
 		t.Fatalf("couldn't stamp git keep files: %v", err)
 	}
+}
+
+// Compares two strings and asserts equivalence.
+func assertEqualString(t *testing.T, is string, shouldBe string) {
+	if is == shouldBe {
+		return
+	}
+
+	t.Fatalf("Assertion failed: Expected: %s. Got: %s", shouldBe, is)
 }
 
 // assertIdentical compares recursively all original and generated file content
