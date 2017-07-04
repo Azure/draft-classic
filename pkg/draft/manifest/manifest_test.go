@@ -9,7 +9,7 @@ import (
 func TestNew(t *testing.T) {
 	m := New()
 	m.Environments[DefaultEnvironmentName].Name = "foobar"
-	expected := "&{foobar   default [] false true 2}"
+	expected := "&{foobar   default [] false false 2}"
 	actual := fmt.Sprintf("%v", m.Environments[DefaultEnvironmentName])
 	if expected != actual {
 		t.Errorf("wanted %s, got %s", expected, actual)
