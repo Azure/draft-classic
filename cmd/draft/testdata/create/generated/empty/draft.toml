@@ -2,5 +2,6 @@
   [environments.development]
     name = "myapp"
     namespace = "default"
-    watch = true
+    wait = false
+    watch = false
     watch_delay = 2
