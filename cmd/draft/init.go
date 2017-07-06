@@ -49,7 +49,7 @@ type initCmd struct {
 	out        io.Writer
 	in         io.Reader
 	home       draftpath.Home
-	yes        bool
+	autoAccept bool
 	helmClient *helm.Client
 }
 
@@ -74,7 +74,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
-	f.BoolVar(&i.yes, "yes", false, "automatically accept configuration defaults (if detected). Exits non-zero if --yes is enabled and no cloud provider was found")
+	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
 
 	return cmd
 }
@@ -113,7 +113,7 @@ func (i *initCmd) run() error {
 			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
 			fmt.Fprintf(i.out, "Draft will be using the following configuration:\n\n'''\n%s'''\n\n", chartConfig.GetRaw())
 
-			if !i.yes {
+			if !i.autoAccept {
 				fmt.Fprint(i.out, "Is this okay? [Y/n] ")
 				reader := bufio.NewReader(i.in)
 				text, err := reader.ReadString('\n')
@@ -122,12 +122,12 @@ func (i *initCmd) run() error {
 				}
 				text = strings.TrimSpace(text)
 				if text == "" || strings.ToLower(text) == "y" {
-					i.yes = true
+					i.autoAccept = true
 				}
 			}
 		}
 
-		if !i.yes || cloudProvider == "" {
+		if !i.autoAccept || cloudProvider == "" {
 			// prompt for missing information
 			fmt.Fprintf(i.out, "\nIn order to install Draft, we need a bit more information...\n\n")
 			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io, quay.io, myregistry.azurecr.io): ")
