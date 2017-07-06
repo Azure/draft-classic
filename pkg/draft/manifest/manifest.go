@@ -25,8 +25,8 @@ type Environment struct {
 	ChartTarPath string   `toml:"chart_tar,omitempty"`
 	Namespace    string   `toml:"namespace,omitempty"`
 	Values       []string `toml:"set,omitempty"`
-	Wait         bool     `toml:"wait,omitempty"`
-	Watch        bool     `toml:"watch,omitempty"`
+	Wait         bool     `toml:"wait"`
+	Watch        bool     `toml:"watch"`
 	WatchDelay   int      `toml:"watch_delay,omitempty"`
 }
 
@@ -38,7 +38,7 @@ func New() *Manifest {
 	m.Environments[DefaultEnvironmentName] = &Environment{
 		Name:       generateName(),
 		Namespace:  DefaultNamespace,
-		Watch:      true,
+		Watch:      false,
 		WatchDelay: DefaultWatchDelaySeconds,
 	}
 	return &m
