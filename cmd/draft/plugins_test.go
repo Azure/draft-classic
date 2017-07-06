@@ -56,13 +56,14 @@ func TestLoadPlugins(t *testing.T) {
 	ph := draftpath.Home(homePath())
 
 	out := bytes.NewBuffer(nil)
+	in := bytes.NewBuffer(nil)
 	cmd := &cobra.Command{}
 	// add `--home` flag to cmd (which is what cmd.Parent() resolves to for the loaded plugin)
 	// so that it can be overridden in tests below
 	p := cmd.PersistentFlags()
 	p.StringVar(&draftHome, "home", draftHome, "location of your Draft config. Overrides $DRAFT_HOME")
 
-	loadPlugins(cmd, ph, out)
+	loadPlugins(cmd, ph, out, in)
 
 	envs := strings.Join([]string{
 		"fullenv",

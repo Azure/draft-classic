@@ -21,7 +21,7 @@ const pluginEnvVar = "DRAFT_PLUGIN"
 // This follows a different pattern than the other commands because it has
 // to inspect its environment and then add commands to the base command
 // as it finds them.
-func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer) {
+func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in io.Reader) {
 	plugdirs := os.Getenv(pluginEnvVar)
 	if plugdirs == "" {
 		plugdirs = home.Plugins()
@@ -62,6 +62,7 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer) {
 				prog.Env = os.Environ()
 				prog.Stdout = out
 				prog.Stderr = os.Stderr
+				prog.Stdin = in
 				if err := prog.Run(); err != nil {
 					if eerr, ok := err.(*exec.ExitError); ok {
 						os.Stderr.Write(eerr.Stderr)
