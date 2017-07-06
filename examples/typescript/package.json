@@ -1,0 +1,11 @@
+{
+    "name": "example-typescript",
+    "version": "0.0.0",
+    "main": "index.ts",
+    "scripts": {
+        "start": "tsc && node dist/index.js"
+    },
+    "dependencies": {
+        "@types/node": "^8.0.2"
+    }
+}
