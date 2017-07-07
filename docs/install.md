@@ -108,7 +108,7 @@ can edit your `/etc/hosts` file to point to the ingressed out application domain
 The following snippet would allow you to access an application:
 
 ```
-$ sudo echo $(minikube ip) appname.k8s.local >> /etc/hosts
+$ echo $(minikube ip) appname.k8s.local | sudo tee -a /etc/hosts
 ```
 
 Unfortunately, `/etc/hosts` does not handle wildcard routes so each application deployed will need
@@ -118,7 +118,7 @@ sophisticated tools like [dnsmasq][].
 To use wildcard domains with dnsmasq, add a new rule in `dnsmasq.conf`:
 
 ```
-$ sudo echo "address=/k8s.local/$(minikube ip)" >> dnsmasq.conf
+$ echo "address=/k8s.local/$(minikube ip)" | sudo tee -a dnsmasq.conf
 ```
 
 See the [Ingress Guide][] for a more detailed setup.
