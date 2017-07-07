@@ -22,8 +22,7 @@ func TestCreate(t *testing.T) {
 	var generatedpath = "testdata/create/generated"
 
 	testCases := []struct {
-		src string
-
+		src     string
 		wantErr bool
 	}{
 		{"testdata/create/src/simple-go", false},
@@ -69,6 +68,28 @@ func TestCreate(t *testing.T) {
 
 			// Compare directories to ensure they are identical
 			assertIdentical(t, pDir, destcompare)
+		})
+	}
+}
+
+func TestPickName(t *testing.T) {
+	testCases := []struct {
+		appName        string
+		destPath       string
+		cwd            string
+		expectedResult string
+	}{
+		{"appName", "", "", "appName"},
+		{"", "/bar/baz", "", "baz"},
+		{"", "", "/bar/baz/foo", "foo"},
+	}
+
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("pick name %d", i), func(t *testing.T) {
+			name := doPickName(tc.appName, tc.destPath, tc.cwd)
+			if name != tc.expectedResult {
+				t.Errorf("pick name error. expected: %s, got %s", tc.expectedResult, name)
+			}
 		})
 	}
 }

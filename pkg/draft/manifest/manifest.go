@@ -31,12 +31,19 @@ type Environment struct {
 }
 
 // New creates a new manifest with the Environments intialized.
-func New() *Manifest {
+func New(name string) *Manifest {
 	m := Manifest{
 		Environments: make(map[string]*Environment),
 	}
+
+	var usedName = generateName()
+
+	if name != "" {
+		usedName = name
+	}
+
 	m.Environments[DefaultEnvironmentName] = &Environment{
-		Name:       generateName(),
+		Name:       usedName,
 		Namespace:  DefaultNamespace,
 		Watch:      false,
 		WatchDelay: DefaultWatchDelaySeconds,

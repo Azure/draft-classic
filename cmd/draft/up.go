@@ -49,7 +49,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	var (
 		up = &upCmd{
 			Out:      out,
-			Manifest: manifest.New(),
+			Manifest: manifest.New(""),
 		}
 		runningEnvironment string
 	)
@@ -64,7 +64,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 				up.src = args[0]
 			}
 			up.Client = ensureDraftClient(up.Client)
-			up.Manifest = manifest.New()
+			up.Manifest = manifest.New("")
 
 			if up.src == "" || up.src == "." {
 				var err error
