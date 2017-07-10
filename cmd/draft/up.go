@@ -16,6 +16,7 @@ import (
 	"github.com/rjeczalik/notify"
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/ignore"
+	"k8s.io/helm/pkg/strvals"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/manifest"
@@ -110,6 +111,12 @@ func vals(e *manifest.Environment, cwd string) ([]byte, error) {
 		return []byte{}, fmt.Errorf("failed to parse %s: %s", valuesPath, err)
 	}
 
+	// merge values from the environment
+	for _, val := range e.Values {
+		if err := strvals.ParseInto(val, base); err != nil {
+			return []byte{}, fmt.Errorf("failed to parse %s from draft.toml: %s", val, err)
+		}
+	}
 	return yaml.Marshal(base)
 }
 
