@@ -1,5 +1,5 @@
 hash: f5a7f23585502f42141b89cfdc8a5c3881f1a308bfc2cea96e37c43b40068524
-updated: 2017-06-20T15:29:50.958065797-07:00
+updated: 2017-07-26T12:00:22.25440202-04:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -464,7 +464,7 @@ imports:
   - util/integer
   - util/jsonpath
 - name: k8s.io/helm
-  version: 012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6
+  version: 7cf31e8d9a026287041bae077b09165be247ae66
   subpackages:
   - pkg/chartutil
   - pkg/engine
