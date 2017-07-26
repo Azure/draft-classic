@@ -166,7 +166,7 @@ func runHook(p *plugin.Plugin, event string) error {
 	// I think its ... ¯\_(ツ)_/¯
 	// prog := exec.Command("cmd", "/C", p.Metadata.Hooks.Install())
 
-	//TODO: debug("running %s hook: %s", event, prog)
+	debug("running %s hook: %s", event, prog)
 
 	home := draftpath.Home(homePath())
 	setupEnv(p.Metadata.Name, p.Dir, home.Plugins(), home)

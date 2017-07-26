@@ -57,16 +57,19 @@ func (pcmd *pluginInstallCmd) run() error {
 	if err != nil {
 		return err
 	}
+
+	debug("installing plugin from %s", pcmd.source)
 	if err := installer.Install(i); err != nil {
 		return err
 	}
 
-	//TODO: debug("loading plugin from %s", i.Path())
+	debug("loading plugin from %s", i.Path())
 	p, err := plugin.LoadDir(i.Path())
 	if err != nil {
 		return err
 	}
 
+	debug("running any install instructions for plugin: %s", p.Metadata.Name)
 	if err := runHook(p, plugin.Install); err != nil {
 		return err
 	}
