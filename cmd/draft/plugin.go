@@ -85,7 +85,7 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 				// Call setupEnv before PrepareCommand because
 				// PrepareCommand uses os.ExpandEnv and expects the
 				// setupEnv vars.
-				setupEnv(md.Name, plug.Dir, plugdirs, draftpath.Home(homePath()))
+				setupPluginEnv(md.Name, plug.Dir, plugdirs, draftpath.Home(homePath()))
 				main, argv := plug.PrepareCommand(u)
 
 				prog := exec.Command(main, argv...)
@@ -169,7 +169,7 @@ func runHook(p *plugin.Plugin, event string) error {
 	debug("running %s hook: %s", event, prog)
 
 	home := draftpath.Home(homePath())
-	setupEnv(p.Metadata.Name, p.Dir, home.Plugins(), home)
+	setupPluginEnv(p.Metadata.Name, p.Dir, home.Plugins(), home)
 	prog.Stdout, prog.Stderr = os.Stdout, os.Stderr
 	if err := prog.Run(); err != nil {
 		if eerr, ok := err.(*exec.ExitError); ok {
@@ -181,11 +181,10 @@ func runHook(p *plugin.Plugin, event string) error {
 	return nil
 }
 
-// setupEnv prepares os.Env for plugins. It operates on os.Env because
+// setupPluginEnv prepares os.Env for plugins. It operates on os.Env because
 // the plugin subsystem itself needs access to the environment variables
 // created here.
-// TODO: change setupEnv to setupPluginEnv
-func setupEnv(shortname, base, plugdirs string, home draftpath.Home) {
+func setupPluginEnv(shortname, base, plugdirs string, home draftpath.Home) {
 	// Set extra env vars:
 	for key, val := range map[string]string{
 		"DRAFT_PLUGIN_NAME": shortname,

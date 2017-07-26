@@ -149,7 +149,7 @@ func TestSetupEnv(t *testing.T) {
 		flagDebug = false
 	}()
 
-	setupEnv(name, base, plugdirs, ph)
+	setupPluginEnv(name, base, plugdirs, ph)
 	for _, tt := range []struct {
 		name   string
 		expect string
