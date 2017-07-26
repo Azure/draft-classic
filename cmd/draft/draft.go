@@ -161,3 +161,10 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+func debug(format string, args ...interface{}) {
+	if flagDebug {
+		format = fmt.Sprintf("[debug] %s\n", format)
+		fmt.Printf(format, args...)
+	}
+}
