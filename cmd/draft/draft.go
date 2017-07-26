@@ -168,3 +168,10 @@ func debug(format string, args ...interface{}) {
 		fmt.Printf(format, args...)
 	}
 }
+
+func validateArgs(args, expectedArgs []string) error {
+	if len(args) != len(expectedArgs) {
+		return fmt.Errorf("This command needs %v argument(s): %v", len(expectedArgs), expectedArgs)
+	}
+	return nil
+}
