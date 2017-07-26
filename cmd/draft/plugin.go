@@ -14,7 +14,36 @@ import (
 	"github.com/Azure/draft/pkg/draft/draftpath"
 )
 
-const pluginEnvVar = "DRAFT_PLUGIN"
+const (
+	pluginHelp   = `Manage client-side Draft plugins.`
+	pluginEnvVar = `DRAFT_PLUGIN`
+)
+
+func newPluginCmd(out io.Writer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "plugin",
+		Short: "add Draft plugins",
+		Long:  pluginHelp,
+	}
+	cmd.AddCommand(
+		newPluginInstallCmd(out),
+	)
+	return cmd
+}
+
+// findPlugins returns a list of YAML files that describe plugins.
+func findPlugins(plugdirs string) ([]*plugin.Plugin, error) {
+	found := []*plugin.Plugin{}
+	// Let's get all UNIXy and allow path separators
+	for _, p := range filepath.SplitList(plugdirs) {
+		matches, err := plugin.LoadAll(p)
+		if err != nil {
+			return matches, err
+		}
+		found = append(found, matches...)
+	}
+	return found, nil
+}
 
 // loadPlugins loads plugins into the command list.
 //
@@ -23,6 +52,7 @@ const pluginEnvVar = "DRAFT_PLUGIN"
 // as it finds them.
 func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in io.Reader) {
 	plugdirs := os.Getenv(pluginEnvVar)
+
 	if plugdirs == "" {
 		plugdirs = home.Plugins()
 	}
@@ -87,7 +117,6 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 			}
 		}
 
-		// TODO: Make sure a command with this name does not already exist.
 		baseCmd.AddCommand(c)
 	}
 }
@@ -125,23 +154,37 @@ func manuallyProcessArgs(args []string) ([]string, []string) {
 	return known, unknown
 }
 
-// findPlugins returns a list of YAML files that describe plugins.
-func findPlugins(plugdirs string) ([]*plugin.Plugin, error) {
-	found := []*plugin.Plugin{}
-	// Let's get all UNIXy and allow path separators
-	for _, p := range filepath.SplitList(plugdirs) {
-		matches, err := plugin.LoadAll(p)
-		if err != nil {
-			return matches, err
-		}
-		found = append(found, matches...)
+// runHook will execute a plugin hook.
+func runHook(p *plugin.Plugin, event string) error {
+	hook := p.Metadata.Hooks.Get(event)
+	if hook == "" {
+		return nil
 	}
-	return found, nil
+
+	prog := exec.Command("sh", "-c", hook)
+	// TODO make this work on windows
+	// I think its ... ¯\_(ツ)_/¯
+	// prog := exec.Command("cmd", "/C", p.Metadata.Hooks.Install())
+
+	//TODO: debug("running %s hook: %s", event, prog)
+
+	home := draftpath.Home(homePath())
+	setupEnv(p.Metadata.Name, p.Dir, home.Plugins(), home)
+	prog.Stdout, prog.Stderr = os.Stdout, os.Stderr
+	if err := prog.Run(); err != nil {
+		if eerr, ok := err.(*exec.ExitError); ok {
+			os.Stderr.Write(eerr.Stderr)
+			return fmt.Errorf("plugin %s hook for %q exited with error", event, p.Metadata.Name)
+		}
+		return err
+	}
+	return nil
 }
 
 // setupEnv prepares os.Env for plugins. It operates on os.Env because
 // the plugin subsystem itself needs access to the environment variables
 // created here.
+// TODO: change setupEnv to setupPluginEnv
 func setupEnv(shortname, base, plugdirs string, home draftpath.Home) {
 	// Set extra env vars:
 	for key, val := range map[string]string{

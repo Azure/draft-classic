@@ -49,9 +49,12 @@ func TestManuallyProcessArgs(t *testing.T) {
 func TestLoadPlugins(t *testing.T) {
 	// Set draft home to point to testdata
 	old := draftHome
+	oldEnv := os.Getenv(pluginEnvVar)
 	draftHome = "testdata/drafthome"
+	os.Unsetenv(pluginEnvVar)
 	defer func() {
 		draftHome = old
+		os.Setenv(pluginEnvVar, oldEnv)
 	}()
 	ph := draftpath.Home(homePath())
 
