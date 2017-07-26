@@ -82,4 +82,10 @@ func TestPluginInstallCmd(t *testing.T) {
 
 		buf.Reset()
 	}
+
+	cmd := newPluginInstallCmd(buf)
+	if err := cmd.PreRunE(cmd, []string{"arg1", "extra arg"}); err == nil {
+		t.Error("Expected failure due to incorrect number of arguments for plugin install command")
+	}
+
 }

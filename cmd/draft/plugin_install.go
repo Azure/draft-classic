@@ -40,10 +40,8 @@ func newPluginInstallCmd(out io.Writer) *cobra.Command {
 }
 
 func (pcmd *pluginInstallCmd) complete(args []string) error {
-	if len(args) != len(pcmd.args) {
-		//TODO: pull this out into helper func like checkArgsLength but better
-		//TODO: standardize error
-		return fmt.Errorf("This command needs %v argument(s): %v", len(pcmd.args), pcmd.args)
+	if err := validateArgs(args, pcmd.args); err != nil {
+		return err
 	}
 	pcmd.source = args[0]
 	pcmd.home = draftpath.Home(homePath())
