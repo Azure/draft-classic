@@ -58,7 +58,6 @@ func debug(format string, args ...interface{}) {
 
 // isLocalReference checks if the source exists on the filesystem.
 func isLocalReference(source string) bool {
-	//TODO: can user install a local plugin using "."?
 	_, err := os.Stat(source)
 	return err == nil
 }

@@ -11,9 +11,6 @@ type base struct {
 	// Source is the reference to a plugin
 	Source string
 
-	//TODO: change DraftHome to ProjectHome or something more generic
-	// or add ProjectHomeEnv as an attribute
-
 	// DraftHome is the $DRAFT_HOME directory
 	DraftHome draftpath.Home
 }

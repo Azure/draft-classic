@@ -20,24 +20,66 @@ type pluginTest struct {
 	flags  []string
 }
 
-func TestPluginInstallCmd(t *testing.T) {
-	// set up draft home
-	old := draftHome
-	defer func() {
-		draftHome = old
-	}()
+type testPluginEnv struct {
+	pluginEnvVar string
+	draftHome    string
+}
 
-	dir, err := ioutil.TempDir("", "draft_home-")
+func setupTestPluginEnv(target *testPluginEnv) (*testPluginEnv, error) {
+	// save old
+	old := draftHome
+	oldenv := os.Getenv(pluginEnvVar)
+
+	// set new
+	draftHome = target.draftHome
+	err := os.Setenv(pluginEnvVar, target.pluginEnvVar)
+
+	return &testPluginEnv{
+		draftHome:    old,
+		pluginEnvVar: oldenv,
+	}, err
+}
+
+func teardownTestPluginEnv(current, original *testPluginEnv) {
+	draftHome = original.draftHome
+	os.Setenv(pluginEnvVar, original.pluginEnvVar)
+	os.RemoveAll(current.draftHome)
+}
+
+func newTestPluginEnv(home, pluginEnvVarValue string) (*testPluginEnv, error) {
+	target := &testPluginEnv{}
+
+	if home == "" {
+		tempHome, err := ioutil.TempDir("", "draft_home-")
+		if err != nil {
+			return target, err
+		}
+
+		if err := os.Mkdir(filepath.Join(tempHome, "plugins"), 0755); err != nil {
+			return target, err
+		}
+
+		target.draftHome = tempHome
+	} else {
+		target.draftHome = home
+	}
+
+	target.pluginEnvVar = pluginEnvVarValue
+
+	return target, nil
+}
+
+func TestPluginInstallCmd(t *testing.T) {
+	target, err := newTestPluginEnv("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(dir)
-	draftHome = dir
-	home := draftpath.Home(draftHome)
 
-	if err := os.Mkdir(home.Plugins(), 0755); err != nil {
+	old, err := setupTestPluginEnv(target)
+	if err != nil {
 		t.Fatal(err)
 	}
+	defer teardownTestPluginEnv(target, old)
 
 	tests := []pluginTest{
 		{
@@ -56,6 +98,7 @@ func TestPluginInstallCmd(t *testing.T) {
 		},
 	}
 
+	home := draftpath.Home(draftHome)
 	buf := bytes.NewBuffer(nil)
 	for _, tt := range tests {
 		cmd := newPluginInstallCmd(buf)

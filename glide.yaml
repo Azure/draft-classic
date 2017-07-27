@@ -35,3 +35,4 @@ import:
   version: ~0.8.0
 - package: github.com/Masterminds/vcs
   version: ^1.11.1
+- package: github.com/gosuri/uitable
