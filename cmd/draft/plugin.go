@@ -27,6 +27,7 @@ func newPluginCmd(out io.Writer) *cobra.Command {
 	}
 	cmd.AddCommand(
 		newPluginInstallCmd(out),
+		newPluginListCmd(out),
 	)
 	return cmd
 }
@@ -45,17 +46,23 @@ func findPlugins(plugdirs string) ([]*plugin.Plugin, error) {
 	return found, nil
 }
 
+func pluginDirPath(home draftpath.Home) string {
+	plugdirs := os.Getenv(pluginEnvVar)
+
+	if plugdirs == "" {
+		plugdirs = home.Plugins()
+	}
+
+	return plugdirs
+}
+
 // loadPlugins loads plugins into the command list.
 //
 // This follows a different pattern than the other commands because it has
 // to inspect its environment and then add commands to the base command
 // as it finds them.
 func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in io.Reader) {
-	plugdirs := os.Getenv(pluginEnvVar)
-
-	if plugdirs == "" {
-		plugdirs = home.Plugins()
-	}
+	plugdirs := pluginDirPath(home)
 
 	found, err := findPlugins(plugdirs)
 	if err != nil {
@@ -162,9 +169,6 @@ func runHook(p *plugin.Plugin, event string) error {
 	}
 
 	prog := exec.Command("sh", "-c", hook)
-	// TODO make this work on windows
-	// I think its ... ¯\_(ツ)_/¯
-	// prog := exec.Command("cmd", "/C", p.Metadata.Hooks.Install())
 
 	debug("running %s hook: %s", event, prog)
 
@@ -193,7 +197,7 @@ func setupPluginEnv(shortname, base, plugdirs string, home draftpath.Home) {
 
 		// Set vars that may not have been set, and save client the
 		// trouble of re-parsing.
-		pluginEnvVar: plugdirs,
+		pluginEnvVar: pluginDirPath(home),
 		homeEnvVar:   home.String(),
 		hostEnvVar:   draftHost,
 		// Set vars that convey common information.
