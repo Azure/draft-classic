@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
+	helpers "github.com/Azure/draft/pkg/testing"
 )
 
 const gitkeepfile = ".gitkeep"
@@ -45,7 +46,7 @@ func TestCreate(t *testing.T) {
 				}
 				pDir = destcompare
 			}
-			copyTree(t, tc.src, pDir)
+			helpers.CopyTree(t, tc.src, pDir)
 
 			// Test
 			create := &createCmd{
@@ -83,39 +84,6 @@ func tempDir(t *testing.T) (string, func()) {
 		if err := os.RemoveAll(path); err != nil {
 			t.Fatalf("err: %s", err)
 		}
-	}
-}
-
-// copyTree copies src directory content tree to dest.
-// If dest exists, it's deleted.
-// We don't handle symlinks (not needed in this test helper)
-func copyTree(t *testing.T, src, dest string) {
-	if err := os.RemoveAll(dest); err != nil {
-		t.Fatalf("couldn't remove directory %s: %v", src, err)
-	}
-
-	if err := filepath.Walk(src, func(p string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		dest := filepath.Join(dest, strings.TrimPrefix(p, src))
-		if info.IsDir() {
-			if err := os.MkdirAll(dest, info.Mode()); err != nil {
-				return err
-			}
-		} else {
-			data, err := ioutil.ReadFile(p)
-			if err != nil {
-				return err
-			}
-			if err = ioutil.WriteFile(dest, data, info.Mode()); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		t.Fatalf("couldn't copy %s: %v", src, err)
 	}
 }
 
