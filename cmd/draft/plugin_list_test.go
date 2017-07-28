@@ -23,7 +23,7 @@ func TestPluginListCmd(t *testing.T) {
 	expectedOutput := "NAME   \tVERSION\tDESCRIPTION      \nargs   \t       \tThis echos args  \necho   \t       \tThis echos stuff \nfullenv\t       \tshow all env vars\nhome   \t       \tshow DRAFT_HOME  \n"
 
 	actual := buf.String()
-	if !strings.Contains(actual, expectedOutput) {
+	if strings.Compare(actual, expectedOutput) != 0 {
 		t.Errorf("Expected %q, Got %q", expectedOutput, actual)
 	}
 }
@@ -51,9 +51,9 @@ func TestEmptyResultsOnPluginListCmd(t *testing.T) {
 		t.Errorf("draft plugin list error: %v", err)
 	}
 
-	expectedOutput := "No plugins found"
+	expectedOutput := "No plugins found\n"
 	actual := buf.String()
-	if !strings.Contains(actual, expectedOutput) {
+	if strings.Compare(actual, expectedOutput) != 0 {
 		t.Errorf("Expected %s, got %s", expectedOutput, actual)
 	}
 

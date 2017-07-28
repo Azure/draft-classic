@@ -86,7 +86,7 @@ func TestPluginInstallCmd(t *testing.T) {
 			name:   "install plugin",
 			plugin: "echo",
 			path:   "testdata/plugins/echo",
-			output: "Installed plugin: echo",
+			output: "Installed plugin: echo\n",
 			fail:   false,
 		},
 		{
@@ -113,7 +113,7 @@ func TestPluginInstallCmd(t *testing.T) {
 
 		if !tt.fail {
 			result := buf.String()
-			if !strings.Contains(result, tt.output) {
+			if strings.Compare(result, tt.output) != 0 {
 				t.Errorf("Expected %v, got %v", tt.output, result)
 			}
 
