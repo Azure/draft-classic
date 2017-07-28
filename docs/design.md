@@ -41,7 +41,7 @@ following domains:
 
 - installation of the server (through `draft init`)
 - interacting with the Draft server
-- interacting with [plugins](plugins.md)
+- interacting with [plugins](plugins-guide.md)
 
 The Draft client interacts with the Draft server through the Kubernetes API server, using
 HTTP/Websockets as the communication protocol.
