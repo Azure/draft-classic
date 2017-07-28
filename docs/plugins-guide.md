@@ -3,11 +3,12 @@
 A plugin is a tool that can be accessed through the `draft` CLI, but which is not part of the
 built-in Draft codebase. This guide explains how to use and create plugins.
 
+Exisiting plugins can be found on the [draft plugins](#draft-plugins) section of this page or by searching [Github](https://github.com/search?q=topic%3Adraft-plugin&type=Repositories)
+
 ## An Overview
 
 Draft plugins are add-on tools that integrate seamlessly with Draft. They provide a way to extend
-the core feature set of Draft, but without requiring every new feature to be written in Go and added
-to the core tool.
+the core feature set of Draft, but without requiring every new feature to be written in Go and added to the core tool.
 
 Draft plugins have the following features:
 
@@ -18,22 +19,23 @@ Draft plugins have the following features:
 
 Draft plugins live in `$DRAFT_HOME/plugins`.
 
-The Draft plugin model is partially modeled on Git's plugin model. To that end, you may sometimes
-hear `draft` referred to as the _porcelain_ layer, with plugins being the _plumbing_. This is a
-shorthand way of suggesting that Draft provides the user experience and top level processing logic,
-while the plugins do the "detail work" of performing a desired action.
+The Draft plugin model is partially modeled on Git's plugin model. To that end, you may sometimes hear `draft` referred to as the _porcelain_ layer, with plugins being the _plumbing_. This is a shorthand way of suggesting that Draft provides the user experience and top level processing logic, while the plugins do the "detail work" of performing a desired action.
 
 ## Installing a Plugin
 
-A Draft plugin management system is in the works. But in the short term, plugins are installed by
-copying the plugin directory into `$(draft home)/plugins`.
+Plugins are installed using `$draft plugin install <plugin url/path>`. You can pass in a url to a git repository which contains the plugin or you can opt to pass in a local path to a plugin on your machine.
+```console
+$ draft plugin install https://github.com/michelleN/draft-server
+Installed plugin: server
+$ draft plugin list
+NAME  	VERSION	DESCRIPTION
+server	0.1.0  	Helpers for working with in-cluster draftd
+```
 
+Alternatively, you can also copy the plugin directory into `$(draft home)/plugins` by hand which is what the `$draft plugin install <plugin path/url>` command does under the hood.
 ```console
 $ cp -a myplugin/ $(draft home)/plugins/
 ```
-
-If you have a plugin tar distribution, simply untar the plugin into the `$(draft home)/plugins`
-directory.
 
 ## Building Plugins
 
@@ -158,3 +160,8 @@ _not_ passed on to the plugin.
 
 Plugins _should_ display help text and then exit for `-h` and `--help`. In all other cases, plugins
 may use flags as appropriate.
+
+## Draft Plugins
+- [draft-server](https://github.com/michelleN/draft-server) - Additional commands to work with and manage draftd
+
+_Notes: We also encourage Github authors to use the [draft-plugin](https://github.com/search?q=topic%3Adraft-plugin&type=Repositories) tag on their plugin repositories._

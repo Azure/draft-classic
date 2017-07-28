@@ -1,7 +1,6 @@
 package: github.com/Azure/draft
 import:
 - package: github.com/BurntSushi/toml
-
 - package: github.com/Azure/go-ansiterm
   version: 388960b655244e76e24c75f48631564eaefade62
 - package: github.com/docker/distribution
@@ -12,7 +11,6 @@ import:
   version: v17.05.0-ce
 - package: github.com/docker/go-units
   version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
-
 - package: github.com/emicklei/go-restful
   version: v1.2
 - package: github.com/ghodss/yaml
@@ -35,3 +33,6 @@ import:
   version: ~0.11.5
 - package: github.com/pkg/errors
   version: ~0.8.0
+- package: github.com/Masterminds/vcs
+  version: ^1.11.1
+- package: github.com/gosuri/uitable

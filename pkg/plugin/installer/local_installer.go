@@ -1,0 +1,36 @@
+package installer
+
+import (
+	"path/filepath"
+
+	"github.com/Azure/draft/pkg/draft/draftpath"
+)
+
+// LocalInstaller installs plugins from the filesystem
+type LocalInstaller struct {
+	base
+}
+
+// NewLocalInstaller creates a new LocalInstaller
+func NewLocalInstaller(source string, home draftpath.Home) (*LocalInstaller, error) {
+
+	i := &LocalInstaller{
+		base: newBase(source, home),
+	}
+
+	return i, nil
+}
+
+// Install creates a symlink to the plugin directory in $HELM_HOME
+func (i *LocalInstaller) Install() error {
+	if !isPlugin(i.Source) {
+		return ErrMissingMetadata
+	}
+
+	src, err := filepath.Abs(i.Source)
+	if err != nil {
+		return err
+	}
+
+	return i.link(src)
+}

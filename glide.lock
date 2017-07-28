@@ -1,5 +1,5 @@
-hash: f5a7f23585502f42141b89cfdc8a5c3881f1a308bfc2cea96e37c43b40068524
-updated: 2017-07-26T12:00:22.25440202-04:00
+hash: 010f114cb7f72ad6b5d106bc3ddb2ceabde6ab724d3f47c43b09d20101cb1b76
+updated: 2017-07-26T15:54:32.289598056-04:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -171,6 +171,11 @@ imports:
   version: 7fe3183ee95b29153898356cc2c6026a8cb7afe5
   repo: https://github.com/bacongobbler/websocket
   vcs: git
+- name: github.com/gosuri/uitable
+  version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
+  subpackages:
+  - util/strutil
+  - util/wordwrap
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
@@ -199,6 +204,10 @@ imports:
   version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
 - name: github.com/Masterminds/sprig
   version: 9526be0327b26ad31aa70296a7b10704883976d5
+- name: github.com/Masterminds/vcs
+  version: 3084677c2c188840777bff30054f2b553729d329
+- name: github.com/mattn/go-runewidth
+  version: d6bea18f789704b5f83375793155289da36a3c7f
 - name: github.com/Microsoft/go-winio
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
@@ -475,6 +484,7 @@ imports:
   - pkg/ignore
   - pkg/kube
   - pkg/plugin
+  - pkg/plugin/cache
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
