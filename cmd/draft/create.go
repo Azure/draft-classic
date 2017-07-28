@@ -59,15 +59,24 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 }
 
 func (c *createCmd) run() error {
-	var err error
-	mfest := manifest.New()
+	var (
+		err       error
+		chartName string
+		appPath   string
+	)
 
-	if c.appName != "" {
-		mfest.Environments[manifest.DefaultEnvironmentName].Name = c.appName
+	log.Debugf("setting manifest name and chart name to: %s", chartName)
+
+	appPath, err = os.Getwd()
+	if err != nil {
+		return fmt.Errorf("could not get the current working directory %v", err)
 	}
 
+	chartName = doPickName(c.appName, c.dest, appPath)
+
+	mfest := manifest.New(chartName)
 	cfile := &chart.Metadata{
-		Name:        mfest.Environments[manifest.DefaultEnvironmentName].Name,
+		Name:        chartName,
 		Description: "A Helm chart for Kubernetes",
 		Version:     "0.1.0",
 		ApiVersion:  chartutil.ApiVersionV1,
@@ -77,9 +86,25 @@ func (c *createCmd) run() error {
 	if err != nil {
 		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
 	}
-	if chartExists {
-		// chart dir already exists, so we just tell the user that we are happily skipping the
-		// process.
+
+	tomlExists, err := osutil.Exists(filepath.Join(c.dest, "draft.toml"))
+
+	if err != nil {
+		return fmt.Errorf(
+			"there was an error checking if the draft.toml file exists: %v",
+			err,
+		)
+	}
+
+	// our chart exists, but draft.toml does not, so we create draft.toml in place, and exit.
+	if chartExists && !tomlExists {
+		fmt.Fprintln(c.out, "!!! chart directory already exists. Skipping pack detection.")
+		if err := doWriteToml(c.dest, *mfest); err != nil {
+			return err
+		}
+		return nil
+	} else if chartExists && tomlExists {
+		// chart dir and draft.toml already exist, so we just tell the user that we are happily skipping the process.
 		fmt.Fprintln(c.out, "--> chart directory already exists. Ready to sail!")
 		return nil
 	}
@@ -104,15 +129,10 @@ func (c *createCmd) run() error {
 			return err
 		}
 	}
-	tomlFile := filepath.Join(c.dest, "draft.toml")
-	draftToml, err := os.OpenFile(tomlFile, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer draftToml.Close()
 
-	if err := toml.NewEncoder(draftToml).Encode(mfest); err != nil {
-		return fmt.Errorf("could not write metadata to draft.toml: %v", err)
+	// Create the draft.toml file.
+	if err := doWriteToml(c.dest, *mfest); err != nil {
+		return err
 	}
 
 	ignoreFile := filepath.Join(c.dest, ignoreFileName)
@@ -125,6 +145,37 @@ func (c *createCmd) run() error {
 
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
+}
+
+func doWriteToml(createDest string, mfest manifest.Manifest) error {
+	tomlFile := filepath.Join(createDest, "draft.toml")
+	draftToml, err := os.OpenFile(tomlFile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer draftToml.Close()
+
+	if err := toml.NewEncoder(draftToml).Encode(mfest); err != nil {
+		return fmt.Errorf("could not write metadata to draft.toml: %v", err)
+	}
+
+	return nil
+}
+
+func doPickName(appName string, createDest string, currentDir string) string {
+	if appName != "" {
+		return appName
+	}
+
+	if createDest != "" {
+		// create run with a path as an argument ie:
+		// draft create foo/bar/app
+		return filepath.Base(createDest)
+	}
+
+	// create run without a path ie:
+	// draft create
+	return filepath.Base(currentDir)
 }
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in

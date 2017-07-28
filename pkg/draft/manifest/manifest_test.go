@@ -6,13 +6,20 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
-	m := New()
-	m.Environments[DefaultEnvironmentName].Name = "foobar"
+func TestNewCustomName(t *testing.T) {
+	m := New("foobar")
 	expected := "&{foobar   default [] false false 2}"
 	actual := fmt.Sprintf("%v", m.Environments[DefaultEnvironmentName])
 	if expected != actual {
 		t.Errorf("wanted %s, got %s", expected, actual)
+	}
+}
+
+func TestNewDefault(t *testing.T) {
+	m := New("")
+
+	if m.Environments[DefaultEnvironmentName].Name == "" {
+		t.Errorf("expected name to be generated")
 	}
 }
 
