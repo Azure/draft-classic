@@ -28,6 +28,7 @@ func newPluginCmd(out io.Writer) *cobra.Command {
 	cmd.AddCommand(
 		newPluginInstallCmd(out),
 		newPluginListCmd(out),
+		newPluginRemoveCmd(out),
 	)
 	return cmd
 }
