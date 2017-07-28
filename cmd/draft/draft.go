@@ -70,6 +70,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 		newInitCmd(out, in),
 		newUpCmd(out),
 		newVersionCmd(out),
+		newPluginCmd(out),
 	)
 
 	// Find and add plugins
@@ -159,4 +160,18 @@ func main() {
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func debug(format string, args ...interface{}) {
+	if flagDebug {
+		format = fmt.Sprintf("[debug] %s\n", format)
+		fmt.Printf(format, args...)
+	}
+}
+
+func validateArgs(args, expectedArgs []string) error {
+	if len(args) != len(expectedArgs) {
+		return fmt.Errorf("This command needs %v argument(s): %v", len(expectedArgs), expectedArgs)
+	}
+	return nil
 }
