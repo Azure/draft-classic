@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/net/context"
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/helm"
@@ -77,8 +77,8 @@ func (c *startCmd) run() (err error) {
 		ListenAddr: c.listenAddr,
 		Registry: &draft.RegistryConfig{
 			Auth: c.registryAuth,
-			Org: c.registryOrg,
-			URL: c.registryURL,
+			Org:  c.registryOrg,
+			URL:  c.registryURL,
 		},
 	}
 	if c.dockerFromEnv {
@@ -98,9 +98,9 @@ func (c *startCmd) run() (err error) {
 	if cfg.Kube, err = kubernetes.NewForConfig(kubecfg); err != nil {
 		return fmt.Errorf("failed to create kubernetes client: %v", err)
 	}
-	
+
 	cfg.Helm = helm.NewClient(helm.Host(c.tillerURI))
 	log.Printf("server is now listening at %s", c.listenAddr)
 
-	return draft.NewServer(cfg).Serve(context.Background())	
+	return draft.NewServer(cfg).Serve(context.Background())
 }

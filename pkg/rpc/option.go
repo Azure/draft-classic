@@ -26,4 +26,4 @@ func WithServerHost(host string) ClientOpt {
 
 // serverOpts specifies the union of all configurable
 // options an rpc.Server accepts, e.g. TLS config.
-type serverOpts struct {}
+type serverOpts struct{}

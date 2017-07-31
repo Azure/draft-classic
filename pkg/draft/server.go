@@ -1,18 +1,18 @@
 package draft
 
 import (
-	"sync"
-	"net"
 	"fmt"
-	"golang.org/x/net/context"
 	"github.com/Azure/draft/pkg/rpc"
+	"golang.org/x/net/context"
+	"net"
+	"sync"
 )
 
 // kubernetes imports
 import (
-// 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
- 	k8s "k8s.io/client-go/kubernetes"
-// 	"k8s.io/client-go/pkg/api/v1"
+	// 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
+	// 	"k8s.io/client-go/pkg/api/v1"
 )
 
 // docker imports
@@ -92,31 +92,31 @@ func (s *Server) Serve(ctx context.Context) error {
 	go func() {
 		defer wg.Done()
 		s.srv = rpc.NewServer()
-		errc<- s.srv.Serve(lis, s)
+		errc <- s.srv.Serve(lis, s)
 		close(errc)
 		close(done)
 	}()
 	select {
-		case <-ctx.Done():
-			s.srv.Stop()
-			close(done)
-			return ctx.Err()
-		case <-done:
-			return <-errc
+	case <-ctx.Done():
+		s.srv.Stop()
+		close(done)
+		return ctx.Err()
+	case <-done:
+		return <-errc
 	}
 }
 
 // Up handles incoming draft up requests and returns a stream of summaries or error.
 //
 // Up implements rpc.UpHandler
-func (s *Server) Up(ctx context.Context, req *rpc.UpRequest) (<-chan *rpc.UpSummary) {
+func (s *Server) Up(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.UpSummary {
 	ch := make(chan *rpc.UpSummary)
 	go func() {
 		fmt.Printf("NAMESPACE: %v\n", req.Namespace)
 		fmt.Printf("CHART:     %v\n", req.Chart)
 		fmt.Printf("VALUES:    %v\n", req.Values)
 		fmt.Printf("FILES:     %v\n", req.Files)
-		ch<- &rpc.UpSummary{StageName:  "test", StatusText: "OK", StatusCode: rpc.UpSummary_SUCCESS}
+		ch <- &rpc.UpSummary{StageName: "test", StatusText: "OK", StatusCode: rpc.UpSummary_SUCCESS}
 		close(ch)
 	}()
 	return ch

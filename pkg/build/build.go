@@ -1,24 +1,24 @@
 package build
 
 import (
-	"path/filepath"
-	"io/ioutil"
 	"bytes"
 	"fmt"
-	"os"
-	"io"
 	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	// docker deps
-	"github.com/docker/docker/cli/command/image/build"
 	"github.com/docker/docker/builder/dockerignore"
-	"github.com/docker/docker/pkg/fileutils"
+	"github.com/docker/docker/cli/command/image/build"
 	"github.com/docker/docker/pkg/archive"
-	
+	"github.com/docker/docker/pkg/fileutils"
+
 	// helm deps
-	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/strvals"
 
 	"github.com/Azure/draft/pkg/draft/manifest"
@@ -106,7 +106,7 @@ func loadArchive(ctx *Context) (err error) {
 
 func loadValues(ctx *Context) error {
 	valuesfile := filepath.Join(ctx.AppDir, pack.ChartDir, pack.ValuesfileName)
-	vals, err  := chartutil.ReadValuesFile(valuesfile)
+	vals, err := chartutil.ReadValuesFile(valuesfile)
 	if err != nil {
 		return fmt.Errorf("failed to read values file %q: %v", valuesfile, err)
 	}
