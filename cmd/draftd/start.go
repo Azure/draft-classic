@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"io"
-	"strings"
 
+	"golang.org/x/net/context"
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/helm"
 
-	"github.com/Azure/draft/api"
+	"github.com/Azure/draft/pkg/draft"
 )
 
 const startDesc = `
@@ -71,43 +71,36 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (c *startCmd) run() error {
-	var (
-		dockerClient *docker.Client
-		err          error
-	)
-
-	protoAndAddr := strings.SplitN(c.listenAddr, "://", 2)
-
+func (c *startCmd) run() (err error) {
+	cfg := &draft.ServerConfig{
+		Basedomain: c.basedomain,
+		ListenAddr: c.listenAddr,
+		Registry: &draft.RegistryConfig{
+			Auth: c.registryAuth,
+			Org: c.registryOrg,
+			URL: c.registryURL,
+		},
+	}
 	if c.dockerFromEnv {
-		dockerClient, err = docker.NewEnvClient()
+		if cfg.Docker, err = docker.NewEnvClient(); err != nil {
+			return fmt.Errorf("failed to create docker env client: %v", err)
+		}
 	} else {
-		dockerClient, err = docker.NewClient(c.dockerAddr, c.dockerVersion, nil, nil)
-	}
-	if err != nil {
-		return err
-	}
-
-	kubeConfig, err := rest.InClusterConfig()
-	if err != nil {
-		return err
-	}
-	kubeClientset, err := kubernetes.NewForConfig(kubeConfig)
-	if err != nil {
-		return err
+		if cfg.Docker, err = docker.NewClient(c.dockerAddr, c.dockerVersion, nil, nil); err != nil {
+			return fmt.Errorf("failed to create docker client: %v", err)
+		}
 	}
 
-	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
+	kubecfg, err := rest.InClusterConfig()
 	if err != nil {
-		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
+		return fmt.Errorf("failed to get in-cluster kubernetes config: %v", err)
 	}
-	server.DockerClient = dockerClient
-	server.RegistryAuth = c.registryAuth
-	server.RegistryOrg = c.registryOrg
-	server.RegistryURL = c.registryURL
-	server.Basedomain = c.basedomain
-	server.HelmClient = helm.NewClient(helm.Host(c.tillerURI))
-	server.KubeClient = kubeClientset
+	if cfg.Kube, err = kubernetes.NewForConfig(kubecfg); err != nil {
+		return fmt.Errorf("failed to create kubernetes client: %v", err)
+	}
+	
+	cfg.Helm = helm.NewClient(helm.Host(c.tillerURI))
 	log.Printf("server is now listening at %s", c.listenAddr)
-	return server.Serve()
+
+	return draft.NewServer(cfg).Serve(context.Background())	
 }
