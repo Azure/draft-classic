@@ -108,13 +108,13 @@ func teardown() {
 	}
 }
 
-func ensureDraftClient(p *draft.Client) *draft.Client {
-	if p != nil {
-		return p
-	}
-	client, err := draft.NewFromString(draftHost, nil)
-	if err != nil {
-		panic(err)
+func ensureDraftClient(client *draft.Client) *draft.Client {
+	if client == nil {
+		return draft.NewClient(&draft.ClientConfig{
+			ServerAddr: draftHost,
+			Stdout:     os.Stdout,
+			Stderr:     os.Stderr,
+		})
 	}
 	return client
 }
