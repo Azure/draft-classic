@@ -3,12 +3,13 @@ package build
 import (
 	"bytes"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/BurntSushi/toml"
+	"github.com/Sirupsen/logrus"
 
 	// docker deps
 	"github.com/docker/docker/builder/dockerignore"
@@ -96,18 +97,29 @@ func loadArchive(ctx *Context) (err error) {
 	if err = archiveSrc(ctx); err != nil {
 		return err
 	}
-	if ctx.Chart, err = chartutil.Load(filepath.Join(ctx.AppDir, "chart")); err != nil {
+	// find the first directory in chart/ and assume that is the chart we want to deploy.
+	chartDir := filepath.Join(ctx.AppDir, pack.ChartDir)
+	files, err := ioutil.ReadDir(chartDir)
+	if err != nil {
 		return err
+	}
+	var found bool
+	for _, file := range files {
+		if file.IsDir() {
+			found = true
+			if ctx.Chart, err = chartutil.Load(filepath.Join(chartDir, file.Name())); err != nil {
+				return err
+			}
+		}
+	}
+	if !found {
+		return ErrChartNotExist
 	}
 	return nil
 }
 
 func loadValues(ctx *Context) error {
-	valuesfile := filepath.Join(ctx.AppDir, pack.ChartDir, pack.ValuesfileName)
-	vals, err := chartutil.ReadValuesFile(valuesfile)
-	if err != nil {
-		return fmt.Errorf("failed to read values file %q: %v", valuesfile, err)
-	}
+	var vals = make(chartutil.Values)
 	for _, val := range ctx.Env.Values {
 		if err := strvals.ParseInto(val, vals.AsMap()); err != nil {
 			return fmt.Errorf("failed to parse %q from draft.toml: %v", val, err)

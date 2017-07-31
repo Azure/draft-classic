@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"k8s.io/helm/pkg/proto/hapi/chart"
-
 	"github.com/Azure/draft/pkg/draft/pack/generated"
 	"github.com/Azure/draft/pkg/osutil"
 )
@@ -122,12 +120,10 @@ func Create(name, dir string, files []*File) (string, error) {
 }
 
 // CreateFrom scaffolds a directory with the src pack.
-func CreateFrom(chartMeta *chart.Metadata, dest, src string) error {
+func CreateFrom(dest, src string) error {
 	pack, err := FromDir(src)
 	if err != nil {
 		return fmt.Errorf("could not load %s: %s", src, err)
 	}
-
-	pack.Chart.Metadata = chartMeta
 	return pack.SaveDir(dest, false)
 }

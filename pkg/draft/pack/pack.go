@@ -99,16 +99,11 @@ func (p *Pack) Detect(dir string) (string, error) {
 // SaveDir saves a pack as files in a directory.
 func (p *Pack) SaveDir(dest string, includeDetectScript bool) error {
 	// Create the chart directory
-	chartName := p.Chart.Metadata.Name
-	// HACK(bacongobbler): chartutil.SaveDir uses the chart name as the dirname. Because we want to
-	// write it to chart/, we name the chart 'chart' and then re-save the Chart.yaml later with
-	// chartutil.SaveChartfile().
-	p.Chart.Metadata.Name = "chart"
-	if err := chartutil.SaveDir(p.Chart, dest); err != nil {
-		return err
+	chartPath := filepath.Join(dest, ChartDir)
+	if err := os.Mkdir(chartPath, 0755); err != nil {
+		return fmt.Errorf("Could not create %s: %s", chartPath, err)
 	}
-	p.Chart.Metadata.Name = chartName
-	if err := chartutil.SaveChartfile(filepath.Join(dest, ChartDir, ChartfileName), p.Chart.Metadata); err != nil {
+	if err := chartutil.SaveDir(p.Chart, chartPath); err != nil {
 		return err
 	}
 
