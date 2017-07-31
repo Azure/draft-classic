@@ -295,7 +295,7 @@ func buildApp(ws *websocket.Conn, server *Server, appName string, buildContext i
 
 	// inject certain values into the chart such as the registry location, the application name
 	// and the version
-	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s",
+	imageVals := fmt.Sprintf("image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s,ondraft=true",
 		appName,
 		server.RegistryOrg,
 		server.RegistryURL,
