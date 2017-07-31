@@ -1,15 +1,15 @@
 package rpc
 
 import (
-	"net"
-	"golang.org/x/net/context"
 	"github.com/Azure/draft/pkg/version"
+	"golang.org/x/net/context"
+	"net"
 )
 
 // Up is the mechanism by which to accept draft up requests
 // initiated by the draft client dispatched by the rpc.Server.
 type UpHandler interface {
-	Up(context.Context, *UpRequest) (<-chan *UpSummary)
+	Up(context.Context, *UpRequest) <-chan *UpSummary
 }
 
 // Handler is the api surface to the rpc package. When calling

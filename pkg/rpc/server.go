@@ -1,11 +1,11 @@
 package rpc
 
 import (
-	"sync/atomic"
-	"sync"
-	"net"
 	"fmt"
 	"io"
+	"net"
+	"sync"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/net/context"
@@ -15,11 +15,11 @@ import (
 )
 
 type serverImpl struct {
-	opts  serverOpts
-	h 	  Handler
-	lis   net.Listener
-	srv   *grpc.Server
-	done  int32
+	opts serverOpts
+	h    Handler
+	lis  net.Listener
+	srv  *grpc.Server
+	done int32
 }
 
 func newServerImpl(opts ...ServerOpt) *serverImpl {
@@ -94,10 +94,10 @@ func (s *serverImpl) UpStream(stream Draft_UpStreamServer) (err error) {
 
 	for {
 		switch msg, err = stream.Recv(); {
-			case err == io.EOF:
-				return nil
-			case err != nil:
-				return err
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
 		}
 		wg.Add(1)
 		go func(ctx context.Context, wg *sync.WaitGroup, req *UpRequest) {
@@ -105,7 +105,7 @@ func (s *serverImpl) UpStream(stream Draft_UpStreamServer) (err error) {
 			for summary := range s.h.Up(ctx, req) {
 				resp := &UpMessage{&UpMessage_UpSummary{summary}}
 				if err := stream.Send(resp); err != nil {
-					errc<- fmt.Errorf("server: failed to send response: %v", err)
+					errc <- fmt.Errorf("server: failed to send response: %v", err)
 				}
 			}
 		}(ctx, &wg, msg.GetUpRequest())

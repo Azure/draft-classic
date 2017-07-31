@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"fmt"
-	"io"
+	"github.com/Azure/draft/pkg/version"
 	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"github.com/Azure/draft/pkg/version"
+	"io"
 )
 
 type clientImpl struct {
@@ -42,19 +42,19 @@ func (c *clientImpl) UpBuild(ctx context.Context, msg *UpRequest) (<-chan *UpSum
 		errc := make(chan error)
 		go func() {
 			if err = up_build(ctx, rpc, msg, recv); err != nil {
-				errc<- err
+				errc <- err
 			}
 			close(recv)
 			close(errc)
 		}()
 		go func() {
 			for resp := range recv {
-				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n", 
+				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n",
 					resp.GetUpSummary().GetStageName(),
 					resp.GetUpSummary().GetStatusText(),
 					resp.GetUpSummary().GetStatusCode())
 				if summary := resp.GetUpSummary(); summary != nil {
-					ret<- summary
+					ret <- summary
 				}
 			}
 			close(ret)
@@ -65,18 +65,18 @@ func (c *clientImpl) UpBuild(ctx context.Context, msg *UpRequest) (<-chan *UpSum
 }
 
 // UpStream implementes rpc.Client.UpStream
-func (c *clientImpl) UpStream(apictx context.Context, msgc <-chan *UpRequest) (<-chan *UpSummary, error)  {
+func (c *clientImpl) UpStream(apictx context.Context, msgc <-chan *UpRequest) (<-chan *UpSummary, error) {
 	ret := make(chan *UpSummary)
 	err := c.Connect(func(ctx context.Context, rpc DraftClient) error {
 		recv := make(chan *UpMessage)
 		go func() {
 			for resp := range recv {
-				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n", 
+				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n",
 					resp.GetUpSummary().GetStageName(),
 					resp.GetUpSummary().GetStatusText(),
 					resp.GetUpSummary().GetStatusCode())
 				if summary := resp.GetUpSummary(); summary != nil {
-					ret<- summary
+					ret <- summary
 				}
 			}
 			close(ret)
@@ -112,11 +112,11 @@ func up_build(ctx context.Context, rpc DraftClient, msg *UpRequest, recv chan<- 
 			return fmt.Errorf("rpc error handling up_build recv: %v", err)
 		}
 		select {
-			case <-ctx.Done():
-				return nil
-			case recv<- f:
-				// nothing to do
-			default:
+		case <-ctx.Done():
+			return nil
+		case recv <- f:
+			// nothing to do
+		default:
 		}
 	}
 }
@@ -145,20 +145,22 @@ func up_stream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, rec
 				errc <- fmt.Errorf("failed to receive a summary: %v", err)
 				return
 			}
-			recv<- m
+			recv <- m
 		}
 	}()
 	for {
 		select {
-			case msg, ok := <-send:
-				if !ok { return nil }		
-				fmt.Printf("client: sending: %v\n", msg)
-				req := &UpMessage{&UpMessage_UpRequest{msg}}
-				if err := stream.Send(req); err != nil {
-					return fmt.Errorf("failed to send an up message: %v", err)
-				}
-			case err := <-errc:
-				return err
+		case msg, ok := <-send:
+			if !ok {
+				return nil
+			}
+			fmt.Printf("client: sending: %v\n", msg)
+			req := &UpMessage{&UpMessage_UpRequest{msg}}
+			if err := stream.Send(req); err != nil {
+				return fmt.Errorf("failed to send an up message: %v", err)
+			}
+		case err := <-errc:
+			return err
 		}
 	}
 }

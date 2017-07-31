@@ -2,19 +2,19 @@ package draft
 
 import (
 	"fmt"
-	"io"
-	"golang.org/x/net/context"
-	"github.com/Azure/draft/pkg/version"
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/rpc"
+	"github.com/Azure/draft/pkg/version"
 	"github.com/golang/protobuf/ptypes/any"
+	"golang.org/x/net/context"
+	"io"
 )
 
 type ClientConfig struct {
 	ServerAddr string
 	ServerHost string
-	Stdout 	   io.Writer
-	Stderr 	   io.Writer
+	Stdout     io.Writer
+	Stderr     io.Writer
 }
 
 type Client struct {
@@ -28,7 +28,7 @@ func NewClient(cfg *ClientConfig) *Client {
 }
 
 func (c *Client) Version(ctx context.Context) (*version.Version, error) {
-	return c.rpc.Version(ctx)	
+	return c.rpc.Version(ctx)
 }
 
 func (c *Client) Up(ctx context.Context, app *build.Context) error {
@@ -39,7 +39,7 @@ func (c *Client) Up(ctx context.Context, app *build.Context) error {
 		Files:     []*any.Any{{app.Source.Name, app.Source.File}},
 	}
 	if app.Env.Watch {
-		fmt.Println("TODO: watch")	
+		fmt.Println("TODO: watch")
 	}
 
 	results, err := c.rpc.UpBuild(ctx, req)
