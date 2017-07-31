@@ -179,11 +179,12 @@ After running `draft create`, this directory would have a chart built for it:
 ```
 myapp/
  chart/
-   Chart.yaml
-   templates/
-     deployment.yaml
-     service.yaml
-   values.yaml
+   python/
+     Chart.yaml
+     templates/
+       deployment.yaml
+       service.yaml
+     values.yaml
  Dockerfile
  src/
    app.py

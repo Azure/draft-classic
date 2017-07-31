@@ -199,7 +199,7 @@ func dotnetcoreDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/.dockerignore", size: 46, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/.dockerignore", size: 46, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -219,7 +219,7 @@ func dotnetcoreDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/Dockerfile", size: 426, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "dotnetcore/Dockerfile", size: 426, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -239,7 +239,7 @@ func dotnetcoreNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/NOTICE", size: 1082, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/NOTICE", size: 1082, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -259,12 +259,12 @@ func dotnetcoreChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _dotnetcoreChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\xc9\x2f\xc9\x4b\x2d\x49\xce\x2f\x4a\xe5\x02\x04\x00\x00\xff\xff\xe1\x52\x51\x0c\x11\x00\x00\x00")
+var _dotnetcoreChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\xc9\x2f\xc9\x4b\x2d\x49\xce\x2f\x4a\xe5\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\x58\x56\x7a\x5d\x59\x00\x00\x00")
 
 func dotnetcoreChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -279,7 +279,7 @@ func dotnetcoreChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/Chart.yaml", size: 17, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/Chart.yaml", size: 89, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -299,7 +299,7 @@ func dotnetcoreChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -319,7 +319,7 @@ func dotnetcoreChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -339,7 +339,7 @@ func dotnetcoreChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/templates/deployment.yaml", size: 937, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/templates/deployment.yaml", size: 937, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -359,7 +359,7 @@ func dotnetcoreChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -379,7 +379,7 @@ func dotnetcoreChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -399,7 +399,7 @@ func dotnetcoreChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/chart/values.yaml", size: 421, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/chart/values.yaml", size: 421, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -419,7 +419,7 @@ func dotnetcoreDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "dotnetcore/detect", size: 159, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "dotnetcore/detect", size: 159, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -439,7 +439,7 @@ func golangDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -459,7 +459,7 @@ func golangDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/Dockerfile", size: 46, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "golang/Dockerfile", size: 46, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -479,7 +479,7 @@ func golangNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -499,12 +499,12 @@ func golangChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _golangChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\xcf\xcf\x49\xcc\x4b\xe7\x02\x04\x00\x00\xff\xff\x80\xbb\xba\x46\x0d\x00\x00\x00")
+var _golangChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\xcf\xcf\x49\xcc\x4b\xe7\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\x30\xa1\x93\x17\x55\x00\x00\x00")
 
 func golangChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -519,7 +519,7 @@ func golangChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/Chart.yaml", size: 85, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -539,7 +539,7 @@ func golangChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -559,7 +559,7 @@ func golangChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -579,7 +579,7 @@ func golangChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -599,7 +599,7 @@ func golangChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -619,7 +619,7 @@ func golangChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -639,7 +639,7 @@ func golangChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/chart/values.yaml", size: 412, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/chart/values.yaml", size: 412, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -659,7 +659,7 @@ func golangDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "golang/detect", size: 362, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "golang/detect", size: 362, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -699,7 +699,7 @@ func gradleDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gradle/Dockerfile", size: 255, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "gradle/Dockerfile", size: 255, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -744,7 +744,7 @@ func gradleChartHelmignore() (*asset, error) {
 	return a, nil
 }
 
-var _gradleChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\x2f\x4a\x4c\xc9\x49\xe5\x02\x04\x00\x00\xff\xff\xaa\x28\x0e\x07\x0d\x00\x00\x00")
+var _gradleChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x48\x2f\x4a\x4c\xc9\x49\xe5\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\xda\xe7\xcc\xd5\x55\x00\x00\x00")
 
 func gradleChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -759,7 +759,7 @@ func gradleChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gradle/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1501695403, 0)}
+	info := bindataFileInfo{name: "gradle/chart/Chart.yaml", size: 85, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -899,7 +899,7 @@ func gradleDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gradle/detect", size: 132, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "gradle/detect", size: 132, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -919,7 +919,7 @@ func mavenDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -939,7 +939,7 @@ func mavenDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/Dockerfile", size: 290, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "maven/Dockerfile", size: 290, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -959,7 +959,7 @@ func mavenNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -979,12 +979,12 @@ func mavenChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _mavenChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\xc8\x4d\x2c\x4b\xcd\xe3\x02\x04\x00\x00\xff\xff\x46\x16\x6a\xc9\x0c\x00\x00\x00")
+var _mavenChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\xc8\x4d\x2c\x4b\xcd\xe3\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\xde\x9f\x74\x59\x54\x00\x00\x00")
 
 func mavenChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -999,7 +999,7 @@ func mavenChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/Chart.yaml", size: 12, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/Chart.yaml", size: 84, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1019,7 +1019,7 @@ func mavenChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1039,7 +1039,7 @@ func mavenChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1059,7 +1059,7 @@ func mavenChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1079,7 +1079,7 @@ func mavenChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1099,7 +1099,7 @@ func mavenChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1119,7 +1119,7 @@ func mavenChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/chart/values.yaml", size: 424, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/chart/values.yaml", size: 424, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1139,7 +1139,7 @@ func mavenDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "maven/detect", size: 126, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "maven/detect", size: 126, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1159,7 +1159,7 @@ func nodeDockerignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/.dockerignore", size: 36, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1179,7 +1179,7 @@ func nodeDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/Dockerfile", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "node/Dockerfile", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1199,7 +1199,7 @@ func nodeNotice() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/NOTICE", size: 1075, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1219,12 +1219,12 @@ func nodeChartHelmignore() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/.helmignore", size: 333, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _nodeChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\xc8\xcb\x4f\x49\xe5\x02\x04\x00\x00\xff\xff\xe3\x6f\x5e\x9b\x0b\x00\x00\x00")
+var _nodeChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\xc8\xcb\x4f\x49\xe5\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\x86\xec\xf8\x8b\x53\x00\x00\x00")
 
 func nodeChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1239,7 +1239,7 @@ func nodeChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/Chart.yaml", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1259,7 +1259,7 @@ func nodeChartTemplatesNotesTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/NOTES.txt", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1279,7 +1279,7 @@ func nodeChartTemplates_helpersTpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/_helpers.tpl", size: 516, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1299,7 +1299,7 @@ func nodeChartTemplatesDeploymentYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/deployment.yaml", size: 903, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1319,7 +1319,7 @@ func nodeChartTemplatesIngressYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/ingress.yaml", size: 406, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1339,7 +1339,7 @@ func nodeChartTemplatesServiceYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/templates/service.yaml", size: 405, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1359,7 +1359,7 @@ func nodeChartValuesYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/chart/values.yaml", size: 408, mode: os.FileMode(420), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/chart/values.yaml", size: 408, mode: os.FileMode(420), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1379,7 +1379,7 @@ func nodeDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "node/detect", size: 147, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "node/detect", size: 147, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1419,7 +1419,7 @@ func phpDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/Dockerfile", size: 257, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "php/Dockerfile", size: 257, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1464,7 +1464,7 @@ func phpChartHelmignore() (*asset, error) {
 	return a, nil
 }
 
-var _phpChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\xc8\x28\xe0\x02\x04\x00\x00\xff\xff\x59\xbe\xed\x73\x0a\x00\x00\x00")
+var _phpChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\xc8\x28\xe0\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\xe1\xbd\xa2\xf0\x52\x00\x00\x00")
 
 func phpChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1479,7 +1479,7 @@ func phpChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/chart/Chart.yaml", size: 10, mode: os.FileMode(420), modTime: time.Unix(1501695403, 0)}
+	info := bindataFileInfo{name: "php/chart/Chart.yaml", size: 82, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1619,7 +1619,7 @@ func phpDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "php/detect", size: 120, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "php/detect", size: 120, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1659,7 +1659,7 @@ func pythonDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/Dockerfile", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "python/Dockerfile", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1704,7 +1704,7 @@ func pythonChartHelmignore() (*asset, error) {
 	return a, nil
 }
 
-var _pythonChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\xa8\x2c\xc9\xc8\xcf\xe3\x02\x04\x00\x00\xff\xff\xf1\xba\xd4\xcc\x0d\x00\x00\x00")
+var _pythonChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\xa8\x2c\xc9\xc8\xcf\xe3\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\xf8\x9d\xd6\x9b\x55\x00\x00\x00")
 
 func pythonChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1719,7 +1719,7 @@ func pythonChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "python/chart/Chart.yaml", size: 13, mode: os.FileMode(420), modTime: time.Unix(1501695403, 0)}
+	info := bindataFileInfo{name: "python/chart/Chart.yaml", size: 85, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1899,7 +1899,7 @@ func rubyDockerfile() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/Dockerfile", size: 67, mode: os.FileMode(420), modTime: time.Unix(1502216331, 0)}
+	info := bindataFileInfo{name: "ruby/Dockerfile", size: 67, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1944,7 +1944,7 @@ func rubyChartHelmignore() (*asset, error) {
 	return a, nil
 }
 
-var _rubyChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\x2a\x4d\xaa\xe4\x02\x04\x00\x00\xff\xff\x74\x83\x10\xe3\x0b\x00\x00\x00")
+var _rubyChartChartYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xca\x4b\xcc\x4d\xb5\x52\x28\x2a\x4d\xaa\xe4\x4a\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xb3\x52\x70\x54\xf0\x48\xcd\xc9\x55\x48\xce\x48\x2c\x2a\x51\x48\xcb\x2f\x52\xf0\x2e\x4d\x4a\x2d\xca\x4b\x2d\x49\x2d\xe6\x4a\x2c\xc8\x0c\x4b\x2d\x2a\x06\xab\x2b\x33\xe4\x2a\x83\xb3\x0d\xf4\x0c\xf5\x0c\xb8\x00\x01\x00\x00\xff\xff\x73\x52\x12\x7b\x53\x00\x00\x00")
 
 func rubyChartChartYamlBytes() ([]byte, error) {
 	return bindataRead(
@@ -1959,7 +1959,7 @@ func rubyChartChartYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/chart/Chart.yaml", size: 11, mode: os.FileMode(420), modTime: time.Unix(1501695403, 0)}
+	info := bindataFileInfo{name: "ruby/chart/Chart.yaml", size: 83, mode: os.FileMode(420), modTime: time.Unix(1502312899, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2099,7 +2099,7 @@ func rubyDetect() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "ruby/detect", size: 196, mode: os.FileMode(493), modTime: time.Unix(1502215017, 0)}
+	info := bindataFileInfo{name: "ruby/detect", size: 196, mode: os.FileMode(493), modTime: time.Unix(1502216505, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2156,103 +2156,103 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"README.md":                                  readmeMd,
-	"dotnetcore/.dockerignore":                   dotnetcoreDockerignore,
-	"dotnetcore/Dockerfile":                      dotnetcoreDockerfile,
-	"dotnetcore/NOTICE":                          dotnetcoreNotice,
-	"dotnetcore/chart/.helmignore":               dotnetcoreChartHelmignore,
-	"dotnetcore/chart/Chart.yaml":                dotnetcoreChartChartYaml,
-	"dotnetcore/chart/templates/NOTES.txt":       dotnetcoreChartTemplatesNotesTxt,
-	"dotnetcore/chart/templates/_helpers.tpl":    dotnetcoreChartTemplates_helpersTpl,
+	"README.md": readmeMd,
+	"dotnetcore/.dockerignore": dotnetcoreDockerignore,
+	"dotnetcore/Dockerfile": dotnetcoreDockerfile,
+	"dotnetcore/NOTICE": dotnetcoreNotice,
+	"dotnetcore/chart/.helmignore": dotnetcoreChartHelmignore,
+	"dotnetcore/chart/Chart.yaml": dotnetcoreChartChartYaml,
+	"dotnetcore/chart/templates/NOTES.txt": dotnetcoreChartTemplatesNotesTxt,
+	"dotnetcore/chart/templates/_helpers.tpl": dotnetcoreChartTemplates_helpersTpl,
 	"dotnetcore/chart/templates/deployment.yaml": dotnetcoreChartTemplatesDeploymentYaml,
-	"dotnetcore/chart/templates/ingress.yaml":    dotnetcoreChartTemplatesIngressYaml,
-	"dotnetcore/chart/templates/service.yaml":    dotnetcoreChartTemplatesServiceYaml,
-	"dotnetcore/chart/values.yaml":               dotnetcoreChartValuesYaml,
-	"dotnetcore/detect":                          dotnetcoreDetect,
-	"golang/.dockerignore":                       golangDockerignore,
-	"golang/Dockerfile":                          golangDockerfile,
-	"golang/NOTICE":                              golangNotice,
-	"golang/chart/.helmignore":                   golangChartHelmignore,
-	"golang/chart/Chart.yaml":                    golangChartChartYaml,
-	"golang/chart/templates/NOTES.txt":           golangChartTemplatesNotesTxt,
-	"golang/chart/templates/_helpers.tpl":        golangChartTemplates_helpersTpl,
-	"golang/chart/templates/deployment.yaml":     golangChartTemplatesDeploymentYaml,
-	"golang/chart/templates/ingress.yaml":        golangChartTemplatesIngressYaml,
-	"golang/chart/templates/service.yaml":        golangChartTemplatesServiceYaml,
-	"golang/chart/values.yaml":                   golangChartValuesYaml,
-	"golang/detect":                              golangDetect,
-	"gradle/.dockerignore":                       gradleDockerignore,
-	"gradle/Dockerfile":                          gradleDockerfile,
-	"gradle/NOTICE":                              gradleNotice,
-	"gradle/chart/.helmignore":                   gradleChartHelmignore,
-	"gradle/chart/Chart.yaml":                    gradleChartChartYaml,
-	"gradle/chart/templates/NOTES.txt":           gradleChartTemplatesNotesTxt,
-	"gradle/chart/templates/_helpers.tpl":        gradleChartTemplates_helpersTpl,
-	"gradle/chart/templates/deployment.yaml":     gradleChartTemplatesDeploymentYaml,
-	"gradle/chart/templates/ingress.yaml":        gradleChartTemplatesIngressYaml,
-	"gradle/chart/templates/service.yaml":        gradleChartTemplatesServiceYaml,
-	"gradle/chart/values.yaml":                   gradleChartValuesYaml,
-	"gradle/detect":                              gradleDetect,
-	"maven/.dockerignore":                        mavenDockerignore,
-	"maven/Dockerfile":                           mavenDockerfile,
-	"maven/NOTICE":                               mavenNotice,
-	"maven/chart/.helmignore":                    mavenChartHelmignore,
-	"maven/chart/Chart.yaml":                     mavenChartChartYaml,
-	"maven/chart/templates/NOTES.txt":            mavenChartTemplatesNotesTxt,
-	"maven/chart/templates/_helpers.tpl":         mavenChartTemplates_helpersTpl,
-	"maven/chart/templates/deployment.yaml":      mavenChartTemplatesDeploymentYaml,
-	"maven/chart/templates/ingress.yaml":         mavenChartTemplatesIngressYaml,
-	"maven/chart/templates/service.yaml":         mavenChartTemplatesServiceYaml,
-	"maven/chart/values.yaml":                    mavenChartValuesYaml,
-	"maven/detect":                               mavenDetect,
-	"node/.dockerignore":                         nodeDockerignore,
-	"node/Dockerfile":                            nodeDockerfile,
-	"node/NOTICE":                                nodeNotice,
-	"node/chart/.helmignore":                     nodeChartHelmignore,
-	"node/chart/Chart.yaml":                      nodeChartChartYaml,
-	"node/chart/templates/NOTES.txt":             nodeChartTemplatesNotesTxt,
-	"node/chart/templates/_helpers.tpl":          nodeChartTemplates_helpersTpl,
-	"node/chart/templates/deployment.yaml":       nodeChartTemplatesDeploymentYaml,
-	"node/chart/templates/ingress.yaml":          nodeChartTemplatesIngressYaml,
-	"node/chart/templates/service.yaml":          nodeChartTemplatesServiceYaml,
-	"node/chart/values.yaml":                     nodeChartValuesYaml,
-	"node/detect":                                nodeDetect,
-	"php/.dockerignore":                          phpDockerignore,
-	"php/Dockerfile":                             phpDockerfile,
-	"php/NOTICE":                                 phpNotice,
-	"php/chart/.helmignore":                      phpChartHelmignore,
-	"php/chart/Chart.yaml":                       phpChartChartYaml,
-	"php/chart/templates/NOTES.txt":              phpChartTemplatesNotesTxt,
-	"php/chart/templates/_helpers.tpl":           phpChartTemplates_helpersTpl,
-	"php/chart/templates/deployment.yaml":        phpChartTemplatesDeploymentYaml,
-	"php/chart/templates/ingress.yaml":           phpChartTemplatesIngressYaml,
-	"php/chart/templates/service.yaml":           phpChartTemplatesServiceYaml,
-	"php/chart/values.yaml":                      phpChartValuesYaml,
-	"php/detect":                                 phpDetect,
-	"python/.dockerignore":                       pythonDockerignore,
-	"python/Dockerfile":                          pythonDockerfile,
-	"python/NOTICE":                              pythonNotice,
-	"python/chart/.helmignore":                   pythonChartHelmignore,
-	"python/chart/Chart.yaml":                    pythonChartChartYaml,
-	"python/chart/templates/NOTES.txt":           pythonChartTemplatesNotesTxt,
-	"python/chart/templates/_helpers.tpl":        pythonChartTemplates_helpersTpl,
-	"python/chart/templates/deployment.yaml":     pythonChartTemplatesDeploymentYaml,
-	"python/chart/templates/ingress.yaml":        pythonChartTemplatesIngressYaml,
-	"python/chart/templates/service.yaml":        pythonChartTemplatesServiceYaml,
-	"python/chart/values.yaml":                   pythonChartValuesYaml,
-	"python/detect":                              pythonDetect,
-	"ruby/.dockerignore":                         rubyDockerignore,
-	"ruby/Dockerfile":                            rubyDockerfile,
-	"ruby/NOTICE":                                rubyNotice,
-	"ruby/chart/.helmignore":                     rubyChartHelmignore,
-	"ruby/chart/Chart.yaml":                      rubyChartChartYaml,
-	"ruby/chart/templates/NOTES.txt":             rubyChartTemplatesNotesTxt,
-	"ruby/chart/templates/_helpers.tpl":          rubyChartTemplates_helpersTpl,
-	"ruby/chart/templates/deployment.yaml":       rubyChartTemplatesDeploymentYaml,
-	"ruby/chart/templates/ingress.yaml":          rubyChartTemplatesIngressYaml,
-	"ruby/chart/templates/service.yaml":          rubyChartTemplatesServiceYaml,
-	"ruby/chart/values.yaml":                     rubyChartValuesYaml,
-	"ruby/detect":                                rubyDetect,
+	"dotnetcore/chart/templates/ingress.yaml": dotnetcoreChartTemplatesIngressYaml,
+	"dotnetcore/chart/templates/service.yaml": dotnetcoreChartTemplatesServiceYaml,
+	"dotnetcore/chart/values.yaml": dotnetcoreChartValuesYaml,
+	"dotnetcore/detect": dotnetcoreDetect,
+	"golang/.dockerignore": golangDockerignore,
+	"golang/Dockerfile": golangDockerfile,
+	"golang/NOTICE": golangNotice,
+	"golang/chart/.helmignore": golangChartHelmignore,
+	"golang/chart/Chart.yaml": golangChartChartYaml,
+	"golang/chart/templates/NOTES.txt": golangChartTemplatesNotesTxt,
+	"golang/chart/templates/_helpers.tpl": golangChartTemplates_helpersTpl,
+	"golang/chart/templates/deployment.yaml": golangChartTemplatesDeploymentYaml,
+	"golang/chart/templates/ingress.yaml": golangChartTemplatesIngressYaml,
+	"golang/chart/templates/service.yaml": golangChartTemplatesServiceYaml,
+	"golang/chart/values.yaml": golangChartValuesYaml,
+	"golang/detect": golangDetect,
+	"gradle/.dockerignore": gradleDockerignore,
+	"gradle/Dockerfile": gradleDockerfile,
+	"gradle/NOTICE": gradleNotice,
+	"gradle/chart/.helmignore": gradleChartHelmignore,
+	"gradle/chart/Chart.yaml": gradleChartChartYaml,
+	"gradle/chart/templates/NOTES.txt": gradleChartTemplatesNotesTxt,
+	"gradle/chart/templates/_helpers.tpl": gradleChartTemplates_helpersTpl,
+	"gradle/chart/templates/deployment.yaml": gradleChartTemplatesDeploymentYaml,
+	"gradle/chart/templates/ingress.yaml": gradleChartTemplatesIngressYaml,
+	"gradle/chart/templates/service.yaml": gradleChartTemplatesServiceYaml,
+	"gradle/chart/values.yaml": gradleChartValuesYaml,
+	"gradle/detect": gradleDetect,
+	"maven/.dockerignore": mavenDockerignore,
+	"maven/Dockerfile": mavenDockerfile,
+	"maven/NOTICE": mavenNotice,
+	"maven/chart/.helmignore": mavenChartHelmignore,
+	"maven/chart/Chart.yaml": mavenChartChartYaml,
+	"maven/chart/templates/NOTES.txt": mavenChartTemplatesNotesTxt,
+	"maven/chart/templates/_helpers.tpl": mavenChartTemplates_helpersTpl,
+	"maven/chart/templates/deployment.yaml": mavenChartTemplatesDeploymentYaml,
+	"maven/chart/templates/ingress.yaml": mavenChartTemplatesIngressYaml,
+	"maven/chart/templates/service.yaml": mavenChartTemplatesServiceYaml,
+	"maven/chart/values.yaml": mavenChartValuesYaml,
+	"maven/detect": mavenDetect,
+	"node/.dockerignore": nodeDockerignore,
+	"node/Dockerfile": nodeDockerfile,
+	"node/NOTICE": nodeNotice,
+	"node/chart/.helmignore": nodeChartHelmignore,
+	"node/chart/Chart.yaml": nodeChartChartYaml,
+	"node/chart/templates/NOTES.txt": nodeChartTemplatesNotesTxt,
+	"node/chart/templates/_helpers.tpl": nodeChartTemplates_helpersTpl,
+	"node/chart/templates/deployment.yaml": nodeChartTemplatesDeploymentYaml,
+	"node/chart/templates/ingress.yaml": nodeChartTemplatesIngressYaml,
+	"node/chart/templates/service.yaml": nodeChartTemplatesServiceYaml,
+	"node/chart/values.yaml": nodeChartValuesYaml,
+	"node/detect": nodeDetect,
+	"php/.dockerignore": phpDockerignore,
+	"php/Dockerfile": phpDockerfile,
+	"php/NOTICE": phpNotice,
+	"php/chart/.helmignore": phpChartHelmignore,
+	"php/chart/Chart.yaml": phpChartChartYaml,
+	"php/chart/templates/NOTES.txt": phpChartTemplatesNotesTxt,
+	"php/chart/templates/_helpers.tpl": phpChartTemplates_helpersTpl,
+	"php/chart/templates/deployment.yaml": phpChartTemplatesDeploymentYaml,
+	"php/chart/templates/ingress.yaml": phpChartTemplatesIngressYaml,
+	"php/chart/templates/service.yaml": phpChartTemplatesServiceYaml,
+	"php/chart/values.yaml": phpChartValuesYaml,
+	"php/detect": phpDetect,
+	"python/.dockerignore": pythonDockerignore,
+	"python/Dockerfile": pythonDockerfile,
+	"python/NOTICE": pythonNotice,
+	"python/chart/.helmignore": pythonChartHelmignore,
+	"python/chart/Chart.yaml": pythonChartChartYaml,
+	"python/chart/templates/NOTES.txt": pythonChartTemplatesNotesTxt,
+	"python/chart/templates/_helpers.tpl": pythonChartTemplates_helpersTpl,
+	"python/chart/templates/deployment.yaml": pythonChartTemplatesDeploymentYaml,
+	"python/chart/templates/ingress.yaml": pythonChartTemplatesIngressYaml,
+	"python/chart/templates/service.yaml": pythonChartTemplatesServiceYaml,
+	"python/chart/values.yaml": pythonChartValuesYaml,
+	"python/detect": pythonDetect,
+	"ruby/.dockerignore": rubyDockerignore,
+	"ruby/Dockerfile": rubyDockerfile,
+	"ruby/NOTICE": rubyNotice,
+	"ruby/chart/.helmignore": rubyChartHelmignore,
+	"ruby/chart/Chart.yaml": rubyChartChartYaml,
+	"ruby/chart/templates/NOTES.txt": rubyChartTemplatesNotesTxt,
+	"ruby/chart/templates/_helpers.tpl": rubyChartTemplates_helpersTpl,
+	"ruby/chart/templates/deployment.yaml": rubyChartTemplatesDeploymentYaml,
+	"ruby/chart/templates/ingress.yaml": rubyChartTemplatesIngressYaml,
+	"ruby/chart/templates/service.yaml": rubyChartTemplatesServiceYaml,
+	"ruby/chart/values.yaml": rubyChartValuesYaml,
+	"ruby/detect": rubyDetect,
 }
 
 // AssetDir returns the file names below a certain
@@ -2294,22 +2294,21 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"README.md": &bintree{readmeMd, map[string]*bintree{}},
 	"dotnetcore": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{dotnetcoreDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{dotnetcoreDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{dotnetcoreNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{dotnetcoreDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{dotnetcoreNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{dotnetcoreChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{dotnetcoreChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{dotnetcoreChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{dotnetcoreChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{dotnetcoreChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{dotnetcoreChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{dotnetcoreChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{dotnetcoreChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{dotnetcoreChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{dotnetcoreChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{dotnetcoreChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{dotnetcoreChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{dotnetcoreChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2317,17 +2316,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"golang": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{golangDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{golangDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{golangNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{golangDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{golangNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{golangChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{golangChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{golangChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{golangChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{golangChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{golangChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{golangChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{golangChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{golangChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{golangChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{golangChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{golangChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{golangChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2335,17 +2334,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"gradle": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{gradleDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{gradleDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{gradleNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{gradleDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{gradleNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{gradleChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{gradleChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{gradleChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{gradleChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{gradleChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{gradleChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{gradleChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{gradleChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{gradleChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{gradleChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{gradleChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{gradleChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{gradleChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2353,17 +2352,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"maven": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{mavenDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{mavenDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{mavenNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{mavenDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{mavenNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{mavenChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{mavenChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{mavenChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{mavenChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{mavenChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{mavenChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{mavenChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{mavenChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{mavenChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{mavenChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{mavenChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{mavenChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{mavenChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2371,17 +2370,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"node": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{nodeDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{nodeDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{nodeNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{nodeDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{nodeNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{nodeChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{nodeChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{nodeChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{nodeChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{nodeChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{nodeChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{nodeChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{nodeChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{nodeChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{nodeChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{nodeChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{nodeChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{nodeChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2389,17 +2388,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"php": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{phpDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{phpDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{phpNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{phpDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{phpNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{phpChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{phpChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{phpChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{phpChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{phpChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{phpChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{phpChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{phpChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{phpChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{phpChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{phpChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{phpChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{phpChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2407,17 +2406,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"python": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{pythonDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{pythonDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{pythonNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{pythonDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{pythonNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{pythonChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{pythonChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{pythonChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{pythonChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{pythonChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{pythonChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{pythonChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{pythonChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{pythonChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{pythonChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{pythonChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{pythonChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{pythonChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2425,17 +2424,17 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"ruby": &bintree{nil, map[string]*bintree{
 		".dockerignore": &bintree{rubyDockerignore, map[string]*bintree{}},
-		"Dockerfile":    &bintree{rubyDockerfile, map[string]*bintree{}},
-		"NOTICE":        &bintree{rubyNotice, map[string]*bintree{}},
+		"Dockerfile": &bintree{rubyDockerfile, map[string]*bintree{}},
+		"NOTICE": &bintree{rubyNotice, map[string]*bintree{}},
 		"chart": &bintree{nil, map[string]*bintree{
 			".helmignore": &bintree{rubyChartHelmignore, map[string]*bintree{}},
-			"Chart.yaml":  &bintree{rubyChartChartYaml, map[string]*bintree{}},
+			"Chart.yaml": &bintree{rubyChartChartYaml, map[string]*bintree{}},
 			"templates": &bintree{nil, map[string]*bintree{
-				"NOTES.txt":       &bintree{rubyChartTemplatesNotesTxt, map[string]*bintree{}},
-				"_helpers.tpl":    &bintree{rubyChartTemplates_helpersTpl, map[string]*bintree{}},
+				"NOTES.txt": &bintree{rubyChartTemplatesNotesTxt, map[string]*bintree{}},
+				"_helpers.tpl": &bintree{rubyChartTemplates_helpersTpl, map[string]*bintree{}},
 				"deployment.yaml": &bintree{rubyChartTemplatesDeploymentYaml, map[string]*bintree{}},
-				"ingress.yaml":    &bintree{rubyChartTemplatesIngressYaml, map[string]*bintree{}},
-				"service.yaml":    &bintree{rubyChartTemplatesServiceYaml, map[string]*bintree{}},
+				"ingress.yaml": &bintree{rubyChartTemplatesIngressYaml, map[string]*bintree{}},
+				"service.yaml": &bintree{rubyChartTemplatesServiceYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{rubyChartValuesYaml, map[string]*bintree{}},
 		}},
@@ -2489,3 +2488,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
