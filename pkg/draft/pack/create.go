@@ -125,5 +125,6 @@ func CreateFrom(dest, src string) error {
 	if err != nil {
 		return fmt.Errorf("could not load %s: %s", src, err)
 	}
-	return pack.SaveDir(dest, false)
+
+	return pack.SaveDir(dest)
 }

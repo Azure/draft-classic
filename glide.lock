@@ -1,5 +1,5 @@
-hash: a08e83df272ae1580b2df255a5a0fa340307b33bbb5f03cc62235f0ac1f197a0
-updated: 2017-07-31T16:55:03.424240984-06:00
+hash: 1f246a2a80d92ec637a4311330f7c6e43b0fd928fdd02b936315a00e9ed18692
+updated: 2017-08-09T14:39:46.482190632-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -124,6 +124,11 @@ imports:
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
 - name: github.com/facebookgo/symwalk
   version: 42004b9f322246749dd73ad71008b1f3160c0052
+- name: github.com/generaltso/linguist
+  version: 9202505feb6930ac6945b5005715d2b03853ac9c
+  subpackages:
+  - data
+  - tokenizer
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/analysis
@@ -189,6 +194,8 @@ imports:
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jbrukh/bayesian
+  version: bf3f261f9a9c61145c60d47665b0518cc32c774f
 - name: github.com/jonboulle/clockwork
   version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/ratelimit
@@ -234,6 +241,10 @@ imports:
   version: 660542b98f76c58910002c82e912b71248f4daa0
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/shibukawa/git4go
+  version: 10e175b296563f4b210345f37e895e747a79b806
+  repo: https://github.com/bacongobbler/git4go
+  vcs: git
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/cobra
@@ -327,6 +338,8 @@ imports:
   - transport
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
+- name: gopkg.in/yaml.v1
+  version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery

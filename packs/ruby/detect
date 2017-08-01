@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-if [ -f "$1/Gemfile" ]; then
-  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  echo "ruby $(cat $SCRIPT_DIR/../VERSION)"
-  exit 0
-else
-  echo "no"
-  exit 1
-fi

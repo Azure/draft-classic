@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 
 	"k8s.io/helm/pkg/chartutil"
-
-	"github.com/Azure/draft/pkg/osutil"
 )
 
 // FromDir takes a string name, tries to resolve it to a file or directory, and then loads it.
@@ -31,18 +29,6 @@ func FromDir(dir string) (*Pack, error) {
 	pack.Dockerfile, err = ioutil.ReadFile(dockerfile)
 	if err != nil {
 		return nil, fmt.Errorf("error reading %s: %s", dockerfile, err)
-	}
-
-	detect := filepath.Join(topdir, DetectName)
-	detectExists, err := osutil.Exists(detect)
-	if err != nil {
-		return nil, fmt.Errorf("error checking if the detect script exists: %v", err)
-	}
-	if detectExists {
-		pack.DetectScript, err = ioutil.ReadFile(detect)
-		if err != nil {
-			return nil, fmt.Errorf("error reading %s: %s", detect, err)
-		}
 	}
 
 	return pack, nil

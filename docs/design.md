@@ -77,11 +77,12 @@ $ ls
 Dockerfile
 src/
 $ draft create
---> Default app detected
+--> Draft detected the primary language as Python with 85.990338% certainty.
 --> Ready to sail
 $ ls
 chart/
 Dockerfile
+draft.toml
 src/
 ```
 
