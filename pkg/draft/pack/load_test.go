@@ -14,18 +14,6 @@ CMD [ "python", "./hello.py" ]
 EXPOSE 80
 `
 
-const expectedDetect = `#!/usr/bin/env bash
-
-APP_DIR=$1
-
-# Exit early if app is clearly not Python.
-if [ ! -f $APP_DIR/requirements.txt ] && [ ! -f $APP_DIR/setup.py ] && [ ! -f $APP_DIR/Pipfile ]; then
-  exit 1
-fi
-
-echo Python
-`
-
 func TestFromDir(t *testing.T) {
 	pack, err := FromDir("testdata/pack-python")
 	if err != nil {
@@ -37,10 +25,6 @@ func TestFromDir(t *testing.T) {
 
 	if string(pack.Dockerfile) != expectedDockerfile {
 		t.Errorf("expected dockerfile == expected, got '%v'", pack.Dockerfile)
-	}
-
-	if string(pack.DetectScript) != expectedDetect {
-		t.Errorf("expected detect == expected, got '%v'", pack.DetectScript)
 	}
 
 	if _, err := FromDir("dir-does-not-exist"); err == nil {
@@ -93,31 +77,5 @@ func TestFromDir(t *testing.T) {
 	// revert file perms for the Dockerfile in prep for the detect script
 	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0644); err != nil {
 		t.Fatal(err)
-	}
-
-	// make the detect script available but unreadable
-	if err := os.Chmod(filepath.Join(dir, packName, DetectName), 0000); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := FromDir(dir); err == nil {
-		t.Errorf("expected err to be non-nil when reading the detect script")
-	}
-}
-
-func TestFromDirNoDetect(t *testing.T) {
-	pack, err := FromDir("testdata/pack-python-no-detect")
-	if err != nil {
-		t.Fatalf("could not load python pack: %v", err)
-	}
-	if pack.Chart == nil {
-		t.Errorf("expected chart to be non-nil")
-	}
-
-	if string(pack.Dockerfile) != expectedDockerfile {
-		t.Errorf("expected dockerfile == expected, got '%v'", pack.Dockerfile)
-	}
-
-	if pack.DetectScript != nil {
-		t.Errorf("expected detect to be nil, got '%v'", pack.DetectScript)
 	}
 }
