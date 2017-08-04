@@ -22,102 +22,101 @@ func newClientImpl(opts ...ClientOpt) Client {
 }
 
 // Version implementes rpc.Client.Version
-func (c *clientImpl) Version(ctx context.Context) (v *version.Version, err error) {
-	err = c.Connect(func(ctx context.Context, rpc DraftClient) error {
-		var r *Version
-		if r, err = rpc.GetVersion(ctx, &empty.Empty{}); err != nil {
-			return fmt.Errorf("error getting server version: %v", err)
-		}
-		v = &version.Version{SemVer: r.SemVer, GitCommit: r.GitCommit, GitTreeState: r.GitTreeState}
-		return nil
-	})
-	return
+func (c *clientImpl) Version(ctx context.Context) (*version.Version, error) {
+	conn, err := connect(c)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := NewDraftClient(conn)
+	rpcctx := context.Background()
+
+	r, err := client.GetVersion(rpcctx, &empty.Empty{})
+	if err != nil {
+		return nil, fmt.Errorf("error getting server version: %v", err)
+	}
+	v := &version.Version{SemVer: r.SemVer, GitCommit: r.GitCommit, GitTreeState: r.GitTreeState}
+	return v, nil
 }
 
 // UpBuild implementes rpc.Client.UpBuild
-func (c *clientImpl) UpBuild(ctx context.Context, msg *UpRequest) (<-chan *UpSummary, error) {
-	ret := make(chan *UpSummary)
-	err := c.Connect(func(ctx context.Context, rpc DraftClient) (err error) {
-		recv := make(chan *UpMessage)
-		errc := make(chan error)
-		go func() {
-			if err = up_build(ctx, rpc, msg, recv); err != nil {
-				errc <- err
+func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *UpSummary) (err error) {
+	conn, err := connect(c)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := NewDraftClient(conn)
+	rpcctx := context.Background()
+
+	msgc := make(chan *UpMessage, 2)
+	errc := make(chan error)
+	go func() {
+		if err := up_build(rpcctx, client, req, msgc); err != nil {
+			errc <- err
+		}
+		close(errc)
+	}()
+	defer close(outc)
+	for msgc != nil || errc != nil {
+		select {
+		case msg, ok := <-msgc:
+			if !ok {
+				msgc = nil
+				continue
 			}
-			close(recv)
-			close(errc)
-		}()
-		go func() {
-			for resp := range recv {
-				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n",
-					resp.GetUpSummary().GetStageName(),
-					resp.GetUpSummary().GetStatusText(),
-					resp.GetUpSummary().GetStatusCode())
-				if summary := resp.GetUpSummary(); summary != nil {
-					ret <- summary
-				}
+			outc <- msg.GetUpSummary()
+		case err, ok := <-errc:
+			if !ok {
+				errc = nil
+				continue
 			}
-			close(ret)
-		}()
-		return <-errc
-	})
-	return ret, err
+			return err
+		}
+	}
+	return nil
 }
 
 // UpStream implementes rpc.Client.UpStream
-func (c *clientImpl) UpStream(apictx context.Context, msgc <-chan *UpRequest) (<-chan *UpSummary, error) {
-	ret := make(chan *UpSummary)
-	err := c.Connect(func(ctx context.Context, rpc DraftClient) error {
-		recv := make(chan *UpMessage)
-		go func() {
-			for resp := range recv {
-				fmt.Printf("summary:\n\tstage_name: %s\n\tstatus_text: %s\n\tstatus_code: %d\n",
-					resp.GetUpSummary().GetStageName(),
-					resp.GetUpSummary().GetStatusText(),
-					resp.GetUpSummary().GetStatusCode())
-				if summary := resp.GetUpSummary(); summary != nil {
-					ret <- summary
-				}
-			}
-			close(ret)
-		}()
-		return up_stream(ctx, rpc, msgc, recv)
-	})
-	return ret, err
-}
-
-// Connect connects the DraftClient to the DraftServer.
-func (c *clientImpl) Connect(fn func(context.Context, DraftClient) error) (err error) {
-	var conn *grpc.ClientConn
-	if conn, err = grpc.Dial(c.opts.addr, grpc.WithInsecure()); err != nil {
-		return fmt.Errorf("failed to dial %q: %v", c.opts.addr, err)
+func (c *clientImpl) UpStream(apictx context.Context, reqc <-chan *UpRequest, outc chan<- *UpSummary) error {
+	conn, err := connect(c)
+	if err != nil {
+		return err
 	}
 	defer conn.Close()
+
 	client := NewDraftClient(conn)
 	rpcctx := context.Background()
-	return fn(rpcctx, client)
+
+	msgc := make(chan *UpMessage)
+	go func() {
+		for msg := range msgc {
+			if summary := msg.GetUpSummary(); summary != nil {
+				outc <- summary
+			}
+		}
+		close(outc)
+	}()
+	return up_stream(rpcctx, client, reqc, msgc)
 }
 
-func up_build(ctx context.Context, rpc DraftClient, msg *UpRequest, recv chan<- *UpMessage) error {
+func up_build(ctx context.Context, rpc DraftClient, msg *UpRequest, outc chan<- *UpMessage) error {
 	s, err := rpc.UpBuild(ctx, &UpMessage{&UpMessage_UpRequest{msg}})
 	if err != nil {
 		return fmt.Errorf("rpc error handling up_build: %v", err)
 	}
+	defer close(outc)
 	for {
-		f, err := s.Recv()
+		resp, err := s.Recv()
 		if err == io.EOF {
 			return nil
 		}
 		if err != nil {
 			return fmt.Errorf("rpc error handling up_build recv: %v", err)
 		}
-		select {
-		case <-ctx.Done():
-			return nil
-		case recv <- f:
-			// nothing to do
-		default:
-		}
+		outc <- resp
 	}
 }
 
@@ -154,7 +153,6 @@ func up_stream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, rec
 			if !ok {
 				return nil
 			}
-			fmt.Printf("client: sending: %v\n", msg)
 			req := &UpMessage{&UpMessage_UpRequest{msg}}
 			if err := stream.Send(req); err != nil {
 				return fmt.Errorf("failed to send an up message: %v", err)
@@ -163,4 +161,12 @@ func up_stream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, rec
 			return err
 		}
 	}
+}
+
+// connect connects the DraftClient to the DraftServer.
+func connect(c *clientImpl, opts ...grpc.DialOption) (conn *grpc.ClientConn, err error) {
+	if conn, err = grpc.Dial(c.opts.addr, grpc.WithInsecure()); err != nil {
+		return nil, fmt.Errorf("failed to dial %q: %v", c.opts.addr, err)
+	}
+	return conn, nil
 }

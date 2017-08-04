@@ -94,7 +94,7 @@ func setupConnection(c *cobra.Command, args []string) error {
 			return err
 		}
 
-		draftHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
+		draftHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 		log.Debugf("Created tunnel using local port: '%d'", tunnel.Local)
 	}
 

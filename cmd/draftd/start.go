@@ -58,7 +58,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&sc.listenAddr, "listen-addr", "l", "tcp://0.0.0.0:44135", "the address the server listens on")
+	f.StringVarP(&sc.listenAddr, "listen-addr", "l", "0.0.0.0:44135", "the address the server listens on")
 	f.StringVarP(&sc.dockerAddr, "docker-addr", "", "unix:///var/run/docker.sock", "the address the docker engine listens on")
 	f.StringVarP(&sc.dockerVersion, "docker-version", "", "", "the API version of the docker engine")
 	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", true, "retrieve docker engine information from environment")

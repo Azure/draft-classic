@@ -65,7 +65,6 @@ func (s *serverImpl) GetVersion(ctx context.Context, _ *empty.Empty) (*Version, 
 //
 // UpStream implements DraftServer.UpStream
 func (s *serverImpl) UpStream(stream Draft_UpStreamServer) (err error) {
-	fmt.Println("Server.UpStream")
 	ctx, cancel := context.WithCancel(context.Background())
 	errc := make(chan error)
 
@@ -117,7 +116,6 @@ func (s *serverImpl) UpStream(stream Draft_UpStreamServer) (err error) {
 //
 // UpBuild implements DraftServer.UpBuild
 func (s *serverImpl) UpBuild(msg *UpMessage, stream Draft_UpBuildServer) error {
-	fmt.Println("Server.UpBuild")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	for summary := range s.h.Up(ctx, msg.GetUpRequest()) {

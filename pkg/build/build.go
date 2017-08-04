@@ -25,17 +25,13 @@ import (
 	"github.com/Azure/draft/pkg/draft/pack"
 )
 
-type Archive struct {
-	Name string
-	File []byte
-}
-
 type Context struct {
-	Env    *manifest.Environment
-	AppDir string
-	Chart  *chart.Chart
-	Values *chart.Config
-	Source *Archive
+	Env     *manifest.Environment
+	AppDir  string
+	Chart   *chart.Chart
+	Values  *chart.Config
+	SrcName string
+	Archive []byte
 }
 
 func LoadWithEnv(appdir, whichenv string) (*Context, error) {
@@ -84,7 +80,8 @@ func loadArchive(ctx *Context) (err error) {
 		if err != nil {
 			return fmt.Errorf("failed to load build archive %q: %v", ctx.Env.BuildTarPath, err)
 		}
-		ctx.Source = &Archive{Name: filepath.Base(ctx.Env.BuildTarPath), File: b}
+		ctx.SrcName = filepath.Base(ctx.Env.BuildTarPath)
+		ctx.Archive = b
 
 		ar, err := os.Open(ctx.Env.ChartTarPath)
 		if err != nil {
@@ -95,7 +92,7 @@ func loadArchive(ctx *Context) (err error) {
 		}
 		return nil
 	}
-	if ctx.Source, err = archiveSrc(ctx); err != nil {
+	if err = archiveSrc(ctx); err != nil {
 		return err
 	}
 	if ctx.Chart, err = chartutil.Load(filepath.Join(ctx.AppDir, "chart")); err != nil {
@@ -123,19 +120,19 @@ func loadValues(ctx *Context) error {
 	return nil
 }
 
-func archiveSrc(ctx *Context) (*Archive, error) {
+func archiveSrc(ctx *Context) error {
 	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, "")
 	if err != nil {
-		return nil, fmt.Errorf("unable to prepare docker context: %s", err)
+		return fmt.Errorf("unable to prepare docker context: %s", err)
 	}
 	// canonicalize dockerfile name to a platform-independent one
 	relDockerfile, err = archive.CanonicalTarNameForPath(relDockerfile)
 	if err != nil {
-		return nil, fmt.Errorf("cannot canonicalize dockerfile path %s: %v", relDockerfile, err)
+		return fmt.Errorf("cannot canonicalize dockerfile path %s: %v", relDockerfile, err)
 	}
 	f, err := os.Open(filepath.Join(contextDir, ".dockerignore"))
 	if err != nil && !os.IsNotExist(err) {
-		return nil, err
+		return err
 	}
 	defer f.Close()
 
@@ -143,14 +140,14 @@ func archiveSrc(ctx *Context) (*Archive, error) {
 	if err == nil {
 		excludes, err = dockerignore.ReadAll(f)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	// do not include the chart directory. That will be packaged separately.
 	excludes = append(excludes, filepath.Join(contextDir, "chart"))
 	if err := build.ValidateContextDirectory(contextDir, excludes); err != nil {
-		return nil, fmt.Errorf("error checking docker context: '%s'", err)
+		return fmt.Errorf("error checking docker context: '%s'", err)
 	}
 
 	// If .dockerignore mentions .dockerignore or the Dockerfile
@@ -175,13 +172,15 @@ func archiveSrc(ctx *Context) (*Archive, error) {
 		IncludeFiles:    includes,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rc.Close()
 
 	var b bytes.Buffer
 	if _, err := io.Copy(&b, rc); err != nil {
-		return nil, err
+		return err
 	}
-	return &Archive{Name: "build.tar.gz", File: b.Bytes()}, nil
+	ctx.SrcName = "build.tar.gz"
+	ctx.Archive = b.Bytes()
+	return nil
 }

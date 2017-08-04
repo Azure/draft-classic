@@ -1,4 +1,4 @@
-google_deps = Mgoogle/protobuf/any.proto=github.com/golang/protobuf/ptypes/any,Mgoogle/protobuf/empty.proto=github.com/golang/protobuf/ptypes/empty
+google_deps = Mgoogle/protobuf/empty.proto=github.com/golang/protobuf/ptypes/empty
 helm_deps = Mhapi/chart/config.proto=k8s.io/helm/pkg/proto/hapi/chart,Mhapi/chart/chart.proto=k8s.io/helm/pkg/proto/hapi/chart
 plugins = grpc
 target = go
