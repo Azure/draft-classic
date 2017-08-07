@@ -1,4 +1,4 @@
-package testing
+package helpers
 
 import (
 	"io/ioutil"
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// copyTree copies src directory content tree to dest.
+// CopyTree copies src directory content tree to dest.
 // If dest exists, it's deleted.
 // We don't handle symlinks (not needed in this test helper)
 func CopyTree(t *testing.T, src, dest string) {

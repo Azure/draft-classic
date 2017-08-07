@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	helpers "github.com/Azure/draft/pkg/testing"
+	"github.com/Azure/draft/pkg/testing/helpers"
 )
 
 const gitkeepfile = ".gitkeep"
