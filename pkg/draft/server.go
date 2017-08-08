@@ -75,7 +75,7 @@ type ServerConfig struct {
 	Registry   *RegistryConfig
 	Docker     *docker.Client
 	Helm       helm.Interface
-	Kube       *k8s.Clientset
+	Kube       k8s.Interface
 }
 
 // Server is a draft Server.
