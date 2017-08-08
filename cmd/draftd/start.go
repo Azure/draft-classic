@@ -8,11 +8,10 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/helm"
 
 	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/kube"
 )
 
 const startDesc = `
@@ -41,6 +40,8 @@ type startCmd struct {
 	basedomain string
 	// tillerURI is the URI used to connect to tiller.
 	tillerURI string
+	// local allows draftd to run locally (for testing purposes).
+	local bool
 }
 
 func newStartCmd(out io.Writer) *cobra.Command {
@@ -67,6 +68,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
 	f.StringVar(&sc.basedomain, "basedomain", "", "the base domain in which a wildcard DNS entry points to an ingress controller")
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
+	f.BoolVarP(&sc.local, "local", "", false, "run draftd locally (uses local kubecfg)")
 
 	return cmd
 }
@@ -91,12 +93,14 @@ func (c *startCmd) run() (err error) {
 		}
 	}
 
-	kubecfg, err := rest.InClusterConfig()
-	if err != nil {
-		return fmt.Errorf("failed to get in-cluster kubernetes config: %v", err)
-	}
-	if cfg.Kube, err = kubernetes.NewForConfig(kubecfg); err != nil {
-		return fmt.Errorf("failed to create kubernetes client: %v", err)
+	if c.local {
+		if cfg.Kube, err = kube.GetOutOfClusterClient(); err != nil {
+			return fmt.Errorf("failed to create out-of-cluster kubernetes client: %v", err)
+		}
+	} else {
+		if cfg.Kube, err = kube.GetInClusterClient(); err != nil {
+			return fmt.Errorf("failed to create in-cluster kubernetes client: %v", err)
+		}
 	}
 
 	cfg.Helm = helm.NewClient(helm.Host(c.tillerURI))
