@@ -3,6 +3,7 @@ COPY . /app
 RUN cd /app && composer install
 
 FROM php:7.1-apache
+ENV PORT 80
 EXPOSE 80
 COPY --from=build-env /app /var/www/html
 RUN usermod -u 1000 www-data; \
