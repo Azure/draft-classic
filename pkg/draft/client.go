@@ -7,6 +7,7 @@ import (
 	"github.com/Azure/draft/pkg/version"
 	"golang.org/x/net/context"
 	"io"
+	"sync"
 )
 
 type ClientConfig struct {
@@ -38,8 +39,17 @@ func (c *Client) Up(ctx context.Context, app *build.Context) error {
 		Values:     app.Values,
 		AppArchive: &rpc.AppArchive{app.SrcName, app.Archive},
 	}
-	msgc := make(chan *rpc.UpSummary)
-	errc := make(chan error)
+	if !app.Env.Watch {
+		return c.build(ctx, app, req)
+	}
+	return c.stream(ctx, app, req)
+}
+
+func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpRequest) error {
+	var (
+		msgc = make(chan *rpc.UpSummary)
+		errc = make(chan error)
+	)
 	go func() {
 		if err := c.rpc.UpBuild(ctx, req, msgc); err != nil {
 			errc <- err
@@ -60,7 +70,70 @@ func (c *Client) Up(ctx context.Context, app *build.Context) error {
 				continue
 			}
 			return fmt.Errorf("error running draft up: %v", err)
+		case <-ctx.Done():
+			msgc, errc = nil, nil
+			continue
 		}
 	}
 	return nil
+}
+
+func (c *Client) stream(ctx context.Context, app *build.Context, req *rpc.UpRequest) error {
+	cancelctx, cancel := context.WithCancel(ctx)
+
+	var (
+		bldc = make(chan *build.Context, 1)
+		reqc = make(chan *rpc.UpRequest, 1)
+		msgc = make(chan *rpc.UpSummary, 1)
+		errc = make(chan error, 1)
+	)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Buffer initial up request.
+	reqc <- req
+
+	// Start a goroutine to service the stream.
+	go func() {
+		if err := c.rpc.UpStream(cancelctx, reqc, msgc); err != nil {
+			errc <- err
+		}
+		wg.Done()
+	}()
+
+	// Start a goroutine to watch for builds.
+	go func() {
+		errc <- app.Watch(cancelctx, bldc)
+		wg.Done()
+	}()
+
+	defer func() {
+		cancel()
+		close(reqc)
+		close(errc)
+		wg.Wait()
+	}()
+
+	for {
+		select {
+		case msg := <-msgc:
+			fmt.Fprintf(c.cfg.Stdout, "\r%s: %s\n", msg.StageDesc, msg.StatusText)
+		case bld := <-bldc:
+			reqc <- &rpc.UpRequest{
+				Namespace:  bld.Env.Namespace,
+				AppName:    bld.Env.Name,
+				Chart:      bld.Chart,
+				Values:     bld.Values,
+				AppArchive: &rpc.AppArchive{bld.SrcName, bld.Archive},
+			}
+		case err := <-errc:
+			return err
+		case <-ctx.Done():
+			// drain the swamp.
+			for range errc {
+			}
+			return ctx.Err()
+		}
+	}
 }
