@@ -219,7 +219,7 @@ me?_
 You can modify the contents of the `chart/` directory as you wish.
 Consider them part of your source code.
 
-Keep in mind that there are three values injected from Draftd into the chart which you'll likely
+Keep in mind that there are certain values injected from Draftd into the chart which you'll likely
 want to use:
 
 ```
@@ -228,6 +228,8 @@ image:
   org: bacongobbler          # the organization of the image
   name: myapp                # the name of the image
   tag: 08db751               # the release of the image in the registry
+basedomain: example.com      # the base domain configured with the ingress controller
+ondraft: true                # metadata to demonstrate this was deployed using Draft
 ```
 
 _How do I add an existing chart to Draft?_
