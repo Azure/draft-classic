@@ -16,10 +16,6 @@ Using Draft is as simple as:
 
 Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
-Here is a video demonstrating how to set up Draft on Azure Container Services:
-
-[![video demonstrating draft on Azure Container Services](http://img.youtube.com/vi/7N7vdOa-TPI/0.jpg)](http://www.youtube.com/watch?v=7N7vdOa-TPI "Using Draft to streamline development on Kubernetes w/Azure Container Service and         Container Registry")
-
 [Join the conversation in Slack!](https://kubernetes.slack.com/messages/draft-users) If you don't already have a Kubernetes slack account, sign up [here](http://slack.k8s.io/).
 
 ## Installation
