@@ -45,7 +45,7 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
-	tplstr := "image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s"
+	tplstr := "image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s,ondraft=true"
 	inject := fmt.Sprintf(tplstr, req.AppName, s.cfg.Registry.Org, s.cfg.Registry.URL, imgtag, s.cfg.Basedomain)
 
 	vals, err := chartutil.ReadValues([]byte(req.Values.Raw))
