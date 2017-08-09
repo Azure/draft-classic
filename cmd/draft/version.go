@@ -7,6 +7,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/version"
@@ -66,7 +67,7 @@ func (v *versionCmd) run() error {
 		return nil
 	}
 
-	sv, err := v.client.Version()
+	sv, err := v.client.Version(context.Background())
 	if err != nil {
 		log.Debug(err)
 		return errors.New("cannot connect to draftd")

@@ -1,5 +1,5 @@
-hash: 010f114cb7f72ad6b5d106bc3ddb2ceabde6ab724d3f47c43b09d20101cb1b76
-updated: 2017-07-26T15:54:32.289598056-04:00
+hash: a08e83df272ae1580b2df255a5a0fa340307b33bbb5f03cc62235f0ac1f197a0
+updated: 2017-07-31T16:55:03.424240984-06:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -160,10 +160,11 @@ imports:
   subpackages:
   - lru
 - name: github.com/golang/protobuf
-  version: 4bd1920723d7b7c925de087aa32e2187708897f7
+  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
   subpackages:
   - proto
   - ptypes/any
+  - ptypes/empty
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
