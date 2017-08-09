@@ -23,7 +23,7 @@ func (buildctx *Context) Watch(ctx context.Context, stream chan<- *Context) (err
 	}
 	defer close(stream)
 	return watch(ctx, buildctx.AppDir, rules, func() error {
-		b, err := LoadWithEnv(buildctx.AppDir, buildctx.Env.Name)
+		b, err := LoadWithEnv(buildctx.AppDir, buildctx.EnvName)
 		if err != nil {
 			return err
 		}
