@@ -138,7 +138,7 @@ func (s *Server) Up(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.UpSumma
 }
 
 func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.UpSummary {
-	ch := make(chan *rpc.UpSummary)
+	ch := make(chan *rpc.UpSummary, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -241,8 +241,8 @@ func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
 
-	msgc := make(chan string)
-	errc := make(chan error)
+	msgc := make(chan string, 1)
+	errc := make(chan error, 1)
 	go func() {
 		pushopts := types.ImagePushOptions{RegistryAuth: s.cfg.Registry.Auth}
 		resp, err := s.cfg.Docker.ImagePush(ctx, app.img, pushopts)

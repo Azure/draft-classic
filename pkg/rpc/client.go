@@ -49,12 +49,10 @@ func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *U
 	defer conn.Close()
 
 	client := NewDraftClient(conn)
-	rpcctx := context.Background()
-
-	msgc := make(chan *UpMessage, 2)
-	errc := make(chan error)
+	msgc := make(chan *UpMessage, 1)
+	errc := make(chan error, 1)
 	go func() {
-		if err := up_build(rpcctx, client, req, msgc); err != nil {
+		if err := up_build(ctx, client, req, msgc); err != nil {
 			errc <- err
 		}
 		close(errc)
@@ -74,6 +72,8 @@ func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *U
 				continue
 			}
 			return err
+		case <-ctx.Done():
+			return ctx.Err()
 		}
 	}
 	return nil
