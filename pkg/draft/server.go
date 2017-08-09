@@ -4,36 +4,26 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/Azure/draft/pkg/rpc"
-	"golang.org/x/net/context"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 	"sync"
 	"time"
-)
 
-// kubernetes imports
-import (
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/v1"
-)
-
-// docker imports
-import (
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
-)
-
-// helm imports
-import (
+	"golang.org/x/net/context"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
+
+	"github.com/Azure/draft/pkg/rpc"
 )
 
 type (

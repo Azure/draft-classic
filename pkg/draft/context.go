@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"fmt"
-	"github.com/Azure/draft/pkg/rpc"
 	"io"
-)
 
-// helm imports
-import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/strvals"
+
+	"github.com/Azure/draft/pkg/rpc"
 )
 
 type AppContext struct {
