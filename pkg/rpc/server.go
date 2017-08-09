@@ -109,7 +109,6 @@ func (s *serverImpl) UpStream(stream Draft_UpStreamServer) (err error) {
 			}
 		}(ctx, &wg, msg.GetUpRequest())
 	}
-	return
 }
 
 // UpBuild returns a stream of the summaries within for a given draft upload.

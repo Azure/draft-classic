@@ -37,7 +37,7 @@ func (c *Client) Up(ctx context.Context, app *build.Context) error {
 		AppName:    app.Env.Name,
 		Chart:      app.Chart,
 		Values:     app.Values,
-		AppArchive: &rpc.AppArchive{app.SrcName, app.Archive},
+		AppArchive: &rpc.AppArchive{Name: app.SrcName, Content: app.Archive},
 	}
 	if !app.Env.Watch {
 		return c.build(ctx, app, req)
@@ -121,6 +121,7 @@ func (c *Client) stream(ctx context.Context, app *build.Context, req *rpc.UpRequ
 
 	for {
 		select {
+		// msgc is closed, handle nil msg received
 		case msg := <-msgc:
 			fmt.Fprintf(c.cfg.Stdout, "\r%s: %s\n", msg.StageDesc, msg.StatusText)
 		case bld := <-bldc:
@@ -129,7 +130,7 @@ func (c *Client) stream(ctx context.Context, app *build.Context, req *rpc.UpRequ
 				AppName:    bld.Env.Name,
 				Chart:      bld.Chart,
 				Values:     bld.Values,
-				AppArchive: &rpc.AppArchive{bld.SrcName, bld.Archive},
+				AppArchive: &rpc.AppArchive{Name: bld.SrcName, Content: bld.Archive},
 			}
 		case err := <-errc:
 			return err

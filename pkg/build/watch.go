@@ -75,7 +75,6 @@ func watch(ctx context.Context, dir string, rules *ignore.Rules, action func() e
 			return ctx.Err()
 		}
 	}
-	return nil
 }
 
 // removedFileInfo fake file info for ignore library only use IsDir() in negative pattern
