@@ -46,12 +46,16 @@ func (c *Client) Up(ctx context.Context, app *build.Context) error {
 }
 
 func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpRequest) error {
+	cancelctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	var (
-		msgc = make(chan *rpc.UpSummary)
-		errc = make(chan error)
+		msgc = make(chan *rpc.UpSummary, 1)
+		errc = make(chan error, 1)
 	)
+
 	go func() {
-		if err := c.rpc.UpBuild(ctx, req, msgc); err != nil {
+		if err := c.rpc.UpBuild(cancelctx, req, msgc); err != nil {
 			errc <- err
 		}
 		close(errc)
@@ -61,6 +65,7 @@ func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpReque
 		case msg, ok := <-msgc:
 			if !ok {
 				msgc = nil
+				cancel()
 				continue
 			}
 			fmt.Fprintf(c.cfg.Stdout, "\r%s: %s\n", msg.StageDesc, msg.StatusText)
@@ -71,8 +76,7 @@ func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpReque
 			}
 			return fmt.Errorf("error running draft up: %v", err)
 		case <-ctx.Done():
-			msgc, errc = nil, nil
-			continue
+			return ctx.Err()
 		}
 	}
 	return nil
@@ -80,6 +84,7 @@ func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpReque
 
 func (c *Client) stream(ctx context.Context, app *build.Context, req *rpc.UpRequest) error {
 	cancelctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	var (
 		bldc = make(chan *build.Context, 1)
@@ -109,7 +114,6 @@ func (c *Client) stream(ctx context.Context, app *build.Context, req *rpc.UpRequ
 	}()
 
 	defer func() {
-		cancel()
 		close(reqc)
 		close(errc)
 		wg.Wait()
