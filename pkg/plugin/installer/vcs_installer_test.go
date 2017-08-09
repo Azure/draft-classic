@@ -82,3 +82,66 @@ func TestVCSInstallerSuccess(t *testing.T) {
 		t.Errorf("expected error for plugin exists, got (%v)", err)
 	}
 }
+
+func TestVCSInstallerUpdate(t *testing.T) {
+
+	dh, err := ioutil.TempDir("", "draft-home-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dh)
+
+	home := draftpath.Home(dh)
+	if err := os.MkdirAll(home.Plugins(), 0755); err != nil {
+		t.Fatalf("Could not create %s: %s", home.Plugins(), err)
+	}
+
+	source := "https://github.com/michelleN/draft-server"
+	i, err := New(source, "0.1.0", home)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	// ensure a VCSInstaller was returned
+	_, ok := i.(*VCSInstaller)
+	if !ok {
+		t.Error("expected a VCSInstaller")
+	}
+
+	if err := Update(i); err == nil {
+		t.Error("expected error for plugin does not exist, got none")
+	} else if err.Error() != "plugin does not exist" {
+		t.Errorf("expected error for plugin does not exist, got (%v)", err)
+	}
+
+	// Install plugin before update
+	if err := Install(i); err != nil {
+		t.Error(err)
+	}
+
+	// Test FindSource method for positive result
+	pluginInfo, err := FindSource(i.Path(), home)
+	if err != nil {
+		t.Error(err)
+	}
+
+	repoRemote := pluginInfo.(*VCSInstaller).Repo.Remote()
+	if repoRemote != source {
+		t.Errorf("invalid source found, expected %q got %q", source, repoRemote)
+	}
+
+	// Update plugin
+	if err := Update(i); err != nil {
+		t.Error(err)
+	}
+
+	// Test update failure
+	os.Remove(filepath.Join(i.Path(), "plugin.yaml"))
+	// Testing update for error
+	if err := Update(i); err == nil {
+		t.Error("expected error for plugin modified, got none")
+	} else if err.Error() != "plugin repo was modified" {
+		t.Errorf("expected error for plugin modified, got (%v)", err)
+	}
+
+}

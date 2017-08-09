@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/testing/helpers"
 )
 
 func TestPluginRemoveCmd(t *testing.T) {
@@ -26,7 +27,7 @@ func TestPluginRemoveCmd(t *testing.T) {
 		names: []string{"echo"},
 	}
 
-	copyTree(t, "testdata/plugins/", pluginDirPath(remove.home))
+	helpers.CopyTree(t, "testdata/plugins/", pluginDirPath(remove.home))
 
 	if err := remove.run(); err != nil {
 		t.Errorf("Error removing plugin: %v", err)
