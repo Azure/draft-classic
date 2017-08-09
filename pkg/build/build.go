@@ -27,6 +27,7 @@ import (
 
 type Context struct {
 	Env     *manifest.Environment
+	EnvName string
 	AppDir  string
 	Chart   *chart.Chart
 	Values  *chart.Config
@@ -35,7 +36,7 @@ type Context struct {
 }
 
 func LoadWithEnv(appdir, whichenv string) (*Context, error) {
-	ctx := &Context{AppDir: appdir}
+	ctx := &Context{AppDir: appdir, EnvName: whichenv}
 	// read draft.toml from appdir.
 	b, err := ioutil.ReadFile(filepath.Join(appdir, "draft.toml"))
 	if err != nil {
