@@ -94,7 +94,7 @@ func setupConnection(c *cobra.Command, args []string) error {
 			return err
 		}
 
-		draftHost = fmt.Sprintf("http://localhost:%d", tunnel.Local)
+		draftHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 		log.Debugf("Created tunnel using local port: '%d'", tunnel.Local)
 	}
 
@@ -108,13 +108,13 @@ func teardown() {
 	}
 }
 
-func ensureDraftClient(p *draft.Client) *draft.Client {
-	if p != nil {
-		return p
-	}
-	client, err := draft.NewFromString(draftHost, nil)
-	if err != nil {
-		panic(err)
+func ensureDraftClient(client *draft.Client) *draft.Client {
+	if client == nil {
+		return draft.NewClient(&draft.ClientConfig{
+			ServerAddr: draftHost,
+			Stdout:     os.Stdout,
+			Stderr:     os.Stderr,
+		})
 	}
 	return client
 }

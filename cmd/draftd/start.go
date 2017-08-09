@@ -3,16 +3,15 @@ package main
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	docker "github.com/docker/docker/client"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"golang.org/x/net/context"
 	"k8s.io/helm/pkg/helm"
 
-	"github.com/Azure/draft/api"
+	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/kube"
 )
 
 const startDesc = `
@@ -41,6 +40,8 @@ type startCmd struct {
 	basedomain string
 	// tillerURI is the URI used to connect to tiller.
 	tillerURI string
+	// local allows draftd to run locally (for testing purposes).
+	local bool
 }
 
 func newStartCmd(out io.Writer) *cobra.Command {
@@ -58,7 +59,7 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&sc.listenAddr, "listen-addr", "l", "tcp://0.0.0.0:44135", "the address the server listens on")
+	f.StringVarP(&sc.listenAddr, "listen-addr", "l", "0.0.0.0:44135", "the address the server listens on")
 	f.StringVarP(&sc.dockerAddr, "docker-addr", "", "unix:///var/run/docker.sock", "the address the docker engine listens on")
 	f.StringVarP(&sc.dockerVersion, "docker-version", "", "", "the API version of the docker engine")
 	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", true, "retrieve docker engine information from environment")
@@ -67,47 +68,43 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
 	f.StringVar(&sc.basedomain, "basedomain", "", "the base domain in which a wildcard DNS entry points to an ingress controller")
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
+	f.BoolVarP(&sc.local, "local", "", false, "run draftd locally (uses local kubecfg)")
 
 	return cmd
 }
 
-func (c *startCmd) run() error {
-	var (
-		dockerClient *docker.Client
-		err          error
-	)
-
-	protoAndAddr := strings.SplitN(c.listenAddr, "://", 2)
-
+func (c *startCmd) run() (err error) {
+	cfg := &draft.ServerConfig{
+		Basedomain: c.basedomain,
+		ListenAddr: c.listenAddr,
+		Registry: &draft.RegistryConfig{
+			Auth: c.registryAuth,
+			Org:  c.registryOrg,
+			URL:  c.registryURL,
+		},
+	}
 	if c.dockerFromEnv {
-		dockerClient, err = docker.NewEnvClient()
+		if cfg.Docker, err = docker.NewEnvClient(); err != nil {
+			return fmt.Errorf("failed to create docker env client: %v", err)
+		}
 	} else {
-		dockerClient, err = docker.NewClient(c.dockerAddr, c.dockerVersion, nil, nil)
-	}
-	if err != nil {
-		return err
-	}
-
-	kubeConfig, err := rest.InClusterConfig()
-	if err != nil {
-		return err
-	}
-	kubeClientset, err := kubernetes.NewForConfig(kubeConfig)
-	if err != nil {
-		return err
+		if cfg.Docker, err = docker.NewClient(c.dockerAddr, c.dockerVersion, nil, nil); err != nil {
+			return fmt.Errorf("failed to create docker client: %v", err)
+		}
 	}
 
-	server, err := api.NewServer(protoAndAddr[0], protoAndAddr[1])
-	if err != nil {
-		return fmt.Errorf("failed to create server at %s: %v", c.listenAddr, err)
+	if c.local {
+		if cfg.Kube, err = kube.GetOutOfClusterClient(); err != nil {
+			return fmt.Errorf("failed to create out-of-cluster kubernetes client: %v", err)
+		}
+	} else {
+		if cfg.Kube, err = kube.GetInClusterClient(); err != nil {
+			return fmt.Errorf("failed to create in-cluster kubernetes client: %v", err)
+		}
 	}
-	server.DockerClient = dockerClient
-	server.RegistryAuth = c.registryAuth
-	server.RegistryOrg = c.registryOrg
-	server.RegistryURL = c.registryURL
-	server.Basedomain = c.basedomain
-	server.HelmClient = helm.NewClient(helm.Host(c.tillerURI))
-	server.KubeClient = kubeClientset
+
+	cfg.Helm = helm.NewClient(helm.Host(c.tillerURI))
 	log.Printf("server is now listening at %s", c.listenAddr)
-	return server.Serve()
+
+	return draft.NewServer(cfg).Serve(context.Background())
 }
