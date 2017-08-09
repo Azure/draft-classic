@@ -21,7 +21,7 @@ func newClientImpl(opts ...ClientOpt) Client {
 	return &c
 }
 
-// Version implementes rpc.Client.Version
+// Version implements rpc.Client.Version
 func (c *clientImpl) Version(ctx context.Context) (*version.Version, error) {
 	conn, err := connect(c)
 	if err != nil {
@@ -40,7 +40,7 @@ func (c *clientImpl) Version(ctx context.Context) (*version.Version, error) {
 	return v, nil
 }
 
-// UpBuild implementes rpc.Client.UpBuild
+// UpBuild implements rpc.Client.UpBuild
 func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *UpSummary) (err error) {
 	conn, err := connect(c)
 	if err != nil {
@@ -79,7 +79,7 @@ func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *U
 	return nil
 }
 
-// UpStream implementes rpc.Client.UpStream
+// UpStream implements rpc.Client.UpStream
 func (c *clientImpl) UpStream(apictx context.Context, reqc <-chan *UpRequest, outc chan<- *UpSummary) error {
 	conn, err := connect(c)
 	if err != nil {

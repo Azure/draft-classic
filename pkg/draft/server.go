@@ -65,7 +65,7 @@ const (
 	// name of the docker pull secret draftd will create in the desired destination namespace
 	pullSecretName = "draftd-pullsecret"
 	// name of the default service account draftd will modify with the imagepullsecret
-	defaultServiceAccountName = "default"
+	svcAcctNameDefault = "default"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -355,7 +355,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 
 	// determine if the default service account in the desired namespace has the correct
 	// imagePullSecret. If not, add it.
-	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get("default", metav1.GetOptions{})
+	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get(svcAcctNameDefault, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("could not load default service account: %v", err)
 	}
