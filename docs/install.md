@@ -28,29 +28,13 @@ Alternative downloads:
 
 Unpack the Draft binary and add it to your PATH.
 
-## Enable Minikube Add-ons
-
-Now that we have minikube installed, we can go ahead and enable the `registry` and `ingress`
-add-ons.
-
-The ingress add-on is used to allow inbound connections to reach the application.
-
-The registry add-on is used to store the built docker container within the cluster.
-
-You can enable the add-ons with
-
-```
-$ minikube addons enable ingress
-$ minikube addons enable registry
-```
-
 ## Boot Minikube
 
 At this point, you can boot up minikube!
 
 ```
 $ minikube start
-Starting local Kubernetes v1.6.4 cluster...
+Starting local Kubernetes v1.7.0 cluster...
 Starting VM...
 oving files into cluster...
 Setting up certs...
@@ -60,8 +44,7 @@ Setting up kubeconfig...
 Kubectl is now configured to use the cluster.
 ```
 
-Now that the cluster is up and ready, minikube automatically configures kubectl on your machine with
-the appropriate authentication and endpoint information.
+Now that the cluster is up and ready, minikube automatically configures kubectl, the command line tool for Kubernetes, on your machine with the appropriate authentication and endpoint information.
 
 ```
 $ kubectl cluster-info
@@ -70,14 +53,32 @@ Kubernetes master is running at https://192.168.99.100:8443
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
+## Enable Minikube Add-ons
+
+Now that we have minikube running, we can go ahead and enable the `registry` and `ingress`
+add-ons.
+
+The ingress add-on is used to allow inbound connections to reach the application.
+
+The registry add-on is used to store the built docker container within the cluster.
+
+You can enable the add-ons with
+
+```console
+$ minikube addons enable ingress
+$ minikube addons enable registry
+```
+
 ## Install Helm
 
-Once the cluster is ready, you will need to install Helm. Helm is a Kubernetes Package Manager and
-is how Draft deploys an application to Kubernetes.
+Install Helm, a Kubernetes Package Manager, in your cluster. Helm manages the lifecycle of an application in Kubernetes, and it is also how Draft deploys an application to Kubernetes.
 
-Installing Helm is quite simple:
+Grab Helm using Homebrew or from the [releases](https://github.com/kubernetes/helm/releases) page.
 
-```
+Installing Helm and setting it up is quite simple:
+
+```console
+$ brew install kubernetes-helm  # or download binary and put it in your $PATH
 $ helm init
 ```
 
@@ -86,7 +87,7 @@ to wait for tiller to come up.
 
 ## Install Draft
 
-Now that everything else is set up, we can now install Draft.
+Now that all the dependencies are set up, we can set up Draft by running this command:
 
 ```
 $ draft init
