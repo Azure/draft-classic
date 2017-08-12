@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"testing"
 
+	"k8s.io/helm/pkg/chartutil"
+
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/Azure/draft/pkg/osutil"
@@ -120,9 +122,49 @@ func TestSaveDir(t *testing.T) {
 	if exists {
 		t.Error("expected SaveDir(dir, false) to not write the detect script to the resultant directory")
 	}
+
+	dockerfilePath := filepath.Join(dir, "Dockerfile")
+	exists, err = osutil.Exists(dockerfilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Errorf("expected SaveDir(dir, false) to write the Dockerfile to %s", dockerfilePath)
+	}
+
+	chartPath := filepath.Join(dir, "chart", "chart-for-nigel-thornberry")
+	exists, err = osutil.Exists(chartPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Errorf("expected SaveDir(dir, false) to write the chart to %s", chartPath)
+	}
+
+	badChartYamlPath := filepath.Join(dir, "chart", "Chart.yaml")
+	exists, err = osutil.Exists(badChartYamlPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		t.Errorf("expected SaveDir(dir, false) to NOT write a Chart.yaml to %s", badChartYamlPath)
+	}
+
+	goodChartYamlPath := filepath.Join(dir, "chart", p.Chart.Metadata.Name, "Chart.yaml")
+	exists, err = osutil.Exists(goodChartYamlPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Errorf("expected SaveDir(dir, false) to write a Chart.yaml to %s", goodChartYamlPath)
+	}
+
+	if _, err := chartutil.LoadDir(filepath.Join(dir, "chart", p.Chart.Metadata.Name)); err != nil {
+		t.Errorf("expected chart/ to be loadable by helm, got %s", err)
+	}
 }
 
-func TestSaveDirDockerfileExists(t *testing.T) {
+func TestSaveDirDockerfileExistsInAppDir(t *testing.T) {
 	p := &Pack{
 		Chart: &chart.Chart{
 			Metadata: &chart.Metadata{
