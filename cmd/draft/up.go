@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-	"io"
-	"os"
 )
 
 const upDesc = `

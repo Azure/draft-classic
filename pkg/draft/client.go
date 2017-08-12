@@ -2,12 +2,13 @@ package draft
 
 import (
 	"fmt"
+	"io"
+	"sync"
+
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/rpc"
 	"github.com/Azure/draft/pkg/version"
 	"golang.org/x/net/context"
-	"io"
-	"sync"
 )
 
 type ClientConfig struct {
