@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
@@ -20,8 +23,13 @@ func FromClientConfig(config clientcmd.ClientConfig) (*chart.Config, string, err
 	}
 
 	if rawConfig.CurrentContext == "minikube" {
+		baseDomain := os.Getenv("DRAFT_BASE_DOMAIN")
+		if baseDomain == "" {
+			baseDomain = "k8s.local"
+		}
+
 		// we imply that the user has installed the registry addon
-		chartConfig.Raw = "registry:\n  url: $(REGISTRY_SERVICE_HOST)\nbasedomain: k8s.local\n"
+		chartConfig.Raw = fmt.Sprintf("registry:\n  url: $(REGISTRY_SERVICE_HOST)\nbasedomain: %s\n", baseDomain)
 		cloudProviderName = rawConfig.CurrentContext
 	}
 
