@@ -1,4 +1,4 @@
 name: draftd
 description: The Draft server
-version: canary
+version: v0.6.0-rc1
 apiVersion: v1
