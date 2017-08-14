@@ -1,4 +1,4 @@
-apiVersion: v1
+name: c#
 description: A Helm chart for Kubernetes
-name: golang
+apiVersion: v1
 version: v0.1.0

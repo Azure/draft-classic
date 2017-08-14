@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
@@ -14,6 +16,7 @@ import (
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/Azure/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/linguist"
 	"github.com/Azure/draft/pkg/osutil"
 )
 
@@ -84,12 +87,10 @@ func (c *createCmd) run() error {
 		}
 	} else {
 		// pack detection time
-		packPath, output, err := doPackDetection(c.home.Packs(), c.out)
-		log.Debugf("doPackDetection result: %s, %s, %v", packPath, output, err)
+		packPath, err := doPackDetection(c.home.Packs(), c.out)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(c.out, "--> %s app detected\n", output)
 		err = pack.CreateFrom(c.dest, packPath)
 		if err != nil {
 			return err
@@ -119,27 +120,32 @@ func (c *createCmd) run() error {
 }
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in
-// alphabetical order, returning the pack dirpath, the "formal name" returned from the detect
-// script's output and any errors that occurred during the pack detection.
-func doPackDetection(packHomeDir string, out io.Writer) (string, string, error) {
+// alphabetical order, returning the pack dirpath and any errors that occurred during the pack detection.
+func doPackDetection(packHomeDir string, out io.Writer) (string, error) {
+	langs, err := linguist.ProcessDir(".")
+	log.Debugf("linguist.ProcessDir('.') result:\n\nError: %v", err)
+	if err != nil {
+		return "", fmt.Errorf("there was an error detecting the language: %s", err)
+	}
+	for _, lang := range langs {
+		log.Debugf("%s:\t%f (%s)", lang.Language, lang.Percent, lang.Color)
+	}
+	if len(langs) == 0 {
+		return "", errors.New("No languages were detected. Are you sure there's code in here?")
+	}
+	fmt.Fprintf(out, "--> Draft detected the primary language as %s with %f%% certainty.\n", langs[0].Language, langs[0].Percent)
 	files, err := ioutil.ReadDir(packHomeDir)
 	if err != nil {
-		return "", "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
+		return "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
 	}
 	for _, file := range files {
 		if file.IsDir() {
-			packPath := filepath.Join(packHomeDir, file.Name())
-			log.Debugf("pack path: %s", packPath)
-			p, err := pack.FromDir(packPath)
-			if err != nil {
-				return "", "", fmt.Errorf("could not load pack %s: %v", packPath, err)
-			}
-			output, err := p.Detect(".")
-			log.Debugf("pack.Detect() result: %s, %v", output, err)
-			if err == nil {
-				return packPath, output, err
+			if strings.Compare(strings.ToLower(langs[0].Language), strings.ToLower(file.Name())) == 0 {
+				packPath := filepath.Join(packHomeDir, file.Name())
+				log.Debugf("pack path: %s", packPath)
+				return packPath, nil
 			}
 		}
 	}
-	return "", "", fmt.Errorf("Unable to select a starter pack Q_Q")
+	return "", errors.New("Could not find a starter pack Q_Q")
 }

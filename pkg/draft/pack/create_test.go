@@ -63,12 +63,6 @@ func fooPackFiles() []*File {
 			Perm:    0644,
 		},
 		{
-			// detect
-			Path:    filepath.Join(packName, DetectName),
-			Content: nil,
-			Perm:    0755,
-		},
-		{
 			// Dockerfile
 			Path:    filepath.Join(packName, DockerfileName),
 			Content: nil,
@@ -183,12 +177,10 @@ func TestCreate(t *testing.T) {
 		}
 	}
 
-	for _, f := range []string{DockerfileName, DetectName} {
-		if fi, err := os.Stat(filepath.Join(dir, f)); err != nil {
-			t.Errorf("Expected %s file: %s", f, err)
-		} else if fi.IsDir() {
-			t.Errorf("Expected %s to be a file.", f)
-		}
+	if fi, err := os.Stat(filepath.Join(dir, DockerfileName)); err != nil {
+		t.Errorf("Expected %s file: %s", DockerfileName, err)
+	} else if fi.IsDir() {
+		t.Errorf("Expected %s to be a file.", DockerfileName)
 	}
 
 }
@@ -219,13 +211,13 @@ func TestBuiltins(t *testing.T) {
 		t.Errorf("Expected at least one pack, got %d", c)
 	}
 
-	gopack, ok := b["golang"]
+	gopack, ok := b["go"]
 	if !ok {
 		t.Fatal("Go pack not found")
 	}
 
-	if c := len(gopack); c != 12 {
-		t.Errorf("Expected 12 files in pack, got %d", c)
+	if c := len(gopack); c != 11 {
+		t.Errorf("Expected 11 files in pack, got %d", c)
 		for _, f := range gopack {
 			t.Log(f.Path)
 		}
