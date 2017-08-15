@@ -104,25 +104,55 @@ specifies a custom host in the ingress from which tells the backing load balance
 based on the Host header.
 
 When Draft was installed on Minikube, a base domain of `k8s.local` was used. To use this domain, you
-can edit your `/etc/hosts` file to point to the ingressed out application domain to your cluster.
+can install `dnsmasq` to redirect all outgoing requests to `k8s.local` off to the Minikube cluster.
 
-The following snippet would allow you to access an application:
-
-```
-$ sudo echo $(minikube ip) appname.k8s.local >> /etc/hosts
-```
-
-Unfortunately, `/etc/hosts` does not handle wildcard routes so each application deployed will need
-to result in a new route in `/etc/hosts`. Others have worked around this by using other more
-sophisticated tools like [dnsmasq][].
-
-To use wildcard domains with dnsmasq, add a new rule in `dnsmasq.conf`:
+There are plenty of ways to install dnsmasq for MacOS users, but the easiest by far is to use
+Homebrew.
 
 ```
-$ sudo echo "address=/k8s.local/$(minikube ip)" >> dnsmasq.conf
+$ brew install dnsmasq
 ```
 
-See the [Ingress Guide][] for a more detailed setup.
+Once it's installed, you will want to point all outgoing requests to `k8s.local` to your minikube
+instance.
+
+```
+$ echo 'address=/.k8s.local/`minikube ip`' > $(brew --prefix)/etc/dnsmasq.conf
+$ sudo brew services start dnsmasq
+```
+
+This will start dnsmasq and make it resolve requests from `k8s.local` to your minikube instance's
+IP address (usually some form of 192.168.99.10x), but now we need to point the operating system's
+DNS resolver at dnsmasq to resolve addresses.
+
+```
+$ sudo mkdir /etc/resolver
+$ echo nameserver 127.0.0.1 | sudo tee /etc/resolver/k8s.local
+```
+
+Afterwards, you will need to clear the DNS resolver cache so any new requests will go through
+dnsmasq instead of hitting the cached results from your operating system.
+
+```
+$ sudo killall -HUP mDNSResponder
+```
+
+To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
+
+```
+><> scutil --dns | grep k8s.local -B 1 -A 3
+resolver #8
+  domain   : k8s.local
+  nameserver[0] : 127.0.0.1
+  flags    : Request A records, Request AAAA records
+  reach    : Reachable, Local Address, Directly Reachable Address
+```
+
+If you're on Linux, refer to [Arch Linux's fantastic wiki on dnsmasq][dnsmasq].
+
+If you're on Windows, refer to [Acrylic's documentation][acrylic], which is another local DNS proxy
+specifically for Windows. Just make sure that Acrylic is pointing at minikube through `k8s.local`.
+You can use the above steps as a general guideline on how to set up Acrylic.
 
 ## Take Draft for a Spin
 
@@ -130,6 +160,7 @@ Once you've completed the above steps, you're ready to climb aboard and explore 
 [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
 
+[acrylic]: http://mayakron.altervista.org/wikibase/show.php?id=AcrylicHome
 [dnsmasq]: https://wiki.archlinux.org/index.php/dnsmasq
 [Getting Started]: getting-started.md
 [Ingress Guide]: ingress.md
