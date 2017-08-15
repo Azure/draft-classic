@@ -66,6 +66,62 @@ explicitly provide it:
 $ curl --header Host:<application domain> <ip address from above>
 ```
 
+#### dnsmasq
+
+For wildcard support, you can use a DNS server like dnsmasq. Installing a local DNS server like
+dnsmasq and configuring your system to use that server can make `/etc/hosts` configuration changes
+a thing of the past.
+
+There are plenty of ways to install dnsmasq for MacOS users, but the easiest by far is to use
+Homebrew.
+
+```
+$ brew install dnsmasq
+```
+
+Once it's installed, you will want to point all outgoing requests to `k8s.local` to your minikube
+instance.
+
+```
+$ echo 'address=/.k8s.local/`minikube ip`' > $(brew --prefix)/etc/dnsmasq.conf
+$ sudo brew services start dnsmasq
+```
+
+This will start dnsmasq and make it resolve requests from `k8s.local` to your minikube instance's
+IP address (usually some form of 192.168.99.10x), but now we need to point the operating system's
+DNS resolver at dnsmasq to resolve addresses.
+
+```
+$ sudo mkdir /etc/resolver
+$ echo nameserver 127.0.0.1 | sudo tee /etc/resolver/k8s.local
+```
+
+Afterwards, you will need to clear the DNS resolver cache so any new requests will go through
+dnsmasq instead of hitting the cached results from your operating system.
+
+```
+$ sudo killall -HUP mDNSResponder
+```
+
+To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
+
+```
+><> scutil --dns | grep k8s.local -B 1 -A 3
+resolver #8
+  domain   : k8s.local
+  nameserver[0] : 127.0.0.1
+  flags    : Request A records, Request AAAA records
+  reach    : Reachable, Local Address, Directly Reachable Address
+```
+
+If you're on Linux, refer to [Arch Linux's fantastic wiki on dnsmasq](https://wiki.archlinux.org/index.php/dnsmasq).
+
+If you're on Windows, refer to [Acrylic's documentation][acrylic], which is another local DNS proxy
+specifically for Windows. Just make sure that Acrylic is pointing at minikube through `k8s.local`.
+You can use the above steps as a general guideline on how to set up Acrylic.
+
+#### /etc/hosts
+
 You could also edit your `/etc/hosts` file to point
 to the ingressed out application domain to your cluster.
 
@@ -76,13 +132,7 @@ $ sudo echo <ip address from above> <application domain> >> /etc/hosts
 ```
 
 The draw back is that `/etc/hosts` does not support wildcards, so you would
-need to add an entry for each application deployed by Draft. For wildcard
-support you can use `dnsmasq`. Refer to `dnsmasq` documentation for your
-platform.
-
-Some sources of information:
- * [Arch Linux dnsmasq]( https://wiki.archlinux.org/index.php/dnsmasq)
-
+need to add an entry for each application deployed by Draft.
 
 ## Next steps
 
@@ -92,5 +142,6 @@ you're ready to install Draft.
 Continue with the [Installation Guide][Installation Guide]!
 
 
+[acrylic]: http://mayakron.altervista.org/wikibase/show.php?id=AcrylicHome
 [Installation Guide]: install.md#install-draft
 [Kubernetes Ingress Documentation]: https://kubernetes.io/docs/concepts/services-networking/ingress/
