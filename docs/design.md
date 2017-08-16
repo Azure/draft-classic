@@ -43,8 +43,8 @@ following domains:
 - interacting with the Draft server
 - interacting with [plugins](plugins-guide.md)
 
-The Draft client interacts with the Draft server through the Kubernetes API server, using
-HTTP/Websockets as the communication protocol.
+The Draft client interacts with the Draft server through the Kubernetes API server, using gRPC as
+the communication protocol.
 
 The Draft server is a an in-cluster server interfaces with the Kubernetes API server, a Docker
 registry and a Tiller (Helm server) instance. The server is responsible for the following:
@@ -59,7 +59,7 @@ and deploying the application.
 
 ## Other Architectural Considerations
 
-Instead of a draftd HTTP server, we originally thought Draft could spawn a Draft pod "job"
+Instead of a draftd gRPC server, we originally thought Draft could spawn a Draft pod "job"
 (via `draft up`) that runs only when `draft up` is called. In that case, the `draft` client would be
 the main focal point for client AND server-side configuration. This has the advantage of requiring
 fewer resource demands server-side (being that there's no perpetually running instance in the
@@ -107,8 +107,8 @@ If you've already created Kubernetes applications, you can start with an existin
 begin using Draft. There are a few patterns you may need to follow to meet the expectations for
 Draft, but this is a matter of a few minutes of work; not a complete refactoring.
 
-In this case, you don't even need `draft create`. You can just create the directory structure and
-sail onward.
+In this case, you don't even need `draft create`. You can just create the directory structure, add
+a draft.toml and sail onward.
 
 ## Running Your Code
 
