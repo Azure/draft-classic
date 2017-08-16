@@ -23,8 +23,14 @@ SHELL=/bin/bash
 .PHONY: all
 all: build
 
+.PHONY: check-then-generate
+check-then-generate:
+	@if [[ -n $$(git status --porcelain packs/) ]]; then \
+		go generate ./pkg/draft/pack/generated; \
+	fi
+
 .PHONY: build
-build: generate
+build: check-then-generate
 build:
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/...
 
