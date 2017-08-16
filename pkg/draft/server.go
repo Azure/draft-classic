@@ -3,6 +3,7 @@ package draft
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -16,7 +17,8 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
 	"golang.org/x/net/context"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"google.golang.org/grpc"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
@@ -285,7 +287,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 
 	// determine if the destination namespace exists, create it if not.
 	if _, err = s.cfg.Kube.CoreV1().Namespaces().Get(app.req.Namespace, metav1.GetOptions{}); err != nil {
-		if !errors.IsNotFound(err) {
+		if !apiErrors.IsNotFound(err) {
 			return err
 		}
 		_, err = s.cfg.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
@@ -314,7 +316,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	// determine if the registry pull secret exists in the desired namespace, create it if not.
 	var secret *v1.Secret
 	if secret, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Get(pullSecretName, metav1.GetOptions{}); err != nil {
-		if !errors.IsNotFound(err) {
+		if !apiErrors.IsNotFound(err) {
 			return err
 		}
 		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
@@ -389,7 +391,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 		}
 		rls, err := s.cfg.Helm.InstallReleaseFromChart(app.req.Chart, app.req.Namespace, opts...)
 		if err != nil {
-			return fmt.Errorf("could not install release: %v", err)
+			return fmt.Errorf("could not install release: %v", grpcError(err))
 		}
 		formatReleaseStatus(app, rls.Release, summary)
 
@@ -408,7 +410,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 		}
 		rls, err := s.cfg.Helm.UpdateReleaseFromChart(app.req.AppName, app.req.Chart, opts...)
 		if err != nil {
-			return fmt.Errorf("could not upgrade release: %v", err)
+			return fmt.Errorf("could not upgrade release: %v", grpcError(err))
 		}
 		formatReleaseStatus(app, rls.Release, summary)
 	}
@@ -474,4 +476,8 @@ func complete(desc string, out chan<- *rpc.UpSummary, err *error) {
 	default:
 		fn("success", rpc.UpSummary_SUCCESS)
 	}
+}
+
+func grpcError(err error) error {
+	return errors.New(grpc.ErrorDesc(err))
 }
