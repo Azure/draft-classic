@@ -10,10 +10,18 @@ Get started with Draft in three easy steps:
 
 In order to get started, you will need to fetch the following:
 
-- [the latest release of minikube](https://github.com/kubernetes/minikube/releases)
-- [the latest release of kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [the latest release of Helm](https://github.com/kubernetes/helm/releases)
-- [the latest release of Draft](https://github.com/Azure/draft/releases)
+- the latest release of minikube
+- the latest release of kubectl
+- the latest release of Helm
+
+All of the dependencies can be installed by the following:
+
+```
+$ brew cask install minikube
+$ brew install kubernetes-helm
+```
+
+Afterwards, fetch [the latest release of Draft](https://github.com/Azure/draft/releases).
 
 Canary releases of the Draft client can be found at the following links:
 
@@ -34,7 +42,7 @@ At this point, you can boot up minikube!
 
 ```
 $ minikube start
-Starting local Kubernetes v1.7.0 cluster...
+Starting local Kubernetes v1.7.3 cluster...
 Starting VM...
 oving files into cluster...
 Setting up certs...
@@ -73,14 +81,9 @@ $ minikube addons enable registry
 
 Install Helm, a Kubernetes Package Manager, in your cluster. Helm manages the lifecycle of an application in Kubernetes, and it is also how Draft deploys an application to Kubernetes.
 
-Grab Helm using Homebrew or from the [releases](https://github.com/kubernetes/helm/releases) page.
-
 Installing Helm and setting it up is quite simple:
 
-```console
-$ brew install kubernetes-helm  # or download binary and put it in your $PATH
-$ helm init
-```
+    $ helm init
 
 Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch`
 to wait for tiller to come up.
@@ -89,9 +92,7 @@ to wait for tiller to come up.
 
 Now that all the dependencies are set up, we can set up Draft by running this command:
 
-```
-$ draft init
-```
+    $ draft init
 
 Follow through the prompts. Draft will read your local kube configuration and notice that it is
 pointing at minikube. It will then install Draftd (the Draft server) communicating with the
@@ -109,9 +110,7 @@ can install `dnsmasq` to redirect all outgoing requests to `k8s.local` off to th
 There are plenty of ways to install dnsmasq for MacOS users, but the easiest by far is to use
 Homebrew.
 
-```
-$ brew install dnsmasq
-```
+    $ brew install dnsmasq
 
 Once it's installed, you will want to point all outgoing requests to `k8s.local` to your minikube
 instance.
@@ -140,7 +139,7 @@ $ sudo killall -HUP mDNSResponder
 To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
 
 ```
-><> scutil --dns | grep k8s.local -B 1 -A 3
+$ scutil --dns | grep k8s.local -B 1 -A 3
 resolver #8
   domain   : k8s.local
   nameserver[0] : 127.0.0.1
