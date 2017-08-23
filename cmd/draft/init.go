@@ -39,7 +39,6 @@ To dump information about the Draft chart, combine the '--dry-run' and '--debug'
 basedomain: %s
 registry:
   url: %s
-  org: %s
   authtoken: %s
 `
 )
@@ -130,7 +129,7 @@ func (i *initCmd) run() error {
 		if !i.autoAccept || cloudProvider == "" {
 			// prompt for missing information
 			fmt.Fprintf(i.out, "\nIn order to install Draft, we need a bit more information...\n\n")
-			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io, quay.io, myregistry.azurecr.io): ")
+			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): ")
 			reader := bufio.NewReader(i.in)
 			registryURL, err := reader.ReadString('\n')
 			if err != nil {
@@ -150,16 +149,7 @@ func (i *initCmd) run() error {
 			if err != nil {
 				return fmt.Errorf("Could not read input: %s", err)
 			}
-			fmt.Fprintf(i.out, "\n4. Enter your org where Draft will push images [%s]: ", dockerUser)
-			dockerOrg, err := reader.ReadString('\n')
-			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
-			}
-			dockerOrg = strings.TrimSpace(dockerOrg)
-			if dockerOrg == "" {
-				dockerOrg = dockerUser
-			}
-			fmt.Fprint(i.out, "5. Enter your top-level domain for ingress (e.g. draft.example.com): ")
+			fmt.Fprint(i.out, "4. Enter your top-level domain for ingress (e.g. draft.example.com): ")
 			basedomain, err := reader.ReadString('\n')
 			if err != nil {
 				return fmt.Errorf("Could not read input: %s", err)
@@ -171,7 +161,7 @@ func (i *initCmd) run() error {
 					`{"username":"%s","password":"%s"}`,
 					dockerUser,
 					dockerPass)))
-			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, basedomain, registryURL, dockerOrg, registryAuth)
+			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, basedomain, registryURL, registryAuth)
 		}
 
 		if err := installer.Install(i.helmClient, chartConfig); err != nil {
