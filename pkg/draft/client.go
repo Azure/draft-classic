@@ -21,12 +21,19 @@ type ClientConfig struct {
 type Client struct {
 	cfg *ClientConfig
 	rpc rpc.Client
+	res chan *rpc.UpSummary
 }
 
 func NewClient(cfg *ClientConfig) *Client {
 	opts := []rpc.ClientOpt{rpc.WithServerAddr(cfg.ServerAddr)}
-	return &Client{cfg: cfg, rpc: rpc.NewClient(opts...)}
+	return &Client{
+		cfg: cfg,
+		rpc: rpc.NewClient(opts...),
+		res: make(chan *rpc.UpSummary, 2),
+	}
 }
+
+func (c *Client) Results() <-chan *rpc.UpSummary { return c.res }
 
 func (c *Client) Version(ctx context.Context) (*version.Version, error) {
 	return c.rpc.Version(ctx)
@@ -69,7 +76,12 @@ func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpReque
 				cancel()
 				continue
 			}
-			fmt.Fprintf(c.cfg.Stdout, "\r%s: %s\n", msg.StageDesc, msg.StatusText)
+			select {
+			case c.res <- msg:
+				// deliver / buffer to summary channel
+			default:
+				// ignore to avoid blocking
+			}
 		case err, ok := <-errc:
 			if !ok {
 				errc = nil
