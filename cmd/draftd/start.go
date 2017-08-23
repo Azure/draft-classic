@@ -64,7 +64,6 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVarP(&sc.dockerVersion, "docker-version", "", "", "the API version of the docker engine")
 	f.BoolVarP(&sc.dockerFromEnv, "docker-from-env", "", true, "retrieve docker engine information from environment")
 	f.StringVar(&sc.registryAuth, "registry-auth", "", "the authorization token used to push images up to the registry")
-	f.StringVar(&sc.registryOrg, "registry-org", "", "the organization (e.g. your DockerHub account) used to push images up to the registry")
 	f.StringVar(&sc.registryURL, "registry-url", "127.0.0.1:5000", "the URL of the registry (e.g. quay.io, docker.io, gcr.io)")
 	f.StringVar(&sc.basedomain, "basedomain", "", "the base domain in which a wildcard DNS entry points to an ingress controller")
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
@@ -79,7 +78,6 @@ func (c *startCmd) run() (err error) {
 		ListenAddr: c.listenAddr,
 		Registry: &draft.RegistryConfig{
 			Auth: c.registryAuth,
-			Org:  c.registryOrg,
 			URL:  c.registryURL,
 		},
 	}

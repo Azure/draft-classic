@@ -3,9 +3,7 @@
 # Declare variables to be passed into your templates.
 replicaCount: 2
 image:
-  registry: docker.io
-  org: library
-  name: openjdk
+  repository: openjdk
   tag: 8-jdk-alpine
   pullPolicy: IfNotPresent
 service:

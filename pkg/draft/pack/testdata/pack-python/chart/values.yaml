@@ -3,9 +3,7 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  registry: docker.io
-  org: library
-  name: nginx
+  repository: nginx
   tag: stable
   pullPolicy: IfNotPresent
 service:
