@@ -5,6 +5,10 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
+	"math/rand"
+	"time"
+
+	"github.com/oklog/ulid"
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/strvals"
@@ -19,6 +23,7 @@ type AppContext struct {
 	tag  string
 	img  string
 	out  io.Writer
+	id   string
 	vals chartutil.Values
 }
 
@@ -56,6 +61,7 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 		return nil, err
 	}
 	return &AppContext{
+		id:   getulid(),
 		srv:  s,
 		req:  req,
 		buf:  b,
@@ -64,4 +70,18 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 		out:  out,
 		vals: vals,
 	}, nil
+}
+
+func getulid() string { return <-ulidc }
+
+// A channel which returns build ulids.
+var ulidc = make(chan string)
+
+func init() {
+	rnd := rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+	go func() {
+		for {
+			ulidc <- ulid.MustNew(ulid.Timestamp(time.Now().UTC()), rnd).String()
+		}
+	}()
 }
