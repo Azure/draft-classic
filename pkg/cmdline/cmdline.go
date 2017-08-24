@@ -90,17 +90,17 @@ func Display(ctx context.Context, app string, summaries <-chan *rpc.UpSummary, o
 			if !ok {
 				return
 			}
-			if c, ok := ongoing[summary.StageDesc]; !ok {
-				c = make(chan rpc.UpSummary_StatusCode, 1)
-				ongoing[summary.StageDesc] = c
+			if ch, ok := ongoing[summary.StageDesc]; !ok {
+				ch = make(chan rpc.UpSummary_StatusCode, 1)
+				ongoing[summary.StageDesc] = ch
 				wg.Add(1)
-				go func(desc string, wg *sync.WaitGroup) {
-					progress(&cli, app, desc, c)
+				go func(desc string, ch chan rpc.UpSummary_StatusCode, wg *sync.WaitGroup) {
+					progress(&cli, app, desc, ch)
 					delete(ongoing, desc)
 					wg.Done()
-				}(summary.StageDesc, &wg)
+				}(summary.StageDesc, ch, &wg)
 			} else {
-				c <- summary.StatusCode
+				ch <- summary.StatusCode
 			}
 		case <-cli.Done():
 			return
@@ -112,22 +112,20 @@ func progress(cli *cmdline, app, desc string, codes <-chan rpc.UpSummary_StatusC
 	start := time.Now()
 	done := make(chan string, 1)
 	go func() {
-		defer close(done)
-		for {
-			select {
-			case code := <-codes:
-				switch code {
-				case rpc.UpSummary_SUCCESS:
-					done <- fmt.Sprintf("%s: %s  (%.4fs)\n", cyan(app), passStr(desc), time.Since(start).Seconds())
-					return
-				case rpc.UpSummary_FAILURE:
-					done <- fmt.Sprintf("%s: %s  (%.4fs)\n", cyan(app), failStr(desc), time.Since(start).Seconds())
-					return
-				}
-			case <-cli.Done():
+		defer func() {
+			close(done)
+		}()
+		for code := range codes {
+			switch code {
+			case rpc.UpSummary_SUCCESS:
+				done <- fmt.Sprintf("%s: %s  (%.4fs)\n", cyan(app), passStr(desc), time.Since(start).Seconds())
+				return
+			case rpc.UpSummary_FAILURE:
+				done <- fmt.Sprintf("%s: %s  (%.4fs)\n", cyan(app), failStr(desc), time.Since(start).Seconds())
 				return
 			}
 		}
+		done <- "\n"
 	}()
 	m := fmt.Sprintf("%s: %s", cyan(app), yellow(desc))
 	s := `-\|/-`
