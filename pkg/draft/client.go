@@ -73,6 +73,7 @@ func (c *Client) build(ctx context.Context, app *build.Context, req *rpc.UpReque
 		case msg, ok := <-msgc:
 			if !ok {
 				msgc = nil
+				close(c.res)
 				cancel()
 				continue
 			}
