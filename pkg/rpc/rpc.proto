@@ -79,6 +79,8 @@ message UpSummary {
 	// status_code indicates the status of the progress or
 	// completion of a draft up.
 	StatusCode status_code = 3;
+	// build_id is the build identifier associated with this draft up build.
+	string build_id = 4;
 }
 
 // UpMessage is the discriminated union of draft up messages

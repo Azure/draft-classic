@@ -76,19 +76,26 @@ func Display(ctx context.Context, app string, summaries <-chan *rpc.UpSummary, o
 
 	fmt.Fprintf(cli.opts.stdout, "%s: '%s'\n", blue("Draft Up Started"), cyan(app))
 	ongoing := make(map[string]chan rpc.UpSummary_StatusCode)
-	var wg sync.WaitGroup
+	var (
+		wg sync.WaitGroup
+		id string
+	)
 	defer func() {
 		for _, c := range ongoing {
 			close(c)
 		}
 		cli.Stop()
 		wg.Wait()
+		fmt.Fprintf(cli.opts.stdout, "%s: %s: %s\n", cyan(app), blue("Build ID"), yellow(id))
 	}()
 	for {
 		select {
 		case summary, ok := <-summaries:
 			if !ok {
 				return
+			}
+			if id == "" {
+				id = summary.BuildId
 			}
 			if ch, ok := ongoing[summary.StageDesc]; !ok {
 				ch = make(chan rpc.UpSummary_StatusCode, 1)
@@ -112,9 +119,7 @@ func progress(cli *cmdline, app, desc string, codes <-chan rpc.UpSummary_StatusC
 	start := time.Now()
 	done := make(chan string, 1)
 	go func() {
-		defer func() {
-			close(done)
-		}()
+		defer close(done)
 		for code := range codes {
 			switch code {
 			case rpc.UpSummary_SUCCESS:
