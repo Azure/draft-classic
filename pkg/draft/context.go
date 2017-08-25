@@ -5,26 +5,23 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
-	"math/rand"
-	"time"
-
-	"github.com/oklog/ulid"
 
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/strvals"
 
+	"github.com/Azure/draft/pkg/draft/build"
 	"github.com/Azure/draft/pkg/rpc"
 )
 
 type AppContext struct {
-	srv  *Server
-	req  *rpc.UpRequest
-	buf  *bytes.Buffer
-	tag  string
-	img  string
-	out  io.Writer
-	id   string
-	vals chartutil.Values
+	srv   *Server
+	req   *rpc.UpRequest
+	buf   *bytes.Buffer
+	tag   string
+	img   string
+	out   io.Writer
+	build *build.Build
+	vals  chartutil.Values
 }
 
 // newAppContext prepares state carried across the various draft stage boundaries.
@@ -61,27 +58,13 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 		return nil, err
 	}
 	return &AppContext{
-		id:   getulid(),
-		srv:  s,
-		req:  req,
-		buf:  b,
-		tag:  imgtag,
-		img:  image,
-		out:  out,
-		vals: vals,
+		build: build.New(),
+		srv:   s,
+		req:   req,
+		buf:   b,
+		tag:   imgtag,
+		img:   image,
+		out:   out,
+		vals:  vals,
 	}, nil
-}
-
-func getulid() string { return <-ulidc }
-
-// A channel which returns build ulids.
-var ulidc = make(chan string)
-
-func init() {
-	rnd := rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
-	go func() {
-		for {
-			ulidc <- ulid.MustNew(ulid.Timestamp(time.Now().UTC()), rnd).String()
-		}
-	}()
 }

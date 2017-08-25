@@ -12,6 +12,14 @@ service Draft {
 	// GetVersion returns the current version of the server.
 	rpc GetVersion(google.protobuf.Empty) returns (Version) {}
 
+	// BuildLogs returns a stream of logs for a given draft
+	// build id.
+	//
+	// Results are streamed rather than returned at once so
+	// the client can paginate the logs or seek to a certain
+	// part of the logs.
+	rpc BuildLogs(BuildLogSummary) returns (BuildLogSummary) {}
+
 	// UpBuild returns a stream of the UpSummary within
 	// for a given draft upload.
 	//
@@ -89,5 +97,31 @@ message UpMessage {
 	oneof Message {
 		UpRequest up_request = 1;
 		UpSummary up_summary = 2;
+	}
+}
+
+// BuildLogRequest indicates the message sent by a draft client and received
+// by a draft server to carry out a draft logs command.
+message BuildLogRequest {
+	// build_id is the build identifier associated with this draft logs request.
+	string build_id = 1;
+	string stage = 2;
+	string page = 3;
+	string seek_offset = 4;
+	string seek_whence =  5;
+}
+
+// BuildLogSummary is the log summary returned when executing a draft logs.
+message BuildLogSummary {
+	// logs is the build logs associated with this draft logs request.
+	string logs = 1;
+}
+
+// LogMessage is the discriminated union of draft log messages
+// exchanged between the client and server.
+message LogMessage {
+	oneof Message {
+		BuildLogRequest build_log_request = 1;
+		BuildLogSummary build_log_summary = 2;
 	}
 }

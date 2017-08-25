@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -143,16 +144,20 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 			fmt.Printf("buildApp: error creating app context: %v\n", err)
 			return
 		}
+		defer app.build.FlushToDisk()
+		app.out = io.MultiWriter(os.Stdout, app.build.BuildImgLogs)
 		if err := s.buildImg(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: buildImg error: %v\n", err)
+			fmt.Fprintf(app.out, "buildApp: buildImg error: %v\n", err)
 			return
 		}
+		app.out = io.MultiWriter(os.Stdout, app.build.PushImgLogs)
 		if err := s.pushImg(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: pushImg error: %v\n", err)
+			fmt.Fprintf(app.out, "buildApp: pushImg error: %v\n", err)
 			return
 		}
+		app.out = io.MultiWriter(os.Stdout, app.build.ReleaseLogs)
 		if err := s.release(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: release error: %v\n", err)
+			fmt.Fprintf(app.out, "buildApp: release error: %v\n", err)
 			return
 		}
 	}()
@@ -167,8 +172,8 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Building Docker Image"
 
-	defer complete(app.id, stageDesc, out, &err)
-	summary := summarize(app.id, stageDesc, out)
+	defer complete(app.build.ID, stageDesc, out, &err)
+	summary := summarize(app.build.ID, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
@@ -227,8 +232,8 @@ func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.
 func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Pushing Docker Image"
 
-	defer complete(app.id, stageDesc, out, &err)
-	summary := summarize(app.id, stageDesc, out)
+	defer complete(app.build.ID, stageDesc, out, &err)
+	summary := summarize(app.build.ID, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
@@ -279,8 +284,8 @@ func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.U
 func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Releasing Application"
 
-	defer complete(app.id, stageDesc, out, &err)
-	summary := summarize(app.id, stageDesc, out)
+	defer complete(app.build.ID, stageDesc, out, &err)
+	summary := summarize(app.build.ID, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
