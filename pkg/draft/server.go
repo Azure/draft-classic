@@ -167,8 +167,8 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Building Docker Image"
 
-	defer complete(stageDesc, out, &err)
-	summary := summarize(stageDesc, out)
+	defer complete(app.id, stageDesc, out, &err)
+	summary := summarize(app.id, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
@@ -227,8 +227,8 @@ func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.
 func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Pushing Docker Image"
 
-	defer complete(stageDesc, out, &err)
-	summary := summarize(stageDesc, out)
+	defer complete(app.id, stageDesc, out, &err)
+	summary := summarize(app.id, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
@@ -279,8 +279,8 @@ func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.U
 func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.UpSummary) (err error) {
 	const stageDesc = "Releasing Application"
 
-	defer complete(stageDesc, out, &err)
-	summary := summarize(stageDesc, out)
+	defer complete(app.id, stageDesc, out, &err)
+	summary := summarize(app.id, stageDesc, out)
 
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
@@ -462,15 +462,15 @@ func formatReleaseStatus(app *AppContext, rls *release.Release, summary func(str
 }
 
 // TODO: This is a half-measure solution.
-func summarize(desc string, out chan<- *rpc.UpSummary) func(string, rpc.UpSummary_StatusCode) {
+func summarize(id, desc string, out chan<- *rpc.UpSummary) func(string, rpc.UpSummary_StatusCode) {
 	return func(info string, code rpc.UpSummary_StatusCode) {
-		out <- &rpc.UpSummary{StageDesc: desc, StatusText: info, StatusCode: code}
+		out <- &rpc.UpSummary{StageDesc: desc, StatusText: info, StatusCode: code, BuildId: id}
 	}
 }
 
 // TODO: This is a half-measure solution.
-func complete(desc string, out chan<- *rpc.UpSummary, err *error) {
-	switch fn := summarize(desc, out); {
+func complete(id, desc string, out chan<- *rpc.UpSummary, err *error) {
+	switch fn := summarize(id, desc, out); {
 	case *err != nil:
 		fn(fmt.Sprintf("failure: %v", *err), rpc.UpSummary_FAILURE)
 	default:
