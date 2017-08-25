@@ -1,5 +1,5 @@
-hash: 1f246a2a80d92ec637a4311330f7c6e43b0fd928fdd02b936315a00e9ed18692
-updated: 2017-08-09T14:39:46.482190632-07:00
+hash: d8b75756a8486f112a0d033bd8add71d05fdf0bcd2bf31556c7875ba8d862b5e
+updated: 2017-08-24T12:55:18.257599215-06:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -124,6 +124,8 @@ imports:
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
 - name: github.com/facebookgo/symwalk
   version: 42004b9f322246749dd73ad71008b1f3160c0052
+- name: github.com/fatih/color
+  version: 67c513e5729f918f5e69786686770c27141a4490
 - name: github.com/generaltso/linguist
   version: 9202505feb6930ac6945b5005715d2b03853ac9c
   subpackages:
@@ -214,6 +216,12 @@ imports:
   version: 9526be0327b26ad31aa70296a7b10704883976d5
 - name: github.com/Masterminds/vcs
   version: 3084677c2c188840777bff30054f2b553729d329
+- name: github.com/mattn/go-colorable
+  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+  repo: https://github.com/mattn/go-colorable
+- name: github.com/mattn/go-isatty
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+  repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-runewidth
   version: d6bea18f789704b5f83375793155289da36a3c7f
 - name: github.com/Microsoft/go-winio
@@ -222,6 +230,8 @@ imports:
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/Nvveen/Gotty
   version: cd527374f1e5bff4938207604a14f2e38a9cf512
+- name: github.com/oklog/ulid
+  version: 66bb6560562feca7045b23db1ae85b01260f87c5
 - name: github.com/opencontainers/go-digest
   version: eaa60544f31ccf3b0653b1a118b76d33418ff41b
 - name: github.com/opencontainers/runc

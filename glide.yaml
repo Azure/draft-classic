@@ -1,5 +1,7 @@
 package: github.com/Azure/draft
 import:
+- package: github.com/oklog/ulid
+- package: github.com/fatih/color
 - package: github.com/BurntSushi/toml
 - package: github.com/Azure/go-ansiterm
   version: 388960b655244e76e24c75f48631564eaefade62

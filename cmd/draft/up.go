@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Azure/draft/pkg/build"
+	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/spf13/cobra"
@@ -69,9 +70,14 @@ func (u *upCmd) run(environment string) (err error) {
 	if buildctx, err = build.LoadWithEnv(u.src, environment); err != nil {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
-	if err = u.client.Up(context.Background(), buildctx); err != nil {
-		return fmt.Errorf("there was an error running 'draft up': %v", err)
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		if err = u.client.Up(ctx, buildctx); err != nil {
+			err = fmt.Errorf("there was an error running 'draft up': %v", err)
+		}
+		cancel()
+	}()
+	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
 	return nil
 }
 
