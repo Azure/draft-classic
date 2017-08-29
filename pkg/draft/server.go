@@ -252,82 +252,8 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
 
-	// determine if the destination namespace exists, create it if not.
-	if _, err = s.cfg.Kube.CoreV1().Namespaces().Get(app.req.Namespace, metav1.GetOptions{}); err != nil {
-		if !apiErrors.IsNotFound(err) {
-			return err
-		}
-		_, err = s.cfg.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: app.req.Namespace},
-		})
-		if err != nil {
-			return fmt.Errorf("could not create namespace %q: %v", app.req.Namespace, err)
-		}
-	}
-
-	regauth, err := configureRegistryAuth(s.cfg.Registry.Auth)
-	if err != nil {
+	if err := s.prepareReleaseEnvironment(app); err != nil {
 		return err
-	}
-	// create a new json string with the full dockerauth, including the registry URL.
-	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
-	if err != nil {
-		return fmt.Errorf("could not json encode docker authentication string: %v", err)
-	}
-
-	// determine if the registry pull secret exists in the desired namespace, create it if not.
-	var secret *v1.Secret
-	if secret, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Get(pullSecretName, metav1.GetOptions{}); err != nil {
-		if !apiErrors.IsNotFound(err) {
-			return err
-		}
-		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
-			&v1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      pullSecretName,
-					Namespace: app.req.Namespace,
-				},
-				Type: v1.SecretTypeDockercfg,
-				StringData: map[string]string{
-					".dockercfg": string(js),
-				},
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("could not create registry pull secret: %v", err)
-		}
-	} else {
-		// the registry pull secret exists, check if it needs to be updated.
-		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
-			secret.StringData[".dockercfg"] = string(js)
-			_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Update(secret)
-			if err != nil {
-				return fmt.Errorf("could not update registry pull secret: %v", err)
-			}
-		}
-	}
-
-	// determine if the default service account in the desired namespace has the correct
-	// imagePullSecret. If not, add it.
-	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get(svcAcctNameDefault, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("could not load default service account: %v", err)
-	}
-	found := false
-	for _, ps := range svcAcct.ImagePullSecrets {
-		if ps.Name == pullSecretName {
-			found = true
-			break
-		}
-	}
-	if !found {
-		svcAcct.ImagePullSecrets = append(svcAcct.ImagePullSecrets, v1.LocalObjectReference{
-			Name: pullSecretName,
-		})
-		_, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Update(svcAcct)
-		if err != nil {
-			return fmt.Errorf("could not modify default service account with registry pull secret: %v", err)
-		}
 	}
 
 	// If a release does not exist, install it. If another error occurs during the check,
@@ -407,6 +333,88 @@ func (s *Server) probes(ctx context.Context, wg *sync.WaitGroup) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func (s *Server) prepareReleaseEnvironment(app *AppContext) error {
+	// determine if the destination namespace exists, create it if not.
+	if _, err := s.cfg.Kube.CoreV1().Namespaces().Get(app.req.Namespace, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = s.cfg.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{Name: app.req.Namespace},
+		})
+		if err != nil {
+			return fmt.Errorf("could not create namespace %q: %v", app.req.Namespace, err)
+		}
+	}
+
+	regauth, err := configureRegistryAuth(s.cfg.Registry.Auth)
+	if err != nil {
+		return err
+	}
+	// create a new json string with the full dockerauth, including the registry URL.
+	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
+	if err != nil {
+		return fmt.Errorf("could not json encode docker authentication string: %v", err)
+	}
+
+	// determine if the registry pull secret exists in the desired namespace, create it if not.
+	var secret *v1.Secret
+	if secret, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Get(pullSecretName, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
+			&v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pullSecretName,
+					Namespace: app.req.Namespace,
+				},
+				Type: v1.SecretTypeDockercfg,
+				StringData: map[string]string{
+					".dockercfg": string(js),
+				},
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("could not create registry pull secret: %v", err)
+		}
+	} else {
+		// the registry pull secret exists, check if it needs to be updated.
+		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
+			secret.StringData[".dockercfg"] = string(js)
+			_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Update(secret)
+			if err != nil {
+				return fmt.Errorf("could not update registry pull secret: %v", err)
+			}
+		}
+	}
+
+	// determine if the default service account in the desired namespace has the correct
+	// imagePullSecret. If not, add it.
+	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get(svcAcctNameDefault, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("could not load default service account: %v", err)
+	}
+	found := false
+	for _, ps := range svcAcct.ImagePullSecrets {
+		if ps.Name == pullSecretName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		svcAcct.ImagePullSecrets = append(svcAcct.ImagePullSecrets, v1.LocalObjectReference{
+			Name: pullSecretName,
+		})
+		_, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Update(svcAcct)
+		if err != nil {
+			return fmt.Errorf("could not modify default service account with registry pull secret: %v", err)
+		}
+	}
+
+	return nil
 }
 
 // health serves and responds to liveness and readiness probes.
