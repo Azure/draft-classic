@@ -1,7 +1,6 @@
 package draft
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,38 +25,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/Azure/draft/pkg/rpc"
-)
-
-type (
-	// RegistryConfig specifies configuration for the image repository.
-	RegistryConfig struct {
-		// Auth is the authorization token used to push images up to the registry.
-		Auth string
-		// Org is the organization (e.g. your DockerHub account) used to push images
-		// up to the registry.
-		Org string
-		// URL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
-		URL string
-	}
-
-	// RegistryAuth is the registry authentication credentials
-	RegistryAuth struct {
-		Username      string `json:"username"`
-		Password      string `json:"password"`
-		Email         string `json:"email"`
-		RegistryToken string `json:"registrytoken"`
-	}
-
-	// DockerAuth is a container for the registry authentication credentials wrapped
-	// by the registry server name.
-	DockerAuth map[string]RegistryAuth
-)
-
-const (
-	// name of the docker pull secret draftd will create in the desired destination namespace
-	pullSecretName = "draftd-pullsecret"
-	// name of the default service account draftd will modify with the imagepullsecret
-	svcAcctNameDefault = "default"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -297,15 +264,10 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 			return fmt.Errorf("could not create namespace %q: %v", app.req.Namespace, err)
 		}
 	}
-	// base64 decode the registryauth string.
-	b64dec, err := base64.StdEncoding.DecodeString(s.cfg.Registry.Auth)
+
+	regauth, err := configureRegistryAuth(s.cfg.Registry.Auth)
 	if err != nil {
-		return fmt.Errorf("could not base64 decode registry authentication string: %v", err)
-	}
-	// break up registry auth json string into a RegistryAuth object.
-	var regauth RegistryAuth
-	if err := json.Unmarshal(b64dec, &regauth); err != nil {
-		return fmt.Errorf("could not json decode registry authentication string: %v", err)
+		return err
 	}
 	// create a new json string with the full dockerauth, including the registry URL.
 	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
