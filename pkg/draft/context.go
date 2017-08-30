@@ -51,8 +51,6 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 	tplstr := "image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s,ondraft=true"
 	inject := fmt.Sprintf(tplstr, req.AppName, s.cfg.Registry.Org, s.cfg.Registry.URL, imgtag, s.cfg.Basedomain)
 
-	vals := map[string]interface{}{}
-
 	vals, err := chartutil.ReadValues([]byte(req.Values.Raw))
 	if err != nil {
 		return nil, err

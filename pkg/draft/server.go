@@ -1,7 +1,6 @@
 package draft
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,38 +25,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/Azure/draft/pkg/rpc"
-)
-
-type (
-	// RegistryConfig specifies configuration for the image repository.
-	RegistryConfig struct {
-		// Auth is the authorization token used to push images up to the registry.
-		Auth string
-		// Org is the organization (e.g. your DockerHub account) used to push images
-		// up to the registry.
-		Org string
-		// URL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
-		URL string
-	}
-
-	// RegistryAuth is the registry authentication credentials
-	RegistryAuth struct {
-		Username      string `json:"username"`
-		Password      string `json:"password"`
-		Email         string `json:"email"`
-		RegistryToken string `json:"registrytoken"`
-	}
-
-	// DockerAuth is a container for the registry authentication credentials wrapped
-	// by the registry server name.
-	DockerAuth map[string]RegistryAuth
-)
-
-const (
-	// name of the docker pull secret draftd will create in the desired destination namespace
-	pullSecretName = "draftd-pullsecret"
-	// name of the default service account draftd will modify with the imagepullsecret
-	svcAcctNameDefault = "default"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -285,87 +252,8 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	// notify that particular stage has started.
 	summary("started", rpc.UpSummary_STARTED)
 
-	// determine if the destination namespace exists, create it if not.
-	if _, err = s.cfg.Kube.CoreV1().Namespaces().Get(app.req.Namespace, metav1.GetOptions{}); err != nil {
-		if !apiErrors.IsNotFound(err) {
-			return err
-		}
-		_, err = s.cfg.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{Name: app.req.Namespace},
-		})
-		if err != nil {
-			return fmt.Errorf("could not create namespace %q: %v", app.req.Namespace, err)
-		}
-	}
-	// base64 decode the registryauth string.
-	b64dec, err := base64.StdEncoding.DecodeString(s.cfg.Registry.Auth)
-	if err != nil {
-		return fmt.Errorf("could not base64 decode registry authentication string: %v", err)
-	}
-	// break up registry auth json string into a RegistryAuth object.
-	var regauth RegistryAuth
-	if err := json.Unmarshal(b64dec, &regauth); err != nil {
-		return fmt.Errorf("could not json decode registry authentication string: %v", err)
-	}
-	// create a new json string with the full dockerauth, including the registry URL.
-	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
-	if err != nil {
-		return fmt.Errorf("could not json encode docker authentication string: %v", err)
-	}
-
-	// determine if the registry pull secret exists in the desired namespace, create it if not.
-	var secret *v1.Secret
-	if secret, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Get(pullSecretName, metav1.GetOptions{}); err != nil {
-		if !apiErrors.IsNotFound(err) {
-			return err
-		}
-		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
-			&v1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      pullSecretName,
-					Namespace: app.req.Namespace,
-				},
-				Type: v1.SecretTypeDockercfg,
-				StringData: map[string]string{
-					".dockercfg": string(js),
-				},
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("could not create registry pull secret: %v", err)
-		}
-	} else {
-		// the registry pull secret exists, check if it needs to be updated.
-		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
-			secret.StringData[".dockercfg"] = string(js)
-			_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Update(secret)
-			if err != nil {
-				return fmt.Errorf("could not update registry pull secret: %v", err)
-			}
-		}
-	}
-
-	// determine if the default service account in the desired namespace has the correct
-	// imagePullSecret. If not, add it.
-	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get(svcAcctNameDefault, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("could not load default service account: %v", err)
-	}
-	found := false
-	for _, ps := range svcAcct.ImagePullSecrets {
-		if ps.Name == pullSecretName {
-			found = true
-			break
-		}
-	}
-	if !found {
-		svcAcct.ImagePullSecrets = append(svcAcct.ImagePullSecrets, v1.LocalObjectReference{
-			Name: pullSecretName,
-		})
-		_, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Update(svcAcct)
-		if err != nil {
-			return fmt.Errorf("could not modify default service account with registry pull secret: %v", err)
-		}
+	if err := s.prepareReleaseEnvironment(app); err != nil {
+		return err
 	}
 
 	// If a release does not exist, install it. If another error occurs during the check,
@@ -445,6 +333,88 @@ func (s *Server) probes(ctx context.Context, wg *sync.WaitGroup) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func (s *Server) prepareReleaseEnvironment(app *AppContext) error {
+	// determine if the destination namespace exists, create it if not.
+	if _, err := s.cfg.Kube.CoreV1().Namespaces().Get(app.req.Namespace, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = s.cfg.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{Name: app.req.Namespace},
+		})
+		if err != nil {
+			return fmt.Errorf("could not create namespace %q: %v", app.req.Namespace, err)
+		}
+	}
+
+	regauth, err := configureRegistryAuth(s.cfg.Registry.Auth)
+	if err != nil {
+		return err
+	}
+	// create a new json string with the full dockerauth, including the registry URL.
+	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
+	if err != nil {
+		return fmt.Errorf("could not json encode docker authentication string: %v", err)
+	}
+
+	// determine if the registry pull secret exists in the desired namespace, create it if not.
+	var secret *v1.Secret
+	if secret, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Get(pullSecretName, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
+			&v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      pullSecretName,
+					Namespace: app.req.Namespace,
+				},
+				Type: v1.SecretTypeDockercfg,
+				StringData: map[string]string{
+					".dockercfg": string(js),
+				},
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("could not create registry pull secret: %v", err)
+		}
+	} else {
+		// the registry pull secret exists, check if it needs to be updated.
+		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
+			secret.StringData[".dockercfg"] = string(js)
+			_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Update(secret)
+			if err != nil {
+				return fmt.Errorf("could not update registry pull secret: %v", err)
+			}
+		}
+	}
+
+	// determine if the default service account in the desired namespace has the correct
+	// imagePullSecret. If not, add it.
+	svcAcct, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Get(svcAcctNameDefault, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("could not load default service account: %v", err)
+	}
+	found := false
+	for _, ps := range svcAcct.ImagePullSecrets {
+		if ps.Name == pullSecretName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		svcAcct.ImagePullSecrets = append(svcAcct.ImagePullSecrets, v1.LocalObjectReference{
+			Name: pullSecretName,
+		})
+		_, err := s.cfg.Kube.CoreV1().ServiceAccounts(app.req.Namespace).Update(svcAcct)
+		if err != nil {
+			return fmt.Errorf("could not modify default service account with registry pull secret: %v", err)
+		}
+	}
+
+	return nil
 }
 
 // health serves and responds to liveness and readiness probes.
