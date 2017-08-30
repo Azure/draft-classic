@@ -1,5 +1,5 @@
-hash: d8b75756a8486f112a0d033bd8add71d05fdf0bcd2bf31556c7875ba8d862b5e
-updated: 2017-08-24T12:55:18.257599215-06:00
+hash: 62449353bbc18ae4067e6f779c02f28df0ca7c1312bde6b0eac06d8b70dbfe38
+updated: 2017-08-29T17:43:49.985954-04:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -43,6 +43,7 @@ imports:
   - reference
 - name: github.com/docker/docker
   version: 89658bed64c2a8fe05a978e5b87dbec409d57a0f
+  repo: https://github.com/docker/docker
   subpackages:
   - api
   - api/types
@@ -168,6 +169,7 @@ imports:
   - lru
 - name: github.com/golang/protobuf
   version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
+  repo: https://github.com/golang/protobuf
   subpackages:
   - proto
   - ptypes/any
@@ -521,6 +523,7 @@ imports:
   - pkg/version
 - name: k8s.io/kubernetes
   version: 477efc3cbe6a7effca06bd1452fa356e2201e1ee
+  repo: https://github.com/kubernetes/kubernetes
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install
