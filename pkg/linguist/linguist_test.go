@@ -28,3 +28,19 @@ func TestProcessDir(t *testing.T) {
 		t.Errorf("expected no languages detected, got '%d'", len(output))
 	}
 }
+
+func TestGetAlias(t *testing.T) {
+	testcases := map[string]string{
+		"maven pom": "Java",
+		"mAvEn POM": "Java",
+		"c#":        "csharp",
+		"Python":    "Python",
+	}
+
+	for packName, expectedAlias := range testcases {
+		alias := Alias(&Language{Language: packName})
+		if alias.Language != expectedAlias {
+			t.Errorf("Expected alias to be '%s', got '%s'", expectedAlias, alias.Language)
+		}
+	}
+}

@@ -134,14 +134,8 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, error) {
 	if len(langs) == 0 {
 		return "", errors.New("No languages were detected. Are you sure there's code in here?")
 	}
-	detectedLang := langs[0]
+	detectedLang := linguist.Alias(langs[0])
 	fmt.Fprintf(out, "--> Draft detected the primary language as %s with %f%% certainty.\n", detectedLang.Language, detectedLang.Percent)
-	// HACK(bacongobbler): the c# pack is named "csharp" so it can be used in the chart. Kubernetes
-	// manifests don't like hashbangs in a service's name, and a common practice is to use
-	// {{ template "fullname" . }} in a chart.
-	if strings.Compare(strings.ToLower(detectedLang.Language), "c#") == 0 {
-		detectedLang.Language = "csharp"
-	}
 	files, err := ioutil.ReadDir(packHomeDir)
 	if err != nil {
 		return "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
