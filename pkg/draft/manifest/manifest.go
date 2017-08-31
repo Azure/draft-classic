@@ -13,7 +13,7 @@ const (
 	DefaultWatchDelaySeconds = 2
 )
 
-// Manifest represents a draft.yaml
+// Manifest represents a draft.toml
 type Manifest struct {
 	Environments map[string]*Environment `toml:"environments"`
 }
