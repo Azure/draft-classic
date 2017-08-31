@@ -5,12 +5,13 @@ import (
 	"io"
 	"os"
 
+	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
+
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/manifest"
-	"github.com/spf13/cobra"
-	"golang.org/x/net/context"
 )
 
 const upDesc = `
