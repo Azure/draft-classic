@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	draftToml  = "draft.toml"
 	createDesc = `This command transforms the local directory to be deployable via 'draft up'.
 `
 )
@@ -96,7 +97,7 @@ func (c *createCmd) run() error {
 			return err
 		}
 	}
-	tomlFile := filepath.Join(c.dest, "draft.toml")
+	tomlFile := filepath.Join(c.dest, draftToml)
 	draftToml, err := os.OpenFile(tomlFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
