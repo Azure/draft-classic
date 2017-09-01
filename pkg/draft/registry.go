@@ -18,10 +18,7 @@ type (
 	RegistryConfig struct {
 		// Auth is the authorization token used to push images up to the registry.
 		Auth string
-		// Org is the organization (e.g. your DockerHub account) used to push images
-		// up to the registry.
-		Org string
-		// URL is the URL of the registry (e.g. quay.io, docker.io, gcr.io)
+		// URL is the URL of the registry (e.g. quay.io/myuser, docker.io/myuser, myregistry.azurecr.io)
 		URL string
 	}
 

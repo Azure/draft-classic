@@ -4,9 +4,7 @@
 basedomain: example.com
 replicaCount: 1
 image:
-  registry: docker.io
-  org: microsoft
-  name: draft
+  repository: microsoft/draft
   tag: canary
   pullPolicy: Always
 debug: false

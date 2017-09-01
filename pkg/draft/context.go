@@ -40,16 +40,12 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 	// truncate checksum to the first 40 characters (20 bytes) this is the
 	// equivalent of `shasum build.tar.gz | awk '{print $1}'`.
 	imgtag := fmt.Sprintf("%.20x", h.Sum(nil))
-	prefix := s.cfg.Registry.Org
-	if prefix != "" {
-		prefix += "/"
-	}
-	image := fmt.Sprintf("%s/%s%s:%s", s.cfg.Registry.URL, prefix, req.AppName, imgtag)
+	image := fmt.Sprintf("%s/%s:%s", s.cfg.Registry.URL, req.AppName, imgtag)
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
-	tplstr := "image.name=%s,image.org=%s,image.registry=%s,image.tag=%s,basedomain=%s,ondraft=true"
-	inject := fmt.Sprintf(tplstr, req.AppName, s.cfg.Registry.Org, s.cfg.Registry.URL, imgtag, s.cfg.Basedomain)
+	tplstr := "image.repository=%s/%s,image.tag=%s,basedomain=%s,ondraft=true"
+	inject := fmt.Sprintf(tplstr, s.cfg.Registry.URL, req.AppName, imgtag, s.cfg.Basedomain)
 
 	vals, err := chartutil.ReadValues([]byte(req.Values.Raw))
 	if err != nil {

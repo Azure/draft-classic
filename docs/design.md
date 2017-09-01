@@ -198,13 +198,11 @@ Inside of the `values.yaml` file, Draft configures images for your chart:
 
 ```
 image:
-  registry: gcr.io
-  org: bacongobbler
-  name: myapp
+  repository: gcr.io/bacongobbler/myapp
   tag: 0.1.0
 ```
 
-This information is then available to all of your Helm charts. (e.g. via `{{.Values.image.name}}`)
+This information is then available to all of your Helm charts. (e.g. via `{{.Values.image.repository}}`)
 
 The contents of the `templates/` directory are determined by the particular Pack you've used.
 
@@ -226,19 +224,17 @@ want to use:
 
 ```
 image:
-  registry: quay.io          # the address of the registry
-  org: bacongobbler          # the organization of the image
-  name: myapp                # the name of the image
-  tag: 08db751               # the release of the image in the registry
-basedomain: example.com      # the base domain configured with the ingress controller
-ondraft: true                # metadata to demonstrate this was deployed using Draft
+  repository: quay.io/bacongobbler/myapp  # the full name of the image
+  tag: 08db751                            # the release of the image in the registry
+basedomain: example.com                   # the base domain configured with the ingress controller
+ondraft: true                             # metadata to demonstrate this was deployed using Draft
 ```
 
 _How do I add an existing chart to Draft?_
 
 Just copy (`helm fetch`) it into the `chart/` directory. You need to tweak the values file to read
-from `image.registry`, `image.org`, `image.name` and `image.tag` if you want draft to regenerate
-Docker images for you. See above.
+from `image.repository` and `image.tag` if you want draft to regenerate Docker images for you. See
+above.
 
 _How do I deploy applications to production?_
 

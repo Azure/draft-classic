@@ -93,7 +93,7 @@ compress-binary:
 .PHONY: serve
 serve: check-helm
 	helm install chart/ --name ${APP} --namespace kube-system \
-		--set image.name=${SHORT_NAME},image.org=${IMAGE_PREFIX},image.registry=${DOCKER_REGISTRY},image.tag=${IMAGE_TAG}
+		--set image.repository=${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${SHORT_NAME},image.tag=${IMAGE_TAG}
 
 .PHONY: unserve
 unserve: check-helm
