@@ -149,11 +149,11 @@ func progress(cli *cmdline, app, desc string, codes <-chan rpc.UpSummary_StatusC
 }
 
 func passStr(msg string) string {
-	const pass = "⚓"
+	const pass = "SUCCESS " + "⚓"
 	return fmt.Sprintf("%s: %s", green(msg), pass)
 }
 
 func failStr(msg string) string {
-	const fail = "❌"
+	const fail = "FAIL " + "❌"
 	return fmt.Sprintf("%s: %s", red(msg), fail)
 }
