@@ -24,9 +24,7 @@ const draftValues = `# Default values for Draftd.
 replicaCount: 1
 basedomain: example.com
 image:
-  registry: docker.io
-  org: microsoft
-  name: draft
+  repository: microsoft/draft
   tag: %s
   pullPolicy: IfNotPresent
 debug: false
@@ -90,12 +88,11 @@ spec:
     spec:
       containers:
       - name: draftd
-        image: "{{ .Values.image.registry }}/{{ .Values.image.org }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start
         - --registry-url={{ .Values.registry.url }}
-        - --registry-org={{ .Values.registry.org }}
         - --registry-auth={{ .Values.registry.authtoken }}
         - --basedomain={{ .Values.basedomain }}
         {{- if .Values.debug }}
