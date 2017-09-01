@@ -3,29 +3,28 @@ kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
   labels:
-    draft: {{ default "draft-app" .Values.draft }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
-        draft: {{ default "draft-app" .Values.draft }}
         app: {{ template "fullname" . }}
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: {{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.service.internalPort }}
+        - containerPort: 80
+          hostPort: 44144
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.service.internalPort }}
+            port: 80
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.service.internalPort }}
-        resources:
-{{ toYaml .Values.resources | indent 12 }}
+            port: 80

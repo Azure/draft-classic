@@ -13,6 +13,7 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/strvals"
 
+	"github.com/Azure/draft/pkg/draft/local"
 	"github.com/Azure/draft/pkg/rpc"
 )
 
@@ -44,8 +45,8 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
-	tplstr := "image.repository=%s/%s,image.tag=%s,basedomain=%s,ondraft=true"
-	inject := fmt.Sprintf(tplstr, s.cfg.Registry.URL, req.AppName, imgtag, s.cfg.Basedomain)
+	tplstr := "image.repository=%s/%s,image.tag=%s,basedomain=%s,ondraft=true,%s=%s"
+	inject := fmt.Sprintf(tplstr, s.cfg.Registry.URL, req.AppName, imgtag, s.cfg.Basedomain, local.DraftLabelKey, req.AppName)
 
 	vals, err := chartutil.ReadValues([]byte(req.Values.Raw))
 	if err != nil {
