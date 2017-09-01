@@ -46,7 +46,7 @@ var globalUsage = `The application deployment tool for Kubernetes.
 func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "draft",
-		Short:        "The application deployment tool for Kubernetes.",
+		Short:        globalUsage,
 		Long:         globalUsage,
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
