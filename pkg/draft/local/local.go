@@ -15,7 +15,7 @@ import (
 	"github.com/Azure/draft/pkg/draft/manifest"
 )
 
-const draftLabelKey = "draft"
+const DraftLabelKey = "draft"
 
 type app struct {
 	Name      string
@@ -92,7 +92,7 @@ func (c *connection) RequestLogStream(app *app) (io.ReadCloser, error) {
 }
 
 func getAppPodNameAndContainers(namespace, labelVal string, clientset kubernetes.Interface) (string, []v1.Container, error) {
-	selector := labels.Set{draftLabelKey: labelVal}.AsSelector()
+	selector := labels.Set{DraftLabelKey: labelVal}.AsSelector()
 	pod, err := getFirstRunningPod(clientset, selector, namespace)
 	if err != nil {
 		return "", nil, err
