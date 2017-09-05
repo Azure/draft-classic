@@ -217,3 +217,19 @@ func ProcessDir(dirname string) ([]*Language, error) {
 	sort.Sort(sort.Reverse(sortableResult(results)))
 	return results, nil
 }
+
+// Alias returns the language name for a given known alias.
+//
+// Occasionally linguist comes up with odd language names, or determines a Java app as a "Maven POM"
+// app, which in essence is the same thing for Draft's intent.
+func Alias(lang *Language) *Language {
+	packAliases := map[string]string{
+		"maven pom": "Java",
+		"c#":        "csharp",
+	}
+
+	if alias, ok := packAliases[strings.ToLower(lang.Language)]; ok {
+		lang.Language = alias
+	}
+	return lang
+}
