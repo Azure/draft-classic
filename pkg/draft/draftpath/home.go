@@ -1,6 +1,7 @@
 package draftpath
 
 import (
+	"os"
 	"path/filepath"
 )
 
@@ -9,9 +10,11 @@ import (
 // This helper builds paths relative to a Draft Home directory.
 type Home string
 
-// Packs returns the path to the Draft starter packs.
-func (h Home) Packs() string {
-	return filepath.Join(string(h), "packs")
+// String returns Home as a string.
+//
+// Implements fmt.Stringer.
+func (h Home) String() string {
+	return os.ExpandEnv(string(h))
 }
 
 // Path returns Home with elements appended.
@@ -21,14 +24,12 @@ func (h Home) Path(elem ...string) string {
 	return filepath.Join(p...)
 }
 
-// Plugins returns the path to the Draft plugins.
-func (h Home) Plugins() string {
-	return filepath.Join(string(h), "plugins")
+// Packs returns the path to the Draft starter packs.
+func (h Home) Packs() string {
+	return h.Path("packs")
 }
 
-// String returns Home as a string.
-//
-// Implements fmt.Stringer.
-func (h Home) String() string {
-	return string(h)
+// Plugins returns the path to the Draft plugins.
+func (h Home) Plugins() string {
+	return h.Path("plugins")
 }
