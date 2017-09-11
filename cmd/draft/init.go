@@ -12,8 +12,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
+	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/tiller/environment"
 
 	"syscall"
@@ -80,10 +83,8 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 // runInit initializes local config and installs Draft to Kubernetes Cluster
 func (i *initCmd) run() error {
-	if err := ensureDirectories(i.home, i.out); err != nil {
-		return err
-	}
-	if err := ensurePacks(i.home, i.out); err != nil {
+
+	if err := setupDraftHome(i.home, i.out); err != nil {
 		return err
 	}
 	fmt.Fprintf(i.out, "$DRAFT_HOME has been configured at %s.\n", draftHome)
@@ -97,10 +98,12 @@ func (i *initCmd) run() error {
 		if err != nil {
 			return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
 		}
-		tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, restClientConfig)
+
+		tunnel, err := setupTillerConnection(client, restClientConfig)
 		if err != nil {
-			return fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
+			return err
 		}
+
 		i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
 
 		chartConfig, cloudProvider, err := installerConfig.FromClientConfig(clientConfig)
@@ -231,4 +234,25 @@ func ensurePacks(home draftpath.Home, out io.Writer) error {
 func IsReleaseAlreadyExists(err error) bool {
 	alreadyExistsRegExp := regexp.MustCompile("a release named \"(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+\" already exists")
 	return alreadyExistsRegExp.MatchString(err.Error())
+}
+
+func setupDraftHome(home draftpath.Home, out io.Writer) error {
+	if err := ensureDirectories(home, out); err != nil {
+		return err
+	}
+
+	if err := ensurePacks(home, out); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupTillerConnection(client kubernetes.Interface, restClientConfig *restclient.Config) (*kube.Tunnel, error) {
+	tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, restClientConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
+	}
+
+	return tunnel, err
 }
