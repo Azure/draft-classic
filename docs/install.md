@@ -18,16 +18,28 @@ All of the dependencies can be installed by the following:
 
 ```
 $ brew cask install minikube
-$ brew install kubernetes-helm
 ```
 
 Afterwards, fetch [the latest release of Draft](https://github.com/Azure/draft/releases).
+
+Installing Draft via Homebrew can be done using
+
+```
+$ brew tap azure/draft
+$ brew install draft
+```
 
 Canary releases of the Draft client can be found at the following links:
 
  - [Linux amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz)
  - [macOS amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
  - [Windows amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
+
+It can also be installed with
+
+```
+$ brew install draft-canary
+```
 
 Alternative downloads:
 
