@@ -88,24 +88,24 @@ release candidate which we are releasing (more on that in step 5), along with a 
 fields.
 
 ```
-diff --git a/chart/Chart.yaml b/chart/Chart.yaml
-index 122df44..259724c 100644
---- a/chart/Chart.yaml
-+++ b/chart/Chart.yaml
+diff --git a/chart/draftd/Chart.yaml b/chart/draftd/Chart.yaml
+index 954fa08..e3cf2d4 100644
+--- a/chart/draftd/Chart.yaml
++++ b/chart/draftd/Chart.yaml
 @@ -1,4 +1,4 @@
  name: draftd
  description: The Draft server
 -version: canary
 +version: v0.2.0-rc1
  apiVersion: v1
-diff --git a/chart/values.yaml b/chart/values.yaml
-index cd80a4a..f90a963 100644
---- a/chart/values.yaml
-+++ b/chart/values.yaml
-@@ -6,8 +6,8 @@ image:
-   registry: docker.io
-   org: microsoft
-   name: draftd
+diff --git a/chart/draftd/values.yaml b/chart/draftd/values.yaml
+index 3de6092..4c6314d 100644
+--- a/chart/draftd/values.yaml
++++ b/chart/draftd/values.yaml
+@@ -5,8 +5,8 @@ basedomain: example.com
+ replicaCount: 1
+ image:
+   repository: microsoft/draft
 -  tag: canary
 -  pullPolicy: Always
 +  tag: v0.2.0-rc1
@@ -114,7 +114,7 @@ index cd80a4a..f90a963 100644
  service:
    http:
 diff --git a/pkg/version/version.go b/pkg/version/version.go
-index a6fa8e7..06937e4 100644
+index 4077fa4..b366797 100644
 --- a/pkg/version/version.go
 +++ b/pkg/version/version.go
 @@ -21,7 +21,7 @@ var (
@@ -123,7 +123,7 @@ index a6fa8e7..06937e4 100644
         // Increment patch number for critical fixes to existing releases.
 -       Release = "canary"
 +       Release = "v0.2.0-rc1"
- 
+
         // BuildMetadata is extra build time data
         BuildMetadata = ""
 ```
