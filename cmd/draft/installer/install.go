@@ -1,9 +1,11 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
 	"path"
 
+	"google.golang.org/grpc"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -208,7 +210,7 @@ func Install(client *helm.Client, chartConfig *chart.Config) error {
 		environment.DefaultTillerNamespace,
 		helm.ReleaseName("draft"),
 		helm.ValueOverrides([]byte(chartConfig.Raw)))
-	return err
+	return prettyError(err)
 }
 
 //
@@ -224,5 +226,14 @@ func Upgrade(client *helm.Client, chartConfig *chart.Config) error {
 		"draft",
 		chart,
 		helm.UpdateValueOverrides([]byte(chartConfig.Raw)))
-	return err
+	return prettyError(err)
+}
+
+// prettyError unwraps grpc error descriptions to make them more user-friendly.
+func prettyError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return errors.New(grpc.ErrorDesc(err))
 }
