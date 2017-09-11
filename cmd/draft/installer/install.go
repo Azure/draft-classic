@@ -28,7 +28,7 @@ basedomain: example.com
 image:
   repository: microsoft/draft
   tag: %s
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 debug: false
 service:
   http:
