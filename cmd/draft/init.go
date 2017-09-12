@@ -178,7 +178,7 @@ func (i *initCmd) run() error {
 			fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
 		}
 	} else {
-		fmt.Fprintln(i.out, "Not installing Draft due to 'client-only' flag having been set")
+		fmt.Fprintln(i.out, "Skipped installing Draft's server side component in Kubernetes due to 'client-only' flag having been set")
 	}
 
 	fmt.Fprintln(i.out, "Happy Sailing!")
