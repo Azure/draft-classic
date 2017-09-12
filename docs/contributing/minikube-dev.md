@@ -18,10 +18,11 @@ In another terminal window:
 $ eval $(minikube docker-env)
 $ registry_ip=$(kubectl get svc registry -n kube-system -o go-template --template '{{.spec.clusterIP'}})
 $ registry_port=$(kubectl get svc registry -n kube-system -o go-template --template '{{range .spec.ports }}{{.port}}{{end}}')
-$ draftd start --listen-addr="127.0.0.1:44135" --registry-auth="e30K" --tiller-uri=":44134" --basedomain=k8s.local --registry.url $registry_ip:$registry_port --local
+$ draftd start --listen-addr="127.0.0.1:44135" --registry-auth="e30K" --tiller-uri=":44134" --basedomain=k8s.local --registry-url $registry_ip:$registry_port --local
+```
 
 In another terminal you can run draft commands after the following step:
-```
+```console
 export DRAFT_HOST=127.0.0.1:44135
 ```
 
