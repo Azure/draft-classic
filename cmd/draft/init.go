@@ -118,10 +118,9 @@ func (i *initCmd) run() error {
 
 		if cloudProvider != "" {
 			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
-			fmt.Fprintf(i.out, "Draft will be using the following configuration:\n\n'''\n%s'''\n\n", chartConfig.GetRaw())
 
 			if !i.autoAccept {
-				fmt.Fprint(i.out, "Is this okay? [Y/n] ")
+				fmt.Fprint(i.out, "Is it okay to use the registry addon in minikube to store your application images? If not, we will prompt you for information on the registry you'd like to push your application images to during development. [Y/n] ")
 				reader := bufio.NewReader(i.in)
 				text, err := reader.ReadString('\n')
 				if err != nil {
@@ -136,7 +135,7 @@ func (i *initCmd) run() error {
 
 		if !i.autoAccept || cloudProvider == "" {
 			// prompt for missing information
-			fmt.Fprintf(i.out, "\nIn order to install Draft, we need a bit more information...\n\n")
+			fmt.Fprintf(i.out, "\nIn order to configure Draft, we need a bit more information...\n\n")
 			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): ")
 			reader := bufio.NewReader(i.in)
 			registryURL, err := reader.ReadString('\n')
