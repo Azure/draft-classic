@@ -42,6 +42,8 @@ type startCmd struct {
 	tillerURI string
 	// local allows draftd to run locally (for testing purposes).
 	local bool
+	// ingressEnabled sets whether we want to use ingress or not for applications
+	ingressEnabled bool
 }
 
 func newStartCmd(out io.Writer) *cobra.Command {
@@ -68,14 +70,16 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.basedomain, "basedomain", "", "the base domain in which a wildcard DNS entry points to an ingress controller")
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
 	f.BoolVarP(&sc.local, "local", "", false, "run draftd locally (uses local kubecfg)")
+	f.BoolVarP(&sc.ingressEnabled, "ingress-enabled", "", false, "configure ingress")
 
 	return cmd
 }
 
 func (c *startCmd) run() (err error) {
 	cfg := &draft.ServerConfig{
-		Basedomain: c.basedomain,
-		ListenAddr: c.listenAddr,
+		IngressEnabled: c.ingressEnabled,
+		Basedomain:     c.basedomain,
+		ListenAddr:     c.listenAddr,
 		Registry: &draft.RegistryConfig{
 			Auth: c.registryAuth,
 			URL:  c.registryURL,
