@@ -29,12 +29,13 @@ import (
 
 // ServerConfig specifies draft.Server configuration.
 type ServerConfig struct {
-	ListenAddr string
-	Basedomain string // Basedomain is the basedomain used to construct the ingress rules
-	Registry   *RegistryConfig
-	Docker     *docker.Client
-	Helm       helm.Interface
-	Kube       k8s.Interface
+	ListenAddr     string
+	IngressEnabled bool
+	Basedomain     string // Basedomain is the basedomain used to construct the ingress rules
+	Registry       *RegistryConfig
+	Docker         *docker.Client
+	Helm           helm.Interface
+	Kube           k8s.Interface
 }
 
 // Server is a draft Server.

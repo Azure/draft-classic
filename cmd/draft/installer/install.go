@@ -98,7 +98,8 @@ spec:
         - start
         - --registry-url={{ .Values.registry.url }}
         - --registry-auth={{ .Values.registry.authtoken }}
-        - --basedomain={{ .Values.basedomain }}
+        - --basedomain={{ .Values.ingress.basedomain }}
+        - --ingress-enabled={{.Values.ingress.enabled}}
         {{- if .Values.debug }}
         - --debug
         {{- end }}
