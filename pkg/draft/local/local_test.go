@@ -6,7 +6,7 @@ import (
 )
 
 func TestDeployedApplication(t *testing.T) {
-	expectedApp := &app{
+	expectedApp := &App{
 		Name:      "example-app",
 		Namespace: "example-namespace",
 	}
