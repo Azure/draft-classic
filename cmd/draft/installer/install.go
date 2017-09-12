@@ -24,7 +24,9 @@ const draftValues = `# Default values for Draftd.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-basedomain: example.com
+ingress:
+    enabled: false
+    basedomain: example.com
 image:
   repository: microsoft/draft
   tag: %s

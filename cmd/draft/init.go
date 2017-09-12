@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -39,7 +40,9 @@ deployment.
 To dump information about the Draft chart, combine the '--dry-run' and '--debug' flags.
 `
 	chartConfigTpl = `
-basedomain: %s
+ingress:
+  enabled: %s
+  basedomain: %s
 registry:
   url: %s
   authtoken: %s
@@ -47,12 +50,13 @@ registry:
 )
 
 type initCmd struct {
-	clientOnly bool
-	out        io.Writer
-	in         io.Reader
-	home       draftpath.Home
-	autoAccept bool
-	helmClient *helm.Client
+	clientOnly     bool
+	out            io.Writer
+	in             io.Reader
+	home           draftpath.Home
+	autoAccept     bool
+	helmClient     *helm.Client
+	ingressEnabled bool
 }
 
 func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
@@ -76,6 +80,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
+	f.BoolVarP(&i.ingressEnabled, "ingress-enabled", "i", false, "configure ingress")
 	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
 
 	return cmd
@@ -149,22 +154,23 @@ func (i *initCmd) run() error {
 			// NOTE(bacongobbler): casting syscall.Stdin here to an int is intentional here as on
 			// Windows, syscall.Stdin is a Handler, which is of type uintptr.
 			dockerPass, err := terminal.ReadPassword(int(syscall.Stdin))
+			fmt.Println("")
 			if err != nil {
 				return fmt.Errorf("Could not read input: %s", err)
 			}
-			fmt.Fprint(i.out, "4. Enter your top-level domain for ingress (e.g. draft.example.com): ")
-			basedomain, err := reader.ReadString('\n')
+
+			basedomain, err := setBasedomain(i.out, reader, i.ingressEnabled)
 			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
+				return err
 			}
-			basedomain = strings.TrimSpace(basedomain)
 
 			registryAuth := base64.StdEncoding.EncodeToString(
 				[]byte(fmt.Sprintf(
 					`{"username":"%s","password":"%s"}`,
 					dockerUser,
 					dockerPass)))
-			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, basedomain, registryURL, registryAuth)
+
+			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, strconv.FormatBool(i.ingressEnabled), basedomain, registryURL, registryAuth)
 		}
 
 		if err := installer.Install(i.helmClient, chartConfig); err != nil {
@@ -255,4 +261,17 @@ func setupTillerConnection(client kubernetes.Interface, restClientConfig *restcl
 	}
 
 	return tunnel, err
+}
+
+func setBasedomain(out io.Writer, reader *bufio.Reader, ingress bool) (string, error) {
+	if ingress {
+		fmt.Fprint(out, "4. Enter your top-level domain for ingress (e.g. draft.example.com): ")
+		basedomain, err := reader.ReadString('\n')
+		if err != nil {
+			return basedomain, fmt.Errorf("Could not read input: %s", err)
+		}
+		return strings.TrimSpace(basedomain), nil
+	} else {
+		return "", nil
+	}
 }
