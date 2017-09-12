@@ -8,6 +8,7 @@ import (
 // FromClientConfig reads a kubernetes client config, searching for information that may indicate
 // this is a minikube/Azure Container Services/Google Container Engine cluster and return
 // configuration optimized for that cloud, as well as the cloud provider name.
+// Currently only supports minikube
 func FromClientConfig(config clientcmd.ClientConfig) (*chart.Config, string, error) {
 	var (
 		chartConfig       = new(chart.Config)
