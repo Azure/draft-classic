@@ -24,7 +24,9 @@ const draftValues = `# Default values for Draftd.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-basedomain: example.com
+ingress:
+    enabled: false
+    basedomain: example.com
 image:
   repository: microsoft/draft
   tag: %s
@@ -96,7 +98,8 @@ spec:
         - start
         - --registry-url={{ .Values.registry.url }}
         - --registry-auth={{ .Values.registry.authtoken }}
-        - --basedomain={{ .Values.basedomain }}
+        - --basedomain={{ .Values.ingress.basedomain }}
+        - --ingress-enabled={{.Values.ingress.enabled}}
         {{- if .Values.debug }}
         - --debug
         {{- end }}
