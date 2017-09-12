@@ -17,12 +17,12 @@ import (
 
 const DraftLabelKey = "draft"
 
-type app struct {
+type App struct {
 	Name      string
 	Namespace string
 }
 
-type connection struct {
+type Connection struct {
 	Tunnel    *kube.Tunnel
 	PodName   string
 	Clientset kubernetes.Interface
@@ -31,25 +31,25 @@ type connection struct {
 // DeployedApplication returns deployment information about the deployed instance
 //  of the source code given a path to your draft.toml file and the name of the
 //  draft environment
-func DeployedApplication(draftTomlPath, draftEnvironment string) (*app, error) {
+func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 	var draftConfig manifest.Manifest
 	if _, err := toml.DecodeFile(draftTomlPath, &draftConfig); err != nil {
 		return nil, err
 	}
 	appConfig := draftConfig.Environments[draftEnvironment]
 
-	return &app{Name: appConfig.Name, Namespace: appConfig.Namespace}, nil
+	return &App{Name: appConfig.Name, Namespace: appConfig.Namespace}, nil
 }
 
 // Connect creates a local tunnel to a Kubernetes pod running the application and returns the connection information
-func (a *app) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config) (*connection, error) {
+func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config) (*Connection, error) {
 	tunnel, podName, err := a.NewTunnel(clientset, clientConfig)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &connection{
+	return &Connection{
 		Tunnel:    tunnel,
 		PodName:   podName,
 		Clientset: clientset,
@@ -57,7 +57,7 @@ func (a *app) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 }
 
 // NewTunnel creates and returns a tunnel to a Kubernetes pod running the application
-func (a *app) NewTunnel(clientset kubernetes.Interface, config *restclient.Config) (*kube.Tunnel, string, error) {
+func (a *App) NewTunnel(clientset kubernetes.Interface, config *restclient.Config) (*kube.Tunnel, string, error) {
 	podName, containers, err := getAppPodNameAndContainers(a.Namespace, a.Name, clientset)
 	if err != nil {
 		return nil, podName, err
@@ -79,7 +79,7 @@ func (a *app) NewTunnel(clientset kubernetes.Interface, config *restclient.Confi
 }
 
 // RequestLogStream returns a stream of the application pod's logs
-func (c *connection) RequestLogStream(app *app) (io.ReadCloser, error) {
+func (c *Connection) RequestLogStream(app *App) (io.ReadCloser, error) {
 	var lines int64 = 5
 
 	req := c.Clientset.CoreV1().Pods(app.Namespace).GetLogs(c.PodName,
