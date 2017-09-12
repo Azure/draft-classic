@@ -11,6 +11,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ClientConfig stores information about the draft server and where to send messages
+//  and errors out
 type ClientConfig struct {
 	ServerAddr string
 	ServerHost string
@@ -24,6 +26,7 @@ type Client struct {
 	res chan *rpc.UpSummary
 }
 
+// NewClient takes ClientConfig and returns a Client
 func NewClient(cfg *ClientConfig) *Client {
 	opts := []rpc.ClientOpt{rpc.WithServerAddr(cfg.ServerAddr)}
 	return &Client{

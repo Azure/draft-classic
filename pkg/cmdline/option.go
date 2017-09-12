@@ -14,8 +14,8 @@ type options struct {
 	stdout io.Writer
 }
 
-// DefaultOpt is a convenience wrapper that enumerates and configures the set of default
-// options for the cmdline interface.
+// DefaultOpts is a convenience wrapper that enumerates and configures the set of default
+//  options for the cmdline interface.
 func DefaultOpts() Option {
 	return func(opts *options) {
 		WithStderr(os.Stderr)(opts)

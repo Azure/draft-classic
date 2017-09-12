@@ -26,6 +26,8 @@ import (
 	"github.com/Azure/draft/pkg/draft/pack"
 )
 
+// Context contains information about the application and the environment
+//  that will be pushed up to the server
 type Context struct {
 	Env     *manifest.Environment
 	EnvName string
@@ -36,6 +38,9 @@ type Context struct {
 	Archive []byte
 }
 
+// LoadWithEnv takes the directory of the application and the environment the application
+//  will be pushed to and returns a Context object with a merge of environment and app
+//  information
 func LoadWithEnv(appdir, whichenv string) (*Context, error) {
 	ctx := &Context{AppDir: appdir, EnvName: whichenv}
 	// read draft.toml from appdir.
