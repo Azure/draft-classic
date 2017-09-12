@@ -84,9 +84,6 @@ node('linux') {
 
     stage('Test') {
       sh 'make test'
-      withCredentials(wrapId('CODECOV_TOKEN', codecovToken)) {
-        sh 'curl -s https://codecov.io/bash | bash -s - -t $CODECOV_TOKEN'
-      }
     }
 
     stage('Build') {
