@@ -30,7 +30,7 @@ ingress:
 image:
   repository: microsoft/draft
   tag: %s
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 debug: false
 service:
   http:
