@@ -1,13 +1,10 @@
 # Getting Started
 
-This document shows how to deploy a "Hello World" app with Draft. If you havent done so already,
-be sure you have Draft installed according to the [Installation Guide][Installation Guide].
+This document shows how to deploy a "Hello World" app with Draft. If you haven't done so already, be sure you have Draft installed according to the [Installation Guide][Installation Guide].
 
 ## App setup
 
-There are multiple example applications included within the [examples directory](../examples).
-For this walkthrough, we'll be using the [python example application](../examples/python) which
-uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
+There are multiple example applications included within the [examples directory](../examples). For this walkthrough, we'll be using the [python example application](../examples/python) which uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
 
 ```shell
 $ cd examples/python
@@ -19,91 +16,77 @@ We need some "scaffolding" to deploy our app into a [Kubernetes](https://kuberne
 
 ```shell
 $ draft create
---> Draft detected the primary language as Python with 85.990338% certainty.
+--> Draft detected the primary language as Python with 97.267760% certainty.
 --> Ready to sail
 $ ls -a
 .draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
-The `chart/` and `Dockerfile` assets created by Draft default to a basic Python
-configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/)
-image, which will install the dependencies in `requirements.txt` and copy the current directory
-into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile
-exposes port 80 from the container.
+The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container.
 
-The `draft.toml` file contains basic configuration about the application like the name, which
-namespace it will be deployed to, and whether to deploy the app automatically when local files
-change.
+The `draft.toml` file contains basic configuration about the application like the name, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
 
 ```shell
 $ cat draft.toml
 [environments]
   [environments.development]
-    name = "tufted-lamb"
+    name = "torrid-hummingbird"
     namespace = "default"
-    watch = true
+    wait = false
+    watch = false
     watch_delay = 2
 ```
 
-See [the Draft User Guide](user-guide.md) for more information and available configuration on the
-`draft.toml`.
+See [the Draft User Guide](user-guide.md) for more information and available configuration on the `draft.toml`.
 
-A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up`
-when watching for changes. The syntax is identical to
-[helm ignore feature](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
-
-Note that for technical reasons, the `.git/` directory is unconditionally ignored for now.
+A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
 
 ## Draft Up
 
-Now we're ready to deploy `app.py` to a Kubernetes cluster.
-
-Draft handles these tasks with one `draft up` command:
+Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these tasks with one `draft up` command:
 
 - reads configuration from `draft.toml`
 - compresses the `chart/` directory and the application directory as two separate tarballs
 - uploads the tarballs to `draftd`, the server-side component
-- `draftd` then builds the docker image and pushes the image to a registry
-- `draftd` instructs helm to install the Helm chart, referencing the Docker registry image just built
-
-With the `watch` option set to `true`, we can let this run in the background while we make changes
-later on...
+- `draftd` builds the docker image and pushes the image to a registry
+- `draftd` instructs helm to install the chart, referencing the image just built
 
 ```shell
 $ draft up
---> Building Dockerfile
-Step 1 : FROM python:onbuild
-onbuild: Pulling from library/python
-...
-Successfully built 38f35b50162c
---> Pushing docker.io/microsoft/tufted-lamb:5a3c633ae76c9bdb81b55f5d4a783398bf00658e
-The push refers to a repository [docker.io/microsoft/tufted-lamb]
-...
-5a3c633ae76c9bdb81b55f5d4a783398bf00658e: digest: sha256:9d9e9fdb8ee3139dd77a110fa2d2b87573c3ff5ec9c045db6009009d1c9ebf5b size: 16384
---> Deploying to Kubernetes
-    Release "tufted-lamb" does not exist. Installing it now.
---> Status: DEPLOYED
---> Notes:
-     
-  http://tufted-lamb.example.com to access your application
-
-Watching local files for changes...
+Draft Up Started: 'torrid-hummingbird'
+torrid-hummingbird: Building Docker Image: SUCCESS ⚓  (73.0991s)
+torrid-hummingbird: Pushing Docker Image: SUCCESS ⚓  (69.1425s)
+torrid-hummingbird: Releasing Application: SUCCESS ⚓  (0.6875s)
+torrid-hummingbird: Build ID: 01BSY5R8J45QHG9D3B17PAXMGN
 ```
 
 ## Interact with the Deployed App
 
-Using the handy output that follows successful deployment, we can now contact our app.
+Now that the application has been deployed, we can connect to our app.
 
 ```shell
-$ curl http://tufted-lamb.example.com
-Hello Draft!
+$ draft connect
+Connecting to your app...SUCCESS...Connect to your app on localhost:55139
+Starting log streaming...
+172.17.0.1 - - [13/Sep/2017 19:10:09] "GET / HTTP/1.1" 200 -
 ```
 
-When we `curl` our app, we see our app in action! A beautiful "Hello Draft!" greets us.  If not, make sure you've followed the [Ingress Guide](ingress.md).
+Note that it may take some time for the app to deploy, so if you see a message like "Error: could not find a ready pod", just wait a little longer for the image to be deployed.
+
+`draft connect` works by creating a local environment for you to test your app. It proxies a connection from the pod running in minikube to a localhost url that you can use to see your application working. It will also print out logs from your application.
+
+In another terminal window, we can connect to our app using the address displayed from `draft connect`'s output.
+
+```shell
+$ curl localhost:55139
+Hello, World!
+```
+
+Once you're done playing with this app, cancel out of the `draft connect` session using CTRL+C.
 
 ## Update the App
 
-Now, let's change the output in `app.py` to output "Hello Kubernetes!" instead:
+Now, let's change the output in `app.py` to output "Hello, Draft!" instead:
 
 ```shell
 $ cat <<EOF > app.py
@@ -113,7 +96,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello Kubernetes!\n"
+    return "Hello, Draft!\n"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
@@ -122,28 +105,28 @@ EOF
 
 ## Draft Up(grade)
 
-Now if we watch the terminal that we initially called `draft up` with, Draft will notice that there
-were changes made locally and call `draft up` again. Draft then determines that the Helm release
-already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
+When we call `draft up` again, Draft determines that the Helm release already exists and will perform a `helm upgrade` rather than attempting another `helm install`:
 
 ```shell
---> Building Dockerfile
-Step 1 : FROM python:onbuild
-...
-Successfully built 9c90b0445146
---> Pushing docker.io/microsoft/tufted-lamb:f031eb675112e2c942369a10815850a0b8bf190e
-The push refers to a repository [docker.io/microsoft/tufted-lamb]
-...
---> Deploying to Kubernetes
---> Status: DEPLOYED
---> Notes:
-     
-  http://tufted-lamb.example.com to access your application
+$ draft up
+Draft Up Started: 'torrid-hummingbird'
+torrid-hummingbird: Building Docker Image: SUCCESS ⚓  (13.0127s)
+torrid-hummingbird: Pushing Docker Image: SUCCESS ⚓  (16.0272s)
+torrid-hummingbird: Releasing Application: SUCCESS ⚓  (0.5533s)
+torrid-hummingbird: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
 ```
+
+We should notice a significant faster build time here. This is because Docker is caching unchanged
+layers and only compiling layers that need to be re-built in the background.
 
 ## Great Success!
 
-Now when we run `curl http://tufted-lamb.example.com`, we can see our app has been updated and deployed to Kubernetes automatically!
+Now when we run `draft connect` and open the local URL using `curl` or our browser, we can see our app has been updated!
+
+```shell
+$ curl localhost:55196
+Hello, Draft!
+```
 
 
 [Installation Guide]: install.md

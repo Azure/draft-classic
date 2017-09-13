@@ -63,17 +63,11 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ## Enable Minikube Add-ons
 
-Now that we have minikube running, we can go ahead and enable the `registry` and `ingress`
-add-ons.
+Now that we have minikube running, we can go ahead and enable the `registry` add-on. The registry add-on is used to store the built docker container within the cluster.
 
-The ingress add-on is used to allow inbound connections to reach the application.
-
-The registry add-on is used to store the built docker container within the cluster.
-
-You can enable the add-ons with
+You can enable the add-on with
 
 ```console
-$ minikube addons enable ingress
 $ minikube addons enable registry
 ```
 
@@ -85,82 +79,20 @@ Installing Helm and setting it up is quite simple:
 
     $ helm init
 
-Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch`
-to wait for tiller to come up.
+Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch` to wait for tiller to come up.
 
 ## Install Draft
 
 Now that all the dependencies are set up, we can set up Draft by running this command:
 
-    $ draft init
+    $ draft init --auto-accept
 
-Follow through the prompts. Draft will read your local kube configuration and notice that it is
-pointing at minikube. It will then install Draftd (the Draft server) communicating with the
-installed registry add-on, ingress controller and Tiller (Helm server) instances.
-
-## Configure Ingress Routes
-
-Draft uses a wildcard domain to make accessing draft-created applications easier. To do so, it
-specifies a custom host in the ingress from which tells the backing load balancer to route requests
-based on the Host header.
-
-When Draft was installed on Minikube, a base domain of `k8s.local` was used. To use this domain, you
-can install `dnsmasq` to redirect all outgoing requests to `k8s.local` off to the Minikube cluster.
-
-There are plenty of ways to install dnsmasq for MacOS users, but the easiest by far is to use
-Homebrew.
-
-    $ brew install dnsmasq
-
-Once it's installed, you will want to point all outgoing requests to `k8s.local` to your minikube
-instance.
-
-```
-$ echo 'address=/.k8s.local/`minikube ip`' > $(brew --prefix)/etc/dnsmasq.conf
-$ sudo brew services start dnsmasq
-```
-
-This will start dnsmasq and make it resolve requests from `k8s.local` to your minikube instance's
-IP address (usually some form of 192.168.99.10x), but now we need to point the operating system's
-DNS resolver at dnsmasq to resolve addresses.
-
-```
-$ sudo mkdir /etc/resolver
-$ echo nameserver 127.0.0.1 | sudo tee /etc/resolver/k8s.local
-```
-
-Afterwards, you will need to clear the DNS resolver cache so any new requests will go through
-dnsmasq instead of hitting the cached results from your operating system.
-
-```
-$ sudo killall -HUP mDNSResponder
-```
-
-To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
-
-```
-$ scutil --dns | grep k8s.local -B 1 -A 3
-resolver #8
-  domain   : k8s.local
-  nameserver[0] : 127.0.0.1
-  flags    : Request A records, Request AAAA records
-  reach    : Reachable, Local Address, Directly Reachable Address
-```
-
-If you're on Linux, refer to [Arch Linux's fantastic wiki on dnsmasq][dnsmasq].
-
-If you're on Windows, refer to [Acrylic's documentation][acrylic], which is another local DNS proxy
-specifically for Windows. Just make sure that Acrylic is pointing at minikube through `k8s.local`.
-You can use the above steps as a general guideline on how to set up Acrylic.
+Draft will read your local kube configuration and notice that it is pointing at minikube. It will then install Draftd (the Draft server) communicating with the installed registry add-on and Tiller (Helm server) instance.
 
 ## Take Draft for a Spin
 
-Once you've completed the above steps, you're ready to climb aboard and explore the
-[Getting Started Guide][Getting Started] - you'll soon be sailing!
+Once you've completed the above steps, you're ready to climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
 
-[acrylic]: http://mayakron.altervista.org/wikibase/show.php?id=AcrylicHome
-[dnsmasq]: https://wiki.archlinux.org/index.php/dnsmasq
 [Getting Started]: getting-started.md
-[Ingress Guide]: ingress.md
 [minikube]: https://github.com/kubernetes/minikube
