@@ -7,7 +7,7 @@ jobs:
     environment:
       AZURE_CONTAINER: "draft"
       AZURE_STORAGE_ACCOUNT: "azuredraft"
-      DOCKER_LOGIN: "bacongobbler"
+      DOCKER_USERNAME: "bacongobbler"
     steps:
       - checkout
       - setup_remote_docker
