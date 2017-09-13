@@ -23,14 +23,14 @@ SHELL=/bin/bash
 .PHONY: all
 all: build
 
-.PHONY: check-then-generate
-check-then-generate:
+.PHONY: generate
+generate:
 	@if [[ -n $$(git status --porcelain packs/) ]]; then \
 		go generate ./pkg/draft/pack/generated; \
 	fi
 
 .PHONY: build
-build: check-then-generate
+build: generate
 build:
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/...
 
@@ -123,10 +123,6 @@ test-unit:
 .PHONY: test-e2e
 test-e2e:
 	./tests/e2e.sh
-
-.PHONY: generate
-generate:
-	go generate ./pkg/draft/pack/generated
 
 HAS_GOMETALINTER := $(shell command -v gometalinter;)
 HAS_GLIDE := $(shell command -v glide;)
