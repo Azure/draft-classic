@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/Azure/draft
+    docker:
+      - image: golang:1.9
+    environment:
+      AZURE_CONTAINER: "draft"
+      AZURE_STORAGE_ACCOUNT: "azuredraft"
+      DOCKER_LOGIN: "bacongobbler"
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: install dependencies
+          command: .circleci/bootstrap.sh
+      - save_cache:
+          key: vendor-{{ checksum "glide.yaml" }}-{{ checksum "glide.lock" }}
+          paths:
+            - vendor
+      - run:
+          name: Test
+          command: .circleci/test.sh
+      - run:
+          name: Deploy to DockerHub
+          command: .circleci/deploy-dockerhub.sh
+      - run:
+          name: Deploy to Azure
+          command: .circleci/deploy-azure.sh
