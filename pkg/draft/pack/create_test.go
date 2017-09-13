@@ -113,19 +113,23 @@ func TestCreate(t *testing.T) {
 	}
 
 	// fourth test: run Create() on a valid path with bad write permissions
-	badPermsDir, err := ioutil.TempDir(tdir, "badpack-")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chmod(badPermsDir, 0000); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := Create(packName, badPermsDir, fooPackFiles()); err == nil {
-		t.Error("expected error when creating pack in dir with bad write permissions")
+	if os.Getenv("CI") != "" {
+		t.Skip("skipping file permission mode tests on CI servers")
 	} else {
-		expectedErr := fmt.Sprintf("mkdir %s: permission denied", filepath.Join(badPermsDir, packName))
-		if err.Error() != expectedErr {
-			t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+		badPermsDir, err := ioutil.TempDir(tdir, "badpack-")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chmod(badPermsDir, 0000); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Create(packName, badPermsDir, fooPackFiles()); err == nil {
+			t.Error("expected error when creating pack in dir with bad write permissions")
+		} else {
+			expectedErr := fmt.Sprintf("mkdir %s: permission denied", filepath.Join(badPermsDir, packName))
+			if err.Error() != expectedErr {
+				t.Errorf("expected '%s',  got '%s'", expectedErr, err.Error())
+			}
 		}
 	}
 
