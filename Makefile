@@ -8,9 +8,8 @@ APP             = draft
 
 # go option
 GO        ?= go
-PKG       := $(shell glide novendor)
 TAGS      := kqueue
-TESTS     := .
+TESTS     := ./...
 TESTFLAGS :=
 LDFLAGS   :=
 GOFLAGS   :=
@@ -118,7 +117,7 @@ test-lint:
 
 .PHONY: test-unit
 test-unit:
-	$(GO) test $(GOFLAGS) -cover -run $(TESTS) $(PKG) $(TESTFLAGS)
+	$(GO) test $(GOFLAGS) -cover $(TESTS) $(TESTFLAGS)
 
 .PHONY: test-e2e
 test-e2e:
