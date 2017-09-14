@@ -2,7 +2,7 @@
 
 # Draft: Streamlined Kubernetes Development
 
-[![Build Status](https://ci.deis.io/buildStatus/icon?job=Azure/draft/master)](https://ci.deis.io/job/Azure/job/draft/job/master/)
+[![Build Status](https://circleci.com/gh/Azure/draft.svg?style=svg)](https://circleci.com/gh/Azure/draft)
 
 _NOTE: Draft is experimental and does not have a stable release yet._
 
