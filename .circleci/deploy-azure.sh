@@ -26,7 +26,7 @@ fi
 
 echo "Installing Azure components"
 AZCLI_VERSION=2.0.15
-apt-get update && apt-get install python-pip
+apt-get update && apt-get install -yq python-pip
 pip install --disable-pip-version-check --no-cache-dir azure-cli==${AZCLI_VERSION}
 
 echo "Building Draft binaries"
