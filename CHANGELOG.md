@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.7.0
+
+### Client
+
+* introduced `draft connect`
+* added a new UI for `draft up`
+* introduced language aliases to linguist
+
+### Server
+
+* removed requirement for ingress setup, making it optional
+* bumped GRPC max message size from 4MB to 20MB
+* removed registry org and image name from generated charts, simplifying templates
+
+### Community
+
+* introduced a draft Homebrew formula. Use `brew tap azure/draft && brew install draft` to try it out
+
 ## v0.6.0
 
 ### Client
