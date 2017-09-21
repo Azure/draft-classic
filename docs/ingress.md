@@ -44,7 +44,8 @@ Using a domain that you manage, create a DNS wildcard `A Record` pointing to the
 
 **NOTE:** you are welcome to use `*.draft.example.com` or any other wildcard domain.
 
-Remember the domain you use, it will be needed in the next step of installation as the `basedomain` passed to `draft init`.
+Remember the domain you use, it will be needed in the next step of installation as the `basedomain` passed to `draft init `.
+Note that to configure the ingress, you must initialize draft using `draft init --ingress-enabled`!
 
 | Name          | Type | Data                      |
 |---------------|------|---------------------------|
