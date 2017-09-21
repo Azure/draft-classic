@@ -13,6 +13,7 @@ import (
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/Azure/draft/pkg/draft/manifest"
+	"github.com/Azure/draft/pkg/kube/podutil"
 )
 
 const DraftLabelKey = "draft"
@@ -110,7 +111,7 @@ func getFirstRunningPod(clientset kubernetes.Interface, selector labels.Selector
 		return nil, fmt.Errorf("could not find ready pod")
 	}
 	for _, p := range pods.Items {
-		if v1.IsPodReady(&p) {
+		if podutil.IsPodReady(&p) {
 			return &p, nil
 		}
 	}

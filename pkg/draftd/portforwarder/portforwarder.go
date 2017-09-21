@@ -9,6 +9,8 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
+
+	"github.com/Azure/draft/pkg/kube/podutil"
 )
 
 const (
@@ -47,7 +49,7 @@ func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selecto
 		return nil, fmt.Errorf("could not find draftd")
 	}
 	for _, p := range pods.Items {
-		if v1.IsPodReady(&p) {
+		if podutil.IsPodReady(&p) {
 			return &p, nil
 		}
 	}

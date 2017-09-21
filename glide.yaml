@@ -5,13 +5,13 @@ import:
 - package: github.com/BurntSushi/toml
 - package: github.com/Azure/go-ansiterm
   version: 388960b655244e76e24c75f48631564eaefade62
-- package: github.com/docker/distribution
-  version: b38e5838b7b2f2ad48e06ec4b500011976080621
 - package: github.com/docker/cli
   version: 30af87981d8d464c385b247f524fcbc503207940
 - package: github.com/docker/docker
   repo: https://github.com/docker/docker
   version: v17.05.0-ce
+- package: github.com/docker/distribution
+  version: b38e5838b7b2f2ad48e06ec4b500011976080621
 - package: github.com/docker/go-units
   version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
 - package: github.com/emicklei/go-restful
@@ -25,14 +25,11 @@ import:
 - package: github.com/rjeczalik/notify
 - package: github.com/spf13/cobra
 - package: github.com/technosophos/moniker
-- package: k8s.io/apimachinery
-- package: k8s.io/client-go
-  version: 8aceb98010c1c18b6b54a35b52fd5b46905e3d7f
 - package: k8s.io/helm
-  version: ~2.5.0
+  version: ~2.6.0
 - package: k8s.io/kubernetes
   repo: https://github.com/kubernetes/kubernetes
-  version: v1.6.2
+  version: v1.7.5
 - package: github.com/Sirupsen/logrus
   version: ~0.11.5
 - package: github.com/pkg/errors
@@ -65,3 +62,32 @@ import:
   version: 10e175b296563f4b210345f37e895e747a79b806
   repo: https://github.com/bacongobbler/git4go
   vcs: git
+
+# hacks for kubernetes v1.7
+- package: cloud.google.com/go
+- package: github.com/Azure/go-autorest
+  version: v8.3.1
+- package: github.com/dgrijalva/jwt-go
+- package: github.com/docker/spdystream
+- package: github.com/go-openapi/analysis
+  version: b44dc874b601d9e4e2f6e19140e794ba24bead3b
+- package: github.com/go-openapi/errors
+  version: d24ebc2075bad502fac3a8ae27aa6dd58e1952dc
+- package: github.com/go-openapi/loads
+  version: 18441dfa706d924a39a030ee2c3b1d8d81917b38
+- package: github.com/go-openapi/spec
+  version: 6aced65f8501fe1217321abf0749d354824ba2ff
+- package: github.com/google/gofuzz
+- package: github.com/hashicorp/golang-lru
+- package: github.com/howeyc/gopass
+- package: github.com/juju/ratelimit
+  version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
+- package: github.com/pborman/uuid
+- package: golang.org/x/oauth2
+- package: gopkg.in/inf.v0
+- package: github.com/go-openapi/strfmt
+- package: github.com/mitchellh/mapstructure
+- package: gopkg.in/mgo.v2/bson
+ignore:
+  - k8s.io/client-go
+  - k8s.io/apimachinery
