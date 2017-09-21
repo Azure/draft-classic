@@ -1,5 +1,5 @@
-hash: 62449353bbc18ae4067e6f779c02f28df0ca7c1312bde6b0eac06d8b70dbfe38
-updated: 2017-08-29T17:43:49.985954-04:00
+hash: bb1d4f092cd3ef1e825761b8f66f38056c4a32bea4fa9e234a611d4d8b74c0d6
+updated: 2017-09-21T09:28:57.702220811-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -128,7 +128,7 @@ imports:
 - name: github.com/fatih/color
   version: 67c513e5729f918f5e69786686770c27141a4490
 - name: github.com/generaltso/linguist
-  version: 9202505feb6930ac6945b5005715d2b03853ac9c
+  version: ae6cce277081f0ad2feb886483ec3dd43573e0e6
   subpackages:
   - data
   - tokenizer
@@ -215,9 +215,9 @@ imports:
 - name: github.com/Masterminds/semver
   version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
 - name: github.com/Masterminds/sprig
-  version: 9526be0327b26ad31aa70296a7b10704883976d5
+  version: 4c164950cd0a8d3724ddb78982e2c56dc7f47112
 - name: github.com/Masterminds/vcs
-  version: 3084677c2c188840777bff30054f2b553729d329
+  version: 6f1c6d150500e452704e9863f68c2559f58616bf
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
@@ -253,10 +253,6 @@ imports:
   version: 660542b98f76c58910002c82e912b71248f4daa0
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
-- name: github.com/shibukawa/git4go
-  version: 10e175b296563f4b210345f37e895e747a79b806
-  repo: https://github.com/bacongobbler/git4go
-  vcs: git
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/cobra
