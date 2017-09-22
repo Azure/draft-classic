@@ -56,12 +56,7 @@ import:
   subpackages:
   - rate
 - package: github.com/generaltso/linguist
-  version: 9202505feb6930ac6945b5005715d2b03853ac9c
+  version: ae6cce277081f0ad2feb886483ec3dd43573e0e6
 # dependency of linguist
 - package: github.com/jbrukh/bayesian
   version: bf3f261f9a9c61145c60d47665b0518cc32c774f
-# fix for git4go, which is also a dependency of linguist
-- package: github.com/shibukawa/git4go
-  version: 10e175b296563f4b210345f37e895e747a79b806
-  repo: https://github.com/bacongobbler/git4go
-  vcs: git
