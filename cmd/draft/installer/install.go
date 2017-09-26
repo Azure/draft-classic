@@ -31,6 +31,7 @@ image:
   repository: microsoft/draft
   tag: %s
   pullPolicy: Always
+imageOverride: ""
 debug: false
 service:
   http:
@@ -92,7 +93,7 @@ spec:
     spec:
       containers:
       - name: draftd
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ default (printf "%s:%s" .Values.image.repository .Values.image.tag) .Values.imageOverride }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start

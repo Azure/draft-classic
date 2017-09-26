@@ -46,6 +46,7 @@ ingress:
 registry:
   url: %s
   authtoken: %s
+imageOverride: %s
 `
 )
 
@@ -57,6 +58,7 @@ type initCmd struct {
 	autoAccept     bool
 	helmClient     *helm.Client
 	ingressEnabled bool
+	image          string
 }
 
 func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
@@ -80,8 +82,9 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
-	f.BoolVarP(&i.ingressEnabled, "ingress-enabled", "i", false, "configure ingress")
+	f.BoolVarP(&i.ingressEnabled, "ingress-enabled", "", false, "configure ingress")
 	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
+	f.StringVarP(&i.image, "draftd-image", "i", "", "override Draftd image")
 
 	return cmd
 }
@@ -120,7 +123,7 @@ func (i *initCmd) run() error {
 			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
 
 			if !i.autoAccept {
-				fmt.Fprint(i.out, "Is it okay to use the registry addon in minikube to store your application images? If not, we will prompt you for information on the registry you'd like to push your application images to during development. [Y/n] ")
+				fmt.Fprint(i.out, "Is it okay to use the registry addon in minikube to store your application images?\nIf not, we will prompt you for information on the registry you'd like to push your application images to during development. [Y/n] ")
 				reader := bufio.NewReader(i.in)
 				text, err := reader.ReadString('\n')
 				if err != nil {
@@ -132,6 +135,10 @@ func (i *initCmd) run() error {
 				}
 			}
 		}
+
+		basedomain := ""
+		registryURL := ""
+		registryAuth := ""
 
 		if !i.autoAccept || cloudProvider == "" {
 			// prompt for missing information
@@ -158,20 +165,21 @@ func (i *initCmd) run() error {
 				return fmt.Errorf("Could not read input: %s", err)
 			}
 
-			basedomain, err := setBasedomain(i.out, reader, i.ingressEnabled)
+			basedomain, err = setBasedomain(i.out, reader, i.ingressEnabled)
 			if err != nil {
 				return err
 			}
 
-			registryAuth := base64.StdEncoding.EncodeToString(
+			registryAuth = base64.StdEncoding.EncodeToString(
 				[]byte(fmt.Sprintf(
 					`{"username":"%s","password":"%s"}`,
 					dockerUser,
 					dockerPass)))
 
-			chartConfig.Raw = fmt.Sprintf(chartConfigTpl, strconv.FormatBool(i.ingressEnabled), basedomain, registryURL, registryAuth)
 		}
 
+		// create draftd config
+		chartConfig.Raw = fmt.Sprintf(chartConfigTpl, strconv.FormatBool(i.ingressEnabled), basedomain, registryURL, registryAuth, i.image)
 		if err := installer.Install(i.helmClient, chartConfig); err != nil {
 			if IsReleaseAlreadyExists(err) {
 				fmt.Fprintln(i.out, "Warning: Draft is already installed in the cluster.\n"+
