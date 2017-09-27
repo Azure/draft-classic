@@ -107,19 +107,17 @@ func (i *initCmd) run() error {
 			return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
 		}
 
-		tunnel, err := setupTillerConnection(client, restClientConfig)
+		i.helmClient, err = setupHelm(client, restClientConfig)
 		if err != nil {
 			return err
 		}
 
-		i.helmClient = helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local)))
-
-		chartConfig, cloudProvider, err := installerConfig.FromClientConfig(clientConfig)
+		draftConfig, cloudProvider, err := installerConfig.FromClientConfig(clientConfig)
 		if err != nil {
 			return fmt.Errorf("Could not generate chart config from kube client config: %s", err)
 		}
 
-		if cloudProvider != "" {
+		if cloudProvider == "minikube" {
 			fmt.Fprintf(i.out, "\nDraft detected that you are using %s as your cloud provider. AWESOME!\n", cloudProvider)
 
 			if !i.autoAccept {
@@ -136,51 +134,26 @@ func (i *initCmd) run() error {
 			}
 		}
 
-		basedomain := ""
-		registryURL := ""
-		registryAuth := ""
+		draftConfig.Ingress = i.ingressEnabled
+		draftConfig.Image = i.image
 
 		if !i.autoAccept || cloudProvider == "" {
 			// prompt for missing information
 			fmt.Fprintf(i.out, "\nIn order to configure Draft, we need a bit more information...\n\n")
-			fmt.Fprint(i.out, "1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): ")
-			reader := bufio.NewReader(i.in)
-			registryURL, err := reader.ReadString('\n')
-			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
-			}
-			registryURL = strings.TrimSpace(registryURL)
-			fmt.Fprint(i.out, "2. Enter your username: ")
-			dockerUser, err := reader.ReadString('\n')
-			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
-			}
-			dockerUser = strings.TrimSpace(dockerUser)
-			fmt.Fprint(i.out, "3. Enter your password: ")
-			// NOTE(bacongobbler): casting syscall.Stdin here to an int is intentional here as on
-			// Windows, syscall.Stdin is a Handler, which is of type uintptr.
-			dockerPass, err := terminal.ReadPassword(int(syscall.Stdin))
-			fmt.Println("")
-			if err != nil {
-				return fmt.Errorf("Could not read input: %s", err)
-			}
 
-			basedomain, err = setBasedomain(i.out, reader, i.ingressEnabled)
-			if err != nil {
+			reader := bufio.NewReader(i.in)
+			if err := setupContainerRegistry(i.out, reader, draftConfig); err != nil {
 				return err
 			}
 
-			registryAuth = base64.StdEncoding.EncodeToString(
-				[]byte(fmt.Sprintf(
-					`{"username":"%s","password":"%s"}`,
-					dockerUser,
-					dockerPass)))
+			if err := setBasedomain(i.out, reader, i.ingressEnabled, draftConfig); err != nil {
+				return err
+			}
 
 		}
 
-		// create draftd config
-		chartConfig.Raw = fmt.Sprintf(chartConfigTpl, strconv.FormatBool(i.ingressEnabled), basedomain, registryURL, registryAuth, i.image)
-		if err := installer.Install(i.helmClient, chartConfig); err != nil {
+		rawChartConfig := fmt.Sprintf(chartConfigTpl, strconv.FormatBool(draftConfig.Ingress), draftConfig.Basedomain, draftConfig.RegistryURL, draftConfig.RegistryAuth, draftConfig.Image)
+		if err := installer.Install(i.helmClient, rawChartConfig); err != nil {
 			if IsReleaseAlreadyExists(err) {
 				fmt.Fprintln(i.out, "Warning: Draft is already installed in the cluster.\n"+
 					"Use --client-only to suppress this message.")
@@ -270,15 +243,59 @@ func setupTillerConnection(client kubernetes.Interface, restClientConfig *restcl
 	return tunnel, err
 }
 
-func setBasedomain(out io.Writer, reader *bufio.Reader, ingress bool) (string, error) {
+func setBasedomain(out io.Writer, reader *bufio.Reader, ingress bool, draftConfig *installerConfig.DraftConfig) error {
 	if ingress {
 		fmt.Fprint(out, "4. Enter your top-level domain for ingress (e.g. draft.example.com): ")
 		basedomain, err := reader.ReadString('\n')
 		if err != nil {
-			return basedomain, fmt.Errorf("Could not read input: %s", err)
+			return fmt.Errorf("Could not read input: %s", err)
 		}
-		return strings.TrimSpace(basedomain), nil
+		draftConfig.Basedomain = strings.TrimSpace(basedomain)
 	} else {
-		return "", nil
+		draftConfig.Basedomain = ""
 	}
+
+	return nil
+}
+
+func setupHelm(kubeClient *kubernetes.Clientset, restClientConfig *restclient.Config) (*helm.Client, error) {
+	tunnel, err := setupTillerConnection(kubeClient, restClientConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local))), nil
+}
+
+func setupContainerRegistry(out io.Writer, reader *bufio.Reader, draftConfig *installerConfig.DraftConfig) error {
+	fmt.Fprint(out, "1. Enter your Docker registry URL (e.g. docker.io/myuser, quay.io/myuser, myregistry.azurecr.io): ")
+	registryURL, err := reader.ReadString('\n')
+	if err != nil {
+		return fmt.Errorf("Could not read input: %s", err)
+	}
+	draftConfig.RegistryURL = strings.TrimSpace(registryURL)
+
+	fmt.Fprint(out, "2. Enter your username: ")
+	dockerUser, err := reader.ReadString('\n')
+	if err != nil {
+		return fmt.Errorf("Could not read input: %s", err)
+	}
+	dockerUser = strings.TrimSpace(dockerUser)
+	fmt.Fprint(out, "3. Enter your password: ")
+	// NOTE(bacongobbler): casting syscall.Stdin here to an int is intentional here as on
+	// Windows, syscall.Stdin is a Handler, which is of type uintptr.
+	dockerPass, err := terminal.ReadPassword(int(syscall.Stdin))
+	fmt.Println("")
+	if err != nil {
+		return fmt.Errorf("Could not read input: %s", err)
+	}
+
+	registryAuth := base64.StdEncoding.EncodeToString(
+		[]byte(fmt.Sprintf(
+			`{"username":"%s","password":"%s"}`,
+			dockerUser,
+			dockerPass)))
+
+	draftConfig.RegistryAuth = registryAuth
+	return nil
 }
