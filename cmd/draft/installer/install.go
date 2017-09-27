@@ -31,6 +31,7 @@ image:
   repository: microsoft/draft
   tag: %s
   pullPolicy: Always
+imageOverride: ""
 debug: false
 service:
   http:
@@ -92,7 +93,7 @@ spec:
     spec:
       containers:
       - name: draftd
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ default (printf "%s:%s" .Values.image.repository .Values.image.tag) .Values.imageOverride }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - start
@@ -203,7 +204,7 @@ var DefaultChartFiles = []*chartutil.BufferedFile{
 // Install uses the helm client to install Draftd with the given config.
 //
 // Returns an error if the command failed.
-func Install(client *helm.Client, chartConfig *chart.Config) error {
+func Install(client *helm.Client, rawChartConfig string) error {
 	chart, err := chartutil.LoadFiles(DefaultChartFiles)
 	if err != nil {
 		return err
@@ -212,7 +213,7 @@ func Install(client *helm.Client, chartConfig *chart.Config) error {
 		chart,
 		environment.DefaultTillerNamespace,
 		helm.ReleaseName("draft"),
-		helm.ValueOverrides([]byte(chartConfig.Raw)))
+		helm.ValueOverrides([]byte(rawChartConfig)))
 	return prettyError(err)
 }
 
