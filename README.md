@@ -6,6 +6,8 @@
 
 _NOTE: Draft is experimental and does not have a stable release yet._
 
+[![asciicast](https://asciinema.org/a/WGVE7JNodpBEOautl105tdc97.png)](https://asciinema.org/a/WGVE7JNodpBEOautl105tdc97)
+
 Draft makes it easy to build applications that run on Kubernetes.  Draft targets the "inner loop" of a developer's workflow: as they hack on code, but before code is committed to version control.
 
 Using Draft is as simple as:
