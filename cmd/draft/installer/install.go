@@ -14,6 +14,9 @@ import (
 	"k8s.io/helm/pkg/tiller/environment"
 )
 
+// ReleaseName is the name of the release used when installing/uninstalling draft via helm.
+const ReleaseName = "draft"
+
 const draftChart = `name: draftd
 description: The Draft server
 version: %s
@@ -212,7 +215,7 @@ func Install(client *helm.Client, rawChartConfig string) error {
 	_, err = client.InstallReleaseFromChart(
 		chart,
 		environment.DefaultTillerNamespace,
-		helm.ReleaseName("draft"),
+		helm.ReleaseName(ReleaseName),
 		helm.ValueOverrides([]byte(rawChartConfig)))
 	return prettyError(err)
 }
@@ -227,7 +230,7 @@ func Upgrade(client *helm.Client, chartConfig *chart.Config) error {
 		return err
 	}
 	_, err = client.UpdateReleaseFromChart(
-		"draft",
+		ReleaseName,
 		chart,
 		helm.UpdateValueOverrides([]byte(chartConfig.Raw)))
 	return prettyError(err)

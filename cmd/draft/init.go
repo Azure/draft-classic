@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"k8s.io/client-go/kubernetes"
@@ -153,16 +153,14 @@ func (i *initCmd) run() error {
 		}
 
 		rawChartConfig := fmt.Sprintf(chartConfigTpl, strconv.FormatBool(draftConfig.Ingress), draftConfig.Basedomain, draftConfig.RegistryURL, draftConfig.RegistryAuth, draftConfig.Image)
-		if err := installer.Install(i.helmClient, rawChartConfig); err != nil {
-			if IsReleaseAlreadyExists(err) {
-				fmt.Fprintln(i.out, "Warning: Draft is already installed in the cluster.\n"+
-					"Use --client-only to suppress this message.")
-			} else {
-				return fmt.Errorf("error installing Draft: %s", err)
-			}
-		} else {
-			fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
+		// attempt to purge the old release, but log errors to --debug
+		if err := installer.Uninstall(i.helmClient); err != nil {
+			log.Debugf("error uninstalling Draft: %s", err)
 		}
+		if err := installer.Install(i.helmClient, rawChartConfig); err != nil {
+			return fmt.Errorf("error installing Draft: %s", err)
+		}
+		fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
 	} else {
 		fmt.Fprintln(i.out, "Skipped installing Draft's server side component in Kubernetes due to 'client-only' flag having been set")
 	}
@@ -213,13 +211,6 @@ func ensurePacks(home draftpath.Home, out io.Writer) error {
 		}
 	}
 	return nil
-}
-
-// IsReleaseAlreadyExists returns true if err matches the "release already exists"
-// error from Helm; else returns false
-func IsReleaseAlreadyExists(err error) bool {
-	alreadyExistsRegExp := regexp.MustCompile("a release named \"(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+\" already exists")
-	return alreadyExistsRegExp.MatchString(err.Error())
 }
 
 func setupDraftHome(home draftpath.Home, out io.Writer) error {
