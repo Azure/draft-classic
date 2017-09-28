@@ -1,19 +1,16 @@
 package installer
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/plugin"
 )
 
 // special thanks to the Kubernets Helm plugin installer pkg
-
-// ErrMissingMetadata indicates that plugin.yaml is missing.
-var ErrMissingMetadata = errors.New("plugin metadata (plugin.yaml) missing")
 
 // Debug enables verbose output.
 var Debug bool
@@ -32,11 +29,11 @@ type Installer interface {
 func Install(i Installer) error {
 	if _, pathErr := os.Stat(path.Dir(i.Path())); os.IsNotExist(pathErr) {
 
-		return errors.New(`plugin home "$DRAFT_HOME/plugins" does not exist`)
+		return plugin.ErrHomeMissing
 	}
 
 	if _, pathErr := os.Stat(i.Path()); !os.IsNotExist(pathErr) {
-		return errors.New("plugin already exists")
+		return plugin.ErrExists
 	}
 
 	return i.Install()
@@ -45,7 +42,7 @@ func Install(i Installer) error {
 // Update updates a plugin in $DRAFT_HOME.
 func Update(i Installer) error {
 	if _, pathErr := os.Stat(i.Path()); os.IsNotExist(pathErr) {
-		return errors.New("plugin does not exist")
+		return plugin.ErrDoesNotExist
 	}
 
 	return i.Update()
@@ -55,7 +52,7 @@ func Update(i Installer) error {
 func FindSource(location string, home draftpath.Home) (Installer, error) {
 	installer, err := existingVCSRepo(location, home)
 	if err != nil && err.Error() == "Cannot detect VCS" {
-		return installer, errors.New("cannot get information about plugin source")
+		return installer, plugin.ErrMissingSource
 	}
 	return installer, err
 }

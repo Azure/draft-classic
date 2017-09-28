@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/Azure/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/draft/pack/repo"
 	"github.com/Azure/draft/pkg/linguist"
 	"github.com/Azure/draft/pkg/osutil"
 )
@@ -88,7 +90,7 @@ func (c *createCmd) run() error {
 		}
 	} else {
 		// pack detection time
-		packPath, err := doPackDetection(c.home.Packs(), c.out)
+		packPath, err := doPackDetection(c.home, c.out)
 		if err != nil {
 			return err
 		}
@@ -122,7 +124,7 @@ func (c *createCmd) run() error {
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in
 // alphabetical order, returning the pack dirpath and any errors that occurred during the pack detection.
-func doPackDetection(packHomeDir string, out io.Writer) (string, error) {
+func doPackDetection(home draftpath.Home, out io.Writer) (string, error) {
 	langs, err := linguist.ProcessDir(".")
 	log.Debugf("linguist.ProcessDir('.') result:\n\nError: %v", err)
 	if err != nil {
@@ -136,18 +138,21 @@ func doPackDetection(packHomeDir string, out io.Writer) (string, error) {
 	}
 	detectedLang := linguist.Alias(langs[0])
 	fmt.Fprintf(out, "--> Draft detected the primary language as %s with %f%% certainty.\n", detectedLang.Language, detectedLang.Percent)
-	files, err := ioutil.ReadDir(packHomeDir)
-	if err != nil {
-		return "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
-	}
-	for _, file := range files {
-		if file.IsDir() {
-			if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(file.Name())) == 0 {
-				packPath := filepath.Join(packHomeDir, file.Name())
-				log.Debugf("pack path: %s", packPath)
-				return packPath, nil
+	for _, repository := range repo.FindRepositories(home.Packs()) {
+		packDir := path.Join(repository.Dir, repo.PackDirName)
+		packs, err := ioutil.ReadDir(packDir)
+		if err != nil {
+			return "", fmt.Errorf("there was an error reading %s: %v", packDir, err)
+		}
+		for _, file := range packs {
+			if file.IsDir() {
+				if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(file.Name())) == 0 {
+					packPath := filepath.Join(packDir, file.Name())
+					log.Debugf("pack path: %s", packPath)
+					return packPath, nil
+				}
 			}
 		}
 	}
-	return "", errors.New("Could not find a starter pack Q_Q")
+	return "", pack.NotFound
 }
