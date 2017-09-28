@@ -30,7 +30,7 @@ apt-get update && apt-get install -yq python-pip
 pip install --disable-pip-version-check --no-cache-dir azure-cli==${AZCLI_VERSION}
 
 echo "Building Draft binaries"
-make build-cross
+make clean build-cross
 VERSION="${VERSION}" make dist checksum
 
 echo "Pushing binaries to Azure Blob Storage"

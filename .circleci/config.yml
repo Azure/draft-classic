@@ -19,6 +19,9 @@ jobs:
           paths:
             - vendor
       - run:
+          name: Build
+          command: .circleci/build.sh
+      - run:
           name: Test
           command: .circleci/test.sh
       - run:
