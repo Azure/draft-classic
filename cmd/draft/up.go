@@ -72,14 +72,16 @@ func (u *upCmd) run(environment string) (err error) {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
+	errc := make(chan error)
 	go func() {
 		if err = u.client.Up(ctx, buildctx); err != nil {
-			err = fmt.Errorf("there was an error running 'draft up': %v", err)
+			errc <- fmt.Errorf("there was an error running 'draft up': %v", err)
 		}
+		close(errc)
 		cancel()
 	}()
 	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
-	return nil
+	return <-errc
 }
 
 func defaultDraftEnvironment() string {
