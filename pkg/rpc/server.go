@@ -14,9 +14,11 @@ import (
 	"github.com/Azure/draft/pkg/version"
 )
 
-// MaxSendMsgSize sets the max message size in bytes
-// the server can send. gRPC uses a default of 4MB.
-const MaxRecvMsgSize = 1024 * 1024 * 20
+// MaxRecvMsgSize sets the max message size in bytes
+// the server can send and receive to 40 MB.
+//
+// gRPC uses a default of 4MB.
+const maxMsgSize = 1024 * 1024 * 40
 
 type serverImpl struct {
 	opts serverOpts
@@ -37,7 +39,7 @@ func newServerImpl(opts ...ServerOpt) *serverImpl {
 // Server implements rpc.Server.Serve
 func (s *serverImpl) Serve(lis net.Listener, h Handler) error {
 	var opts = []grpc.ServerOption{
-		grpc.MaxMsgSize(MaxRecvMsgSize),
+		grpc.MaxMsgSize(maxMsgSize),
 	}
 	// TODO: If TLS load keys and such
 	s.h = h
