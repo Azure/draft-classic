@@ -7,12 +7,16 @@ import (
 	"testing"
 )
 
-const expectedDockerfile = `FROM python:onbuild
+const (
+	expectedDockerfile = `FROM python:onbuild
 
 CMD [ "python", "./hello.py" ]
 
 EXPOSE 80
 `
+	expectedPackName     = "Python 3"
+	expectedPackLanguage = "Python"
+)
 
 func TestFromDir(t *testing.T) {
 	pack, err := FromDir("testdata/pack-python")
@@ -25,6 +29,14 @@ func TestFromDir(t *testing.T) {
 
 	if string(pack.Dockerfile) != expectedDockerfile {
 		t.Errorf("expected dockerfile == expected, got '%v'", pack.Dockerfile)
+	}
+
+	if pack.Name != expectedPackName {
+		t.Errorf("expected name == %s, got '%v'", expectedPackName, pack.Name)
+	}
+
+	if pack.Language != expectedPackLanguage {
+		t.Errorf("expected language == %s, got '%v'", expectedPackLanguage, pack.Language)
 	}
 
 	if _, err := FromDir("dir-does-not-exist"); err == nil {

@@ -65,7 +65,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	p.StringVar(&draftHost, "host", defaultDraftHost(), "address of Draftd. Overrides $DRAFT_HOST")
 
 	cmd.AddCommand(
-		newCreateCmd(out),
+		newCreateCmd(out, in),
 		newHomeCmd(out),
 		newInitCmd(out, in),
 		newUpCmd(out),

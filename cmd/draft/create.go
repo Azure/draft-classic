@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -29,14 +32,16 @@ const (
 type createCmd struct {
 	appName string
 	out     io.Writer
+	in      io.Reader
 	pack    string
 	home    draftpath.Home
 	dest    string
 }
 
-func newCreateCmd(out io.Writer) *cobra.Command {
+func newCreateCmd(out io.Writer, in io.Reader) *cobra.Command {
 	cc := &createCmd{
 		out: out,
+		in:  in,
 	}
 
 	cmd := &cobra.Command{
@@ -88,12 +93,47 @@ func (c *createCmd) run() error {
 		}
 	} else {
 		// pack detection time
-		packPath, err := doPackDetection(c.home.Packs(), c.out)
+		var selectedPack *pack.Pack
+		detectedPacks, err := doPackDetection(c.home.Packs(), c.out)
 		if err != nil {
 			return err
 		}
-		err = pack.CreateFrom(c.dest, packPath)
-		if err != nil {
+
+		for i := range detectedPacks {
+			log.Debugln("detected pack %s", detectedPacks[i].Name)
+		}
+		switch len(detectedPacks) {
+		case 0:
+			return errors.New("Could not find a starter pack Q_Q")
+		case 1:
+			selectedPack = detectedPacks[0]
+		default:
+			for selectedPack == nil {
+				fmt.Fprintf(c.out, "!!! draft detected multiple packs that satisfy the detected language. please choose from the following:\n\n")
+				for i := range detectedPacks {
+					fmt.Fprintf(c.out, "%d. %s\n", i, detectedPacks[i].Name)
+				}
+				fmt.Fprintf(c.out, "\nEnter your choice: ")
+				reader := bufio.NewReader(c.in)
+				text, err := reader.ReadString('\n')
+				if err != nil {
+					return fmt.Errorf("Could not read input: %s", err)
+				}
+				text = strings.TrimSpace(text)
+				selectedNumber, err := strconv.Atoi(text)
+				if err != nil {
+					fmt.Fprintf(c.out, "!!! Invalid choice: %s\n", text)
+					continue
+				}
+				if selectedNumber < 0 || selectedNumber >= len(detectedPacks) {
+					fmt.Fprintf(c.out, "!!! Invalid choice: %s\n", text)
+					continue
+				}
+				selectedPack = detectedPacks[selectedNumber]
+			}
+		}
+
+		if err := pack.CreateFrom(c.dest, selectedPack.Path); err != nil {
 			return err
 		}
 	}
@@ -121,33 +161,37 @@ func (c *createCmd) run() error {
 }
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in
-// alphabetical order, returning the pack dirpath and any errors that occurred during the pack detection.
-func doPackDetection(packHomeDir string, out io.Writer) (string, error) {
+// alphabetical order, returning the pack name and any errors that occurred during the pack detection.
+func doPackDetection(packHomeDir string, out io.Writer) ([]*pack.Pack, error) {
+	var packs []*pack.Pack
 	langs, err := linguist.ProcessDir(".")
 	log.Debugf("linguist.ProcessDir('.') result:\n\nError: %v", err)
 	if err != nil {
-		return "", fmt.Errorf("there was an error detecting the language: %s", err)
+		return nil, fmt.Errorf("there was an error detecting the language: %s", err)
 	}
 	for _, lang := range langs {
 		log.Debugf("%s:\t%f (%s)", lang.Language, lang.Percent, lang.Color)
 	}
 	if len(langs) == 0 {
-		return "", errors.New("No languages were detected. Are you sure there's code in here?")
+		return nil, errors.New("No languages were detected. Are you sure there's code in here?")
 	}
 	detectedLang := linguist.Alias(langs[0])
 	fmt.Fprintf(out, "--> Draft detected the primary language as %s with %f%% certainty.\n", detectedLang.Language, detectedLang.Percent)
 	files, err := ioutil.ReadDir(packHomeDir)
 	if err != nil {
-		return "", fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
+		return nil, fmt.Errorf("there was an error reading %s: %v", packHomeDir, err)
 	}
-	for _, file := range files {
-		if file.IsDir() {
-			if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(file.Name())) == 0 {
-				packPath := filepath.Join(packHomeDir, file.Name())
-				log.Debugf("pack path: %s", packPath)
-				return packPath, nil
+	for _, packDir := range files {
+		if packDir.IsDir() {
+			p, err := pack.FromDir(path.Join(packHomeDir, packDir.Name()))
+			if err != nil {
+				return nil, fmt.Errorf("there was an error loading pack from dir %s: %v", path.Join(packHomeDir, packDir.Name()), err)
+			}
+			if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(p.Language)) == 0 {
+				log.Debugf("pack path: %s", p.Path)
+				packs = append(packs, p)
 			}
 		}
 	}
-	return "", errors.New("Could not find a starter pack Q_Q")
+	return packs, nil
 }

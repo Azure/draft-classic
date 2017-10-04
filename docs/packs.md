@@ -24,6 +24,7 @@ Inside this directory, Draft will expect a structure like this:
 
 ```
 python/               # the name of the directory is the name of the starter pack
+  pack.toml           # configuration data describing the pack
   chart/
     Chart.yaml        # A YAML file containing information about the chart
     LICENSE           # OPTIONAL: A plain text file containing the license for the chart
@@ -53,9 +54,18 @@ $ cd python
 $ helm create chart
 Creating chart
 $ echo "FROM python:onbuild" > Dockerfile
+$ echo -e 'name = "Python 3"\nlanguage = "Python"' > pack.toml
 ```
 
 See [Helm's documentation on Charts][charts] for more information on the Chart file structure.
+
+### pack.toml
+
+In `pack.toml`, there are several fields that assist in defining the pack's structure:
+
+`name` is the human-readable name of the pack. Typically this describes the pack's build environment (language version, packaging tool, etc). For example, a Python 3 pack specifically around Django apps may have the name "Python 3 - Django", where a Java pack using Maven and OpenJDK 8 may have the name "Java - Maven 3 - OpenJDK 8". The intent is to tell the end-user what and how the pack intends to package their application so they may make a well-informed decision when selecting the correct pack for their application.
+
+`language` is the programming language this pack should be used with. For example, a Node.js app is detected by pkg/linguist as "JavaScript", so a pack developer will want application owners to use this pack in that situation.
 
 ## Pack Detection
 

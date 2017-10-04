@@ -220,8 +220,8 @@ func TestBuiltins(t *testing.T) {
 		t.Fatal("Go pack not found")
 	}
 
-	if c := len(gopack); c != 11 {
-		t.Errorf("Expected 11 files in pack, got %d", c)
+	if c := len(gopack); c != 12 {
+		t.Errorf("Expected 12 files in pack, got %d", c)
 		for _, f := range gopack {
 			t.Log(f.Path)
 		}

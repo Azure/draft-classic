@@ -13,6 +13,8 @@ import (
 )
 
 const (
+	// PackfileName is the default Pack file name.
+	PackfileName = "pack.toml"
 	// ChartfileName is the default Chart file name.
 	ChartfileName = "Chart.yaml"
 	// ChartDir is the relative directory name for the packaged chart with a pack.
@@ -45,10 +47,18 @@ const (
 
 // Pack defines a Draft Starter Pack.
 type Pack struct {
+	// Name is the human-readable name of the Draft pack. This is typically scoped to the
+	// language's runtime configuration (e.g. "Python 3", "OpenJDK 8")
+	Name string `toml:"name"`
+	// Language is the programming language this pack is typically identified as when run
+	// against pkg/linguist (e.g. "Python", "Java")
+	Language string `toml:"language"`
+	// Path is the local file path where this pack resides.
+	Path string `toml:"-"`
 	// Chart is the Helm chart to be installed with the Pack.
-	Chart *chart.Chart
+	Chart *chart.Chart `toml:"-"`
 	// Dockerfile is the pre-defined Dockerfile that will be installed with the Pack.
-	Dockerfile []byte
+	Dockerfile []byte `toml:"-"`
 }
 
 // SaveDir saves a pack as files in a directory.

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/BurntSushi/toml"
 	"k8s.io/helm/pkg/chartutil"
 )
 
@@ -20,6 +21,14 @@ func FromDir(dir string) (*Pack, error) {
 		return nil, err
 	}
 
+	packConfigFile, err := ioutil.ReadFile(filepath.Join(topdir, PackfileName))
+	if err != nil {
+		return nil, err
+	}
+	if err := toml.Unmarshal(packConfigFile, pack); err != nil {
+		return nil, err
+	}
+
 	pack.Chart, err = chartutil.LoadDir(filepath.Join(topdir, ChartDir))
 	if err != nil {
 		return nil, err
@@ -30,6 +39,8 @@ func FromDir(dir string) (*Pack, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading %s: %s", dockerfile, err)
 	}
+
+	pack.Path = dir
 
 	return pack, nil
 }
