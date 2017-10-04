@@ -5,14 +5,15 @@ import (
 	"io"
 
 	"github.com/BurntSushi/toml"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
 
 	"github.com/Azure/draft/pkg/draft/manifest"
+	"github.com/Azure/draft/pkg/kube/podutil"
 )
 
 // DraftLabelKey is the label selector key on a pod that allows
@@ -140,7 +141,7 @@ func getFirstRunningPod(clientset kubernetes.Interface, selector labels.Selector
 		return nil, fmt.Errorf("could not find ready pod")
 	}
 	for _, p := range pods.Items {
-		if v1.IsPodReady(&p) {
+		if podutil.IsPodReady(&p) {
 			return &p, nil
 		}
 	}

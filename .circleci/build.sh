@@ -6,5 +6,4 @@ DRAFT_ROOT="${BASH_SOURCE[0]%/*}/.."
 
 cd "$DRAFT_ROOT"
 
-# install glide
 make build

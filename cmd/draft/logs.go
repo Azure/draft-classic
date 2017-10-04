@@ -37,13 +37,9 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 }
 
 func (l *logsCmd) run() error {
-	client, clientConfig, err := getKubeClient(kubeContext)
+	client, config, err := getKubeClient(kubeContext)
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
-	}
-	restClientConfig, err := clientConfig.ClientConfig()
-	if err != nil {
-		return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
 	}
 
 	draftApp := &local.App{
@@ -52,7 +48,7 @@ func (l *logsCmd) run() error {
 		Container: "draftd",
 	}
 
-	connection, err := draftApp.Connect(client, restClientConfig)
+	connection, err := draftApp.Connect(client, config)
 	if err != nil {
 		return fmt.Errorf("Could not connect to draftd: %s", err)
 	}

@@ -70,12 +70,12 @@ func (d *deleteCmd) run() error {
 // Returns an error if the command failed.
 func Delete(app string) error {
 	// set up helm client
-	client, clientConfig, err := getKubeClient(kubeContext)
+	client, config, err := getKubeClient(kubeContext)
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
 
-	helmClient, err := setupHelm(client, clientConfig, draftNamespace)
+	helmClient, err := setupHelm(client, config, draftNamespace)
 	if err != nil {
 		return err
 	}

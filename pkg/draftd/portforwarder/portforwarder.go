@@ -3,10 +3,12 @@ package portforwarder
 import (
 	"fmt"
 
+	"github.com/Azure/draft/pkg/kube/podutil"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/tiller/environment"
@@ -18,29 +20,29 @@ const (
 )
 
 // New returns a tunnel to the Draft pod.
-func New(clientset *kubernetes.Clientset, config *restclient.Config, namespace string) (*kube.Tunnel, error) {
-	podName, err := getDraftPodName(clientset, namespace)
+func New(client kubernetes.Interface, config *restclient.Config, namespace string) (*kube.Tunnel, error) {
+	podName, err := getDraftPodName(client.CoreV1(), namespace)
 	if err != nil {
 		return nil, err
 	}
 	const draftPort = 44135
-	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, namespace, podName, draftPort)
+	t := kube.NewTunnel(client.Core().RESTClient(), config, namespace, podName, draftPort)
 	return t, t.ForwardPort()
 }
 
-func getDraftPodName(clientset *kubernetes.Clientset, namespace string) (string, error) {
+func getDraftPodName(client corev1.PodsGetter, namespace string) (string, error) {
 	// TODO use a const for labels
 	selector := labels.Set{"app": "draft", "name": "draftd"}.AsSelector()
-	pod, err := getFirstRunningPod(clientset, selector, namespace)
+	pod, err := getFirstRunningPod(client, selector, namespace)
 	if err != nil {
 		return "", err
 	}
 	return pod.ObjectMeta.GetName(), nil
 }
 
-func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector, namespace string) (*v1.Pod, error) {
+func getFirstRunningPod(client corev1.PodsGetter, selector labels.Selector, namespace string) (*v1.Pod, error) {
 	options := metav1.ListOptions{LabelSelector: selector.String()}
-	pods, err := clientset.CoreV1().Pods(namespace).List(options)
+	pods, err := client.Pods(namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +50,7 @@ func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selecto
 		return nil, fmt.Errorf("could not find draftd")
 	}
 	for _, p := range pods.Items {
-		if v1.IsPodReady(&p) {
+		if podutil.IsPodReady(&p) {
 			return &p, nil
 		}
 	}

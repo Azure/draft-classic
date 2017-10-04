@@ -45,17 +45,13 @@ func (cn *connectCmd) run() (err error) {
 		return err
 	}
 
-	clientset, config, err := getKubeClient(kubeContext)
-	if err != nil {
-		return err
-	}
-	clientConfig, err := config.ClientConfig()
+	client, config, err := getKubeClient(kubeContext)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(cn.out, "Connecting to your app...")
-	connection, err := deployedApp.Connect(clientset, clientConfig)
+	connection, err := deployedApp.Connect(client, config)
 	if err != nil {
 		return err
 	}
