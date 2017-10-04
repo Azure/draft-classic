@@ -1,5 +1,5 @@
-hash: bb1d4f092cd3ef1e825761b8f66f38056c4a32bea4fa9e234a611d4d8b74c0d6
-updated: 2017-09-21T09:28:57.702220811-07:00
+hash: a2fd5fd87896f73564a51eebe1da7c968f704ac0609206d1b204206f4215a1df
+updated: 2017-09-28T14:26:15.428697-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -127,6 +127,8 @@ imports:
   version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/fatih/color
   version: 67c513e5729f918f5e69786686770c27141a4490
+- name: github.com/fsnotify/fsnotify
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/generaltso/linguist
   version: ae6cce277081f0ad2feb886483ec3dd43573e0e6
   subpackages:
@@ -190,6 +192,17 @@ imports:
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
   - simplelru
+- name: github.com/hashicorp/hcl
+  version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
 - name: github.com/howeyc/gopass
   version: 3ca23474a7c7203e0a0a070fd33508f6efdb9b3d
 - name: github.com/huandu/xstrings
@@ -206,6 +219,10 @@ imports:
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/julienschmidt/httprouter
   version: 975b5c4c7c21c0e3d2764200bf2aa8e34657ae6e
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/magiconair/properties
+  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -230,6 +247,8 @@ imports:
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
+- name: github.com/mitchellh/mapstructure
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/Nvveen/Gotty
   version: cd527374f1e5bff4938207604a14f2e38a9cf512
 - name: github.com/oklog/ulid
@@ -243,8 +262,12 @@ imports:
   - libcontainer/user
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
+- name: github.com/pelletier/go-toml
+  version: 16398bac157da96aa88f98a2df640c7f32af1da2
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/pkg/sftp
+  version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
@@ -255,10 +278,23 @@ imports:
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/spf13/afero
+  version: b28a7effac979219c2a2ed6205a4d70e4b1bcd02
+  subpackages:
+  - mem
+  - sftp
+- name: github.com/spf13/cast
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  subpackages:
+  - cobra/cmd
+- name: github.com/spf13/jwalterweatherman
+  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
+- name: github.com/spf13/viper
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/technosophos/moniker
   version: 9f956786b91d9786ca11aa5be6104542fa911546
 - name: github.com/ugorji/go
@@ -268,8 +304,12 @@ imports:
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
   - pbkdf2
   - scrypt
+  - ssh
   - ssh/terminal
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
