@@ -7,12 +7,15 @@ import (
 	"testing"
 )
 
-const expectedDockerfile = `FROM python:onbuild
+const (
+	packName           = "foo"
+	expectedDockerfile = `FROM python:onbuild
 
 CMD [ "python", "./hello.py" ]
 
 EXPOSE 80
 `
+)
 
 func TestFromDir(t *testing.T) {
 	pack, err := FromDir("testdata/pack-python")
@@ -44,28 +47,11 @@ func TestFromDir(t *testing.T) {
 	if err := os.Chdir(dir); err != nil {
 		t.Fatal(err)
 	}
-	// remove the dir from under our feet to force filepath.Abs to fail
-	os.RemoveAll(dir)
-	if _, err := FromDir("."); err == nil {
-		t.Errorf("expected err to be non-nil when filepath.Abs(\".\") should fail")
-	}
-
-	if err := os.Chdir(cwd); err != nil {
-		t.Fatal(err)
-	}
 
 	if os.Getenv("CI") != "" {
 		t.Skip("skipping file permission mode tests on CI servers")
 	}
 
-	// re-use the dir
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-	if _, err := Create(packName, dir, fooPackFiles()); err != nil {
-		t.Fatal(err)
-	}
 	// load a pack with an un-readable Dockerfile (file perms 0000)
 	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0000); err != nil {
 		t.Fatalf("dir %s: %s", dir, err)
@@ -76,6 +62,16 @@ func TestFromDir(t *testing.T) {
 
 	// revert file perms for the Dockerfile in prep for the detect script
 	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// remove the dir from under our feet to force filepath.Abs to fail
+	os.RemoveAll(dir)
+	if _, err := FromDir("."); err == nil {
+		t.Errorf("expected err to be non-nil when filepath.Abs(\".\") should fail")
+	}
+
+	if err := os.Chdir(cwd); err != nil {
 		t.Fatal(err)
 	}
 }

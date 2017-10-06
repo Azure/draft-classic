@@ -23,20 +23,12 @@ SHELL=/bin/bash
 .PHONY: all
 all: build
 
-.PHONY: generate
-generate:
-	@if [[ -n $$(git status --porcelain packs/) ]]; then \
-		go generate ./pkg/draft/pack/generated; \
-	fi
-
 .PHONY: build
-build: generate
 build:
 	GOBIN=$(BINDIR) $(GO) install $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/...
 
 # usage: make clean build-cross dist APP=draft|draftd VERSION=v2.0.0-alpha.3
 .PHONY: build-cross
-build-cross: generate
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
 	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/$(APP)

@@ -1,7 +1,10 @@
 package installer
 
 import (
+	"net/url"
 	"os"
+	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/Masterminds/semver"
@@ -9,10 +12,11 @@ import (
 	"k8s.io/helm/pkg/plugin/cache"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/plugin"
+	"github.com/Azure/draft/pkg/draft/pack/repo"
+	"github.com/Azure/draft/pkg/plugin/installer"
 )
 
-//VCSInstaller installs plugins from a remote repository
+//VCSInstaller installs packs from a remote repository
 type VCSInstaller struct {
 	Repo    vcs.Repo
 	Version string
@@ -26,7 +30,7 @@ func NewVCSInstaller(source, version string, home draftpath.Home) (*VCSInstaller
 	if err != nil {
 		return nil, err
 	}
-	cachedpath := home.Path("cache", "plugins", key)
+	cachedpath := home.Path("cache", "packs", key)
 	repo, err := vcs.NewRepo(source, cachedpath)
 	if err != nil {
 		return nil, err
@@ -40,7 +44,16 @@ func NewVCSInstaller(source, version string, home draftpath.Home) (*VCSInstaller
 	return i, err
 }
 
-// Install clones a remote repository and creates a symlink to the plugin directory in DRAFT_HOME
+// Path is where the pack repo will be symlinked to.
+func (i *VCSInstaller) Path() string {
+	u, err := url.Parse(i.Source)
+	if err == nil {
+		return filepath.Join(i.DraftHome.Packs(), u.Host, u.Path)
+	}
+	return filepath.Join(i.DraftHome.Packs(), filepath.Base(i.Source))
+}
+
+// Install clones a remote repository and creates a symlink to the pack repo directory in DRAFT_HOME
 //
 // Implements Installer
 func (i *VCSInstaller) Install() error {
@@ -57,29 +70,32 @@ func (i *VCSInstaller) Install() error {
 		return err
 	}
 
-	if !isPlugin(i.Repo.LocalPath()) {
-		return plugin.ErrMissingMetadata
+	if !isPackRepo(i.Repo.LocalPath()) {
+		return repo.ErrHomeMissing
 	}
 
-	return i.link(i.Repo.LocalPath())
+	if err := os.MkdirAll(path.Dir(i.Path()), 0755); err != nil {
+		return err
+	}
+
+	return os.Symlink(i.Repo.LocalPath(), i.Path())
 }
 
 // Update updates a remote repository
 func (i *VCSInstaller) Update() error {
-	debug("updating %s", i.Repo.Remote())
 	if i.Repo.IsDirty() {
-		return plugin.ErrRepoDirty
+		return repo.ErrRepoDirty
 	}
 	if err := i.Repo.Update(); err != nil {
 		return err
 	}
-	if !isPlugin(i.Repo.LocalPath()) {
-		return plugin.ErrMissingMetadata
+	if !isPackRepo(i.Repo.LocalPath()) {
+		return repo.ErrHomeMissing
 	}
 	return nil
 }
 
-func existingVCSRepo(location string, home draftpath.Home) (Installer, error) {
+func existingVCSRepo(location string, home draftpath.Home) (installer.Installer, error) {
 	repo, err := vcs.NewRepo("", location)
 	if err != nil {
 		return nil, err
@@ -106,16 +122,15 @@ func getSemVers(refs []string) []*semver.Version {
 
 // setVersion attempts to checkout the version
 func (i *VCSInstaller) setVersion(repo vcs.Repo, ref string) error {
-	debug("setting version to %q", i.Version)
 	return repo.UpdateVersion(ref)
 }
 
-func (i *VCSInstaller) solveVersion(repo vcs.Repo) (string, error) {
+func (i *VCSInstaller) solveVersion(rp vcs.Repo) (string, error) {
 	if i.Version == "" {
 		return "", nil
 	}
 
-	if repo.IsReference(i.Version) {
+	if rp.IsReference(i.Version) {
 		return i.Version, nil
 	}
 
@@ -127,11 +142,10 @@ func (i *VCSInstaller) solveVersion(repo vcs.Repo) (string, error) {
 	}
 
 	// Get the tags
-	refs, err := repo.Tags()
+	refs, err := rp.Tags()
 	if err != nil {
 		return "", err
 	}
-	debug("found refs: %s", refs)
 
 	// Convert and filter the list to semver.Version instances
 	semvers := getSemVers(refs)
@@ -142,21 +156,18 @@ func (i *VCSInstaller) solveVersion(repo vcs.Repo) (string, error) {
 		if constraint.Check(v) {
 			// If the constraint passes get the original reference
 			ver := v.Original()
-			debug("setting to %s", ver)
 			return ver, nil
 		}
 	}
 
-	return "", plugin.ErrVersionDoesNotExist
+	return "", repo.ErrVersionDoesNotExist
 }
 
 // sync will clone or update a remote repo.
 func (i *VCSInstaller) sync(repo vcs.Repo) error {
 
 	if _, err := os.Stat(repo.LocalPath()); os.IsNotExist(err) {
-		debug("cloning %s to %s", repo.Remote(), repo.LocalPath())
 		return repo.Get()
 	}
-	debug("updating %s", repo.Remote())
 	return repo.Update()
 }

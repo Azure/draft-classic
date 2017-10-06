@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/helm/pkg/plugin"
 
@@ -74,6 +75,16 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 
 	// Now we create commands for all of these.
 	for _, plug := range found {
+		var commandExists bool
+		for _, command := range baseCmd.Commands() {
+			if strings.Compare(command.Use, plug.Metadata.Usage) == 0 {
+				commandExists = true
+			}
+		}
+		if commandExists {
+			log.Debugf("command %s exists", plug.Metadata.Usage)
+			continue
+		}
 		plug := plug
 		md := plug.Metadata
 		if md.Usage == "" {
@@ -102,14 +113,7 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 				prog.Stdout = out
 				prog.Stderr = os.Stderr
 				prog.Stdin = in
-				if err := prog.Run(); err != nil {
-					if eerr, ok := err.(*exec.ExitError); ok {
-						os.Stderr.Write(eerr.Stderr)
-						return fmt.Errorf("plugin %q exited with error", md.Name)
-					}
-					return err
-				}
-				return nil
+				return prog.Run()
 			},
 			// This passes all the flags to the subcommand.
 			DisableFlagParsing: true,

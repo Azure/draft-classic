@@ -1,13 +1,14 @@
 package installer
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/plugin"
+	"github.com/Azure/draft/pkg/draft/pack/repo"
 )
 
-// LocalInstaller installs plugins from the filesystem
+// LocalInstaller installs pack repos from the filesystem
 type LocalInstaller struct {
 	base
 }
@@ -22,10 +23,18 @@ func NewLocalInstaller(source string, home draftpath.Home) (*LocalInstaller, err
 	return i, nil
 }
 
-// Install creates a symlink to the plugin directory in $HELM_HOME
+// Path is where the pack repo will be symlinked to.
+func (i *LocalInstaller) Path() string {
+	if i.Source == "" {
+		return ""
+	}
+	return filepath.Join(i.DraftHome.Packs(), filepath.Base(i.Source))
+}
+
+// Install creates a symlink to the pack repo directory in $DRAFT_HOME
 func (i *LocalInstaller) Install() error {
-	if !isPlugin(i.Source) {
-		return plugin.ErrMissingMetadata
+	if !isPackRepo(i.Source) {
+		return repo.ErrHomeMissing
 	}
 
 	src, err := filepath.Abs(i.Source)
@@ -33,11 +42,10 @@ func (i *LocalInstaller) Install() error {
 		return err
 	}
 
-	return i.link(src)
+	return os.Symlink(src, i.Path())
 }
 
 // Update updates a local repository
 func (i *LocalInstaller) Update() error {
-	debug("local repository is auto-updated")
 	return nil
 }

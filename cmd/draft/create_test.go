@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,20 +16,17 @@ import (
 
 const gitkeepfile = ".gitkeep"
 
-var update = flag.Bool("update", false, "update generated reference files")
-
 func TestCreate(t *testing.T) {
 	var generatedpath = "testdata/create/generated"
 
 	testCases := []struct {
-		src string
-
-		wantErr bool
+		src         string
+		expectedErr error
 	}{
-		{"testdata/create/src/simple-go", false},
-		{"testdata/create/src/simple-go-with-draftignore", false},
-		{"testdata/create/src/simple-go-with-chart", false},
-		{"testdata/create/src/empty", false},
+		{"testdata/create/src/simple-go", nil},
+		{"testdata/create/src/simple-go-with-draftignore", nil},
+		{"testdata/create/src/simple-go-with-chart", nil},
+		{"testdata/create/src/empty", nil},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("create %s", tc.src), func(t *testing.T) {
@@ -38,33 +34,24 @@ func TestCreate(t *testing.T) {
 			defer teardown()
 
 			destcompare := filepath.Join(generatedpath, path.Base(tc.src))
-			// On update, override and clean destcompare
-			if *update {
-				// Skip the ones where we expect an error on
-				if tc.wantErr {
-					return
-				}
-				pDir = destcompare
-			}
 			helpers.CopyTree(t, tc.src, pDir)
-
 			// Test
 			create := &createCmd{
 				appName: "myapp",
 				out:     os.Stdout,
-				home:    draftpath.Home("../../"),
+				home:    draftpath.Home("testdata/drafthome/"),
 				dest:    pDir,
 			}
 			err := create.run()
 
 			// Error checking
-			if err != nil != tc.wantErr {
-				t.Errorf("draft create error = %v, wantErr %v", err, tc.wantErr)
+			if err != tc.expectedErr {
+				t.Errorf("draft create returned an unexpected error: '%v'", err)
 				return
 			}
 
-			// append .gitkeep file on empty directories
-			if *update && !tc.wantErr {
+			// append .gitkeep file on empty directories when we expect `draft create` to pass
+			if tc.expectedErr == nil {
 				addGitKeep(t, pDir)
 			}
 
