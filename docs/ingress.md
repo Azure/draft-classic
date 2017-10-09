@@ -27,7 +27,7 @@ $ kubectl --namespace kube-system get services -w nginx-ingress-nginx-ingress-co
 On minikube, you can simply enable the ingress controller add-on
 
 ```shell
-$ minikube addon enable ingress
+$ minikube addons enable ingress
 ```
 
 The ingress IP address is minikube's IP:
