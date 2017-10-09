@@ -93,7 +93,7 @@ $ sudo killall -HUP mDNSResponder
 To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
 
 ```
-><> scutil --dns | grep k8s.local -B 1 -A 3
+$ scutil --dns | grep k8s.local -B 1 -A 3
 resolver #8
   domain   : k8s.local
   nameserver[0] : 127.0.0.1
