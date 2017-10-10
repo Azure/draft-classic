@@ -11,7 +11,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/Azure/draft/pkg/version"
-	"k8s.io/helm/pkg/tiller/environment"
 )
 
 // ReleaseName is the name of the release used when installing/uninstalling draft via helm.
@@ -207,14 +206,14 @@ var DefaultChartFiles = []*chartutil.BufferedFile{
 // Install uses the helm client to install Draftd with the given config.
 //
 // Returns an error if the command failed.
-func Install(client *helm.Client, rawChartConfig string) error {
+func Install(client *helm.Client, namespace string, rawChartConfig string) error {
 	chart, err := chartutil.LoadFiles(DefaultChartFiles)
 	if err != nil {
 		return err
 	}
 	_, err = client.InstallReleaseFromChart(
 		chart,
-		environment.DefaultTillerNamespace,
+		namespace,
 		helm.ReleaseName(ReleaseName),
 		helm.ValueOverrides([]byte(rawChartConfig)))
 	return prettyError(err)

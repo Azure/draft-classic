@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	hostEnvVar = "DRAFT_HOST"
-	homeEnvVar = "DRAFT_HOME"
+	hostEnvVar      = "DRAFT_HOST"
+	homeEnvVar      = "DRAFT_HOME"
+	namespaceEnvVar = "DRAFT_NAMESPACE"
 )
 
 var (
@@ -38,6 +39,8 @@ var (
 	draftHome string
 	// draftHost depicts where the Draftd server is hosted. This is used when the port forwarding logic by Kubernetes is unavailable.
 	draftHost string
+	// draftNamespace depicts which namespace the Draftd server is running in. This is used when Draftd was installed in a different namespace than kube-system.
+	draftNamespace string
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -62,7 +65,8 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	p.StringVar(&draftHome, "home", defaultDraftHome(), "location of your Draft config. Overrides $DRAFT_HOME")
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use")
-	p.StringVar(&draftHost, "host", defaultDraftHost(), "address of Draftd. Overrides $DRAFT_HOST")
+	p.StringVar(&draftHost, "host", defaultDraftHost(), "address of Draftd. This is used when the port forwarding feature by Kubernetes is unavailable. Overrides $DRAFT_HOST")
+	p.StringVar(&draftNamespace, "draft-namespace", defaultDraftNamespace(), "namespace where Draftd is running. This is used when Draftd was installed in a different namespace than kube-system. Overrides $DRAFT_NAMESPACE")
 
 	cmd.AddCommand(
 		newCreateCmd(out),
@@ -91,7 +95,7 @@ func setupConnection(c *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		tunnel, err := portforwarder.New(clientset, clientConfig)
+		tunnel, err := portforwarder.New(clientset, clientConfig, draftNamespace)
 		if err != nil {
 			return err
 		}
@@ -123,6 +127,13 @@ func ensureDraftClient(client *draft.Client) *draft.Client {
 
 func defaultDraftHost() string {
 	return os.Getenv(hostEnvVar)
+}
+
+func defaultDraftNamespace() string {
+	if namespace := os.Getenv(namespaceEnvVar); namespace != "" {
+		return namespace
+	}
+	return portforwarder.DefaultDraftNamespace
 }
 
 func defaultDraftHome() string {
