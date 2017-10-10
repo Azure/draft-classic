@@ -27,7 +27,7 @@ $ kubectl --namespace kube-system get services -w nginx-ingress-nginx-ingress-co
 On minikube, you can simply enable the ingress controller add-on
 
 ```shell
-$ minikube addon enable ingress
+$ minikube addons enable ingress
 ```
 
 The ingress IP address is minikube's IP:
@@ -93,7 +93,7 @@ $ sudo killall -HUP mDNSResponder
 To verify that your operating system is now pointing all `k8s.local` requests at dnsmasq:
 
 ```
-><> scutil --dns | grep k8s.local -B 1 -A 3
+$ scutil --dns | grep k8s.local -B 1 -A 3
 resolver #8
   domain   : k8s.local
   nameserver[0] : 127.0.0.1
