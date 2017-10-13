@@ -10,7 +10,7 @@ service:
   name: ruby
   type: ClusterIP
   externalPort: 80
-  internalPort: 8080
+  internalPort: 3000
 resources:
   limits:
     cpu: 100m
