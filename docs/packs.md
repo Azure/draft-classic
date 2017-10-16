@@ -24,7 +24,7 @@ Inside this directory, Draft will expect a structure like this:
 
 ```
 python/               # the name of the directory is the name of the starter pack
-  chart/
+  charts/
     Chart.yaml        # A YAML file containing information about the chart
     LICENSE           # OPTIONAL: A plain text file containing the license for the chart
     README.md         # OPTIONAL: A human-readable README file

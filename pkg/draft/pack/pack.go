@@ -15,8 +15,6 @@ import (
 const (
 	// ChartfileName is the default Chart file name.
 	ChartfileName = "Chart.yaml"
-	// ChartDir is the relative directory name for the packaged chart with a pack.
-	ChartDir = "chart"
 	// DockerfileName is the name of the Dockerfile.
 	DockerfileName = "Dockerfile"
 	// ValuesfileName is the default values file name.
@@ -35,7 +33,8 @@ const (
 	HelpersName = "_helpers.tpl"
 	// TemplatesDir is the relative directory name for templates.
 	TemplatesDir = "templates"
-	// ChartsDir is the relative directory name for charts dependencies.
+	// ChartsDir is the directory name for the packaged chart.
+	// This also doubles as the directory name for chart dependencies.
 	ChartsDir = "charts"
 	// HerokuLicenseName is the name of the Neroku License
 	HerokuLicenseName = "NOTICE"
@@ -54,7 +53,7 @@ type Pack struct {
 // SaveDir saves a pack as files in a directory.
 func (p *Pack) SaveDir(dest string) error {
 	// Create the chart directory
-	chartPath := filepath.Join(dest, ChartDir)
+	chartPath := filepath.Join(dest, ChartsDir)
 	if err := os.Mkdir(chartPath, 0755); err != nil {
 		return fmt.Errorf("Could not create %s: %s", chartPath, err)
 	}
