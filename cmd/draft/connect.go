@@ -62,7 +62,7 @@ func (cn *connectCmd) run() (err error) {
 	fmt.Fprintln(cn.out, "SUCCESS...Connect to your app on "+detail)
 
 	fmt.Fprintln(cn.out, "Starting log streaming...")
-	readCloser, err := connection.RequestLogStream(deployedApp)
+	readCloser, err := connection.RequestLogStream(deployedApp, 5)
 	if err != nil {
 		return err
 	}

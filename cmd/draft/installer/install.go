@@ -93,6 +93,7 @@ spec:
       labels:
         app: draft
         name: draftd
+        draft: draftd
     spec:
       containers:
       - name: draftd

@@ -73,6 +73,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 		newPluginCmd(out),
 		newConnectCmd(out),
 		newDeleteCmd(out),
+		newLogsCmd(out),
 	)
 
 	// Find and add plugins

@@ -20,6 +20,7 @@ const DraftLabelKey = "draft"
 type App struct {
 	Name      string
 	Namespace string
+	Container string
 }
 
 type Connection struct {
@@ -44,7 +45,6 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 // Connect creates a local tunnel to a Kubernetes pod running the application and returns the connection information
 func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config) (*Connection, error) {
 	tunnel, podName, err := a.NewTunnel(clientset, clientConfig)
-
 	if err != nil {
 		return nil, err
 	}
@@ -60,32 +60,54 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 func (a *App) NewTunnel(clientset kubernetes.Interface, config *restclient.Config) (*kube.Tunnel, string, error) {
 	podName, containers, err := getAppPodNameAndContainers(a.Namespace, a.Name, clientset)
 	if err != nil {
-		return nil, podName, err
+		return nil, "", err
 	}
 
-	// purposely handles first container and its first container port
-	//  at the moment for MVP and should be changed later
-	var port int
-	for _, container := range containers {
-		port = int(container.Ports[0].ContainerPort)
+	port, err := getContainerPort(containers, a.Container)
+	if err != nil {
+		return nil, "", err
 	}
 
 	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, a.Namespace, podName, port)
 	if err != nil {
-		return nil, podName, err
+		return nil, "", err
 	}
 
 	return t, podName, t.ForwardPort()
 }
 
+func getContainerPort(containers []v1.Container, targetContainer string) (int, error) {
+	var port int
+	containerFound := false
+	if targetContainer != "" {
+		for _, container := range containers {
+			if container.Name == targetContainer && !containerFound {
+				containerFound = true
+				port = int(container.Ports[0].ContainerPort)
+			}
+		}
+
+		if containerFound == false {
+			return 0, fmt.Errorf("container '%s' not found", targetContainer)
+		}
+	} else {
+		// if not container is specified, default behavior is to
+		//  grab first ContainerPort of first container
+		port = int(containers[0].Ports[0].ContainerPort)
+	}
+
+	return port, nil
+
+}
+
 // RequestLogStream returns a stream of the application pod's logs
-func (c *Connection) RequestLogStream(app *App) (io.ReadCloser, error) {
-	var lines int64 = 5
+func (c *Connection) RequestLogStream(app *App, logLines int64) (io.ReadCloser, error) {
 
 	req := c.Clientset.CoreV1().Pods(app.Namespace).GetLogs(c.PodName,
 		&v1.PodLogOptions{
 			Follow:    true,
-			TailLines: &lines,
+			TailLines: &logLines,
+			Container: app.Container,
 		})
 
 	return req.Stream()
