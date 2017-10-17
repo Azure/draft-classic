@@ -19,7 +19,6 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
-	"k8s.io/helm/pkg/tiller/environment"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
@@ -107,7 +106,7 @@ func (i *initCmd) run() error {
 			return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
 		}
 
-		i.helmClient, err = setupHelm(client, restClientConfig)
+		i.helmClient, err = setupHelm(client, restClientConfig, draftNamespace)
 		if err != nil {
 			return err
 		}
@@ -157,7 +156,7 @@ func (i *initCmd) run() error {
 		if err := installer.Uninstall(i.helmClient); err != nil {
 			log.Debugf("error uninstalling Draft: %s", err)
 		}
-		if err := installer.Install(i.helmClient, rawChartConfig); err != nil {
+		if err := installer.Install(i.helmClient, draftNamespace, rawChartConfig); err != nil {
 			return fmt.Errorf("error installing Draft: %s", err)
 		}
 		fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
@@ -296,8 +295,8 @@ func (i *initCmd) setupDraftHome() error {
 	return nil
 }
 
-func setupTillerConnection(client kubernetes.Interface, restClientConfig *restclient.Config) (*kube.Tunnel, error) {
-	tunnel, err := portforwarder.New(environment.DefaultTillerNamespace, client, restClientConfig)
+func setupTillerConnection(client kubernetes.Interface, restClientConfig *restclient.Config, namespace string) (*kube.Tunnel, error) {
+	tunnel, err := portforwarder.New(namespace, client, restClientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
 	}
@@ -320,8 +319,8 @@ func setupBasedomain(out io.Writer, reader *bufio.Reader, ingress bool, draftCon
 	return nil
 }
 
-func setupHelm(kubeClient *kubernetes.Clientset, restClientConfig *restclient.Config) (*helm.Client, error) {
-	tunnel, err := setupTillerConnection(kubeClient, restClientConfig)
+func setupHelm(kubeClient *kubernetes.Clientset, restClientConfig *restclient.Config, namespace string) (*helm.Client, error) {
+	tunnel, err := setupTillerConnection(kubeClient, restClientConfig, namespace)
 	if err != nil {
 		return nil, err
 	}

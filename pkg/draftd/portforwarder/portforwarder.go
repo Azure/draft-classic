@@ -9,37 +9,38 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/tiller/environment"
 )
 
 const (
-	// DraftNamespace is the Kubernetes namespace in which the Draft pod runs.
-	DraftNamespace string = "kube-system"
+	// DefaultDraftNamespace is the Kubernetes namespace in which the Draft pod runs by default.
+	DefaultDraftNamespace string = environment.DefaultTillerNamespace
 )
 
 // New returns a tunnel to the Draft pod.
-func New(clientset *kubernetes.Clientset, config *restclient.Config) (*kube.Tunnel, error) {
-	podName, err := getDraftPodName(clientset)
+func New(clientset *kubernetes.Clientset, config *restclient.Config, namespace string) (*kube.Tunnel, error) {
+	podName, err := getDraftPodName(clientset, namespace)
 	if err != nil {
 		return nil, err
 	}
 	const draftPort = 44135
-	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, DraftNamespace, podName, draftPort)
+	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), config, namespace, podName, draftPort)
 	return t, t.ForwardPort()
 }
 
-func getDraftPodName(clientset *kubernetes.Clientset) (string, error) {
+func getDraftPodName(clientset *kubernetes.Clientset, namespace string) (string, error) {
 	// TODO use a const for labels
 	selector := labels.Set{"app": "draft", "name": "draftd"}.AsSelector()
-	pod, err := getFirstRunningPod(clientset, selector)
+	pod, err := getFirstRunningPod(clientset, selector, namespace)
 	if err != nil {
 		return "", err
 	}
 	return pod.ObjectMeta.GetName(), nil
 }
 
-func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector) (*v1.Pod, error) {
+func getFirstRunningPod(clientset *kubernetes.Clientset, selector labels.Selector, namespace string) (*v1.Pod, error) {
 	options := metav1.ListOptions{LabelSelector: selector.String()}
-	pods, err := clientset.CoreV1().Pods(DraftNamespace).List(options)
+	pods, err := clientset.CoreV1().Pods(namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

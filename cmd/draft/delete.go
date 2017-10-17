@@ -78,7 +78,7 @@ func Delete(app string) error {
 		return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
 	}
 
-	helmClient, err := setupHelm(client, restClientConfig)
+	helmClient, err := setupHelm(client, restClientConfig, draftNamespace)
 	if err != nil {
 		return err
 	}
