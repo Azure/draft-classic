@@ -13,6 +13,7 @@ import (
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack/repo"
+	"github.com/Azure/draft/pkg/osutil"
 	"github.com/Azure/draft/pkg/plugin/installer"
 )
 
@@ -78,7 +79,7 @@ func (i *VCSInstaller) Install() error {
 		return err
 	}
 
-	return os.Symlink(i.Repo.LocalPath(), i.Path())
+	return osutil.SymlinkWithFallback(i.Repo.LocalPath(), i.Path())
 }
 
 // Update updates a remote repository

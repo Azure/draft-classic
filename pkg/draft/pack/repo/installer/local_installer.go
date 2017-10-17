@@ -1,11 +1,11 @@
 package installer
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack/repo"
+	"github.com/Azure/draft/pkg/osutil"
 )
 
 // LocalInstaller installs pack repos from the filesystem
@@ -42,7 +42,7 @@ func (i *LocalInstaller) Install() error {
 		return err
 	}
 
-	return os.Symlink(src, i.Path())
+	return osutil.SymlinkWithFallback(src, i.Path())
 }
 
 // Update updates a local repository

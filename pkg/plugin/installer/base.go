@@ -1,10 +1,10 @@
 package installer // import "github.com/Azure/draft/pkg/plugin/installer"
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/osutil"
 )
 
 type base struct {
@@ -22,7 +22,7 @@ func newBase(source string, home draftpath.Home) base {
 // link creates a symlink from the plugin source to $DRAFT_HOME
 func (b *base) link(from string) error {
 	//debug("symlinking %s to %s", from, b.Path())
-	return os.Symlink(from, b.Path())
+	return osutil.SymlinkWithFallback(from, b.Path())
 }
 
 // Path is where the plugin will be symlinked to.
