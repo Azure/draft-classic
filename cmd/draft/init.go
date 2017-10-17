@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -233,13 +232,6 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin) error {
 		return packRepoCmd.RunE(packRepoCmd, addArgs)
 	}
 	return nil
-}
-
-// IsReleaseAlreadyExists returns true if err matches the "release already exists"
-// error from Helm; else returns false
-func IsReleaseAlreadyExists(err error) bool {
-	alreadyExistsRegExp := regexp.MustCompile("a release named \"(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+\" already exists")
-	return alreadyExistsRegExp.MatchString(err.Error())
 }
 
 // ensurePlugins checks to see if the default plugins exist.

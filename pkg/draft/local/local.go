@@ -15,6 +15,8 @@ import (
 	"github.com/Azure/draft/pkg/draft/manifest"
 )
 
+// DraftLabelKey is the label selector key on a pod that allows
+//  us to identify which draft app a pod is associated with
 const DraftLabelKey = "draft"
 
 type App struct {
