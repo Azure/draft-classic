@@ -15,7 +15,8 @@ const (
 )
 
 type connectCmd struct {
-	out io.Writer
+	out      io.Writer
+	logLines int64
 }
 
 func newConnectCmd(out io.Writer) *cobra.Command {
@@ -31,6 +32,8 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 			return cc.run()
 		},
 	}
+	f := cmd.Flags()
+	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 
 	return cmd
 }
@@ -61,7 +64,7 @@ func (cn *connectCmd) run() (err error) {
 	fmt.Fprintln(cn.out, "SUCCESS...Connect to your app on "+detail)
 
 	fmt.Fprintln(cn.out, "Starting log streaming...")
-	readCloser, err := connection.RequestLogStream(deployedApp, 5)
+	readCloser, err := connection.RequestLogStream(deployedApp, cn.logLines)
 	if err != nil {
 		return err
 	}

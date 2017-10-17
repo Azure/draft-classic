@@ -12,11 +12,12 @@ import (
 const logsDesc = `This command outputs logs from the draft server to help debug builds.`
 
 type logsCmd struct {
-	out io.Writer
+	out      io.Writer
+	logLines int64
 }
 
 func newLogsCmd(out io.Writer) *cobra.Command {
-	cc := &logsCmd{
+	lc := &logsCmd{
 		out: out,
 	}
 
@@ -25,9 +26,12 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 		Short: logsDesc,
 		Long:  logsDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cc.run()
+			return lc.run()
 		},
 	}
+
+	f := cmd.Flags()
+	f.Int64Var(&lc.logLines, "tail", 100, "lines of recent log lines to display")
 
 	return cmd
 }
@@ -54,7 +58,7 @@ func (l *logsCmd) run() error {
 	}
 
 	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp, 100)
+	readCloser, err := connection.RequestLogStream(draftApp, l.logLines)
 	if err != nil {
 		return fmt.Errorf("Could not get log stream: %s", err)
 	}
