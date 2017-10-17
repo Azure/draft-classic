@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -72,8 +71,6 @@ func (cn *connectCmd) run() (err error) {
 	if err != nil {
 		return err
 	}
-
-	time.Sleep(40 * time.Minute) //TODO: put this in wait loop and let the logs roll
 
 	return nil
 }
