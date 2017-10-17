@@ -15,7 +15,7 @@ func TestDelete(t *testing.T) {
 		{"testdata/delete/src/simple-go-error", true},
 	}
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("delete", tc.src), func(t *testing.T) {
+		t.Run(fmt.Sprintf("delete %s", tc.src), func(t *testing.T) {
 			delete := &deleteCmd{
 				appName: "",
 				out:     os.Stdout,
