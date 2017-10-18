@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.8.0
+
+### Client
+
+* implemented `draft delete` to remove applications from Kubernetes
+* implemented `draft logs` to view build logs after `draft up`
+* added --tail flag to `draft connect` (as well as `draft logs`)
+* added -i/--image flag to `draft init` to override the draftd image
+* added "upgrade" workflow to `draft init`
+* installed the pack-repo plugin by default on `draft init`
+* switched default listening port to 3000 for apps deployed with the default Ruby pack
+* added global flag `--draft-namespace` for talking to draftd in another namespace
+
+### Server
+
+* bumped max RPC message size to 40MB
+
+### Documentation
+
+* clarified how to use ingress with the basedomain field
+* added an asciicast on draft's workflow
+* added documentation on creating and maintaining a pack repository
+
 ## v0.7.0
 
 ### Client
