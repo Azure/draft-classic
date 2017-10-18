@@ -266,12 +266,7 @@ git cherry-pick -x <commit_id>
 ```
 
 You will also want to update the release version number and the CHANGELOG as we did in steps 2 and
-3. In doing so, you will want to amend the original "bump commit" and CHANGELOG commit which will
-require you to rebase the commits such that they're on top.
-
-```
-git rebase -i HEAD~3
-```
+3 as separate commits.
 
 After that, tag it and notify users of the new release candidate:
 
@@ -287,20 +282,11 @@ candidate.
 
 When you're finally happy with the quality of a release candidate, you can move on and create the
 real thing. First, you will want to change the release name we changed in step 2 back to the
-official release name. Follow step 2 to make those changes then amend the original commit message.
-You can do so by first creating a new commit:
+official release name. Follow step 2 to make those changes then commit the change:
 
 ```
 git add .
 git commit -m "bump version to $RELEASE_NAME"
-```
-
-Then with `git rebase -i HEAD~3`, re-arrange the commits such that this new commit is below the
-original bump commit. Mark the bump commit as "reword" and the new commit as a "fixup" so it will
-be merged into the original. Re-word the original bump commit.
-
-```
-bump version to $RELEASE_NAME
 ```
 
 Double-check one last time to make sure eveything is in order, then finally push the release tag.
