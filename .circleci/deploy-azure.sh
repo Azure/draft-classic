@@ -25,7 +25,7 @@ else
 fi
 
 echo "Installing Azure components"
-AZCLI_VERSION=2.0.15
+AZCLI_VERSION=2.0.19
 apt-get update && apt-get install -yq python-pip
 pip install --disable-pip-version-check --no-cache-dir azure-cli==${AZCLI_VERSION}
 
