@@ -5,7 +5,7 @@ basedomain: example.com
 replicaCount: 1
 image:
   repository: microsoft/draft
-  tag: v0.8.0-rc1
+  tag: v0.8.0-rc2
   pullPolicy: IfNotPresent
 debug: false
 service:
