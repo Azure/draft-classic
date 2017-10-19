@@ -30,3 +30,11 @@ jobs:
       - run:
           name: Deploy to Azure
           command: .circleci/deploy-azure.sh
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+        filters:
+          tags:
+            only: /.*/
