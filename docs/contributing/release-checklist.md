@@ -295,7 +295,15 @@ git push origin changelog-$RELEASE_NAME
 Create a new pull request against master with this branch, then push that pretty green button to
 merge it into master.
 
-## 9. Evangelize!
+## 9. Bump the Homebrew forumla
+
+And finally, we can update the [Homebrew formula version](https://github.com/Azure/homebrew-draft/blob/master/Formula/draft.rb#L4). Make sure to update the sha256 value with the value of
+
+```shell
+$ curl https://azuredraft.blob.core.windows.net/draft/draft-$RELEASE_NAME-darwin-amd64.tar.gz.sha256
+```
+
+## 10. Evangelize!
 
 Congratulations! You're done. Go grab yourself a $DRINK_OF_CHOICE. You've earned it.
 
