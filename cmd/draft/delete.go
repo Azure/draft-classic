@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+	"k8s.io/helm/pkg/helm"
 
 	"github.com/Azure/draft/pkg/draft/local"
 )
@@ -84,7 +85,7 @@ func Delete(app string) error {
 	}
 
 	// delete helm release
-	_, err = helmClient.DeleteRelease(app)
+	_, err = helmClient.DeleteRelease(app, helm.DeletePurge(true))
 	if err != nil {
 		return errors.New(grpc.ErrorDesc(err))
 	}
