@@ -9,7 +9,7 @@ packs/github.com/Azure/draft/packs
   |
   |- PACKNAME
   |     |
-  |     |- chart/
+  |     |- charts/
   |     |    |- Chart.yaml
   |     |    |- ...
   |     |- Dockerfile

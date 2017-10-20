@@ -70,14 +70,14 @@ func (c *createCmd) run() error {
 		mfest.Environments[manifest.DefaultEnvironmentName].Name = c.appName
 	}
 
-	chartExists, err := osutil.Exists(filepath.Join(c.dest, "chart"))
+	chartExists, err := osutil.Exists(filepath.Join(c.dest, pack.ChartsDir))
 	if err != nil {
-		return fmt.Errorf("there was an error checking if a chart exists: %v", err)
+		return fmt.Errorf("there was an error checking if charts/ exists: %v", err)
 	}
 	if chartExists {
 		// chart dir already exists, so we just tell the user that we are happily skipping the
 		// process.
-		fmt.Fprintln(c.out, "--> chart directory already exists. Ready to sail!")
+		fmt.Fprintln(c.out, "--> chart directory charts/ already exists. Ready to sail!")
 		return nil
 	}
 

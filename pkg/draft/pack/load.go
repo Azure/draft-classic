@@ -20,7 +20,7 @@ func FromDir(dir string) (*Pack, error) {
 		return nil, err
 	}
 
-	pack.Chart, err = chartutil.LoadDir(filepath.Join(topdir, ChartDir))
+	pack.Chart, err = chartutil.LoadDir(filepath.Join(topdir, ChartsDir))
 	if err != nil {
 		return nil, err
 	}

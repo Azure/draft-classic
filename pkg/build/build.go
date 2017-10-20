@@ -103,7 +103,7 @@ func loadArchive(ctx *Context) (err error) {
 		return err
 	}
 	// find the first directory in chart/ and assume that is the chart we want to deploy.
-	chartDir := filepath.Join(ctx.AppDir, pack.ChartDir)
+	chartDir := filepath.Join(ctx.AppDir, pack.ChartsDir)
 	files, err := ioutil.ReadDir(chartDir)
 	if err != nil {
 		return err
