@@ -37,7 +37,7 @@ $ cat draft.toml
     watch_delay = 2
 ```
 
-See [the Draft User Guide](user-guide.md) for more information and available configuration on the `draft.toml`.
+See [DEP 6](reference/dep-006.md) for more information and available configuration on the `draft.toml`.
 
 A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
 
@@ -127,7 +127,6 @@ Now when we run `draft connect` and open the local URL using `curl` or our brows
 $ curl localhost:55196
 Hello, Draft!
 ```
-
 
 [Installation Guide]: install.md
 [Helm]: https://github.com/kubernetes/helm
