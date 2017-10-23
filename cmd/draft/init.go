@@ -156,6 +156,7 @@ func (i *initCmd) run() error {
 		}
 
 		rawChartConfig := fmt.Sprintf(chartConfigTpl, strconv.FormatBool(draftConfig.Ingress), draftConfig.Basedomain, draftConfig.RegistryURL, draftConfig.RegistryAuth, draftConfig.Image)
+		log.Debugf("raw chart config: %s", rawChartConfig)
 
 		if !i.dryRun {
 			// attempt to purge the old release, but log errors to --debug
