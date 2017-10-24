@@ -60,7 +60,7 @@ func (cn *connectCmd) run() (err error) {
 		return err
 	}
 
-	detail := fmt.Sprintf("localhost:%#v", connection.Tunnel.Local)
+	detail := fmt.Sprintf("http://localhost:%#v", connection.Tunnel.Local)
 	fmt.Fprintln(cn.out, "SUCCESS...Connect to your app on "+detail)
 
 	fmt.Fprintln(cn.out, "Starting log streaming...")
