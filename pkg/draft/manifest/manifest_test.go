@@ -2,7 +2,6 @@ package manifest
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
@@ -21,7 +20,7 @@ func TestGenerateName(t *testing.T) {
 	if name == "" {
 		t.Error("expected name to be generated")
 	}
-	if !strings.Contains(name, "-") {
-		t.Errorf("expected dash in name, got %s", name)
+	if name != "manifest" {
+		t.Errorf("expected name to take the form of the current directory, got %s", name)
 	}
 }

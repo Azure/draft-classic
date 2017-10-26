@@ -4,10 +4,10 @@ This document shows how to deploy a "Hello World" app with Draft. If you haven't
 
 ## App setup
 
-There are multiple example applications included within the [examples directory](../examples). For this walkthrough, we'll be using the [python example application](../examples/python) which uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
+There are multiple example applications included within the [examples directory](../examples). For this walkthrough, we'll be using the [python example application](../examples/example-python) which uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
 
 ```shell
-$ cd examples/python
+$ cd examples/example-python
 ```
 
 ## Draft Create
@@ -30,7 +30,7 @@ The `draft.toml` file contains basic configuration about the application like th
 $ cat draft.toml
 [environments]
   [environments.development]
-    name = "torrid-hummingbird"
+    name = "example-python"
     namespace = "default"
     wait = false
     watch = false
@@ -53,11 +53,11 @@ Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these 
 
 ```shell
 $ draft up
-Draft Up Started: 'torrid-hummingbird'
-torrid-hummingbird: Building Docker Image: SUCCESS ⚓  (73.0991s)
-torrid-hummingbird: Pushing Docker Image: SUCCESS ⚓  (69.1425s)
-torrid-hummingbird: Releasing Application: SUCCESS ⚓  (0.6875s)
-torrid-hummingbird: Build ID: 01BSY5R8J45QHG9D3B17PAXMGN
+Draft Up Started: 'example-python'
+example-python: Building Docker Image: SUCCESS ⚓  (73.0991s)
+example-python: Pushing Docker Image: SUCCESS ⚓  (69.1425s)
+example-python: Releasing Application: SUCCESS ⚓  (0.6875s)
+example-python: Build ID: 01BSY5R8J45QHG9D3B17PAXMGN
 ```
 
 ## Interact with the Deployed App
@@ -109,11 +109,11 @@ When we call `draft up` again, Draft determines that the Helm release already ex
 
 ```shell
 $ draft up
-Draft Up Started: 'torrid-hummingbird'
-torrid-hummingbird: Building Docker Image: SUCCESS ⚓  (13.0127s)
-torrid-hummingbird: Pushing Docker Image: SUCCESS ⚓  (16.0272s)
-torrid-hummingbird: Releasing Application: SUCCESS ⚓  (0.5533s)
-torrid-hummingbird: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
+Draft Up Started: 'example-python'
+example-python: Building Docker Image: SUCCESS ⚓  (13.0127s)
+example-python: Pushing Docker Image: SUCCESS ⚓  (16.0272s)
+example-python: Releasing Application: SUCCESS ⚓  (0.5533s)
+example-python: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
 ```
 
 We should notice a significant faster build time here. This is because Docker is caching unchanged

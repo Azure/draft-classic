@@ -1,6 +1,11 @@
 package manifest
 
-import "github.com/technosophos/moniker"
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/technosophos/moniker"
+)
 
 const (
 	// DefaultEnvironmentName is the name invoked from draft.toml on `draft up` when
@@ -44,8 +49,15 @@ func New() *Manifest {
 	return &m
 }
 
-// generateName generates a random name
+// generateName generates a name based on the current working directory or a random name.
 func generateName() string {
-	namer := moniker.New()
-	return namer.NameSep("-")
+	var name string
+	cwd, err := os.Getwd()
+	if err == nil {
+		name = filepath.Base(cwd)
+	} else {
+		namer := moniker.New()
+		name = namer.NameSep("-")
+	}
+	return name
 }
