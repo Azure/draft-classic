@@ -6,6 +6,12 @@ Get started with Draft in three easy steps:
 2. Boot Minikube and install Draft
 3. Deploy your first application
 
+## Video: Deploying Draft on Azure Container Services
+
+This video will show you how to set up Draft with Azure Container Services and Azure Container Registry.
+
+[![Video: Deploying Draft on Azure Container Services](https://img.youtube.com/vi/-P3NKJ_hSUU/0.jpg)](https://www.youtube.com/watch?v=-P3NKJ_hSUU)
+
 ## Dependencies
 
 In order to get started, you will need to fetch the following:
