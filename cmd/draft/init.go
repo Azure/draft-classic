@@ -51,6 +51,7 @@ imageOverride: %s
 
 type initCmd struct {
 	clientOnly     bool
+	dryRun         bool
 	out            io.Writer
 	in             io.Reader
 	home           draftpath.Home
@@ -83,6 +84,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
 	f.BoolVarP(&i.ingressEnabled, "ingress-enabled", "", false, "configure ingress")
 	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
+	f.BoolVar(&i.dryRun, "dry-run", false, "go through all the steps without actually installing anything. Mostly used along with --debug for debugging purposes.")
 	f.StringVarP(&i.image, "draftd-image", "i", "", "override Draftd image")
 
 	return cmd
@@ -91,8 +93,10 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 // runInit initializes local config and installs Draft to Kubernetes Cluster
 func (i *initCmd) run() error {
 
-	if err := i.setupDraftHome(); err != nil {
-		return err
+	if !i.dryRun {
+		if err := i.setupDraftHome(); err != nil {
+			return err
+		}
 	}
 	fmt.Fprintf(i.out, "$DRAFT_HOME has been configured at %s.\n", draftHome)
 
@@ -152,12 +156,16 @@ func (i *initCmd) run() error {
 		}
 
 		rawChartConfig := fmt.Sprintf(chartConfigTpl, strconv.FormatBool(draftConfig.Ingress), draftConfig.Basedomain, draftConfig.RegistryURL, draftConfig.RegistryAuth, draftConfig.Image)
-		// attempt to purge the old release, but log errors to --debug
-		if err := installer.Uninstall(i.helmClient); err != nil {
-			log.Debugf("error uninstalling Draft: %s", err)
-		}
-		if err := installer.Install(i.helmClient, draftNamespace, rawChartConfig); err != nil {
-			return fmt.Errorf("error installing Draft: %s", err)
+		log.Debugf("raw chart config: %s", rawChartConfig)
+
+		if !i.dryRun {
+			// attempt to purge the old release, but log errors to --debug
+			if err := installer.Uninstall(i.helmClient); err != nil {
+				log.Debugf("error uninstalling Draft: %s", err)
+			}
+			if err := installer.Install(i.helmClient, draftNamespace, rawChartConfig); err != nil {
+				return fmt.Errorf("error installing Draft: %s", err)
+			}
 		}
 		fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
 	} else {
