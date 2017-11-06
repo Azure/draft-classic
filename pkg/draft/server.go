@@ -1,7 +1,6 @@
 package draft
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -25,6 +24,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/Azure/draft/pkg/rpc"
+	//log "github.com/Sirupsen/logrus"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -204,7 +204,11 @@ func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	msgc := make(chan string, 1)
 	errc := make(chan error, 1)
 	go func() {
-		pushopts := types.ImagePushOptions{RegistryAuth: s.cfg.Registry.Auth}
+		pushopts, err := getRegistryAuthAsPushOptions(s.cfg.Registry)
+		if err != nil {
+			errc <- err
+			return
+		}
 		resp, err := s.cfg.Docker.ImagePush(ctx, app.img, pushopts)
 		if err != nil {
 			errc <- err
@@ -350,14 +354,14 @@ func (s *Server) prepareReleaseEnvironment(app *AppContext) error {
 		}
 	}
 
-	regauth, err := configureRegistryAuth(s.cfg.Registry.Auth)
+	newSecret, err := getRegistryAuthAsPullSecret(s.cfg.Registry,
+		metav1.ObjectMeta{
+			Name:      pullSecretName,
+			Namespace: app.req.Namespace,
+		},
+	)
 	if err != nil {
 		return err
-	}
-	// create a new json string with the full dockerauth, including the registry URL.
-	js, err := json.Marshal(DockerAuth{s.cfg.Registry.URL: regauth})
-	if err != nil {
-		return fmt.Errorf("could not json encode docker authentication string: %v", err)
 	}
 
 	// determine if the registry pull secret exists in the desired namespace, create it if not.
@@ -366,25 +370,14 @@ func (s *Server) prepareReleaseEnvironment(app *AppContext) error {
 		if !apiErrors.IsNotFound(err) {
 			return err
 		}
-		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(
-			&v1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      pullSecretName,
-					Namespace: app.req.Namespace,
-				},
-				Type: v1.SecretTypeDockercfg,
-				StringData: map[string]string{
-					".dockercfg": string(js),
-				},
-			},
-		)
+		_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Create(newSecret)
 		if err != nil {
 			return fmt.Errorf("could not create registry pull secret: %v", err)
 		}
 	} else {
 		// the registry pull secret exists, check if it needs to be updated.
-		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
-			secret.StringData[".dockercfg"] = string(js)
+		if data, ok := secret.StringData[".dockercfg"]; ok && data != newSecret.StringData[".dockercfg"] {
+			secret.StringData[".dockercfg"] = newSecret.StringData[".dockercfg"]
 			_, err = s.cfg.Kube.CoreV1().Secrets(app.req.Namespace).Update(secret)
 			if err != nil {
 				return fmt.Errorf("could not update registry pull secret: %v", err)
