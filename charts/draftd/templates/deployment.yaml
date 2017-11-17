@@ -30,8 +30,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: DOCKER_HOST
-          value: tcp://localhost:2375 
         livenessProbe:
           httpGet:
             path: /ping
@@ -40,20 +38,12 @@ spec:
           httpGet:
             path: /ping
             port: {{ .Values.service.http.internalPort }}
-      - name: dind
-        image: docker:17.05.0-ce-dind
-        args:
-        - --insecure-registry=10.0.0.0/24
-        env:
-        - name: DOCKER_DRIVER
-          value: overlay
-        securityContext:
-            privileged: true
         volumeMounts:
-          - name: docker-graph-storage
-            mountPath: /var/lib/docker
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
       volumes:
-      - name: docker-graph-storage
-        emptyDir: {}
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
       nodeSelector:
         beta.kubernetes.io/os: linux
