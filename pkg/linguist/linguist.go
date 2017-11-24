@@ -113,8 +113,8 @@ func initLinguistAttributes(dir string) error {
 			path := strings.Trim(words[0], string(filepath.Separator))
 			attribute := words[1]
 			if strings.HasPrefix(attribute, "linguist-documentation") || strings.HasPrefix(attribute, "linguist-vendored") || strings.HasPrefix(attribute, "linguist-generated") {
-				if strings.HasSuffix(strings.ToLower(attribute), "false") {
-					except = append(except, path)
+				if !strings.HasSuffix(strings.ToLower(attribute), "false") {
+					ignore = append(except, path)
 				}
 			} else if strings.HasPrefix(attribute, "linguist-language") {
 				attr := strings.Split(attribute, "=")
