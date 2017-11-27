@@ -114,5 +114,12 @@ Draft will read your local kube configuration and notice that it is pointing at 
 
 Once you've completed the above steps, you're ready to climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
 
+## Advanced Setup
+
+For more advanced users, [advanced setup documentation](install-advanced.md) is also provided for
+
+- running Draftd in a Kubernetes cluster with RBAC enabled
+- running Tiller/Draftd in a namespace other than kube-system
+
 [Getting Started]: getting-started.md
 [minikube]: https://github.com/kubernetes/minikube
