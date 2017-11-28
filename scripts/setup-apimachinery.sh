@@ -24,11 +24,12 @@ rm -rf ./vendor/k8s.io/{kube-aggregator,apiserver,apimachinery,client-go}
 
 cp -r ./vendor/k8s.io/kubernetes/staging/src/k8s.io/{kube-aggregator,apiserver,apimachinery,client-go} ./vendor/k8s.io
 
+# glide strips git information, which we need
 rm -rf ./vendor/github.com/generaltso/linguist
 cd vendor/github.com/generaltso/
 git clone https://github.com/generaltso/linguist
 cd linguist/
-git checkout 9202505feb6930ac6945b5005715d2b03853ac9c
+git checkout ae6cce277081f0ad2feb886483ec3dd43573e0e6
 git submodule update --init
 go generate
 go generate ./data

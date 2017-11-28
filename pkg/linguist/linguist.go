@@ -1,8 +1,9 @@
 package linguist
 
 import (
+	"bufio"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -13,7 +14,10 @@ import (
 	"github.com/generaltso/linguist"
 )
 
-var isIgnored func(string) bool
+var (
+	isIgnored                 func(string) bool
+	isDetectedInGitAttributes func(filename string) string
+)
 
 // used for displaying results
 type (
@@ -41,67 +45,112 @@ func (s sortableResult) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func initGitIgnore(dir string) error {
-	gitDirExists, err := osutil.Exists(filepath.Join(dir, ".git"))
-	if err != nil {
-		return err
-	}
+func initLinguistAttributes(dir string) error {
+	ignore := []string{}
+	except := []string{}
+	detected := make(map[string]string)
+
 	gitignoreExists, err := osutil.Exists(filepath.Join(dir, ".gitignore"))
 	if err != nil {
 		return err
 	}
-	if gitDirExists && gitignoreExists {
-		log.Debugln("found .git directory and .gitignore")
+	if gitignoreExists {
+		log.Debugln("found .gitignore")
 
 		f, err := os.Open(filepath.Join(dir, ".gitignore"))
 		if err != nil {
 			return err
 		}
+		defer f.Close()
 
-		pathlist, err := ioutil.ReadAll(f)
-		if err != nil {
-			return err
-		}
-
-		ignore := []string{}
-		except := []string{}
-		for _, path := range strings.Split(string(pathlist), "\n") {
-			path = strings.TrimSpace(path)
+		ignoreScanner := bufio.NewScanner(f)
+		for ignoreScanner.Scan() {
+			var isExcept bool
+			path := strings.TrimSpace(ignoreScanner.Text())
+			// if it's whitespace or a comment
 			if len(path) == 0 || string(path[0]) == "#" {
 				continue
 			}
-			isExcept := false
 			if string(path[0]) == "!" {
 				isExcept = true
 				path = path[1:]
 			}
-			fields := strings.Split(path, " ")
-			p := fields[len(fields)-1:][0]
-			p = strings.Trim(p, string(filepath.Separator))
+			p := strings.Trim(path, string(filepath.Separator))
 			if isExcept {
 				except = append(except, p)
 			} else {
 				ignore = append(ignore, p)
 			}
 		}
-		isIgnored = func(filename string) bool {
-			for _, p := range ignore {
-				if m, _ := filepath.Match(p, filename); m {
-					for _, e := range except {
-						if m, _ := filepath.Match(e, filename); m {
-							return false
-						}
-					}
-					return true
-				}
+		if err := ignoreScanner.Err(); err != nil {
+			return fmt.Errorf("error reading .gitignore: %v", err)
+		}
+	}
+
+	gitAttributesExists, err := osutil.Exists(filepath.Join(dir, ".gitattributes"))
+	if err != nil {
+		return err
+	}
+	if gitAttributesExists {
+		log.Debugln("found .gitattributes")
+
+		f, err := os.Open(filepath.Join(dir, ".gitattributes"))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		attributeScanner := bufio.NewScanner(f)
+		var lineNumber int
+		for attributeScanner.Scan() {
+			lineNumber++
+			line := strings.TrimSpace(attributeScanner.Text())
+			words := strings.Fields(line)
+			if len(words) != 2 {
+				log.Printf("invalid line in .gitattributes at L%d: '%s'\n", lineNumber, line)
+				continue
 			}
-			return false
+			path := strings.Trim(words[0], string(filepath.Separator))
+			attribute := words[1]
+			if strings.HasPrefix(attribute, "linguist-documentation") || strings.HasPrefix(attribute, "linguist-vendored") || strings.HasPrefix(attribute, "linguist-generated") {
+				if !strings.HasSuffix(strings.ToLower(attribute), "false") {
+					ignore = append(except, path)
+				}
+			} else if strings.HasPrefix(attribute, "linguist-language") {
+				attr := strings.Split(attribute, "=")
+				if len(attr) != 2 {
+					log.Printf("invalid line in .gitattributes at L%d: '%s'\n", lineNumber, line)
+					continue
+				}
+				language := attr[1]
+				detected[path] = language
+			}
 		}
-	} else {
-		log.Debugln("no .gitignore found")
-		isIgnored = func(filename string) bool {
-			return false
+		if err := attributeScanner.Err(); err != nil {
+			return fmt.Errorf("error reading .gitattributes: %v", err)
 		}
+	}
+
+	isIgnored = func(filename string) bool {
+		for _, p := range ignore {
+			if m, _ := filepath.Match(p, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+				for _, e := range except {
+					if m, _ := filepath.Match(e, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+						return false
+					}
+				}
+				return true
+			}
+		}
+		return false
+	}
+	isDetectedInGitAttributes = func(filename string) string {
+		for p, lang := range detected {
+			if m, _ := filepath.Match(p, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+				return lang
+			}
+		}
+		return ""
 	}
 	return nil
 }
@@ -132,7 +181,7 @@ func ProcessDir(dirname string) ([]*Language, error) {
 		langs     = make(map[string]int)
 		totalSize int
 	)
-	if err := initGitIgnore(dirname); err != nil {
+	if err := initLinguistAttributes(dirname); err != nil {
 		return nil, err
 	}
 	exists, err := osutil.Exists(dirname)
@@ -168,8 +217,15 @@ func ProcessDir(dirname string) ([]*Language, error) {
 				return nil
 			}
 
-			byName := linguist.LanguageByFilename(path)
-			if byName != "" {
+			byGitAttr := isDetectedInGitAttributes(path)
+			if byGitAttr != "" {
+				log.Debugln(path, "got result by .gitattributes: ", byGitAttr)
+				langs[byGitAttr] += size
+				totalSize += size
+				return nil
+			}
+
+			if byName := linguist.LanguageByFilename(path); byName != "" {
 				log.Debugln(path, "got result by name: ", byName)
 				langs[byName] += size
 				totalSize += size
