@@ -5,8 +5,8 @@ basedomain: example.com
 replicaCount: 1
 image:
   repository: microsoft/draft
-  tag: canary
-  pullPolicy: Always
+  tag: v0.9.0-rc1
+  pullPolicy: IfNotPresent
 debug: false
 service:
   http:
