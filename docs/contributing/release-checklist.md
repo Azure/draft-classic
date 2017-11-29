@@ -88,7 +88,7 @@ release candidate which we are releasing (more on that in step 5), along with a 
 fields.
 
 ```
-diff --git a/chart/draftd/Chart.yaml b/chart/draftd/Chart.yaml
+diff --git a/charts/draftd/Chart.yaml b/chart/draftd/Chart.yaml
 index 954fa08..e3cf2d4 100644
 --- a/chart/draftd/Chart.yaml
 +++ b/chart/draftd/Chart.yaml
@@ -98,7 +98,7 @@ index 954fa08..e3cf2d4 100644
 -version: canary
 +version: v0.2.0-rc1
  apiVersion: v1
-diff --git a/chart/draftd/values.yaml b/chart/draftd/values.yaml
+diff --git a/charts/draftd/values.yaml b/chart/draftd/values.yaml
 index 3de6092..4c6314d 100644
 --- a/chart/draftd/values.yaml
 +++ b/chart/draftd/values.yaml
