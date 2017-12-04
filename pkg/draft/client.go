@@ -1,9 +1,13 @@
 package draft
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"sync"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/rpc"
@@ -18,6 +22,8 @@ type ClientConfig struct {
 	ServerHost string
 	Stdout     io.Writer
 	Stderr     io.Writer
+	UseTLS     bool
+	TLSConfig  *tls.Config
 }
 
 type Client struct {
@@ -29,6 +35,13 @@ type Client struct {
 // NewClient takes ClientConfig and returns a Client
 func NewClient(cfg *ClientConfig) *Client {
 	opts := []rpc.ClientOpt{rpc.WithServerAddr(cfg.ServerAddr)}
+	switch {
+	case cfg.UseTLS:
+		creds := grpc.WithTransportCredentials(credentials.NewTLS(cfg.TLSConfig))
+		opts = append(opts, rpc.WithGrpcDialOpt(creds))
+	default:
+		opts = append(opts, rpc.WithGrpcDialOpt(grpc.WithInsecure()))
+	}
 	return &Client{
 		cfg: cfg,
 		rpc: rpc.NewClient(opts...),

@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/tlsutil"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -41,6 +42,16 @@ var (
 	draftHost string
 	// draftNamespace depicts which namespace the Draftd server is running in. This is used when Draftd was installed in a different namespace than kube-system.
 	draftNamespace string
+	// tls flags, options, and defaults
+	tlsCaCertFile string // path to TLS CA certificate file
+	tlsCertFile   string // path to TLS certificate file
+	tlsKeyFile    string // path to TLS key file
+	tlsVerify     bool   // enable TLS and verify remote certificates
+	tlsEnable     bool   // enable TLS
+
+	tlsCaCertDefault = "$DRAFT_HOME/ca.pem"
+	tlsCertDefault   = "$DRAFT_HOME/cert.pem"
+	tlsKeyDefault    = "$DRAFT_HOME/key.pem"
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -56,6 +67,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 			if flagDebug {
 				log.SetLevel(log.DebugLevel)
 			}
+			os.Setenv(homeEnvVar, draftHome)
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			teardown()
@@ -72,8 +84,8 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 		newCreateCmd(out),
 		newHomeCmd(out),
 		newInitCmd(out, in),
-		newUpCmd(out),
-		newVersionCmd(out),
+		addFlagsTLS(newUpCmd(out)),
+		addFlagsTLS(newVersionCmd(out)),
 		newPluginCmd(out),
 		newConnectCmd(out),
 		newDeleteCmd(out),
@@ -116,14 +128,43 @@ func teardown() {
 }
 
 func ensureDraftClient(client *draft.Client) *draft.Client {
-	if client == nil {
-		return draft.NewClient(&draft.ClientConfig{
-			ServerAddr: draftHost,
-			Stdout:     os.Stdout,
-			Stderr:     os.Stderr,
-		})
+	if client != nil {
+		return client
 	}
-	return client
+	return newClient()
+}
+
+func newClient() *draft.Client {
+	cfg := &draft.ClientConfig{ServerAddr: draftHost, Stdout: os.Stdout, Stderr: os.Stderr}
+	if tlsVerify || tlsEnable {
+		if tlsCaCertFile == tlsCaCertDefault {
+			tlsCaCertFile = os.ExpandEnv(tlsCaCertDefault)
+		}
+		if tlsCertFile == tlsCertDefault {
+			tlsCertFile = os.ExpandEnv(tlsCertDefault)
+		}
+		if tlsKeyFile == tlsKeyDefault {
+			tlsKeyFile = os.ExpandEnv(tlsKeyDefault)
+		}
+		debug("Key=%q, Cert=%q, CA=%q\n", tlsKeyFile, tlsCertFile, tlsCaCertFile)
+		tlsopts := tlsutil.Options{
+			InsecureSkipVerify: true,
+			CertFile:           tlsCertFile,
+			KeyFile:            tlsKeyFile,
+		}
+		if tlsVerify {
+			tlsopts.InsecureSkipVerify = false
+			tlsopts.CaCertFile = tlsCaCertFile
+		}
+		tlscfg, err := tlsutil.ClientConfig(tlsopts)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+		}
+		cfg.UseTLS = true
+		cfg.TLSConfig = tlscfg
+	}
+	return draft.NewClient(cfg)
 }
 
 func defaultDraftHost() string {
@@ -188,4 +229,16 @@ func validateArgs(args, expectedArgs []string) error {
 		return fmt.Errorf("This command needs %v argument(s): %v", len(expectedArgs), expectedArgs)
 	}
 	return nil
+}
+
+// addFlagsTLS adds the flags for supporting client side TLS to the
+// helm command (only those that invoke communicate to Draftd.)
+func addFlagsTLS(cmd *cobra.Command) *cobra.Command {
+	// add flags
+	cmd.Flags().StringVar(&tlsCaCertFile, "tls-ca-cert", tlsCaCertDefault, "path to TLS CA certificate file")
+	cmd.Flags().StringVar(&tlsCertFile, "tls-cert", tlsCertDefault, "path to TLS certificate file")
+	cmd.Flags().StringVar(&tlsKeyFile, "tls-key", tlsKeyDefault, "path to TLS key file")
+	cmd.Flags().BoolVar(&tlsVerify, "tls-verify", false, "enable TLS for request and verify remote")
+	cmd.Flags().BoolVar(&tlsEnable, "tls", false, "enable TLS for request")
+	return cmd
 }

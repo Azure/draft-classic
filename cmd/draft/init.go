@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"syscall"
 
@@ -37,15 +36,6 @@ $DRAFT_HOME, but not attempt to connect to a remote cluster and install the Draf
 deployment.
 
 To dump information about the Draft chart, combine the '--dry-run' and '--debug' flags.
-`
-	chartConfigTpl = `
-ingress:
-  enabled: %s
-  basedomain: %s
-registry:
-  url: %s
-  authtoken: %s
-imageOverride: %s
 `
 )
 
@@ -86,8 +76,39 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
 	f.BoolVar(&i.dryRun, "dry-run", false, "go through all the steps without actually installing anything. Mostly used along with --debug for debugging purposes.")
 	f.StringVarP(&i.image, "draftd-image", "i", "", "override Draftd image")
+	// flags for bootstrapping draftd with tls
+	f.BoolVar(&tlsEnable, "draftd-tls", false, "install Draftd with TLS enabled")
+	f.BoolVar(&tlsVerify, "draftd-tls-verify", false, "install Draftd with TLS enabled and to verify remote certificates")
+	f.StringVar(&tlsKeyFile, "draftd-tls-key", "", "path to TLS key file to install with Draftd")
+	f.StringVar(&tlsCertFile, "draftd-tls-cert", "", "path to TLS certificate file to install with Draftd")
+	f.StringVar(&tlsCaCertFile, "tls-ca-cert", "", "path to CA root certificate")
 
 	return cmd
+}
+
+// tlsOptions sanitizes the tls flags as well as checks for the existence of
+// required tls files indicate by those flags, if any.
+func (i *initCmd) tlsOptions(cfg *installerConfig.DraftConfig) error {
+	cfg.EnableTLS = tlsEnable || tlsVerify
+	cfg.VerifyTLS = tlsVerify
+	if cfg.EnableTLS {
+		missing := func(file string) bool {
+			_, err := os.Stat(file)
+			return os.IsNotExist(err)
+		}
+		if cfg.TLSKeyFile = tlsKeyFile; cfg.TLSKeyFile == "" || missing(cfg.TLSKeyFile) {
+			return errors.New("missing required TLS key file")
+		}
+		if cfg.TLSCertFile = tlsCertFile; cfg.TLSCertFile == "" || missing(cfg.TLSCertFile) {
+			return errors.New("missing required TLS certificate file")
+		}
+		if cfg.VerifyTLS {
+			if cfg.TLSCaCertFile = tlsCaCertFile; cfg.TLSCaCertFile == "" || missing(cfg.TLSCaCertFile) {
+				return errors.New("missing required TLS CA file")
+			}
+		}
+	}
+	return nil
 }
 
 // runInit initializes local config and installs Draft to Kubernetes Cluster
@@ -155,15 +176,18 @@ func (i *initCmd) run() error {
 
 		}
 
-		rawChartConfig := fmt.Sprintf(chartConfigTpl, strconv.FormatBool(draftConfig.Ingress), draftConfig.Basedomain, draftConfig.RegistryURL, draftConfig.RegistryAuth, draftConfig.Image)
-		log.Debugf("raw chart config: %s", rawChartConfig)
+		if err := i.tlsOptions(draftConfig); err != nil {
+			return err
+		}
+
+		log.Debugf("raw chart config: %s", draftConfig)
 
 		if !i.dryRun {
 			// attempt to purge the old release, but log errors to --debug
 			if err := installer.Uninstall(i.helmClient); err != nil {
 				log.Debugf("error uninstalling Draft: %s", err)
 			}
-			if err := installer.Install(i.helmClient, draftNamespace, rawChartConfig); err != nil {
+			if err := installer.Install(i.helmClient, draftNamespace, draftConfig); err != nil {
 				return fmt.Errorf("error installing Draft: %s", err)
 			}
 		}
