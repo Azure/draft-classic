@@ -1,6 +1,7 @@
 package draft
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +18,7 @@ import (
 	"github.com/docker/docker/pkg/term"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -36,6 +38,8 @@ type ServerConfig struct {
 	Docker         *docker.Client
 	Helm           helm.Interface
 	Kube           k8s.Interface
+	UseTLS         bool
+	TLSConfig      *tls.Config
 }
 
 // Server is a draft Server.
@@ -67,8 +71,15 @@ func (s *Server) Serve(ctx context.Context) error {
 		return err
 	}
 
+	var opts []rpc.ServerOpt
+	if s.cfg.UseTLS {
+		opts = append(opts, rpc.WithGrpcServerOpt(
+			grpc.Creds(credentials.NewTLS(s.cfg.TLSConfig)),
+		))
+	}
+
 	errc := make(chan error, 1)
-	s.srv = rpc.NewServer()
+	s.srv = rpc.NewServer(opts...)
 	wg.Add(1)
 	go func() {
 		errc <- s.srv.Serve(lis, s)

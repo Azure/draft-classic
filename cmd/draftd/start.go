@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/tlsutil"
 
 	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/kube"
@@ -71,6 +72,12 @@ func newStartCmd(out io.Writer) *cobra.Command {
 	f.StringVar(&sc.tillerURI, "tiller-uri", "tiller-deploy:44134", "the URI used to connect to tiller")
 	f.BoolVarP(&sc.local, "local", "", false, "run draftd locally (uses local kubecfg)")
 	f.BoolVarP(&sc.ingressEnabled, "ingress-enabled", "", false, "configure ingress")
+	// add TLS flags
+	f.BoolVar(&tlsEnable, "tls", tlsEnableEnvVarDefault(), "enable TLS")
+	f.BoolVar(&tlsVerify, "tls-verify", tlsVerifyEnvVarDefault(), "enable TLS and verify remote certificate")
+	f.StringVar(&keyFile, "tls-key", tlsDefaultsFromEnv("tls-key"), "path to TLS private key file")
+	f.StringVar(&certFile, "tls-cert", tlsDefaultsFromEnv("tls-cert"), "path to TLS certificate file")
+	f.StringVar(&caCertFile, "tls-ca-cert", tlsDefaultsFromEnv("tls-ca-cert"), "trust certificates signed by this CA")
 
 	return cmd
 }
@@ -104,9 +111,18 @@ func (c *startCmd) run() (err error) {
 			return fmt.Errorf("failed to create in-cluster kubernetes client: %v", err)
 		}
 	}
+	if tlsEnable || tlsVerify {
+		tlscfg, err := tlsutil.ServerConfig(tlsOptions())
+		if err != nil {
+			return fmt.Errorf("failed to create server TLS configuration: %v", err)
+		}
+		cfg.UseTLS = true
+		cfg.TLSConfig = tlscfg
+	}
 
 	cfg.Helm = helm.NewClient(helm.Host(c.tillerURI))
-	log.Printf("server is now listening at %s", c.listenAddr)
+
+	log.Printf("server is now listening at %s (tls=%t)", c.listenAddr, tlsEnable || tlsVerify)
 
 	return draft.NewServer(cfg).Serve(context.Background())
 }

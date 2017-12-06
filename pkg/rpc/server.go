@@ -30,6 +30,7 @@ type serverImpl struct {
 
 func newServerImpl(opts ...ServerOpt) *serverImpl {
 	var s serverImpl
+	opts = append(DefaultServerOpts(), opts...)
 	for _, opt := range opts {
 		opt(&s.opts)
 	}
@@ -38,13 +39,9 @@ func newServerImpl(opts ...ServerOpt) *serverImpl {
 
 // Server implements rpc.Server.Serve
 func (s *serverImpl) Serve(lis net.Listener, h Handler) error {
-	var opts = []grpc.ServerOption{
-		grpc.MaxMsgSize(maxMsgSize),
-	}
-	// TODO: If TLS load keys and such
 	s.h = h
 	s.lis = lis
-	s.srv = grpc.NewServer(opts...)
+	s.srv = grpc.NewServer(s.opts.grpcOpts...)
 	RegisterDraftServer(s.srv, s)
 	return s.srv.Serve(s.lis)
 }

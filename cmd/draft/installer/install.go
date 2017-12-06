@@ -10,6 +10,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
+	draftconfig "github.com/Azure/draft/cmd/draft/installer/config"
 	"github.com/Azure/draft/pkg/version"
 )
 
@@ -54,6 +55,12 @@ registry:
   #
   # $ echo '{"registrytoken":"9cbaf023786cd7"}' | base64 -w 0
   authtoken: e30K
+tls:
+  enable: false
+  verify: false
+  key: ""
+  cert: ""
+  cacert: ""
 `
 
 const draftIgnore = `# Patterns to ignore when building packages.
@@ -104,6 +111,8 @@ spec:
         - --registry-auth={{ .Values.registry.authtoken }}
         - --basedomain={{ .Values.ingress.basedomain }}
         - --ingress-enabled={{.Values.ingress.enabled}}
+        - --tls={{.Values.tls.enable}}
+        - --tls-verify={{.Values.tls.verify}}
         {{- if .Values.debug }}
         - --debug
         {{- end }}
@@ -114,6 +123,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: DRAFT_TLS_VERIFY
+          value: {{ if .Values.tls.verify }}"1"{{ else }}"0"{{ end }}
+        - name: DRAFT_TLS_ENABLE
+          value: {{ if .Values.tls.enable }}"1"{{ else }}"0"{{ end }}
+        - name: DRAFT_TLS_CERTS
+          value: "/etc/certs"
         livenessProbe:
           httpGet:
             path: /ping
@@ -125,10 +140,20 @@ spec:
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: docker-socket
+        {{- if (or .Values.tls.enable .Values.tls.verify) }}
+        - mountPath: "/etc/certs"
+          name: draftd-certs
+          readOnly: true
+        {{- end }}
       volumes:
       - name: docker-socket
         hostPath:
           path: /var/run/docker.sock
+      {{- if (or .Values.tls.enable .Values.tls.verify) }}
+      - name: draftd-certs
+        secret:
+          secretName: draftd-secret
+      {{- end }}
       nodeSelector:
         beta.kubernetes.io/os: linux
 `
@@ -144,6 +169,17 @@ spec:
       targetPort: {{ .Values.service.http.internalPort }}
   selector:
     app: {{ .Chart.Name }}
+`
+
+const draftSecret = `apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  tls.key: {{ .Values.tls.key }}
+  tls.crt: {{ .Values.tls.cert }}
+  ca.crt: {{ .Values.tls.cacert }}
+metadata:
+  name: draftd-secret
 `
 
 const draftNotes = `Now you can deploy an app using Draft!
@@ -197,7 +233,15 @@ var DefaultChartFiles = []*chartutil.BufferedFile{
 // Install uses the helm client to install Draftd with the given config.
 //
 // Returns an error if the command failed.
-func Install(client *helm.Client, namespace string, rawChartConfig string) error {
+func Install(client *helm.Client, namespace string, config *draftconfig.DraftConfig) error {
+	if config.WithTLS() {
+		DefaultChartFiles = append(DefaultChartFiles, &chartutil.BufferedFile{
+			// TODO: Add chartutil.SecretName to k8s.io/helm/pkg/chartutil/create.go
+			Name: path.Join(chartutil.TemplatesDir, "secret.yaml"),
+			Data: []byte(draftSecret),
+		})
+	}
+
 	chart, err := chartutil.LoadFiles(DefaultChartFiles)
 	if err != nil {
 		return err
@@ -206,7 +250,8 @@ func Install(client *helm.Client, namespace string, rawChartConfig string) error
 		chart,
 		namespace,
 		helm.ReleaseName(ReleaseName),
-		helm.ValueOverrides([]byte(rawChartConfig)))
+		helm.ValueOverrides([]byte(config.String())),
+	)
 	return prettyError(err)
 }
 

@@ -15,6 +15,7 @@ type clientImpl struct {
 
 func newClientImpl(opts ...ClientOpt) Client {
 	var c clientImpl
+	opts = append(DefaultClientOpts(), opts...)
 	for _, opt := range opts {
 		opt(&c.opts)
 	}
@@ -164,8 +165,8 @@ func up_stream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, rec
 }
 
 // connect connects the DraftClient to the DraftServer.
-func connect(c *clientImpl, opts ...grpc.DialOption) (conn *grpc.ClientConn, err error) {
-	if conn, err = grpc.Dial(c.opts.addr, grpc.WithInsecure()); err != nil {
+func connect(c *clientImpl) (conn *grpc.ClientConn, err error) {
+	if conn, err = grpc.Dial(c.opts.addr, c.opts.dialOpts...); err != nil {
 		return nil, fmt.Errorf("failed to dial %q: %v", c.opts.addr, err)
 	}
 	return conn, nil
