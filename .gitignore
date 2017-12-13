@@ -6,6 +6,6 @@ coverage.txt
 *.exe
 *.tar.gz
 examples/**/Dockerfile
-examples/**/chart/
+examples/**/charts/
 examples/**/draft.toml
 examples/**/.draftignore
