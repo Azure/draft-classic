@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.9.0
+
+### Client
+
+* ported [linguist's .gitattributes support](https://github.com/Azure/draft/blob/v0.9.0/docs/troubleshooting.md#my-repository-is-detected-as-the-wrong-language)
+* `draft create` now bootstraps with a `charts/` directory, as opposed to `chart/`
+* application releases are purged from the Kubernetes cluster on `draft delete`
+* added `--dry-run` flag to `draft init`
+* the name of the directory is now used as the application name for `draft create`
+* added a [Swift](https://swift.org/) pack
+* ASP.NET pack was bumped to 2.0
+
+### Server
+
+* the docker-in-docker container was removed in favour of mounting the host's docker socket
+
+### Documentation
+
+* design documentation has been re-organized into [Draft Enhancement Proposals](https://github.com/Azure/draft/blob/v0.9.0/docs/reference/index.md), aka DEPs
+
 ## v0.8.0
 
 ### Client
