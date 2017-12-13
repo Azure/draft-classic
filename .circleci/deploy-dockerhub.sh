@@ -20,7 +20,8 @@ if [[ -n "${CIRCLE_TAG:-}" ]]; then
 elif [[ "${CIRCLE_BRANCH:-}" == "master" ]]; then
   VERSION="canary"
 else
-  exit 1
+  echo "skipping because this is neither a push to master or a pull request."
+  exit
 fi
 
 echo "Installing Docker client"
