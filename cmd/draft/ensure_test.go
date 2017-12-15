@@ -105,7 +105,7 @@ func TestEnsurePluginExisting(t *testing.T) {
 
 	builtinPlugin := &plugin.Builtin{Name: "something", Version: "1.0.0"}
 	existingPlugins := []*pluginbase.Plugin{
-		&pluginbase.Plugin{Metadata: &pluginbase.Metadata{
+		{Metadata: &pluginbase.Metadata{
 			Name: "something", Version: "1.0.0"},
 		},
 	}

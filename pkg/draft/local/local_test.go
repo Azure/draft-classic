@@ -25,8 +25,8 @@ func TestDeployedApplication(t *testing.T) {
 
 func TestGetContainerPort(t *testing.T) {
 	containersTest1 := []v1.Container{
-		v1.Container{Name: "anothercontainer", Ports: []v1.ContainerPort{v1.ContainerPort{ContainerPort: 3000}}},
-		v1.Container{Name: "mycontainer", Ports: []v1.ContainerPort{v1.ContainerPort{ContainerPort: 4000}}},
+		{Name: "anothercontainer", Ports: []v1.ContainerPort{{ContainerPort: 3000}}},
+		{Name: "mycontainer", Ports: []v1.ContainerPort{{ContainerPort: 4000}}},
 	}
 
 	testCases := []struct {
