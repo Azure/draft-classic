@@ -12,7 +12,7 @@ Draft makes it easy to build applications that run on Kubernetes.  Draft targets
 
 Using Draft is as simple as:
 
-1. `draft create` to containerize your application based on Draft [packs](docs/packs.md)
+1. `draft create` to containerize your application based on Draft [packs](docs/reference/dep-003.md)
 2. `draft up` to deploy your application to a Kubernetes dev sandbox, accessible via a public URL
 3. Use a local editor to modify the application, with changes deployed to Kubernetes in seconds
 
