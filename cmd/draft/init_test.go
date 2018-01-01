@@ -31,6 +31,7 @@ func TestInitClientOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if len(plugins) != 1 {
 		t.Errorf("Expected 1 plugin, got %v", len(plugins))
 	}
