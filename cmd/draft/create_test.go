@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("create %s", tc.src), func(t *testing.T) {
-			pDir, teardown := tempDir(t)
+			pDir, teardown := tempDir(t, "draft-create")
 			defer teardown()
 
 			destcompare := filepath.Join(generatedpath, path.Base(tc.src))
@@ -62,8 +62,8 @@ func TestCreate(t *testing.T) {
 }
 
 // tempDir create and clean a temporary directory to work in our tests
-func tempDir(t *testing.T) (string, func()) {
-	path, err := ioutil.TempDir("", "draft-create")
+func tempDir(t *testing.T, description string) (string, func()) {
+	path, err := ioutil.TempDir("", description)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

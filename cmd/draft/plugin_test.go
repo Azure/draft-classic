@@ -50,8 +50,10 @@ func TestLoadPlugins(t *testing.T) {
 	// Set draft home to point to testdata
 	old := draftHome
 	draftHome = "testdata/drafthome"
+	resetEnvVars := unsetEnvVars()
 	defer func() {
 		draftHome = old
+		resetEnvVars()
 	}()
 	ph := draftpath.Home(homePath())
 
@@ -146,6 +148,8 @@ func TestSetupEnv(t *testing.T) {
 		flagDebug = false
 	}()
 
+	resetEnvVars := unsetEnvVars()
+	defer resetEnvVars()
 	setupPluginEnv(name, base, plugdirs, ph)
 	for _, tt := range []struct {
 		name   string
@@ -161,6 +165,28 @@ func TestSetupEnv(t *testing.T) {
 	} {
 		if got := os.Getenv(tt.name); got != tt.expect {
 			t.Errorf("Expected $%s=%q, got %q", tt.name, tt.expect, got)
+		}
+	}
+}
+
+func unsetEnvVars() func() {
+	envs := []string{"DRAFT_PLUGIN_NAME", "DRAFT_PLUGIN_DIR", "DRAFT_PLUGIN", "DRAFT_DEBUG", "DRAFT_HOME", "DRAFT_PACKS_HOME", "DRAFT_HOST"}
+
+	resetVals := map[string]string{}
+
+	for _, env := range envs {
+		val := os.Getenv(env)
+		resetVals[env] = val
+		if err := os.Unsetenv(env); err != nil {
+			debug("error unsetting env %v: %v", env, err)
+		}
+	}
+
+	return func() {
+		for env, val := range resetVals {
+			if err := os.Setenv(env, val); err != nil {
+				debug("error setting env variable %s to %s: %s", env, val, err)
+			}
 		}
 	}
 }

@@ -1,8 +1,6 @@
 package plugin
 
-import (
-	"github.com/Azure/draft/pkg/version"
-)
+import "github.com/Azure/draft/pkg/version"
 
 // Builtin contains metadata to the built-in plugins. Used to install/uninstall a plugin.
 type Builtin struct {

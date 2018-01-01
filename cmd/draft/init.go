@@ -18,6 +18,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
+	pluginbase "k8s.io/helm/pkg/plugin"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
@@ -269,46 +270,59 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin) error {
 //
 // If the plugin does not exist, this function will add it.
 func (i *initCmd) ensurePlugins() error {
+	existingPlugins, err := findPlugins(pluginDirPath(i.home))
+	if err != nil {
+		return err
+	}
+
 	for _, builtin := range plugin.Builtins() {
-		if err := ensurePlugin(i.out, i.in, builtin); err != nil {
+		if err := i.ensurePlugin(builtin, existingPlugins); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func ensurePlugin(out io.Writer, in io.Reader, builtin *plugin.Builtin) error {
-	var (
-		installArgs = []string{
-			os.Args[0],
-			"plugin",
-			"install",
-			builtin.URL,
-			"--version",
-			builtin.Version,
-		}
-		removeArgs = []string{
-			os.Args[0],
-			"plugin",
-			"remove",
-			builtin.Name,
-		}
-	)
+func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*pluginbase.Plugin) error {
 
-	fmt.Fprintf(out, "Adding plugin %s...\n", builtin.URL)
-	os.Args = installArgs
-	cmd := newRootCmd(out, in)
-	err := cmd.Execute()
-	if err == plugin.ErrExists {
-		// remove plugin, then re-install
-		os.Args = removeArgs
-		if removeErr := cmd.Execute(); removeErr != nil {
-			return removeErr
+	for _, pl := range existingPlugins {
+		if builtin.Name == pl.Metadata.Name {
+			if builtin.Version == pl.Metadata.Version {
+				return nil
+			} else {
+				debug("Currently have %v version %v. Removing to install %v",
+					pl.Metadata.Name, pl.Metadata.Version, builtin.Version)
+
+				if err := removePlugin(pl); err != nil {
+					return err
+				}
+
+				debug("Successfully removed %v version %v",
+					pl.Metadata.Name, pl.Metadata.Version)
+			}
 		}
-		os.Args = installArgs
-		return cmd.Execute()
 	}
-	return err
+
+	installArgs := []string{
+		os.Args[0],
+		"plugin",
+		"install",
+		builtin.URL,
+		"--version",
+		builtin.Version,
+		"--home",
+		string(i.home),
+	}
+
+	os.Args = installArgs
+	cmd := newRootCmd(i.out, i.in)
+	if err := cmd.Execute(); err != nil {
+		return err
+	}
+
+	debug("Successfully installed %v %v from %v",
+		builtin.Name, builtin.Version, builtin.URL)
+	return nil
 }
 
 func (i *initCmd) setupDraftHome() error {
