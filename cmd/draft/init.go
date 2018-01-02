@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -271,6 +270,7 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin) error {
 //
 // If the plugin does not exist, this function will add it.
 func (i *initCmd) ensurePlugins() error {
+
 	existingPlugins, err := findPlugins(pluginDirPath(i.home))
 	if err != nil {
 		return err
@@ -300,28 +300,38 @@ func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugi
 					return err
 				}
 
-				debug("Successfully removed %v version %v",
+				debug("Successfully removed %v %v",
 					pl.Metadata.Name, pl.Metadata.Version)
 			}
 		}
 	}
 
 	installArgs := []string{
-		os.Args[0],
-		"plugin",
-		"install",
 		builtin.URL,
+	}
+
+	installFlags := []string{
 		"--version",
 		builtin.Version,
 		"--home",
 		string(i.home),
+		fmt.Sprintf("--debug=%v", flagDebug),
 	}
 
-	os.Args = installArgs
-	out := bytes.NewBuffer(nil)
-	cmd := newRootCmd(out, i.in)
-	debug(out.String())
-	if err := cmd.Execute(); err != nil {
+	plugInstallCmd, _, err := newRootCmd(i.out, i.in).Find([]string{"plugin", "install"})
+	if err != nil {
+		return err
+	}
+
+	if err := plugInstallCmd.ParseFlags(installFlags); err != nil {
+		return err
+	}
+
+	if err := plugInstallCmd.PreRunE(plugInstallCmd, installArgs); err != nil {
+		return err
+	}
+
+	if err := plugInstallCmd.RunE(plugInstallCmd, installArgs); err != nil {
 		return err
 	}
 
