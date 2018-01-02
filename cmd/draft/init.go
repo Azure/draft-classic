@@ -228,41 +228,52 @@ func (i *initCmd) ensureDirectories() error {
 //
 // If the pack does not exist, this function will create it.
 func (i *initCmd) ensurePacks() error {
+	existingRepos := repo.FindRepositories(i.home.Packs())
+
+	fmt.Fprintln(i.out, "Installing default pack repositories...")
 	for _, builtin := range repo.Builtins() {
-		if err := i.ensurePack(builtin); err != nil {
+		if err := i.ensurePack(builtin, existingRepos); err != nil {
 			return err
 		}
 	}
+	fmt.Fprintln(i.out, "Installation of default pack repositories complete")
 	return nil
 }
 
-func (i *initCmd) ensurePack(builtin *repo.Builtin) error {
+func (i *initCmd) ensurePack(builtin *repo.Builtin, existingRepos []repo.Repository) error {
+
+	for _, repo := range existingRepos {
+		if builtin.Name == repo.Name {
+			return nil
+		}
+	}
+
 	addArgs := []string{
 		"add",
 		builtin.URL,
+	}
+
+	addFlags := []string{
 		"--version",
 		builtin.Version,
+		"--home",
+		string(i.home),
+		fmt.Sprintf("--debug=%v", flagDebug),
 	}
+
 	packRepoCmd, _, err := newRootCmd(i.out, i.in).Find([]string{"pack-repo"})
 	if err != nil {
 		return err
 	}
-	if err := packRepoCmd.RunE(packRepoCmd, addArgs); err != nil {
-		fmt.Fprintf(i.out, "Removing pack %s then re-trying...\n", builtin.Name)
-		// remove repo, then re-install
-		var builtinRepo *repo.Repository
-		for _, repo := range repo.FindRepositories(i.home.Packs()) {
-			if repo.Name == builtin.Name {
-				builtinRepo = &repo
-			}
-		}
-		if builtinRepo != nil {
-			if removeErr := os.RemoveAll(builtinRepo.Dir); removeErr != nil {
-				return removeErr
-			}
-		}
-		return packRepoCmd.RunE(packRepoCmd, addArgs)
+
+	if err := packRepoCmd.ParseFlags(addFlags); err != nil {
+		return err
 	}
+
+	if err := packRepoCmd.RunE(packRepoCmd, addArgs); err != nil {
+		return err
+	}
+	debug("Successfully installed pack repo: %v %v", builtin.URL, builtin.Version)
 	return nil
 }
 

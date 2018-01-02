@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/draft/pack/repo"
 )
 
 func TestInitClientOnly(t *testing.T) {
@@ -34,5 +35,10 @@ func TestInitClientOnly(t *testing.T) {
 
 	if len(plugins) != 1 {
 		t.Errorf("Expected 1 plugin, got %v", len(plugins))
+	}
+
+	repos := repo.FindRepositories(cmd.home.Packs())
+	if len(repos) != 1 {
+		t.Errorf("Expected 1 pack repo, got %v", len(repos))
 	}
 }
