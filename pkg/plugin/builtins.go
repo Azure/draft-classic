@@ -16,7 +16,7 @@ func Builtins() []*Builtin {
 	var packRepoVersion string
 	// canary draft releases should always test the latest version of the plugin.
 	if version.Release != "canary" {
-		packRepoVersion = "v0.2.0"
+		packRepoVersion = "v0.3.1"
 	}
 	return []*Builtin{
 		{
