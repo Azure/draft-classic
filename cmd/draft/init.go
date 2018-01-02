@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -275,11 +276,13 @@ func (i *initCmd) ensurePlugins() error {
 		return err
 	}
 
+	fmt.Fprintln(i.out, "Installing default plugins...")
 	for _, builtin := range plugin.Builtins() {
 		if err := i.ensurePlugin(builtin, existingPlugins); err != nil {
 			return err
 		}
 	}
+	fmt.Fprintln(i.out, "Installation of default plugins complete")
 	return nil
 }
 
@@ -315,7 +318,9 @@ func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugi
 	}
 
 	os.Args = installArgs
-	cmd := newRootCmd(i.out, i.in)
+	out := bytes.NewBuffer(nil)
+	cmd := newRootCmd(out, i.in)
+	debug(out.String())
 	if err := cmd.Execute(); err != nil {
 		return err
 	}
