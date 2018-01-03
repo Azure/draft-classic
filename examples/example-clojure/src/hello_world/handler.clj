@@ -4,7 +4,7 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
 
 (defn hello [request]
-  "Hello Draft Kubernetes World")
+  "Hello World")
 
 (defroutes app-routes
   (GET "/" [] hello)
