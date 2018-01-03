@@ -1,8 +1,9 @@
-// took from https://gist.github.com/mjohnsullivan/e5182707caf0a9dbdf2d
+// bin.rs was copied from https://gist.github.com/mjohnsullivan/e5182707caf0a9dbdf2d, which was modified from Rosetta Code's example at http://rosettacode.org/wiki/Hello_world/Web_server#Rust.
+// bin.rs is available under the GNU Free Documentation License 1.2 unless otherwise noted.
+
 use std::net::{TcpStream, TcpListener};
 use std::io::{Read, Write};
 use std::thread;
-
 
 fn handle_read(mut stream: &TcpStream) {
     let mut buf = [0u8 ;4096];
