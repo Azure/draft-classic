@@ -21,8 +21,16 @@ func newBase(source string, home draftpath.Home) base {
 
 // link creates a symlink from the plugin source to $DRAFT_HOME
 func (b *base) link(from string) error {
-	//debug("symlinking %s to %s", from, b.Path())
-	return osutil.SymlinkWithFallback(from, b.Path())
+	origin, err := filepath.Abs(from)
+	if err != nil {
+		return err
+	}
+	dest, err := filepath.Abs(b.Path())
+	if err != nil {
+		return err
+	}
+	debug("symlinking %s to %s", origin, dest)
+	return osutil.SymlinkWithFallback(origin, dest)
 }
 
 // Path is where the plugin will be symlinked to.
