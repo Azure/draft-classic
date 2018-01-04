@@ -11,9 +11,11 @@ This DEP contains the index of all Draft Enhancement Proposals, known as DEPs. D
 | [3][]   | Draft Pack Format            |
 | [4][]   | Draft Pack Repository Format |
 | [5][]   | Draft Plugin Format          |
+| [6][]   | draft.toml Format            |
 
 [1]: dep-001.md
 [2]: dep-002.md
 [3]: dep-003.md
 [4]: dep-004.md
 [5]: dep-005.md
+[6]: dep-006.md
