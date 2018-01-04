@@ -22,8 +22,6 @@ import (
 	"github.com/Azure/draft/cmd/draft/installer"
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/draft/pack/repo"
-	"github.com/Azure/draft/pkg/plugin"
 )
 
 const (
@@ -198,117 +196,6 @@ func (i *initCmd) run() error {
 
 	fmt.Fprintln(i.out, "Happy Sailing!")
 	return nil
-}
-
-// ensureDirectories checks to see if $DRAFT_HOME exists
-//
-// If $DRAFT_HOME does not exist, this function will create it.
-func (i *initCmd) ensureDirectories() error {
-	configDirectories := []string{
-		i.home.String(),
-		i.home.Plugins(),
-		i.home.Packs(),
-	}
-	for _, p := range configDirectories {
-		if fi, err := os.Stat(p); err != nil {
-			fmt.Fprintf(i.out, "Creating %s \n", p)
-			if err := os.MkdirAll(p, 0755); err != nil {
-				return fmt.Errorf("Could not create %s: %s", p, err)
-			}
-		} else if !fi.IsDir() {
-			return fmt.Errorf("%s must be a directory", p)
-		}
-	}
-
-	return nil
-}
-
-// ensurePacks checks to see if the default packs exist.
-//
-// If the pack does not exist, this function will create it.
-func (i *initCmd) ensurePacks() error {
-	for _, builtin := range repo.Builtins() {
-		if err := i.ensurePack(builtin); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (i *initCmd) ensurePack(builtin *repo.Builtin) error {
-	addArgs := []string{
-		"add",
-		builtin.URL,
-		"--version",
-		builtin.Version,
-	}
-	packRepoCmd, _, err := newRootCmd(i.out, i.in).Find([]string{"pack-repo"})
-	if err != nil {
-		return err
-	}
-	if err := packRepoCmd.RunE(packRepoCmd, addArgs); err != nil {
-		fmt.Fprintf(i.out, "Removing pack %s then re-trying...\n", builtin.Name)
-		// remove repo, then re-install
-		var builtinRepo *repo.Repository
-		for _, repo := range repo.FindRepositories(i.home.Packs()) {
-			if repo.Name == builtin.Name {
-				builtinRepo = &repo
-			}
-		}
-		if builtinRepo != nil {
-			if removeErr := os.RemoveAll(builtinRepo.Dir); removeErr != nil {
-				return removeErr
-			}
-		}
-		return packRepoCmd.RunE(packRepoCmd, addArgs)
-	}
-	return nil
-}
-
-// ensurePlugins checks to see if the default plugins exist.
-//
-// If the plugin does not exist, this function will add it.
-func (i *initCmd) ensurePlugins() error {
-	for _, builtin := range plugin.Builtins() {
-		if err := ensurePlugin(i.out, i.in, builtin); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func ensurePlugin(out io.Writer, in io.Reader, builtin *plugin.Builtin) error {
-	var (
-		installArgs = []string{
-			os.Args[0],
-			"plugin",
-			"install",
-			builtin.URL,
-			"--version",
-			builtin.Version,
-		}
-		removeArgs = []string{
-			os.Args[0],
-			"plugin",
-			"remove",
-			builtin.Name,
-		}
-	)
-
-	fmt.Fprintf(out, "Adding plugin %s...\n", builtin.URL)
-	os.Args = installArgs
-	cmd := newRootCmd(out, in)
-	err := cmd.Execute()
-	if err == plugin.ErrExists {
-		// remove plugin, then re-install
-		os.Args = removeArgs
-		if removeErr := cmd.Execute(); removeErr != nil {
-			return removeErr
-		}
-		os.Args = installArgs
-		return cmd.Execute()
-	}
-	return err
 }
 
 func (i *initCmd) setupDraftHome() error {

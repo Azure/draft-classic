@@ -12,6 +12,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - run: echo 'export PATH=/go/src/github.com/Azure/draft/bin:$PATH' >> $BASH_ENV
       - run:
           name: install dependencies
           command: .circleci/bootstrap.sh

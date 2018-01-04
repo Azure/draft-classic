@@ -22,7 +22,7 @@ func NewLocalInstaller(source string, home draftpath.Home) (*LocalInstaller, err
 	return i, nil
 }
 
-// Install creates a symlink to the plugin directory in $HELM_HOME
+// Install creates a symlink to the plugin directory in $DRAFT_HOME
 func (i *LocalInstaller) Install() error {
 	if !isPlugin(i.Source) {
 		return plugin.ErrMissingMetadata

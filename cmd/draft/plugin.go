@@ -176,7 +176,7 @@ func runHook(p *plugin.Plugin, event string) error {
 
 	prog := exec.Command("sh", "-c", hook)
 
-	debug("running %s hook: %s", event, prog)
+	debug("running %s hook: %s %v", event, prog.Path, prog.Args)
 
 	home := draftpath.Home(homePath())
 	setupPluginEnv(p.Metadata.Name, p.Dir, home.Plugins(), home)
