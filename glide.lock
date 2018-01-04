@@ -1,5 +1,5 @@
-hash: bb1d4f092cd3ef1e825761b8f66f38056c4a32bea4fa9e234a611d4d8b74c0d6
-updated: 2017-11-24T12:25:27.052704-08:00
+hash: 3843b69c33b8feb3a9f5abb750ee376e3b75ca1629b87b0314547feb5a70ce30
+updated: 2018-01-04T12:56:31.577690606-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aokoli/goutils
-  version: 9c37978a95bd5c709a15883b6242714ea6709e64
+  version: 3391d3790d23d03408670993e957e8f408993c34
 - name: github.com/Azure/go-ansiterm
   version: 388960b655244e76e24c75f48631564eaefade62
   subpackages:
@@ -99,7 +99,7 @@ imports:
   - types/time
   - types/versions
 - name: github.com/docker/go-connections
-  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+  version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
   subpackages:
   - nat
   - sockets
@@ -120,7 +120,7 @@ imports:
 - name: github.com/emicklei/go-restful-swagger12
   version: dcef7f55730566d41eae5db10e7d6981829720f6
 - name: github.com/evanphx/json-patch
-  version: 944e07253867aacae43c04b2e6a239005443f33a
+  version: ba18e35c5c1b36ef6334cad706eb681153d2d379
 - name: github.com/exponent-io/jsonpath
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
 - name: github.com/facebookgo/symwalk
@@ -193,7 +193,7 @@ imports:
 - name: github.com/howeyc/gopass
   version: 3ca23474a7c7203e0a0a070fd33508f6efdb9b3d
 - name: github.com/huandu/xstrings
-  version: 3959339b333561bf62a38b424fd41517c2c90f40
+  version: 37469d0c81a7910b49d64a0d308ded4823e90937
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/inconshreveable/mousetrap
@@ -213,9 +213,9 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/Masterminds/semver
-  version: 517734cc7d6470c0d07130e40fd40bdeb9bcd3fd
+  version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
 - name: github.com/Masterminds/sprig
-  version: efda631a76d70875162cdc25ffa0d0164bf69758
+  version: b217b9c388de2cacde4354c536e520c52c055563
 - name: github.com/Masterminds/vcs
   version: 6f1c6d150500e452704e9863f68c2559f58616bf
 - name: github.com/mattn/go-colorable
@@ -225,7 +225,7 @@ imports:
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
   repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-runewidth
-  version: d6bea18f789704b5f83375793155289da36a3c7f
+  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
 - name: github.com/Microsoft/go-winio
   version: 8f9387ea7efabb228a981b9c381142be7667967f
 - name: github.com/mitchellh/go-wordwrap
@@ -233,9 +233,9 @@ imports:
 - name: github.com/Nvveen/Gotty
   version: cd527374f1e5bff4938207604a14f2e38a9cf512
 - name: github.com/oklog/ulid
-  version: eb55c82d96c77e196b269cb2ae3afda150454de7
+  version: b38f8fcd3b93fd0e63dae168550d51a485185d60
 - name: github.com/opencontainers/go-digest
-  version: a6d0ee40d4207ea02364bd3b9e8e77b9159ba1eb
+  version: 279bed98673dd5bef374d3b6e4b09e2af76183bf
 - name: github.com/opencontainers/runc
   version: 45c30e75abfd52107b53048004a83165403ad0d1
   subpackages:
@@ -250,15 +250,16 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/rjeczalik/notify
-  version: 767eb674ef14b09119b2fff3601e64558d530c47
+  version: 27b537f07230b3f917421af6dcf044038dbe57e2
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+  repo: https://github.com/sirupsen/logrus
 - name: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: b95ab734e27d33e0d8fbabf71ca990568d4e2020
 - name: github.com/spf13/pflag
-  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
+  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
 - name: github.com/technosophos/moniker
   version: ab470f5e105a44d0c87ea21bacd6a335c4816d83
 - name: github.com/ugorji/go
@@ -403,7 +404,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: c1e53d745d0fe45bf7d5d44697e6eface25fceca
+  version: 366b072768b4e6d93c7de236464c0abe85d0b7c6
   subpackages:
   - pkg/authentication/authenticator
   - pkg/authentication/serviceaccount
@@ -516,6 +517,7 @@ imports:
   - pkg/storage/driver
   - pkg/strvals
   - pkg/tiller/environment
+  - pkg/tlsutil
   - pkg/version
 - name: k8s.io/kubernetes
   version: 477efc3cbe6a7effca06bd1452fa356e2201e1ee
@@ -651,7 +653,7 @@ imports:
   - pkg/util/term
   - pkg/version
 - name: vbom.ml/util
-  version: db5cfe13f5cc80a4990d98e2e1b0707a4d1a5394
+  version: 256737ac55c46798123f754ab7d2c784e2c71783
   repo: https://github.com/fvbommel/util.git
   vcs: git
   subpackages:
