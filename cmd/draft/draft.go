@@ -14,7 +14,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/helm/pkg/helm"
+	hpf "k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/tlsutil"
 
@@ -241,4 +244,27 @@ func addFlagsTLS(cmd *cobra.Command) *cobra.Command {
 	cmd.Flags().BoolVar(&tlsVerify, "tls-verify", false, "enable TLS for request and verify remote")
 	cmd.Flags().BoolVar(&tlsEnable, "tls", false, "enable TLS for request")
 	return cmd
+}
+
+func setupHelm(kubeClient *kubernetes.Clientset, clientConfig clientcmd.ClientConfig, namespace string) (*helm.Client, error) {
+	restClientConfig, err := clientConfig.ClientConfig()
+	if err != nil {
+		return nil, fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
+	}
+
+	tunnel, err := setupTillerConnection(kubeClient, restClientConfig, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local))), nil
+}
+
+func setupTillerConnection(client kubernetes.Interface, restClientConfig *restclient.Config, namespace string) (*kube.Tunnel, error) {
+	tunnel, err := hpf.New(namespace, client, restClientConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
+	}
+
+	return tunnel, err
 }

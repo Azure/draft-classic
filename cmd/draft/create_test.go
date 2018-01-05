@@ -38,7 +38,7 @@ func TestCreate(t *testing.T) {
 			// Test
 			create := &createCmd{
 				appName: "myapp",
-				out:     os.Stdout,
+				out:     ioutil.Discard,
 				home:    draftpath.Home("testdata/drafthome/"),
 				dest:    pDir,
 			}
