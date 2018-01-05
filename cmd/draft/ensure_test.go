@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestEnsureDirectories(t *testing.T) {
 
 	cmd := &initCmd{
 		home: draftpath.Home(tempHome),
-		out:  os.Stdout,
+		out:  ioutil.Discard,
 	}
 
 	if err := cmd.ensureDirectories(); err != nil {
@@ -66,7 +67,7 @@ func TestEnsurePlugin(t *testing.T) {
 
 	cmd := &initCmd{
 		home: draftpath.Home(tempHome),
-		out:  os.Stdout,
+		out:  ioutil.Discard,
 		in:   os.Stdin,
 	}
 
