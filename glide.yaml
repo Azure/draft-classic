@@ -35,6 +35,7 @@ import:
   version: v1.6.2
 - package: github.com/Sirupsen/logrus
   version: ~0.11.5
+  repo: https://github.com/sirupsen/logrus
 - package: github.com/pkg/errors
   version: ~0.8.0
 - package: github.com/Masterminds/vcs
