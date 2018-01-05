@@ -54,6 +54,7 @@ func NewServer(cfg *ServerConfig) *Server {
 	return &Server{cfg: cfg}
 }
 
+// Serve starts draftd
 func (s *Server) Serve(ctx context.Context) error {
 	// start probes server
 	cancelctx, cancel := context.WithCancel(ctx)

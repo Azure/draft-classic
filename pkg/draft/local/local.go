@@ -19,12 +19,18 @@ import (
 //  us to identify which draft app a pod is associated with
 const DraftLabelKey = "draft"
 
+// App encapsulates information about an application to connect to
+//
+//  Name is the name of the application
+//  Namespace is the Kubernetes namespace it is deployed in
+//  Container is the name the name of the application container to connect to
 type App struct {
 	Name      string
 	Namespace string
 	Container string
 }
 
+// Connection encapsulated information to connect to am application
 type Connection struct {
 	Tunnel    *kube.Tunnel
 	PodName   string
