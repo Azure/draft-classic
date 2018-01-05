@@ -250,7 +250,7 @@ func addFlagsTLS(cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
-func setupHelm(kubeClient kubernetes.Interface, config *rest.Config, namespace string) (*helm.Client, error) {
+func setupHelm(kubeClient kubernetes.Interface, config *rest.Config, namespace string) (helm.Interface, error) {
 	tunnel, err := setupTillerConnection(kubeClient, config, namespace)
 	if err != nil {
 		return nil, err

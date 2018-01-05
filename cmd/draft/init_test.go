@@ -6,10 +6,100 @@ import (
 	"os"
 	"testing"
 
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/helm/pkg/helm"
+
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/pack/repo"
 )
+
+func TestSetupDraftd(t *testing.T) {
+	resetEnvVars := unsetEnvVars()
+	tempHome, _ := tempDir(t, "draft-init")
+	os.Setenv(homeEnvVar, tempHome)
+	defer func() {
+		teardown()
+		resetEnvVars()
+	}()
+
+	cmd := &initCmd{
+		out:            ioutil.Discard,
+		in:             bytes.NewBufferString("test-registry\ntest-user\n"),
+		home:           draftpath.Home(tempHome),
+		installer:      &fakeInstaller{installed: false},
+		passwordReader: mockSecureReader{},
+		env: &deployEnv{
+			helmClient: &helm.FakeClient{},
+			kubeClientConfig: &testClientConfig{
+				config: &rest.Config{},
+				err:    nil},
+		},
+	}
+
+	if err := cmd.setupDraftd(); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if cmd.installer.(*fakeInstaller).installed == false {
+		t.Error("Expected draftd to be installed but was not")
+	}
+
+	if cmd.draftConfig.Image != "" {
+		t.Errorf("expected image to be empty, got %v", cmd.draftConfig.Image)
+	}
+
+	if cmd.draftConfig.Basedomain != "" {
+		t.Errorf("expected basedomain to be empty, got %v", cmd.draftConfig.Basedomain)
+	}
+
+	if cmd.draftConfig.Ingress != false {
+		t.Errorf("expected ingress to be false, got %v", cmd.draftConfig.Ingress)
+	}
+
+	if cmd.draftConfig.RegistryURL != "test-registry" {
+		t.Errorf("expected registy to be test-registry, got %v", cmd.draftConfig.RegistryURL)
+	}
+
+	if cmd.draftConfig.RegistryAuth != "eyJ1c2VybmFtZSI6InRlc3QtdXNlciIsInBhc3N3b3JkIjoic29tZSBwYXNzd29yZCJ9" {
+		t.Errorf("expected registy to be test-registry, got %v", cmd.draftConfig.RegistryURL)
+	}
+}
+
+func TestSetupDraftdUpgrade(t *testing.T) {
+	resetEnvVars := unsetEnvVars()
+	tempHome, _ := tempDir(t, "draft-init-upgrade")
+	os.Setenv(homeEnvVar, tempHome)
+	defer func() {
+		teardown()
+		resetEnvVars()
+	}()
+
+	cmd := &initCmd{
+		out:            ioutil.Discard,
+		in:             bytes.NewBufferString("test-registry\ntest-user\n"),
+		home:           draftpath.Home(tempHome),
+		upgrade:        true,
+		passwordReader: mockSecureReader{},
+		installer:      &fakeInstaller{upgraded: false},
+		env: &deployEnv{
+			helmClient: &helm.FakeClient{},
+			kubeClientConfig: &testClientConfig{
+				config: &rest.Config{},
+				err:    nil},
+		},
+	}
+
+	if err := cmd.setupDraftd(); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if cmd.installer.(*fakeInstaller).upgraded == false {
+		t.Error("Expected draftd to be upgraded but was not")
+	}
+}
 
 func TestInitClientOnly(t *testing.T) {
 	resetEnvVars := unsetEnvVars()
@@ -188,4 +278,44 @@ type mockSecureReader struct{}
 
 func (r mockSecureReader) readPassword() ([]byte, error) {
 	return []byte("some password"), nil
+}
+
+type testClientConfig struct {
+	config *rest.Config
+	err    error
+}
+
+func (tcc *testClientConfig) RawConfig() (clientcmdapi.Config, error) {
+	conf := clientcmdapi.NewConfig()
+	conf.Clusters["test-cluster"] = &clientcmdapi.Cluster{}
+	conf.Contexts["other"] = &clientcmdapi.Context{
+		Cluster: "test-cluster",
+	}
+	return *conf, tcc.err
+}
+
+func (tcc *testClientConfig) ClientConfig() (*rest.Config, error) {
+	return tcc.config, tcc.err
+}
+
+func (tcc *testClientConfig) ConfigAccess() clientcmd.ConfigAccess {
+	return nil
+}
+
+func (tcc *testClientConfig) Namespace() (string, bool, error) {
+	return "", false, tcc.err
+}
+
+type fakeInstaller struct {
+	installed bool
+	upgraded  bool
+}
+
+func (fin *fakeInstaller) Install() error {
+	fin.installed = true
+	return nil
+}
+func (fin *fakeInstaller) Upgrade() error {
+	fin.upgraded = true
+	return nil
 }
