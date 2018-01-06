@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
@@ -50,6 +51,10 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 				cc.dest = args[0]
 			}
 			return cc.run()
+		},
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// Docker naming convention doesn't allow upper case names for repositories.
+			cc.normalizeApplicationName()
 		},
 	}
 
@@ -120,6 +125,33 @@ func (c *createCmd) run() error {
 
 	fmt.Fprintln(c.out, "--> Ready to sail")
 	return nil
+}
+
+func (c *createCmd) normalizeApplicationName() {
+	if c.appName == "" {
+		return
+	}
+
+	nameIsUpperCase := false
+	for _, char := range c.appName {
+		if unicode.IsUpper(char) {
+			nameIsUpperCase = true
+			break
+		}
+	}
+
+	if !nameIsUpperCase {
+		return
+	}
+
+	lowerCaseName := strings.ToLower(c.appName)
+	fmt.Fprintf(
+		c.out,
+		"--> Application %s will be renamed to %s for docker compatibility\n",
+		c.appName,
+		lowerCaseName,
+	)
+	c.appName = lowerCaseName
 }
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in
