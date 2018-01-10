@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/kube"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
@@ -49,7 +50,7 @@ type initCmd struct {
 }
 
 type deployEnv struct {
-	kubeClient       *kubernetes.Clientset
+	kubeClient       kubernetes.Interface
 	kubeClientConfig clientcmd.ClientConfig
 	helmClient       *helm.Client
 }
@@ -291,16 +292,16 @@ func (i *initCmd) tlsOptions(cfg *installerConfig.DraftConfig) error {
 }
 
 func (i *initCmd) prepareDeployEnv() error {
-	client, clientConfig, err := getKubeClient(kubeContext)
+	client, config, err := getKubeClient(kubeContext) 
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
 
-	helmClient, err := setupHelm(client, clientConfig, draftNamespace)
+	helmClient, err := setupHelm(client, config, draftNamespace)
 
 	i.env = &deployEnv{
 		kubeClient:       client,
-		kubeClientConfig: clientConfig,
+		kubeClientConfig: kube.GetConfig(kubeContext),
 		helmClient:       helmClient,
 	}
 
