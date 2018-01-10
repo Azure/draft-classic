@@ -1,7 +1,5 @@
 package plugin
 
-import "github.com/Azure/draft/pkg/version"
-
 // Builtin contains metadata to the built-in plugins. Used to install/uninstall a plugin.
 type Builtin struct {
 	Name    string
@@ -11,11 +9,8 @@ type Builtin struct {
 
 // Builtins fetches all built-in plugins.
 func Builtins() []*Builtin {
-	var packRepoVersion string
-	// canary draft releases should always test the latest version of the plugin.
-	if version.Release != "canary" {
-		packRepoVersion = "0.3.1"
-	}
+	packRepoVersion := "0.3.1" // Can set this to canary to test latest version of plugin
+
 	return []*Builtin{
 		{
 			Name:    "pack-repo",
