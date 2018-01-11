@@ -21,8 +21,8 @@ type connectCmd struct {
 
 func newConnectCmd(out io.Writer) *cobra.Command {
 	var (
-		cc          = &connectCmd{out: out}
-		environment string
+		cc                 = &connectCmd{out: out}
+		runningEnvironment string
 	)
 
 	cmd := &cobra.Command{
@@ -30,19 +30,19 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 		Short: "connect to your application locally",
 		Long:  connectDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cc.run(environment)
+			return cc.run(runningEnvironment)
 		},
 	}
 
 	f := cmd.Flags()
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
-	f.StringVarP(&environment, "environment", "e", defaultDraftEnvironment(), "the environment (development, staging, qa, etc) that draft will run under")
+	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
 
 	return cmd
 }
 
-func (cn *connectCmd) run(environment string) (err error) {
-	deployedApp, err := local.DeployedApplication(draftToml, environment)
+func (cn *connectCmd) run(runningEnvironment string) (err error) {
+	deployedApp, err := local.DeployedApplication(draftToml, runningEnvironment)
 	if err != nil {
 		return err
 	}
