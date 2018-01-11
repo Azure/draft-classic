@@ -46,7 +46,11 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 	if _, err := toml.DecodeFile(draftTomlPath, &draftConfig); err != nil {
 		return nil, err
 	}
-	appConfig := draftConfig.Environments[draftEnvironment]
+
+	appConfig, found := draftConfig.Environments[draftEnvironment]
+	if !found {
+		return nil, fmt.Errorf("Environment %v not found", draftEnvironment)
+	}
 
 	return &App{Name: appConfig.Name, Namespace: appConfig.Namespace}, nil
 }

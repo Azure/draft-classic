@@ -11,7 +11,6 @@ import (
 	"github.com/Azure/draft/pkg/build"
 	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft"
-	"github.com/Azure/draft/pkg/draft/manifest"
 )
 
 const upDesc = `
@@ -25,8 +24,7 @@ that changes have stopped before uploading, but that can be altered by the
 `
 
 const (
-	environmentEnvVar = "DRAFT_ENV"
-	ignoreFileName    = ".draftignore"
+	ignoreFileName = ".draftignore"
 )
 
 type upCmd struct {
@@ -61,7 +59,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&runningEnvironment, "environment", "e", defaultDraftEnvironment(), "the environment (development, staging, qa, etc) that draft will run under")
+	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
 
 	return cmd
 }
@@ -82,12 +80,4 @@ func (u *upCmd) run(environment string) (err error) {
 	}()
 	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
 	return <-errc
-}
-
-func defaultDraftEnvironment() string {
-	env := os.Getenv(environmentEnvVar)
-	if env == "" {
-		env = manifest.DefaultEnvironmentName
-	}
-	return env
 }

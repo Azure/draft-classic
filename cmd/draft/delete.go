@@ -48,7 +48,7 @@ func (d *deleteCmd) run() error {
 	} else {
 		deployedApp, err := local.DeployedApplication(draftToml, defaultDraftEnvironment())
 		if err != nil {
-			return errors.New("Unable to detect app name\nPlesae pass in the name of the application")
+			return errors.New("Unable to detect app name\nPlease pass in the name of the application")
 
 		}
 
