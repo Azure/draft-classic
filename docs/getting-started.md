@@ -10,6 +10,8 @@ There are multiple example applications included within the [examples directory]
 $ cd examples/example-python
 ```
 
+When creating your own application, note that your entrypoint python file MUST be named app.py and be present in the root directory. Any additional packages that the project requires should be specified in requirements.txt (also at the root of the project). The container expects the application to serve on port 8080, however it is not required to implement an endpoint to use the tool.
+
 ## Draft Create
 
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
