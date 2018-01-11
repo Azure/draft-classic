@@ -21,7 +21,7 @@ func TestDefaultEnvironment(t *testing.T) {
 			_ = os.Setenv(environmentEnvVar, tc.envVar)
 
 			if result := defaultDraftEnvironment(); result != tc.expected {
-				t.Errorf("Expected default environment %s, got %v", tc.expected, result)
+				t.Errorf("Expected default environment %s, got %s", tc.expected, result)
 			}
 		})
 	}
