@@ -26,7 +26,9 @@ else
 fi
 
 echo "Installing Azure components"
-apt-get update && apt-get install -yq python-pip
+# NOTE(bacongobbler): azure-cli needs a newer version of libssl. See https://github.com/Azure/azure-cli/issues/3720#issuecomment-350335381
+apt-get update && apt-get install -yq python-pip libssl-dev
+easy_install pyOpenSSL
 pip install --disable-pip-version-check --no-cache-dir azure-cli~=2.0
 
 echo "Building Draft binaries"
