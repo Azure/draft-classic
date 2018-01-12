@@ -47,12 +47,15 @@ type initCmd struct {
 	image          string
 	env            *deployEnv
 	passwordReader passwordReader
+	upgrade        bool
+	draftConfig    *installerConfig.DraftConfig
+	installer      installer.Interface
 }
 
 type deployEnv struct {
 	kubeClient       kubernetes.Interface
 	kubeClientConfig clientcmd.ClientConfig
-	helmClient       *helm.Client
+	helmClient       helm.Interface
 }
 
 type secureReader struct{}
@@ -93,6 +96,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 	f.StringVar(&tlsKeyFile, "draftd-tls-key", "", "path to TLS key file to install with Draftd")
 	f.StringVar(&tlsCertFile, "draftd-tls-cert", "", "path to TLS certificate file to install with Draftd")
 	f.StringVar(&tlsCaCertFile, "tls-ca-cert", "", "path to CA root certificate")
+	f.BoolVar(&i.upgrade, "upgrade", false, "upgrade if draftd is already installed")
 
 	return cmd
 }
@@ -115,7 +119,10 @@ func (i *initCmd) run() error {
 				return err
 			}
 		}
-		i.setupDraftd()
+
+		if err := i.setupDraftd(); err != nil {
+			return err
+		}
 
 	} else {
 
@@ -144,12 +151,12 @@ func (i *initCmd) setupDraftHome() error {
 }
 
 func (i *initCmd) setupDraftd() error {
-	draftConfig, cloudProvider, err :=
-		installerConfig.FromClientConfig(i.env.kubeClientConfig)
+	draftConfig, cloudProvider, err := installerConfig.FromClientConfig(i.env.kubeClientConfig)
 	if err != nil {
 		return fmt.Errorf("Could not generate draft config: %s",
 			err)
 	}
+	i.draftConfig = draftConfig
 
 	if cloudProvider == "minikube" {
 		if err := i.configureMinikube(); err != nil {
@@ -157,7 +164,7 @@ func (i *initCmd) setupDraftd() error {
 		}
 	}
 
-	draftConfig.Image = i.image
+	i.draftConfig.Image = i.image
 
 	if !i.autoAccept || cloudProvider == "" {
 
@@ -178,15 +185,12 @@ func (i *initCmd) setupDraftd() error {
 	log.Debugf("raw chart config: %s", draftConfig)
 
 	if !i.dryRun {
-		// attempt to purge the old release, but log errors to --debug
-		if err := installer.Uninstall(i.env.helmClient); err != nil {
-			log.Debugf("error uninstalling Draft: %s", err)
+		if err := i.deployDraft(); err != nil {
+			return err
 		}
-		if err := installer.Install(i.env.helmClient, draftNamespace, draftConfig); err != nil {
-			return fmt.Errorf("error installing Draft: %s", err)
-		}
+
 	}
-	fmt.Fprintln(i.out, "Draft has been installed into your Kubernetes Cluster.")
+
 	return nil
 }
 
@@ -292,7 +296,7 @@ func (i *initCmd) tlsOptions(cfg *installerConfig.DraftConfig) error {
 }
 
 func (i *initCmd) prepareDeployEnv() error {
-	client, config, err := getKubeClient(kubeContext) 
+	client, config, err := getKubeClient(kubeContext)
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
@@ -310,4 +314,28 @@ func (i *initCmd) prepareDeployEnv() error {
 
 func (r secureReader) readPassword() ([]byte, error) {
 	return terminal.ReadPassword(int(syscall.Stdin))
+}
+
+func (i *initCmd) deployDraft() error {
+	if i.installer == nil {
+		i.installer = installer.New(i.env.helmClient, i.draftConfig, draftNamespace)
+	}
+
+	if i.upgrade {
+		if err := i.installer.Upgrade(); err != nil {
+			return err
+		}
+		fmt.Fprintln(i.out, "Draftd has been upgraded to the current version")
+	} else {
+		if err := i.installer.Install(); err != nil {
+			if strings.Contains(err.Error(), "a release named draft already exists") {
+				fmt.Fprintln(i.out, "Draftd is already installed in your Kubernetes Cluster\nSee usage for more information on using --upgrade and --draftd-image flags to configure draftd")
+				return nil
+			}
+			return fmt.Errorf("error installing Draft: %s", err)
+		}
+		fmt.Fprintln(i.out, "Draftd has been installed into your Kubernetes Cluster")
+	}
+
+	return nil
 }
