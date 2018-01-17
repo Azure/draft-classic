@@ -2,10 +2,9 @@ package kube
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
+
 	"github.com/Azure/draft/pkg/storage"
-	"github.com/golang/protobuf/proto"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
@@ -40,7 +39,7 @@ func (s *Store) DeleteBuild(ctx context.Context, appName, buildID string) (obj *
 		return nil, err
 	}
 	if build, ok := cfgmap.Data[buildID]; ok {
-		if obj, err = decode(build); err != nil {
+		if obj, err = storage.DecodeString(build); err != nil {
 			return nil, err
 		}
 		delete(cfgmap.Data, buildID)
@@ -52,7 +51,7 @@ func (s *Store) DeleteBuild(ctx context.Context, appName, buildID string) (obj *
 
 // CreateBuild stores a draft.Build for the application specified by appName.
 func (s *Store) CreateBuild(ctx context.Context, appName string, build *storage.Object) error {
-	content, err := encode(build)
+	content, err := storage.EncodeToString(build)
 	if err != nil {
 		return err
 	}
@@ -77,7 +76,7 @@ func (s *Store) GetBuilds(ctx context.Context, appName string) (builds []*storag
 		return nil, err
 	}
 	for _, obj := range cfgmap.Data {
-		build, err := decode(obj)
+		build, err := storage.DecodeString(obj)
 		if err != nil {
 			return nil, err
 		}
@@ -93,36 +92,10 @@ func (s *Store) GetBuild(ctx context.Context, appName, buildID string) (obj *sto
 		return nil, err
 	}
 	if data, ok := cfgmap.Data[buildID]; ok {
-		if obj, err = decode(data); err != nil {
+		if obj, err = storage.DecodeString(data); err != nil {
 			return nil, err
 		}
 		return obj, nil
 	}
 	return nil, fmt.Errorf("application %q storage object %q not found", appName, buildID)
-}
-
-// encode returns the base64 encoding of protobuf encoded storage.Object.
-//
-// err != nil if the protobuf marshaling fails; otherwise nil.
-func encode(obj *storage.Object) (string, error) {
-	b, err := proto.Marshal(obj)
-	if err != nil {
-		return "", err
-	}
-	return b64.StdEncoding.EncodeToString(b), nil
-}
-
-// decode returns the storage.Object from its base64 encoded protobuf.
-//
-// err != nil if decoding fails.
-func decode(str string) (*storage.Object, error) {
-	b, err := b64.StdEncoding.DecodeString(str)
-	if err != nil {
-		return nil, err
-	}
-	var obj storage.Object
-	if err := proto.Unmarshal(b, &obj); err != nil {
-		return nil, err
-	}
-	return &obj, nil
 }

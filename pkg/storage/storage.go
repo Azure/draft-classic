@@ -1,13 +1,16 @@
 package storage
 
-import (
-	"context"
-)
-
 // To regenerate the protocol buffer types for this package, run:
 //		go generate
 
 //go:generate protoc object.proto --go_out=.
+
+import (
+	"context"
+	b64 "encoding/base64"
+
+	"github.com/golang/protobuf/proto"
+)
 
 // Deletor represents the delete APIs of the storage engine.
 type Deletor interface {
@@ -36,4 +39,30 @@ type Store interface {
 	Creator
 	Deletor
 	Getter
+}
+
+// EncodeToString returns the base64 encoding of a protobuf encoded storage.Object.
+//
+// err != nil if the protobuf marshaling fails; otherwise nil.
+func EncodeToString(obj *Object) (string, error) {
+	b, err := proto.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return b64.StdEncoding.EncodeToString(b), nil
+}
+
+// DecodeString returns the storage.Object decoded from a base64 encoded protobuf string.
+//
+// err != nil if decoding fails.
+func DecodeString(str string) (*Object, error) {
+	b, err := b64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return nil, err
+	}
+	var obj Object
+	if err := proto.Unmarshal(b, &obj); err != nil {
+		return nil, err
+	}
+	return &obj, nil
 }
