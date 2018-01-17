@@ -29,6 +29,10 @@ const (
 `
 )
 
+// ErrNoLanguageDetected is raised when `draft create` does not detect source
+// code for linguist to classify, or if there are no packs available for the detected languages.
+var ErrNoLanguageDetected = errors.New("no languages were detected")
+
 type createCmd struct {
 	appName string
 	out     io.Writer
@@ -166,25 +170,28 @@ func doPackDetection(home draftpath.Home, out io.Writer) (string, error) {
 		log.Debugf("%s:\t%f (%s)", lang.Language, lang.Percent, lang.Color)
 	}
 	if len(langs) == 0 {
-		return "", errors.New("No languages were detected. Are you sure there's code in here?")
+		return "", ErrNoLanguageDetected
 	}
-	detectedLang := linguist.Alias(langs[0])
-	fmt.Fprintf(out, "--> Draft detected the primary language as %s with %f%% certainty.\n", detectedLang.Language, detectedLang.Percent)
-	for _, repository := range repo.FindRepositories(home.Packs()) {
-		packDir := path.Join(repository.Dir, repo.PackDirName)
-		packs, err := ioutil.ReadDir(packDir)
-		if err != nil {
-			return "", fmt.Errorf("there was an error reading %s: %v", packDir, err)
-		}
-		for _, file := range packs {
-			if file.IsDir() {
-				if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(file.Name())) == 0 {
-					packPath := filepath.Join(packDir, file.Name())
-					log.Debugf("pack path: %s", packPath)
-					return packPath, nil
+	for _, lang := range langs {
+		detectedLang := linguist.Alias(lang)
+		fmt.Fprintf(out, "--> Draft detected %s (%f%%)\n", detectedLang.Language, detectedLang.Percent)
+		for _, repository := range repo.FindRepositories(home.Packs()) {
+			packDir := path.Join(repository.Dir, repo.PackDirName)
+			packs, err := ioutil.ReadDir(packDir)
+			if err != nil {
+				return "", fmt.Errorf("there was an error reading %s: %v", packDir, err)
+			}
+			for _, file := range packs {
+				if file.IsDir() {
+					if strings.Compare(strings.ToLower(detectedLang.Language), strings.ToLower(file.Name())) == 0 {
+						packPath := filepath.Join(packDir, file.Name())
+						log.Debugf("pack path: %s", packPath)
+						return packPath, nil
+					}
 				}
 			}
 		}
+		fmt.Fprintf(out, "--> Draft could not find a pack for %s. Trying the next likeliest language...\n", detectedLang.Language)
 	}
-	return "", pack.ErrNotFound
+	return "", ErrNoLanguageDetected
 }
