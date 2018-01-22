@@ -16,7 +16,7 @@ type RecvStream interface {
 	Stop()
 }
 
-// Up is the mechanism by which to accept draft up requests
+// UpHandler is the mechanism by which to accept draft up requests
 // initiated by the draft client dispatched by the rpc.Server.
 type UpHandler interface {
 	Up(context.Context, *UpRequest) <-chan *UpSummary
