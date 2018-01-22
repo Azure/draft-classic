@@ -126,7 +126,8 @@ func (c *startCmd) run() (err error) {
 	}
 	switch c.storageEngine {
 	case "configmaps":
-		cfg.Storage = cfgmaps.NewStore(cfg.Kube, "default")
+		const namespace = "default"
+		cfg.Storage = cfgmaps.NewConfigMaps(cfg.Kube.CoreV1().ConfigMaps(namespace))
 	case "inprocess":
 		cfg.Storage = inprocess.NewStore()
 	default:
