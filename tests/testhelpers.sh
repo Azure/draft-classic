@@ -2,6 +2,31 @@
 
 TIMEOUT=30
 
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+BRIGHT=$(tput bold)
+NORMAL=$(tput sgr0)
+
+function fail {
+	error=$1
+	draftlogs=$2
+	draftpid=$3
+
+	echo "${RED} ${error} ${NORMAL}"
+	echo "Draft logs:"
+	echo "${BRIGHT} $(cat $draftlogs) ${NORMAL}"
+
+	if [[ $# -eq 3 ]]; then
+		$(cleanDraftUpAsync $draftout $draftpid)
+	fi
+
+	exit 1
+}
+
+function pass {
+	echo "${GREEN} test passed ${NORMAL}"
+}
+
 # draftUpAsync outfile <command args> to launch draft async. Return process id.
 function draftUpAsync {
     outfile="$1"
@@ -65,4 +90,3 @@ function expectChangeAndWaitForSync {
     echo -2
     return
 }
-

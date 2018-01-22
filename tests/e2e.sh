@@ -11,7 +11,7 @@ TESTDIR="$(pwd)/tests"
 cd $TESTDIR
 PATH="$(pwd)/../bin:$PATH"
 
-. $TESTDIR/tools
+. $TESTDIR/testhelpers.sh
 
 echo "# testing apps that are expected to pass"
 pushd testdata/good > /dev/null
@@ -25,23 +25,23 @@ for app in */; do
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     name=$(helm list | grep "${app}" | awk '{print $1}')
     if [[ "$revision" != "1" ]]; then
-        echo "Expected REVISION == 1, got $revision"
-        exit 1
+        fail "Expected REVISION == 1, got $revision"
     fi
-    echo "GOOD"
+	pass
     # deploy the app again and check that the update is seen upstream
     draft up -e nowatch
     echo "checking that ${app} v2 was released"
     revision=$(helm list | grep "${app}" | awk '{print $2}')
     if [[ "$revision" != "2" ]]; then
-        echo "Expected REVISION == 2, got $revision"
-        exit 1
+        fail "Expected REVISION == 2, got $revision"
     fi
-    echo "GOOD"
+	pass
+
     echo "deleting the helm release for ${app}: ${name}"
     # clean up
     helm delete --purge "${name}"
-    echo "GOOD"
+	pass
+
     popd > /dev/null
 done
 popd > /dev/null
@@ -57,10 +57,10 @@ for app in */; do
     echo "checking that ${app} v1 was NOT released"
     release=$(helm list | grep "${app}")
     if [[ "$release" != "" ]]; then
-        echo "Expected no release to exist , got $release"
-        exit 1
+        fail "Expected no release to exist , got $release"
     fi
-    echo "GOOD"
+	pass
+
     popd > /dev/null
 done
 popd > /dev/null
@@ -79,12 +79,12 @@ for app in */; do
     # wait for initial sync
     changes=$(expectChangeAndWaitForSync $draftout)
     if [[ $changes -ne 0 ]]; then
-        [[ $changes -eq -1 ]] && echo "Expected changes and nothing happened"
-        [[ $changes -eq -2 ]] && echo "Had changes, but didn't listened back"
-        echo "Draft logs:"
-        cat $draftout
-        $(cleanDraftUpAsync $draftout $draftpid)
-        exit 1
+        if [[ $changes -eq -1 ]]; then
+			fail "Expected changes and nothing happened" $draftout $draftpid
+		fi
+        if [[ $changes -eq -2 ]]; then
+			fail "Tests timed out" $draftout $draftpid
+		fi
     fi
 
     # loop over scenarios
@@ -119,40 +119,32 @@ for app in */; do
 
         if [[ $changeDesired == "N" ]]; then
             if [[ $(hasChanged $draftout) == "true" ]]; then
-                echo "No rebuild was expected if modifying the following files: $files, but we got some"
-                echo "Draft logs:"
-                cat $draftout
-                $(cleanDraftUpAsync $draftout $draftpid)
-                exit 1
+                fail "No rebuild was expected if modifying the following files: $files, but we got some" $draftout $draftpid
             fi
 
         elif [[ $changeDesired == "Y" ]]; then
             echo "Waiting for build to happen"
             changes=$(expectChangeAndWaitForSync $draftout)
             if [[ $changes -ne 0 ]]; then
-                [[ $changes -eq -1 ]] && echo "Expected changes and nothing happened"
-                [[ $changes -eq -2 ]] && echo "Had changes, but didn't listened back"
-                echo "Draft logs:"
-                cat $draftout
-                $(cleanDraftUpAsync $draftout $draftpid)
-                exit 1
+                if [[ $changes -eq -1 ]]; then
+					fail "Expected changes and nothing happened" $draftout $draftpid
+				fi
+                if [[ $changes -eq -2 ]]; then
+					fail "Tests timed out" $draftout $draftpid
+				fi
             fi
             echo "checking that ${app} v${desiredRevision} was released"
             revision=$(helm list | grep "${app}" | awk '{print $2}')
             name=$(helm list | grep "${app}" | awk '{print $1}')
             if [[ "$revision" != "$desiredRevision" ]]; then
-                echo "Expected REVISION == $desiredRevision, got $revision"
-                echo "Draft logs:"
-                cat $draftout
-                $(cleanDraftUpAsync $draftout $draftpid)
-                exit 1
+                fail "Expected REVISION == $desiredRevision, got $revision" $draftout $draftpid
             fi
             desiredRevision=$(( $desiredRevision + 1 ))
         fi
 
     done < scenarios.test
 
-    echo "GOOD"
+    pass
     echo "deleting the helm release for ${app}: ${name}"
     # clean up
     $(cleanDraftUpAsync $draftout $draftpid)
@@ -162,7 +154,8 @@ for app in */; do
     done
     rm -r .git
     helm delete --purge "${name}"
-    echo "GOOD"
+    pass
+
     popd > /dev/null
 done
 popd > /dev/null
