@@ -60,11 +60,11 @@ func TestSetupDraftd(t *testing.T) {
 	}
 
 	if cmd.draftConfig.RegistryURL != "test-registry" {
-		t.Errorf("expected registy to be test-registry, got %v", cmd.draftConfig.RegistryURL)
+		t.Errorf("expected registry to be test-registry, got %v", cmd.draftConfig.RegistryURL)
 	}
 
 	if cmd.draftConfig.RegistryAuth != "eyJ1c2VybmFtZSI6InRlc3QtdXNlciIsInBhc3N3b3JkIjoic29tZSBwYXNzd29yZCJ9" {
-		t.Errorf("expected registy to be test-registry, got %v", cmd.draftConfig.RegistryURL)
+		t.Errorf("expected registry to be test-registry, got %v", cmd.draftConfig.RegistryURL)
 	}
 }
 

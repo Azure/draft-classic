@@ -103,7 +103,7 @@ func Tokenize(input []byte) (tokens []string) {
 	scanlines := bufio.NewScanner(buf)
 	scanlines.Split(bufio.ScanLines)
 
-	// NOTE(tso): the use of goto here is probably interchangable with continue
+	// NOTE(tso): the use of goto here is probably interchangeable with continue
 line:
 	for scanlines.Scan() {
 		ln := scanlines.Bytes()
