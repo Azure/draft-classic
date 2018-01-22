@@ -32,13 +32,13 @@ var (
 		"#",  // Perl, Bash, Ruby
 	}
 	MultiLineComments = [][]string{
-		[]string{"/*", "*/"},    // C
-		[]string{"<!--", "-->"}, // XML
-		[]string{"{-", "-}"},    // Haskell
-		[]string{"(*", "*)"},    // Coq
-		[]string{`"""`, `"""`},  // Python
-		[]string{"'''", "'''"},  // Python
-		[]string{"#`(", ")"},    // Perl6
+		{"/*", "*/"},    // C
+		{"<!--", "-->"}, // XML
+		{"{-", "-}"},    // Haskell
+		{"(*", "*)"},    // Coq
+		{`"""`, `"""`},  // Python
+		{"'''", "'''"},  // Python
+		{"#`(", ")"},    // Perl6
 	}
 	StartLineComment       []*regexp.Regexp
 	BeginSingleLineComment []*regexp.Regexp
