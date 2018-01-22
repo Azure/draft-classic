@@ -68,7 +68,7 @@ func init() {
 	}
 }
 
-// Convenience function that returns the color associated
+// LanguageColor is a convenience function that returns the color associated
 // with the language, in HTML Hex notation (e.g. "#123ABC")
 // from the languages.yml file provided by https://github.com/github/linguist
 //
@@ -80,7 +80,7 @@ func LanguageColor(language string) string {
 	return ""
 }
 
-// Attempts to determine the language of a source file based solely on
+// LanguageByFilename attempts to determine the language of a source file based solely on
 // common naming conventions and file extensions
 // from the languages.yml file provided by https://github.com/github/linguist
 //
@@ -98,7 +98,7 @@ func LanguageByFilename(filename string) string {
 	return ""
 }
 
-// Attempts to detect all possible languages of a source file based solely on
+// LanguageHints attempts to detect all possible languages of a source file based solely on
 // common naming conventions and file extensions
 // from the languages.yml file provided by https://github.com/github/linguist
 //
@@ -117,7 +117,7 @@ func LanguageHints(filename string) (hints []string) {
 	return hints
 }
 
-// Attempts to detect the language of a source file based on its
+// LanguageByContents attempts to detect the language of a source file based on its
 // contents and a slice of hints to the possible answer.
 //
 // Obtain hints with LanguageHints()
@@ -149,7 +149,7 @@ func detectInterpreter(contents []byte) string {
 	return scriptVersionRE.ReplaceAllString(base, "")
 }
 
-// Checks if filename should not be passed to LanguageByFilename.
+// ShouldIgnoreFilename checks if filename should not be passed to LanguageByFilename.
 //
 // (this simply calls IsVendored and IsDocumentation)
 func ShouldIgnoreFilename(filename string) bool {
@@ -159,24 +159,24 @@ func ShouldIgnoreFilename(filename string) bool {
 	// return IsVendored(filename) || IsDocumentation(filename)
 }
 
-// Checks if contents should not be passed to LangugeByContents.
+// ShouldIgnoreContents checks if contents should not be passed to LangugeByContents.
 //
 // (this simply calls IsBinary)
 func ShouldIgnoreContents(contents []byte) bool {
 	return IsBinary(contents)
 }
 
-// Checks if path contains a filename commonly belonging to configuration files.
+// IsVendored checks if path contains a filename commonly belonging to configuration files.
 func IsVendored(path string) bool {
 	return vendorRE.MatchString(path)
 }
 
-// Checks if path contains a filename commonly belonging to documentation.
+// IsDocumentation checks if path contains a filename commonly belonging to documentation.
 func IsDocumentation(path string) bool {
 	return doxRE.MatchString(path)
 }
 
-// Checks contents for known character escape codes which
+// IsBinary checks contents for known character escape codes which
 // frequently show up in binary files but rarely (if ever) in text.
 //
 // Use this check before using LanguageFromContents to reduce likelihood
