@@ -6,10 +6,12 @@
 # installs all the apps under testdata and checks that they pass or fail, depending on their
 # success condition.
 
-cd $(dirname $0)
+TESTDIR="$(pwd)/tests"
+
+cd $TESTDIR
 PATH="$(pwd)/../bin:$PATH"
 
-. $(dirname $0)/tools
+. $TESTDIR/tools
 
 echo "# testing apps that are expected to pass"
 pushd testdata/good > /dev/null
