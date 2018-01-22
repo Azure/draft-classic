@@ -1,4 +1,4 @@
-// go port of https://github.com/github/linguist/blob/master/lib/linguist/tokenizer.rb
+// Package tokenizer is a go port of https://github.com/github/linguist/blob/master/lib/linguist/tokenizer.rb
 //
 // in their words:
 //
@@ -17,20 +17,24 @@ import (
 )
 
 var (
-	// Maximum input length for Tokenize()
+	// ByteLimit is the maximum input length for Tokenize()
 	ByteLimit = 100000
 
-	// NOTE(tso): these string slices are turned into their regexp slice counterparts
+	// StartLineComments turns string slices into their regexp slice counterparts
 	// by this package's init() function.
 	StartLineComments = []string{
 		"\"", // Vim
 		"%",  // Tex
 	}
+	// SingleLineComments turns string slices into their regexp slice counterparts
+	// by this package's init() function.
 	SingleLineComments = []string{
 		"//", // C
 		"--", // Ada, Haskell, AppleScript
 		"#",  // Perl, Bash, Ruby
 	}
+	// MultiLineComments turns string slices into their regexp slice counterparts
+	// by this package's init() function.
 	MultiLineComments = [][]string{
 		{"/*", "*/"},    // C
 		{"<!--", "-->"}, // XML
@@ -62,9 +66,8 @@ func init() {
 	}
 }
 
-// If the given token matches the start of a multi-line comment,
-// this function will return true and a regex for the corresponding closing token,
-// otherwise false and nil.
+// FindMultiLineComment compares a given token to the start of a multiline comment
+// and if true, returns the bool with a regex. Otherwise false and nil.
 func FindMultiLineComment(token []byte) (matched bool, terminator *regexp.Regexp) {
 	for idx, re := range BeginMultiLineComment {
 		if re.Match(token) {
@@ -74,7 +77,7 @@ func FindMultiLineComment(token []byte) (matched bool, terminator *regexp.Regexp
 	return false, nil
 }
 
-// Simple tokenizer that uses bufio.Scanner to process lines and individual words
+// Tokenize is a simple tokenizer that uses bufio.Scanner to process lines and individual words
 // and matches them against regular expressions to filter out comments, strings, and numerals
 // in a manner very similar to github's linguist (see https://github.com/github/linguist/blob/master/lib/linguist/tokenizer.rb)
 //
@@ -93,10 +96,10 @@ func Tokenize(input []byte) (tokens []string) {
 	}
 
 	var (
-		ml_in   = false                // in a multiline comment
-		ml_end  *regexp.Regexp         // closing token regexp
-		str_in                 = false // in a string literal
-		str_end byte           = 0     // closing token byte to be found by the String regexp
+		mlStart     = false        // in a multiline comment
+		mlEnd       *regexp.Regexp // closing token regexp
+		stringStart = false        // in a string literal
+		stringEnd   byte           // closing token byte to be found by the String regexp
 	)
 
 	buf := bytes.NewBuffer(input)
@@ -118,61 +121,61 @@ line:
 		// this may yield inaccurate results where there is a lack of sufficient
 		// whitespace for the approaches taken here, i.e. jumping straight to the
 		// next word/line boundary.
-		ln_buf := bytes.NewBuffer(ln)
-		scanwords := bufio.NewScanner(ln_buf)
+		lnBuffer := bytes.NewBuffer(ln)
+		scanwords := bufio.NewScanner(lnBuffer)
 		scanwords.Split(bufio.ScanWords)
 	word:
 		for scanwords.Scan() {
-			tk_b := scanwords.Bytes()
-			tk_s := scanwords.Text()
+			tokenBytes := scanwords.Bytes()
+			tokenString := scanwords.Text()
 
 			// find end of multi-line comment
-			if ml_in {
-				if ml_end.Match(tk_b) {
-					ml_in = false
-					ml_end = nil
+			if mlStart {
+				if mlEnd.Match(tokenBytes) {
+					mlStart = false
+					mlEnd = nil
 				}
 				goto word
 			}
 
 			// find end of string literal
-			if str_in {
-				s := String.FindSubmatch(tk_b)
-				if s != nil && s[1][0] == str_end {
-					str_in = false
-					str_end = 0
+			if stringStart {
+				s := String.FindSubmatch(tokenBytes)
+				if s != nil && s[1][0] == stringEnd {
+					stringStart = false
+					stringEnd = 0
 				}
 				goto word
 			}
 
 			// find single-line comment
 			for _, re := range BeginSingleLineComment {
-				if re.Match(tk_b) {
+				if re.Match(tokenBytes) {
 					goto line
 				}
 			}
 
 			// find start of multi-line comment
-			if matched, terminator := FindMultiLineComment(tk_b); matched {
-				ml_in = true
-				ml_end = terminator
+			if matched, terminator := FindMultiLineComment(tokenBytes); matched {
+				mlStart = true
+				mlEnd = terminator
 				goto word
 			}
 
 			// find start of string literal
-			if s := String.FindSubmatch(tk_b); s != nil {
-				str_in = true
-				str_end = s[1][0]
+			if s := String.FindSubmatch(tokenBytes); s != nil {
+				stringStart = true
+				stringEnd = s[1][0]
 				goto word
 			}
 
 			// find numeric literal
-			if n := Number.Find(tk_b); n != nil {
+			if n := Number.Find(tokenBytes); n != nil {
 				goto word
 			}
 
 			// add valid tokens to result set
-			tokens = append(tokens, tk_s)
+			tokens = append(tokens, tokenString)
 		}
 	}
 	return tokens
