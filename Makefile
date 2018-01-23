@@ -111,10 +111,6 @@ test-lint:
 test-unit:
 	$(GO) test $(GOFLAGS) -cover -run $(TESTS) ./... $(TESTFLAGS)
 
-.PHONY: test-e2e
-test-e2e:
-	./tests/e2e.sh
-
 HAS_GOMETALINTER := $(shell command -v gometalinter;)
 HAS_DEP := $(shell command -v dep;)
 HAS_GOX := $(shell command -v gox;)

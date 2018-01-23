@@ -73,8 +73,10 @@ $ make build      # compiles `draft` and `draftd` inside bin/
 
 ## Test Your Changes
 
-Draft includes a suite of tests. Run `make test` for basic unit tests or `make test-e2e` for more
-comprehensive, end-to-end tests.
+Draft includes a suite of tests.
+- `make test-lint`: runs linter/style checks
+- `make test-unit`: runs basic unit tests
+- `make test`: runs all of the above
 
 ## Deploying Your Changes
 
