@@ -2,17 +2,20 @@ package build
 
 import (
 	"fmt"
-	"github.com/rjeczalik/notify"
-	"golang.org/x/net/context"
-	"k8s.io/helm/pkg/ignore"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/rjeczalik/notify"
+	"golang.org/x/net/context"
+	"k8s.io/helm/pkg/ignore"
 )
 
 const ignoreFileName = ".draftignore"
 
+// Watch watches for inotify events in the build context's application directory, returning events
+// to the stream
 func (buildctx *Context) Watch(ctx context.Context, stream chan<- *Context) (err error) {
 	var rules *ignore.Rules
 	if rules, err = ignore.ParseFile(ignoreFileName); err != nil {

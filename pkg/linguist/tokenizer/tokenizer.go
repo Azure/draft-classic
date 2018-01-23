@@ -44,34 +44,33 @@ var (
 		{"'''", "'''"},  // Python
 		{"#`(", ")"},    // Perl6
 	}
-	StartLineComment       []*regexp.Regexp
-	BeginSingleLineComment []*regexp.Regexp
-	BeginMultiLineComment  []*regexp.Regexp
-	EndMultiLineComment    []*regexp.Regexp
-	String                 = regexp.MustCompile(`[^\\]*(["'` + "`])")
-	Shebang                = regexp.MustCompile(`#!.*$`)
-	Number                 = regexp.MustCompile(`(0x[0-9a-f]([0-9a-f]|\.)*|\d(\d|\.)*)([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)`)
+	startLineComment       []*regexp.Regexp
+	beginSingleLineComment []*regexp.Regexp
+	beginMultiLineComment  []*regexp.Regexp
+	endMultiLineComment    []*regexp.Regexp
+	stringRegexp           = regexp.MustCompile(`[^\\]*(["'` + "`])")
+	numberRegexp           = regexp.MustCompile(`(0x[0-9a-f]([0-9a-f]|\.)*|\d(\d|\.)*)([uU][lL]{0,2}|([eE][-+]\d*)?[fFlL]*)`)
 )
 
 func init() {
 	for _, st := range append(StartLineComments, SingleLineComments...) {
-		StartLineComment = append(StartLineComment, regexp.MustCompile(`^\s*`+regexp.QuoteMeta(st)))
+		startLineComment = append(startLineComment, regexp.MustCompile(`^\s*`+regexp.QuoteMeta(st)))
 	}
 	for _, sl := range SingleLineComments {
-		BeginSingleLineComment = append(BeginSingleLineComment, regexp.MustCompile(regexp.QuoteMeta(sl)))
+		beginSingleLineComment = append(beginSingleLineComment, regexp.MustCompile(regexp.QuoteMeta(sl)))
 	}
 	for _, ml := range MultiLineComments {
-		BeginMultiLineComment = append(BeginMultiLineComment, regexp.MustCompile(regexp.QuoteMeta(ml[0])))
-		EndMultiLineComment = append(EndMultiLineComment, regexp.MustCompile(regexp.QuoteMeta(ml[1])))
+		beginMultiLineComment = append(beginMultiLineComment, regexp.MustCompile(regexp.QuoteMeta(ml[0])))
+		endMultiLineComment = append(endMultiLineComment, regexp.MustCompile(regexp.QuoteMeta(ml[1])))
 	}
 }
 
 // FindMultiLineComment compares a given token to the start of a multiline comment
 // and if true, returns the bool with a regex. Otherwise false and nil.
 func FindMultiLineComment(token []byte) (matched bool, terminator *regexp.Regexp) {
-	for idx, re := range BeginMultiLineComment {
+	for idx, re := range beginMultiLineComment {
 		if re.Match(token) {
-			return true, EndMultiLineComment[idx]
+			return true, endMultiLineComment[idx]
 		}
 	}
 	return false, nil
@@ -111,7 +110,7 @@ line:
 	for scanlines.Scan() {
 		ln := scanlines.Bytes()
 
-		for _, re := range StartLineComment {
+		for _, re := range startLineComment {
 			if re.Match(ln) {
 				goto line
 			}
@@ -140,7 +139,7 @@ line:
 
 			// find end of string literal
 			if stringStart {
-				s := String.FindSubmatch(tokenBytes)
+				s := stringRegexp.FindSubmatch(tokenBytes)
 				if s != nil && s[1][0] == stringEnd {
 					stringStart = false
 					stringEnd = 0
@@ -149,7 +148,7 @@ line:
 			}
 
 			// find single-line comment
-			for _, re := range BeginSingleLineComment {
+			for _, re := range beginSingleLineComment {
 				if re.Match(tokenBytes) {
 					goto line
 				}
@@ -163,14 +162,14 @@ line:
 			}
 
 			// find start of string literal
-			if s := String.FindSubmatch(tokenBytes); s != nil {
+			if s := stringRegexp.FindSubmatch(tokenBytes); s != nil {
 				stringStart = true
 				stringEnd = s[1][0]
 				goto word
 			}
 
 			// find numeric literal
-			if n := Number.Find(tokenBytes); n != nil {
+			if n := numberRegexp.Find(tokenBytes); n != nil {
 				goto word
 			}
 

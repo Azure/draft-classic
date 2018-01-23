@@ -13,17 +13,20 @@ import (
 	"github.com/Azure/draft/pkg/version"
 )
 
+// Installer is the client used to install draftd into the kubernetes cluster via helm.
 type Installer struct {
 	client    helm.Interface
 	config    *draftconfig.DraftConfig
 	namespace string
 }
 
+// Interface defines the installer interface.
 type Interface interface {
 	Install() error
 	Upgrade() error
 }
 
+// New creates a new Installer
 func New(client helm.Interface, config *draftconfig.DraftConfig, namespace string) *Installer {
 	return &Installer{
 		client:    client,
