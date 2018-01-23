@@ -191,7 +191,7 @@ func doPackDetection(home draftpath.Home, out io.Writer) (string, error) {
 				}
 			}
 		}
-		fmt.Fprintf(out, "--> Draft could not find a pack for %s. Trying the next likeliest language...\n", detectedLang.Language)
+		fmt.Fprintf(out, "--> Could not find a pack for %s. Trying to find the next likely language match...\n", detectedLang.Language)
 	}
 	return "", ErrNoLanguageDetected
 }
