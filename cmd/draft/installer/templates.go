@@ -112,6 +112,8 @@ spec:
           value: {{ if .Values.tls.enable }}"1"{{ else }}"0"{{ end }}
         - name: DRAFT_TLS_CERTS
           value: "/etc/certs"
+        - name: DOCKER_HOST
+          value: tcp://localhost:2375
         livenessProbe:
           httpGet:
             path: /ping
@@ -120,18 +122,26 @@ spec:
           httpGet:
             path: /ping
             port: 8080
+      - name: dind
+        image: docker:17.05.0-ce-dind
+        args:
+        - --insecure-registry=10.0.0.0/24
+        env:
+        - name: DOCKER_DRIVER
+          value: overlay
+        securityContext:
+            privileged: true
         volumeMounts:
-        - mountPath: /var/run/docker.sock
-          name: docker-socket
+        - mountPath: /var/lib/docker
+          name: docker-graph-storage
         {{- if (or .Values.tls.enable .Values.tls.verify) }}
         - mountPath: "/etc/certs"
           name: draftd-certs
           readOnly: true
         {{- end }}
       volumes:
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock
+      - name: docker-graph-storage
+        emptyDir: {}
       {{- if (or .Values.tls.enable .Values.tls.verify) }}
       - name: draftd-certs
         secret:
