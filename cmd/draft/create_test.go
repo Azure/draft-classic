@@ -23,10 +23,11 @@ func TestCreate(t *testing.T) {
 		src         string
 		expectedErr error
 	}{
+		{"testdata/create/src/empty", nil},
+		{"testdata/create/src/html-but-actually-go", nil},
 		{"testdata/create/src/simple-go", nil},
 		{"testdata/create/src/simple-go-with-draftignore", nil},
 		{"testdata/create/src/simple-go-with-chart", nil},
-		{"testdata/create/src/empty", nil},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("create %s", tc.src), func(t *testing.T) {
