@@ -70,7 +70,7 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin, existingRepos []repo.Reposit
 		fmt.Sprintf("--debug=%v", flagDebug),
 	}
 
-	packRepoCmd, _, err := newRootCmd(i.out, i.in).Find([]string{"pack-repo"})
+	packRepoCmd, _, err := rootCmd.Find([]string{"pack-repo"})
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugi
 		fmt.Sprintf("--debug=%v", flagDebug),
 	}
 
-	plugInstallCmd, _, err := newRootCmd(i.out, i.in).Find([]string{"plugin", "install"})
+	plugInstallCmd, _, err := rootCmd.Find([]string{"plugin", "install"})
 	if err != nil {
 		return err
 	}
@@ -154,6 +154,9 @@ func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugi
 	if err := plugInstallCmd.RunE(plugInstallCmd, installArgs); err != nil {
 		return err
 	}
+
+	// reload plugins
+	loadPlugins(rootCmd, i.home, i.out, i.in)
 
 	debug("Successfully installed %v %v from %v",
 		builtin.Name, builtin.Version, builtin.URL)
