@@ -31,7 +31,7 @@ var files = map[string]string{
 #                     in the statistics as the parent language.
 #
 # Any additions or modifications (even trivial) should have corresponding
-# test changes in `+"`"+`test/test_blob.rb`+"`"+`.
+# test changes in ` + "`" + `test/test_blob.rb` + "`" + `.
 #
 # Please keep this list alphabetized. Capitalization comes before lowercase.
 
@@ -5303,7 +5303,7 @@ xBase:
 # pathname.
 #
 # Please add additional test coverage to
-# `+"`"+`test/test_blob.rb#test_vendored`+"`"+` if you make any changes.
+# ` + "`" + `test/test_blob.rb#test_vendored` + "`" + ` if you make any changes.
 
 ## Vendor Conventions ##
 
@@ -5658,7 +5658,7 @@ xBase:
 # pathname.
 #
 # Please add additional test coverage to
-# `+"`"+`test/test_blob.rb#test_documentation`+"`"+` if you make any changes.
+# ` + "`" + `test/test_blob.rb#test_documentation` + "`" + ` if you make any changes.
 
 ## Documentation directories ##
 
@@ -5683,5 +5683,4 @@ xBase:
 # Samples folders
 - ^[Ss]amples?/
 `,
-
 }

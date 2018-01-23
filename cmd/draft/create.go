@@ -186,5 +186,5 @@ func doPackDetection(home draftpath.Home, out io.Writer) (string, error) {
 			}
 		}
 	}
-	return "", pack.NotFound
+	return "", pack.ErrNotFound
 }

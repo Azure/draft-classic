@@ -53,7 +53,7 @@ func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *U
 	msgc := make(chan *UpMessage, 1)
 	errc := make(chan error, 1)
 	go func() {
-		if err := up_build(ctx, client, req, msgc); err != nil {
+		if err := upBuild(ctx, client, req, msgc); err != nil {
 			errc <- err
 		}
 		close(errc)
@@ -100,13 +100,13 @@ func (c *clientImpl) UpStream(apictx context.Context, reqc <-chan *UpRequest, ou
 		}
 		close(outc)
 	}()
-	return up_stream(rpcctx, client, reqc, msgc)
+	return upStream(rpcctx, client, reqc, msgc)
 }
 
-func up_build(ctx context.Context, rpc DraftClient, msg *UpRequest, outc chan<- *UpMessage) error {
+func upBuild(ctx context.Context, rpc DraftClient, msg *UpRequest, outc chan<- *UpMessage) error {
 	s, err := rpc.UpBuild(ctx, &UpMessage{&UpMessage_UpRequest{msg}})
 	if err != nil {
-		return fmt.Errorf("rpc error handling up_build: %v", err)
+		return fmt.Errorf("rpc error handling upBuild: %v", err)
 	}
 	defer close(outc)
 	for {
@@ -115,16 +115,16 @@ func up_build(ctx context.Context, rpc DraftClient, msg *UpRequest, outc chan<- 
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("rpc error handling up_build recv: %v", err)
+			return fmt.Errorf("rpc error handling upBuild recv: %v", err)
 		}
 		outc <- resp
 	}
 }
 
-func up_stream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, recv chan<- *UpMessage) error {
+func upStream(ctx context.Context, rpc DraftClient, send <-chan *UpRequest, recv chan<- *UpMessage) error {
 	stream, err := rpc.UpStream(ctx)
 	if err != nil {
-		return fmt.Errorf("rpc error handling up_stream: %v", err)
+		return fmt.Errorf("rpc error handling upStream: %v", err)
 	}
 	done := make(chan struct{})
 	errc := make(chan error)
