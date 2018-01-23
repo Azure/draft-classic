@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package storage;
+
+// Object is the storage object for a draft applications build history.
+message Object {
+	string buildID = 1;  // build uuid generated during draft up
+	string release = 2;  // name of associated helm release
+	bytes contextID = 3; // checksum of docker context
+}

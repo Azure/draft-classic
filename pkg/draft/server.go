@@ -27,6 +27,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/Azure/draft/pkg/rpc"
+	"github.com/Azure/draft/pkg/storage"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -40,6 +41,7 @@ type ServerConfig struct {
 	Kube           k8s.Interface
 	UseTLS         bool
 	TLSConfig      *tls.Config
+	Storage        storage.Store
 }
 
 // Server is a draft Server.
