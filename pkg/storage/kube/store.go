@@ -2,13 +2,12 @@ package kube
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Azure/draft/pkg/storage"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/pkg/api/v1"
-
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
 // ConfigMaps represents a Kubernetes configmap storage engine for a storage.Object .
@@ -16,13 +15,18 @@ type ConfigMaps struct {
 	impl corev1.ConfigMapInterface
 }
 
+// compile-time guarantee that *ConfigMaps implements storage.Store
 var _ storage.Store = (*ConfigMaps)(nil)
 
+// NewConfigMaps returns an implementation of storage.Store backed by kubernetes
+// ConfigMap objects to store draft application build context.
 func NewConfigMaps(impl corev1.ConfigMapInterface) *ConfigMaps {
 	return &ConfigMaps{impl}
 }
 
 // DeleteBuilds deletes all draft builds for the application specified by appName.
+//
+// DeleteBuilds implements storage.Deleter.
 func (this *ConfigMaps) DeleteBuilds(ctx context.Context, appName string) ([]*storage.Object, error) {
 	builds, err := this.GetBuilds(ctx, appName)
 	if err != nil {
@@ -33,9 +37,14 @@ func (this *ConfigMaps) DeleteBuilds(ctx context.Context, appName string) ([]*st
 }
 
 // DeleteBuild deletes the draft build given by buildID for the application specified by appName.
+//
+// DeleteBuild implements storage.Deleter.
 func (this *ConfigMaps) DeleteBuild(ctx context.Context, appName, buildID string) (obj *storage.Object, err error) {
 	var cfgmap *v1.ConfigMap
 	if cfgmap, err = this.impl.Get(appName, metav1.GetOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, storage.NewErrAppStorageNotFound(appName)
+		}
 		return nil, err
 	}
 	if build, ok := cfgmap.Data[buildID]; ok {
@@ -46,23 +55,63 @@ func (this *ConfigMaps) DeleteBuild(ctx context.Context, appName, buildID string
 		_, err = this.impl.Update(cfgmap)
 		return obj, err
 	}
-	return nil, fmt.Errorf("application %q storage object %q not found", appName, buildID)
+	return nil, storage.NewErrAppBuildNotFound(appName, buildID)
 }
 
-// CreateBuild stores a draft.Build for the application specified by appName.
+// CreateBuild creates new storage for the application specified by appName to include build.
+//
+// If the configmap storage already exists for the application, ErrAppStorageExists is returned.
+//
+// CreateBuild implements storage.Creater.
 func (this *ConfigMaps) CreateBuild(ctx context.Context, appName string, build *storage.Object) error {
 	cfgmap, err := newConfigMap(appName, build)
 	if err != nil {
 		return err
 	}
-	_, err = this.impl.Create(cfgmap)
+	if _, err = this.impl.Create(cfgmap); err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return storage.NewErrAppStorageExists(appName)
+		}
+		return err
+	}
+	return nil
+}
+
+// UpdateBuild updates the application configmap storage specified by appName to include build.
+//
+// If build does not exist, a new storage entry is created. Otherwise the existing storage
+// is updated.
+//
+// UpdateBuild implements storage.Updater.
+func (this *ConfigMaps) UpdateBuild(ctx context.Context, appName string, build *storage.Object) (err error) {
+	var cfgmap *v1.ConfigMap
+	if cfgmap, err = this.impl.Get(appName, metav1.GetOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			return this.CreateBuild(ctx, appName, build)
+		}
+		return err
+	}
+	if _, ok := cfgmap.Data[build.BuildID]; ok {
+		return storage.NewErrAppBuildExists(appName, build.BuildID)
+	}
+	content, err := storage.EncodeToString(build)
+	if err != nil {
+		return err
+	}
+	cfgmap.Data[build.BuildID] = content
+	_, err = this.impl.Update(cfgmap)
 	return err
 }
 
 // GetBuilds returns a slice of builds for the given app name.
+//
+// GetBuilds implements storage.Getter.
 func (this *ConfigMaps) GetBuilds(ctx context.Context, appName string) (builds []*storage.Object, err error) {
 	var cfgmap *v1.ConfigMap
 	if cfgmap, err = this.impl.Get(appName, metav1.GetOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, storage.NewErrAppStorageNotFound(appName)
+		}
 		return nil, err
 	}
 	for _, obj := range cfgmap.Data {
@@ -76,9 +125,14 @@ func (this *ConfigMaps) GetBuilds(ctx context.Context, appName string) (builds [
 }
 
 // GetBuild returns the build associated with buildID for the specified app name.
+//
+// GetBuild implements storage.Getter.
 func (this *ConfigMaps) GetBuild(ctx context.Context, appName, buildID string) (obj *storage.Object, err error) {
 	var cfgmap *v1.ConfigMap
 	if cfgmap, err = this.impl.Get(appName, metav1.GetOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, storage.NewErrAppStorageNotFound(appName)
+		}
 		return nil, err
 	}
 	if data, ok := cfgmap.Data[buildID]; ok {
@@ -87,7 +141,7 @@ func (this *ConfigMaps) GetBuild(ctx context.Context, appName, buildID string) (
 		}
 		return obj, nil
 	}
-	return nil, fmt.Errorf("application %q storage object %q not found", appName, buildID)
+	return nil, storage.NewErrAppBuildNotFound(appName, buildID)
 }
 
 // newConfigMap constructs a kubernetes ConfigMap object to store a build.

@@ -41,13 +41,30 @@ func TestStoreCreateBuild(t *testing.T) {
 	obj := objectStub("foo1", "bar1", []byte("foobar1"))
 	err := store.CreateBuild(ctx, "app2", obj)
 	if err != nil {
-		t.Fatalf("failed to created build: %v", err)
+		t.Fatalf("failed to create build: %v", err)
 	}
 	got, err := store.GetBuild(ctx, "app2", "foo1")
 	if err != nil {
 		t.Fatalf("failed to get storage object: %v", err)
 	}
 	assertEqual(t, "CreateBuild", got, obj)
+}
+
+func TestStoreUpdateBuild(t *testing.T) {
+	var (
+		store = newMockConfigMapsTestFixture(t)
+		ctx   = context.Background()
+	)
+	obj := objectStub("foo1", "bar1", []byte("foobar1"))
+	err := store.UpdateBuild(ctx, "app2", obj)
+	if err != nil {
+		t.Fatalf("failed to update build: %v", err)
+	}
+	got, err := store.GetBuild(ctx, "app2", "foo1")
+	if err != nil {
+		t.Fatalf("failed to get storage object: %v", err)
+	}
+	assertEqual(t, "UpdateBuild", got, obj)
 }
 
 func TestStoreGetBuilds(t *testing.T) {

@@ -81,9 +81,6 @@ func (mock *MockConfigMaps) Create(cfgmap *v1.ConfigMap) (*v1.ConfigMap, error) 
 // Update updates a ConfigMap.
 func (mock *MockConfigMaps) Update(cfgmap *v1.ConfigMap) (*v1.ConfigMap, error) {
 	name := cfgmap.ObjectMeta.Name
-	if _, ok := mock.cfgmaps[name]; !ok {
-		return nil, apierrors.NewNotFound(api.Resource("tests"), name)
-	}
 	mock.cfgmaps[name] = cfgmap
 	return cfgmap, nil
 }

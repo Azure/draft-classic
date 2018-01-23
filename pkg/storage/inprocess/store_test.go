@@ -53,6 +53,27 @@ func TestStoreCreateBuild(t *testing.T) {
 		t.Fatalf("failed to get build entry: %v", err)
 	}
 	assertEqual(t, "CreateBuild", build, alt)
+
+	// try creating a second time; this should fail with ErrAppStorageExists.
+	if err := store.CreateBuild(ctx, "app2", build); err == nil {
+		t.Fatalf("expected second CreateBuild to fail")
+	}
+}
+
+func TestStoreUpdateBuild(t *testing.T) {
+	var (
+		build = &storage.Object{BuildID: "foo", Release: "bar", ContextID: []byte("foobar")}
+		store = NewStoreWithMocks()
+		ctx   = context.TODO()
+	)
+	if err := store.UpdateBuild(ctx, "app2", build); err != nil {
+		t.Fatalf("failed to update storage entry: %v", err)
+	}
+	alt, err := store.GetBuild(ctx, "app2", build.BuildID)
+	if err != nil {
+		t.Fatalf("failed to get build entry: %v", err)
+	}
+	assertEqual(t, "UpdateBuild", build, alt)
 }
 
 func TestStoreGetBuilds(t *testing.T) {
