@@ -16,7 +16,5 @@ run_style_check() {
   make test-lint
 }
 
-case "${CIRCLE_NODE_INDEX-0}" in
-  0) run_unit_test   ;;
-  1) run_style_check ;;
-esac
+run_unit_test
+run_style_check
