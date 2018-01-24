@@ -3,11 +3,12 @@ package kube
 import (
 	"testing"
 
+	"k8s.io/api/core/v1"
+	"k8s.io/kubernetes/pkg/api"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/Azure/draft/pkg/storage"
 )
