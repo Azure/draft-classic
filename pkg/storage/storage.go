@@ -20,8 +20,8 @@ type Deleter interface {
 	DeleteBuild(ctx context.Context, appName, buildID string) (*Object, error)
 }
 
-// Creater represents the create APIs of the storage engine.
-type Creater interface {
+// Creator represents the create APIs of the storage engine.
+type Creator interface {
 	// CreateBuild creates and stores a new build.
 	CreateBuild(ctx context.Context, appName string, build *Object) error
 }
@@ -42,7 +42,7 @@ type Getter interface {
 
 // Store represents a storage engine for application state stored by Draftd.
 type Store interface {
-	Creater
+	Creator
 	Deleter
 	Updater
 	Getter
