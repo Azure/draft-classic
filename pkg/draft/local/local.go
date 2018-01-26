@@ -31,7 +31,7 @@ type App struct {
 	Container string
 }
 
-// Connection encapsulated information to connect to am application
+// Connection encapsulated information to connect to an application
 type Connection struct {
 	Tunnel    *kube.Tunnel
 	PodName   string
@@ -56,8 +56,8 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 }
 
 // Connect creates a local tunnel to a Kubernetes pod running the application and returns the connection information
-func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config) (*Connection, error) {
-	tunnel, podName, err := a.NewTunnel(clientset, clientConfig)
+func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, containerName string) (*Connection, error) {
+	tunnel, podName, err := a.NewTunnel(clientset, clientConfig, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +70,13 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 }
 
 // NewTunnel creates and returns a tunnel to a Kubernetes pod running the application
-func (a *App) NewTunnel(clientset kubernetes.Interface, config *restclient.Config) (*kube.Tunnel, string, error) {
+func (a *App) NewTunnel(clientset kubernetes.Interface, config *restclient.Config, containerName string) (*kube.Tunnel, string, error) {
 	podName, containers, err := getAppPodNameAndContainers(a.Namespace, a.Name, clientset)
 	if err != nil {
 		return nil, "", err
 	}
 
-	port, err := getContainerPort(containers, a.Container)
+	port, err := getContainerPort(containers, containerName)
 	if err != nil {
 		return nil, "", err
 	}

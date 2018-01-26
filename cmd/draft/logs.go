@@ -48,7 +48,7 @@ func (l *logsCmd) run() error {
 		Container: "draftd",
 	}
 
-	connection, err := draftApp.Connect(client, config)
+	connection, err := draftApp.Connect(client, config, draftApp.Container)
 	if err != nil {
 		return fmt.Errorf("Could not connect to draftd: %s", err)
 	}

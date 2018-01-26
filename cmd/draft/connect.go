@@ -14,6 +14,8 @@ const (
 `
 )
 
+var containerName string
+
 type connectCmd struct {
 	out      io.Writer
 	logLines int64
@@ -37,6 +39,7 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
+	f.StringVarP(&containerName, "container", "c", "", "name of the container to connect to")
 
 	return cmd
 }
@@ -52,8 +55,10 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		return err
 	}
 
+	deployedApp.Container = containerName
+
 	fmt.Fprintf(cn.out, "Connecting to your app...")
-	connection, err := deployedApp.Connect(client, config)
+	connection, err := deployedApp.Connect(client, config, deployedApp.Container)
 	if err != nil {
 		return err
 	}
