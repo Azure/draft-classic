@@ -58,6 +58,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 	if containerName == "" {
 		containerName = deployedApp.Container
 	}
+
 	fmt.Fprintf(cn.out, "Connecting to your app...")
 	connection, err := deployedApp.Connect(client, config, containerName)
 	if err != nil {
@@ -68,7 +69,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 	fmt.Fprintln(cn.out, "SUCCESS...Connect to your app on "+detail)
 
 	fmt.Fprintln(cn.out, "Starting log streaming...")
-	readCloser, err := connection.RequestLogStream(deployedApp, cn.logLines)
+	readCloser, err := connection.RequestLogStream(deployedApp, cn.logLines, containerName)
 	if err != nil {
 		return err
 	}

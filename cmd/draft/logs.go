@@ -59,7 +59,7 @@ func (l *logsCmd) run() error {
 	}
 
 	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp, l.logLines)
+	readCloser, err := connection.RequestLogStream(draftApp, l.logLines, containerName)
 	if err != nil {
 		return fmt.Errorf("Could not get log stream: %s", err)
 	}

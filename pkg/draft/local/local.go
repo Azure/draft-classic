@@ -114,13 +114,13 @@ func getContainerPort(containers []v1.Container, targetContainer string) (int, e
 }
 
 // RequestLogStream returns a stream of the application pod's logs
-func (c *Connection) RequestLogStream(app *App, logLines int64) (io.ReadCloser, error) {
+func (c *Connection) RequestLogStream(app *App, logLines int64, containerName string) (io.ReadCloser, error) {
 
 	req := c.Clientset.CoreV1().Pods(app.Namespace).GetLogs(c.PodName,
 		&v1.PodLogOptions{
 			Follow:    true,
 			TailLines: &logLines,
-			Container: app.Container,
+			Container: containerName,
 		})
 
 	return req.Stream()
