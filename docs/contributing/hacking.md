@@ -125,6 +125,7 @@ helm delete --purge draft
 
 
 [docker]: https://www.docker.com/
+[install]: ../install.md
 [git]: https://git-scm.com/
 [go]: https://golang.org/
 [helm]: https://github.com/kubernetes/helm
