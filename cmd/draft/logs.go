@@ -32,7 +32,6 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.Int64Var(&lc.logLines, "tail", 100, "lines of recent log lines to display")
-	f.StringVarP(&containerName, "container", "c", "", "name of the container to connect to")
 
 	return cmd
 }
@@ -49,17 +48,13 @@ func (l *logsCmd) run() error {
 		Container: "draftd",
 	}
 
-	if containerName == "" {
-		containerName = draftApp.Container
-	}
-
-	connection, err := draftApp.Connect(client, config, containerName)
+	connection, err := draftApp.Connect(client, config, draftApp.Container)
 	if err != nil {
 		return fmt.Errorf("Could not connect to draftd: %s", err)
 	}
 
 	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp, l.logLines, containerName)
+	readCloser, err := connection.RequestLogStream(draftApp, l.logLines)
 	if err != nil {
 		return fmt.Errorf("Could not get log stream: %s", err)
 	}
