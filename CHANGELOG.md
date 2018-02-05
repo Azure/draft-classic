@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.1
+
+# Bugs
+
+* fixed up how the --insecure-registry flag was set up for dind
+
 ## v0.10.0
 
 ### Features
