@@ -21,7 +21,7 @@ var (
 	// Increment major number for new feature additions and behavioral changes.
 	// Increment minor number for bug fixes and performance enhancements.
 	// Increment patch number for critical fixes to existing releases.
-	Release = "v0.10.0"
+	Release = "v0.10.1"
 
 	// BuildMetadata is extra build time data
 	BuildMetadata = ""
