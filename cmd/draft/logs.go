@@ -48,13 +48,13 @@ func (l *logsCmd) run() error {
 		Container: "draftd",
 	}
 
-	connection, err := draftApp.Connect(client, config)
+	connection, err := draftApp.Connect(client, config, draftApp.Container)
 	if err != nil {
 		return fmt.Errorf("Could not connect to draftd: %s", err)
 	}
 
 	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp, l.logLines)
+	readCloser, err := connection.RequestLogStream(draftApp.Namespace, draftApp.Container, l.logLines)
 	if err != nil {
 		return fmt.Errorf("Could not get log stream: %s", err)
 	}
