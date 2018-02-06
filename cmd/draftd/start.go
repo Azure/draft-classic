@@ -12,6 +12,7 @@ import (
 	"k8s.io/helm/pkg/tlsutil"
 
 	"github.com/Azure/draft/pkg/draft"
+	"github.com/Azure/draft/pkg/draftd/portforwarder"
 	"github.com/Azure/draft/pkg/kube"
 	"github.com/Azure/draft/pkg/storage/inprocess"
 	cfgmaps "github.com/Azure/draft/pkg/storage/kube"
@@ -126,7 +127,7 @@ func (c *startCmd) run() (err error) {
 	}
 	switch c.storageEngine {
 	case "configmaps":
-		const namespace = "default"
+		namespace := envOr(namespaceEnvVar, portforwarder.DefaultDraftNamespace)
 		cfg.Storage = cfgmaps.NewConfigMaps(cfg.Kube.CoreV1().ConfigMaps(namespace))
 	case "inprocess":
 		cfg.Storage = inprocess.NewStore()
