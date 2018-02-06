@@ -35,11 +35,11 @@ spec:
         livenessProbe:
           httpGet:
             path: /ping
-            port: {{ .Values.service.http.internalPort }}
+            port: 8080
         readinessProbe:
           httpGet:
             path: /ping
-            port: {{ .Values.service.http.internalPort }}
+            port: 8080
       - name: dind
         image: docker:17.05.0-ce-dind
         args:
