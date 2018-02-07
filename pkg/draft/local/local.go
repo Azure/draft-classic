@@ -40,7 +40,7 @@ type Connection struct {
 
 // ContainerConnection encapsulates a connection to a container in a pod
 type ContainerConnection struct {
-	Tunnel        *kube.Tunnel
+	Tunnels       []*kube.Tunnel
 	ContainerName string
 }
 
@@ -63,9 +63,7 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
 func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, containerName string) (*Connection, error) {
-
 	var cc []*ContainerConnection
-
 	pod, err := getPod(a.Namespace, a.Name, clientset)
 	if err != nil {
 		return nil, err
@@ -73,14 +71,17 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 
 	// if no container was specified as flag, return tunnels to all containers in pod
 	if containerName == "" {
-
 		for _, c := range pod.Spec.Containers {
+			var tt []*kube.Tunnel
 
-			port := int(c.Ports[0].ContainerPort)
-			t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, port)
+			// iterate through all ports of the contaier and create tunnels
+			for _, p := range c.Ports {
+				t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, int(p.ContainerPort))
+				tt = append(tt, t)
+			}
 			cc = append(cc, &ContainerConnection{
 				ContainerName: c.Name,
-				Tunnel:        t,
+				Tunnels:       tt,
 			})
 		}
 
@@ -90,17 +91,23 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 			Clientset:            clientset,
 		}, nil
 	}
+	var tt []*kube.Tunnel
 
 	// a container was specified - return tunnel to specified container
-	port, err := getTargetContainerPort(pod.Spec.Containers, containerName)
+	ports, err := getTargetContainerPorts(pod.Spec.Containers, containerName)
 	if err != nil {
 		return nil, err
 	}
 
-	t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, port)
+	// iterate through all ports of the container and create tunnels
+	for _, p := range ports {
+		t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, p)
+		tt = append(tt, t)
+	}
+
 	cc = append(cc, &ContainerConnection{
 		ContainerName: containerName,
-		Tunnel:        t,
+		Tunnels:       tt,
 	})
 
 	return &Connection{
@@ -108,7 +115,6 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 		PodName:              pod.Name,
 		Clientset:            clientset,
 	}, nil
-
 }
 
 // RequestLogStream returns a stream of the application pod's logs
@@ -141,21 +147,23 @@ func getPod(namespace, label string, clientset kubernetes.Interface) (*v1.Pod, e
 	return nil, fmt.Errorf("could not find a ready pod")
 }
 
-func getTargetContainerPort(containers []v1.Container, targetContainer string) (int, error) {
-	var port int
+func getTargetContainerPorts(containers []v1.Container, targetContainer string) ([]int, error) {
+	var ports []int
 	containerFound := false
 
 	for _, c := range containers {
 
 		if c.Name == targetContainer && !containerFound {
 			containerFound = true
-			port = int(c.Ports[0].ContainerPort)
+			for _, p := range c.Ports {
+				ports = append(ports, int(p.ContainerPort))
+			}
 		}
 	}
 
 	if containerFound == false {
-		return 0, fmt.Errorf("container '%s' not found", targetContainer)
+		return nil, fmt.Errorf("container '%s' not found", targetContainer)
 	}
 
-	return port, nil
+	return ports, nil
 }
