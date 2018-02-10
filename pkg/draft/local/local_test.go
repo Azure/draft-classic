@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 )
 
 func TestDeployedApplication(t *testing.T) {
@@ -23,10 +23,10 @@ func TestDeployedApplication(t *testing.T) {
 	}
 }
 
-func TestGetContainerPort(t *testing.T) {
+func TestGetTargetContainerPort(t *testing.T) {
 	containersTest1 := []v1.Container{
-		v1.Container{Name: "anothercontainer", Ports: []v1.ContainerPort{v1.ContainerPort{ContainerPort: 3000}}},
-		v1.Container{Name: "mycontainer", Ports: []v1.ContainerPort{v1.ContainerPort{ContainerPort: 4000}}},
+		{Name: "anothercontainer", Ports: []v1.ContainerPort{{ContainerPort: 3000}}},
+		{Name: "mycontainer", Ports: []v1.ContainerPort{{ContainerPort: 4000}}},
 	}
 
 	testCases := []struct {
@@ -37,12 +37,11 @@ func TestGetContainerPort(t *testing.T) {
 		expectErr       bool
 	}{
 		{"test correct container and port found", containersTest1, "mycontainer", 4000, false},
-		{"test first container and port found", containersTest1, "", 3000, false},
 		{"test container not found error", containersTest1, "randomcontainer", 0, true},
 	}
 
 	for _, tc := range testCases {
-		port, err := getContainerPort(tc.containers, tc.targetContainer)
+		port, err := getTargetContainerPort(tc.containers, tc.targetContainer)
 		if tc.expectErr && err == nil {
 			t.Errorf("Expected err but did not get one for case: %s", tc.description)
 		}

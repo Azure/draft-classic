@@ -14,7 +14,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/helm/pkg/helm"
+	hpf "k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/tlsutil"
 
@@ -100,15 +103,11 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 func setupConnection(c *cobra.Command, args []string) error {
 	if draftHost == "" {
-		clientset, config, err := getKubeClient(kubeContext)
+		client, config, err := getKubeClient(kubeContext)
 		if err != nil {
 			return err
 		}
-		clientConfig, err := config.ClientConfig()
-		if err != nil {
-			return err
-		}
-		tunnel, err := portforwarder.New(clientset, clientConfig, draftNamespace)
+		tunnel, err := portforwarder.New(client, config, draftNamespace)
 		if err != nil {
 			return err
 		}
@@ -195,17 +194,25 @@ func homePath() string {
 	return os.ExpandEnv(draftHome)
 }
 
-// getKubeClient is a convenience method for creating kubernetes config and client
-// for a given kubeconfig context
-func getKubeClient(context string) (*kubernetes.Clientset, clientcmd.ClientConfig, error) {
-	config := kube.GetConfig(context)
-	clientConfig, err := config.ClientConfig()
+// configForContext creates a Kubernetes REST client configuration for a given kubeconfig context.
+func configForContext(context string) (clientcmd.ClientConfig, *rest.Config, error) {
+	clientConfig := kube.GetConfig(context)
+	config, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", context, err)
+		return nil, nil, fmt.Errorf("could not get Kubernetes config for context %q: %s", context, err)
 	}
-	client, err := kubernetes.NewForConfig(clientConfig)
+	return clientConfig, config, nil
+}
+
+// getKubeClient creates a Kubernetes config and client for a given kubeconfig context.
+func getKubeClient(context string) (kubernetes.Interface, *rest.Config, error) {
+	_, config, err := configForContext(context)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
+		return nil, nil, err
+	}
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get Kubernetes client: %s", err)
 	}
 	return client, config, nil
 }
@@ -241,4 +248,22 @@ func addFlagsTLS(cmd *cobra.Command) *cobra.Command {
 	cmd.Flags().BoolVar(&tlsVerify, "tls-verify", false, "enable TLS for request and verify remote")
 	cmd.Flags().BoolVar(&tlsEnable, "tls", false, "enable TLS for request")
 	return cmd
+}
+
+func setupHelm(kubeClient kubernetes.Interface, config *rest.Config, namespace string) (helm.Interface, error) {
+	tunnel, err := setupTillerConnection(kubeClient, config, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return helm.NewClient(helm.Host(fmt.Sprintf("localhost:%d", tunnel.Local))), nil
+}
+
+func setupTillerConnection(client kubernetes.Interface, config *rest.Config, namespace string) (*kube.Tunnel, error) {
+	tunnel, err := hpf.New(namespace, client, config)
+	if err != nil {
+		return nil, fmt.Errorf("Could not get a connection to tiller: %s\nPlease ensure you have run `helm init`", err)
+	}
+
+	return tunnel, err
 }

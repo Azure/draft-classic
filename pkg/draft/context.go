@@ -18,6 +18,7 @@ import (
 	"github.com/Azure/draft/pkg/rpc"
 )
 
+// AppContext contains state information carried across the various draft stage boundaries.
 type AppContext struct {
 	srv  *Server
 	req  *rpc.UpRequest

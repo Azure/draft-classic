@@ -8,7 +8,6 @@ APP             = draft
 
 # go option
 GO        ?= go
-PKG       := $(shell glide novendor)
 TAGS      := kqueue
 TESTS     := .
 TESTFLAGS :=
@@ -110,14 +109,10 @@ test-lint:
 
 .PHONY: test-unit
 test-unit:
-	$(GO) test $(GOFLAGS) -cover -run $(TESTS) $(PKG) $(TESTFLAGS)
-
-.PHONY: test-e2e
-test-e2e:
-	./tests/e2e.sh
+	$(GO) test $(GOFLAGS) -cover -run $(TESTS) ./... $(TESTFLAGS)
 
 HAS_GOMETALINTER := $(shell command -v gometalinter;)
-HAS_GLIDE := $(shell command -v glide;)
+HAS_DEP := $(shell command -v dep;)
 HAS_GOX := $(shell command -v gox;)
 HAS_GIT := $(shell command -v git;)
 HAS_BINDATA := $(shell command -v go-bindata;)
@@ -128,8 +123,8 @@ ifndef HAS_GOMETALINTER
 	go get -u github.com/alecthomas/gometalinter
 	gometalinter --install
 endif
-ifndef HAS_GLIDE
-	go get -u github.com/Masterminds/glide
+ifndef HAS_DEP
+	go get -u github.com/golang/dep/cmd/dep
 endif
 ifndef HAS_GOX
 	go get -u github.com/mitchellh/gox
@@ -140,7 +135,7 @@ endif
 ifndef HAS_BINDATA
 	go get github.com/jteeuwen/go-bindata/...
 endif
-	glide install --strip-vendor
+	dep ensure -v
 	scripts/setup-apimachinery.sh
 
 include versioning.mk

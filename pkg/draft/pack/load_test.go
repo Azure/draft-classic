@@ -52,6 +52,10 @@ func TestFromDir(t *testing.T) {
 		t.Skip("skipping file permission mode tests on CI servers")
 	}
 
+	if err := os.MkdirAll(filepath.Join(dir, packName, DockerfileName), 0755); err != nil {
+		t.Fatal(err)
+	}
+
 	// load a pack with an un-readable Dockerfile (file perms 0000)
 	if err := os.Chmod(filepath.Join(dir, packName, DockerfileName), 0000); err != nil {
 		t.Fatalf("dir %s: %s", dir, err)

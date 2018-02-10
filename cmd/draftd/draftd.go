@@ -24,6 +24,9 @@ const (
 	// tlsCertsEnvVar names the environment variable that points to
 	// the directory where Draftd's TLS certificates are located.
 	tlsCertsEnvVar = "TILLER_TLS_CERTS"
+	// namespaceEnvVar refers to the environment variable that
+	// indicates which namespace in which draftd is running.
+	namespaceEnvVar = "DRAFT_NAMESPACE"
 )
 
 var (
@@ -65,6 +68,13 @@ func tlsOptions() tlsutil.Options {
 		opts.ClientAuth = tls.RequireAndVerifyClientCert
 	}
 	return opts
+}
+
+func envOr(name string, alt string) string {
+	if s := os.Getenv(name); s != "" {
+		return s
+	}
+	return alt
 }
 
 func newRootCmd(out io.Writer) *cobra.Command {

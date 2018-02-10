@@ -48,7 +48,7 @@ func (d *deleteCmd) run() error {
 	} else {
 		deployedApp, err := local.DeployedApplication(draftToml, defaultDraftEnvironment())
 		if err != nil {
-			return errors.New("Unable to detect app name\nPlesae pass in the name of the application")
+			return errors.New("Unable to detect app name\nPlease pass in the name of the application")
 
 		}
 
@@ -70,16 +70,12 @@ func (d *deleteCmd) run() error {
 // Returns an error if the command failed.
 func Delete(app string) error {
 	// set up helm client
-	client, clientConfig, err := getKubeClient(kubeContext)
+	client, config, err := getKubeClient(kubeContext)
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
-	restClientConfig, err := clientConfig.ClientConfig()
-	if err != nil {
-		return fmt.Errorf("Could not retrieve client config from the kube client: %s", err)
-	}
 
-	helmClient, err := setupHelm(client, restClientConfig, draftNamespace)
+	helmClient, err := setupHelm(client, config, draftNamespace)
 	if err != nil {
 		return err
 	}

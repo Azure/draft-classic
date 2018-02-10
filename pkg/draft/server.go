@@ -19,14 +19,15 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 
 	"github.com/Azure/draft/pkg/rpc"
+	"github.com/Azure/draft/pkg/storage"
 )
 
 // ServerConfig specifies draft.Server configuration.
@@ -40,6 +41,7 @@ type ServerConfig struct {
 	Kube           k8s.Interface
 	UseTLS         bool
 	TLSConfig      *tls.Config
+	Storage        storage.Store
 }
 
 // Server is a draft Server.
@@ -54,6 +56,7 @@ func NewServer(cfg *ServerConfig) *Server {
 	return &Server{cfg: cfg}
 }
 
+// Serve starts draftd
 func (s *Server) Serve(ctx context.Context) error {
 	// start probes server
 	cancelctx, cancel := context.WithCancel(ctx)

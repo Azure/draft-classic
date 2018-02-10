@@ -26,9 +26,10 @@ else
 fi
 
 echo "Installing Azure components"
-AZCLI_VERSION=2.0.19
-apt-get update && apt-get install -yq python-pip
-pip install --disable-pip-version-check --no-cache-dir azure-cli==${AZCLI_VERSION}
+# NOTE(bacongobbler): azure-cli needs a newer version of libffi/libssl. See https://github.com/Azure/azure-cli/issues/3720#issuecomment-350335381
+apt-get update && apt-get install -yq python-pip libffi-dev libssl-dev
+easy_install pyOpenSSL
+pip install --disable-pip-version-check --no-cache-dir azure-cli~=2.0
 
 echo "Building Draft binaries"
 make clean build-cross

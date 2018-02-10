@@ -11,6 +11,9 @@ import (
 func TestPluginListCmd(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 
+	resetEnvVars := unsetEnvVars()
+	defer resetEnvVars()
+
 	list := &pluginListCmd{
 		home: draftpath.Home("testdata/drafthome/"),
 		out:  buf,

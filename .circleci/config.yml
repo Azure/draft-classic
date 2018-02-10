@@ -8,15 +8,15 @@ jobs:
       AZURE_CONTAINER: "draft"
       AZURE_STORAGE_ACCOUNT: "azuredraft"
       DOCKER_USERNAME: "bacongobbler"
-      GLIDE_HOME: /root/.glide
     steps:
       - checkout
       - setup_remote_docker
+      - run: echo 'export PATH=/go/src/github.com/Azure/draft/bin:$PATH' >> $BASH_ENV
       - run:
           name: install dependencies
           command: .circleci/bootstrap.sh
       - save_cache:
-          key: vendor-{{ checksum "glide.yaml" }}-{{ checksum "glide.lock" }}
+          key: vendor-{{ checksum "Gopkg.toml" }}-{{ checksum "Gopkg.lock" }}
           paths:
             - vendor
       - run:
