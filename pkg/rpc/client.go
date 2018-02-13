@@ -41,6 +41,24 @@ func (c *clientImpl) Version(ctx context.Context) (*version.Version, error) {
 	return v, nil
 }
 
+// GetLogs implements rpc.Client.GetLogs
+func (c *clientImpl) GetLogs(ctx context.Context, req *GetLogsRequest) (*GetLogsResponse, error) {
+	conn, err := connect(c)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := NewDraftClient(conn)
+	rpcctx := context.Background()
+
+	r, err := client.GetLogs(rpcctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error getting logs from server: %v", err)
+	}
+	return r, nil
+}
+
 // UpBuild implements rpc.Client.UpBuild
 func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *UpSummary) (err error) {
 	conn, err := connect(c)
