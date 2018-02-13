@@ -1,13 +1,18 @@
 package draft
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -104,6 +109,17 @@ func (s *Server) Serve(ctx context.Context) error {
 	}
 }
 
+// Logs handles incoming requests to retrieve logs for a draft build.
+//
+// Logs implements rpc.LogsHandler
+func (s *Server) Logs(ctx context.Context, req *rpc.GetLogsRequest) (*rpc.GetLogsResponse, error) {
+	var buf bytes.Buffer
+	if err := tail(&buf, req.Limit, filepath.Join("tmp", req.BuildID)); err != nil {
+		return nil, err
+	}
+	return &rpc.GetLogsResponse{Content: buf.Bytes()}, nil
+}
+
 // Up handles incoming draft up requests and returns a stream of summaries or error.
 //
 // Up implements rpc.UpHandler
@@ -116,12 +132,17 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		var (
+			buf = new(bytes.Buffer)
 			app *AppContext
 			err error
 		)
-		if app, err = newAppContext(s, req, os.Stdout); err != nil {
+		defer func() {
+			s.finish(app, buf)
+			wg.Done()
+		}()
+		w := io.MultiWriter(buf, os.Stdout)
+		if app, err = newAppContext(s, req, w); err != nil {
 			fmt.Printf("buildApp: error creating app context: %v\n", err)
 			return
 		}
@@ -143,6 +164,27 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 		close(ch)
 	}()
 	return ch
+}
+
+func (s *Server) finish(app *AppContext, buf *bytes.Buffer) {
+	if err := s.cfg.Storage.UpdateBuild(context.Background(), app.req.AppName, app.obj); err != nil {
+		fmt.Printf("complete: failed to store build object for app %q: %v\n", app.req.AppName, err)
+		return
+	}
+	f, err := ioutil.TempFile("", app.id)
+	if err != nil {
+		fmt.Printf("complete:: cannot create temporary file for build %q: %v\n", app.id, err)
+		return
+	}
+	defer f.Close()
+
+	n, err := f.Write(buf.Bytes())
+	if err != nil {
+		fmt.Printf("complete: failed to write logs to file for build %q: %v\n", app.id, err)
+		return
+	}
+
+	fmt.Printf("complete: wrote %d bytes to %s\n", n, f.Name())
 }
 
 // buildImg builds the docker image.
@@ -315,6 +357,7 @@ func (s *Server) release(ctx context.Context, app *AppContext, out chan<- *rpc.U
 		if err != nil {
 			return fmt.Errorf("could not upgrade release: %v", grpcError(err))
 		}
+		app.obj.Release = rls.Release.Name
 		formatReleaseStatus(app, rls.Release, summary)
 	}
 	return nil
@@ -465,4 +508,57 @@ func complete(id, desc string, out chan<- *rpc.UpSummary, err *error) {
 
 func grpcError(err error) error {
 	return errors.New(grpc.ErrorDesc(err))
+}
+
+// tail writes up to limit number of lines of the file specified by path relative to the file end.
+func tail(buf *bytes.Buffer, limit int64, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	var (
+		offset = int64(-1)
+		nlines = int64(0)
+		endPos int64
+	)
+	for nlines <= limit-1 {
+		begPos, err := f.Seek(offset, 2)
+		if err != nil {
+			return err
+		}
+		if begPos == 0 {
+			endPos = -1
+			break
+		}
+		b := make([]byte, 1)
+		if _, err = f.ReadAt(b, begPos); err != nil {
+			return err
+		}
+		if offset == int64(-1) && string(b) == "\n" {
+			offset--
+			continue
+		}
+		if string(b) == "\n" {
+			nlines++
+			endPos = begPos
+		}
+		offset--
+	}
+
+	if _, err = f.Seek(endPos+1, 0); err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(f)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return err
+		}
+		buf.Write(scanner.Bytes())
+		buf.WriteString("\n")
+	}
+	return nil
 }

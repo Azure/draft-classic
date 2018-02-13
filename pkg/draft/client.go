@@ -58,6 +58,19 @@ func (c *Client) Version(ctx context.Context) (*version.Version, error) {
 	return c.rpc.Version(ctx)
 }
 
+// GetLogs returns the logs for a draft build.
+func (c *Client) GetLogs(ctx context.Context, buildID string, opts ...ClientOpt) ([]byte, error) {
+	o := defaultClientOpts()
+	for _, opt := range opts {
+		opt(o)
+	}
+	r, err := c.rpc.GetLogs(ctx, &rpc.GetLogsRequest{BuildID: buildID, Limit: int64(o.logLimit)})
+	if err != nil {
+		return nil, err
+	}
+	return r.Content, nil
+}
+
 // Up uploads the build context and chart up to draftd, streaming results back to the client.
 func (c *Client) Up(ctx context.Context, app *build.Context) error {
 	req := &rpc.UpRequest{
