@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io"
-
+	"github.com/Azure/draft/pkg/draft"
 	"github.com/spf13/cobra"
-
-	"github.com/Azure/draft/pkg/draft/local"
+	"golang.org/x/net/context"
+	"io"
 )
 
 const logsDesc = `This command outputs logs from the draft server to help debug builds.`
 
 type logsCmd struct {
+	client   *draft.Client
 	out      io.Writer
+	buildID  string
 	logLines int64
 }
 
@@ -22,10 +23,16 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "logs",
-		Short: logsDesc,
-		Long:  logsDesc,
+		Use:     "logs",
+		Short:   logsDesc,
+		Long:    logsDesc,
+		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("missing build id")
+			}
+			lc.buildID = args[0]
+			lc.client = ensureDraftClient(lc.client)
 			return lc.run()
 		},
 	}
@@ -37,33 +44,10 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 }
 
 func (l *logsCmd) run() error {
-	client, config, err := getKubeClient(kubeContext)
-	if err != nil {
-		return fmt.Errorf("Could not get a kube client: %s", err)
-	}
-
-	draftApp := &local.App{
-		Name:      "draftd",
-		Namespace: "kube-system",
-		Container: "draftd",
-	}
-
-	connection, err := draftApp.Connect(client, config, draftApp.Container)
-	if err != nil {
-		return fmt.Errorf("Could not connect to draftd: %s", err)
-	}
-
-	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp.Namespace, draftApp.Container, l.logLines)
-	if err != nil {
-		return fmt.Errorf("Could not get log stream: %s", err)
-	}
-
-	defer readCloser.Close()
-	_, err = io.Copy(l.out, readCloser)
+	b, err := l.client.GetLogs(context.Background(), l.buildID, draft.WithLogsLimit(l.logLines))
 	if err != nil {
 		return err
 	}
-
+	fmt.Print(string(b))
 	return nil
 }
