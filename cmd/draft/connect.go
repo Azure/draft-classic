@@ -66,11 +66,13 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 
 	// output all local ports first - easier to spot
 	for _, cc := range connection.ContainerConnections {
-		err = cc.Tunnel.ForwardPort()
-		if err != nil {
-			return err
+		for _, t := range cc.Tunnels {
+			err = t.ForwardPort()
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(cn.out, "Connect to %v:%v on localhost:%#v\n", cc.ContainerName, t.Remote, t.Local)
 		}
-		fmt.Fprintf(cn.out, "Connect to %v on localhost:%#v\n", cc.ContainerName, cc.Tunnel.Local)
 	}
 
 	for _, cc := range connection.ContainerConnections {
