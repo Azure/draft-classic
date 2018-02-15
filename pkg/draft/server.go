@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -34,6 +35,8 @@ import (
 	"github.com/Azure/draft/pkg/rpc"
 	"github.com/Azure/draft/pkg/storage"
 )
+
+const draftLogsDirPrefix = "/tmp/draft-logs"
 
 // ServerConfig specifies draft.Server configuration.
 type ServerConfig struct {
@@ -109,12 +112,27 @@ func (s *Server) Serve(ctx context.Context) error {
 	}
 }
 
+// regular expression to sanitize build ids.
+var reBuildID = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+
 // Logs handles incoming requests to retrieve logs for a draft build.
 //
 // Logs implements rpc.LogsHandler
 func (s *Server) Logs(ctx context.Context, req *rpc.GetLogsRequest) (*rpc.GetLogsResponse, error) {
+	if !reBuildID.MatchString(req.BuildID) {
+		return nil, fmt.Errorf("invalid build id %q", req.BuildID)
+	}
+	obj, err := s.cfg.Storage.GetBuild(context.Background(), req.AppName, req.BuildID)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to retrieve application (%q) storage object for build %q: %v",
+			req.AppName,
+			req.BuildID,
+			err,
+		)
+	}
 	var buf bytes.Buffer
-	if err := tail(&buf, req.Limit, filepath.Join("tmp", req.BuildID)); err != nil {
+	if err := tail(&buf, req.Limit, obj.LogsFileRef); err != nil {
 		return nil, err
 	}
 	return &rpc.GetLogsResponse{Content: buf.Bytes()}, nil
@@ -141,7 +159,7 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 			s.finish(app, buf)
 			wg.Done()
 		}()
-		w := io.MultiWriter(buf, os.Stdout)
+		w := io.MultiWriter(buf, os.Stdout, os.Stderr)
 		if app, err = newAppContext(s, req, w); err != nil {
 			fmt.Printf("buildApp: error creating app context: %v\n", err)
 			return
@@ -166,25 +184,27 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 	return ch
 }
 
+// finish updates storage with the information collected during the stages of a draft build and
+// writes the aggregated logs to a tempoarary file.
 func (s *Server) finish(app *AppContext, buf *bytes.Buffer) {
+	dir, err := ioutil.TempDir("", "draft-logs")
+	if err != nil {
+		fmt.Printf("complete:: cannot create temporary directory for build %q: %v\n", app.id, err)
+		return
+	}
+	tmp := filepath.Join(dir, app.id)
+
+	app.obj.LogsFileRef = tmp
 	if err := s.cfg.Storage.UpdateBuild(context.Background(), app.req.AppName, app.obj); err != nil {
 		fmt.Printf("complete: failed to store build object for app %q: %v\n", app.req.AppName, err)
 		return
 	}
-	f, err := ioutil.TempFile("", app.id)
-	if err != nil {
-		fmt.Printf("complete:: cannot create temporary file for build %q: %v\n", app.id, err)
-		return
-	}
-	defer f.Close()
 
-	n, err := f.Write(buf.Bytes())
-	if err != nil {
+	if err := ioutil.WriteFile(tmp, buf.Bytes(), 0666); err != nil {
 		fmt.Printf("complete: failed to write logs to file for build %q: %v\n", app.id, err)
 		return
 	}
-
-	fmt.Printf("complete: wrote %d bytes to %s\n", n, f.Name())
+	fmt.Printf("complete: wrote logs to %s\n", tmp)
 }
 
 // buildImg builds the docker image.
@@ -489,14 +509,14 @@ func formatReleaseStatus(app *AppContext, rls *release.Release, summary func(str
 	}
 }
 
-// TODO: This is a half-measure solution.
+// summarize returns a function closure that wraps writing rpc.UpSummary_StatusCode.
 func summarize(id, desc string, out chan<- *rpc.UpSummary) func(string, rpc.UpSummary_StatusCode) {
 	return func(info string, code rpc.UpSummary_StatusCode) {
 		out <- &rpc.UpSummary{StageDesc: desc, StatusText: info, StatusCode: code, BuildId: id}
 	}
 }
 
-// TODO: This is a half-measure solution.
+// complete marks the end of a draft build stage.
 func complete(id, desc string, out chan<- *rpc.UpSummary, err *error) {
 	switch fn := summarize(id, desc, out); {
 	case *err != nil:
