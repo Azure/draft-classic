@@ -36,7 +36,7 @@ import (
 	"github.com/Azure/draft/pkg/storage"
 )
 
-const draftLogsDirPrefix = "/tmp/draft-logs"
+const draftLogsDirPrefix = "draft-logs"
 
 // ServerConfig specifies draft.Server configuration.
 type ServerConfig struct {
@@ -54,8 +54,9 @@ type ServerConfig struct {
 
 // Server is a draft Server.
 type Server struct {
-	cfg *ServerConfig
-	srv rpc.Server
+	cfg     *ServerConfig
+	srv     rpc.Server
+	logsDir string
 }
 
 // NewServer returns a draft.Server initialized with the
@@ -66,6 +67,13 @@ func NewServer(cfg *ServerConfig) *Server {
 
 // Serve starts draftd
 func (s *Server) Serve(ctx context.Context) error {
+	// create temporary logs directory
+	var err error
+	if s.logsDir, err = ioutil.TempDir("", draftLogsDirPrefix); err != nil {
+		return fmt.Errorf("could not create logs directory: %v", err)
+	}
+	defer os.RemoveAll(s.logsDir)
+
 	// start probes server
 	cancelctx, cancel := context.WithCancel(ctx)
 	var wg sync.WaitGroup
@@ -187,24 +195,18 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 // finish updates storage with the information collected during the stages of a draft build and
 // writes the aggregated logs to a tempoarary file.
 func (s *Server) finish(app *AppContext, buf *bytes.Buffer) {
-	dir, err := ioutil.TempDir("", "draft-logs")
-	if err != nil {
-		fmt.Printf("complete:: cannot create temporary directory for build %q: %v\n", app.id, err)
-		return
-	}
-	tmp := filepath.Join(dir, app.id)
-
-	app.obj.LogsFileRef = tmp
+	logsFile := filepath.Join(s.logsDir, app.id)
+	app.obj.LogsFileRef = logsFile
 	if err := s.cfg.Storage.UpdateBuild(context.Background(), app.req.AppName, app.obj); err != nil {
 		fmt.Printf("complete: failed to store build object for app %q: %v\n", app.req.AppName, err)
 		return
 	}
 
-	if err := ioutil.WriteFile(tmp, buf.Bytes(), 0666); err != nil {
+	if err := ioutil.WriteFile(logsFile, buf.Bytes(), 0666); err != nil {
 		fmt.Printf("complete: failed to write logs to file for build %q: %v\n", app.id, err)
 		return
 	}
-	fmt.Printf("complete: wrote logs to %s\n", tmp)
+	fmt.Printf("complete: wrote logs to %s\n", logsFile)
 }
 
 // buildImg builds the docker image.
