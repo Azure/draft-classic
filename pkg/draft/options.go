@@ -1,5 +1,6 @@
 package draft
 
+// ClientOpt is an optional draft client configuration.
 type ClientOpt func(*clientOpts)
 
 type clientOpts struct {
@@ -12,6 +13,8 @@ func defaultClientOpts() *clientOpts {
 	}
 }
 
+// WithLogsLimit sets an upper bound on the number of log lines returned
+// from a draft logs client request.
 func WithLogsLimit(limit int64) ClientOpt {
 	return func(opts *clientOpts) {
 		if limit > 0 {
