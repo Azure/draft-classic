@@ -32,6 +32,8 @@ import (
 
 const DefaultLocalPort = 0
 
+var DefaultOverridePorts []string
+
 // Tunnel describes a ssh-like tunnel to a kubernetes pod
 type Tunnel struct {
 	Local     int
@@ -59,6 +61,21 @@ func NewTunnel(client rest.Interface, config *rest.Config, namespace, podName st
 	}
 }
 
+// NewWithLocalTunnel creates a new tunnel on a specified local port
+func NewWithLocalTunnel(client rest.Interface, config *rest.Config, namespace, podName string, remote, local int) *Tunnel {
+	return &Tunnel{
+		config:    config,
+		client:    client,
+		Namespace: namespace,
+		PodName:   podName,
+		Remote:    remote,
+		Local:     local,
+		stopChan:  make(chan struct{}, 1),
+		readyChan: make(chan struct{}, 1),
+		Out:       ioutil.Discard,
+	}
+}
+
 // Close disconnects a tunnel connection
 func (t *Tunnel) Close() {
 	close(t.stopChan)
@@ -66,7 +83,7 @@ func (t *Tunnel) Close() {
 }
 
 // ForwardPort opens a tunnel to a kubernetes pod
-func (t *Tunnel) ForwardPort(localPort int) error {
+func (t *Tunnel) ForwardPort() error {
 	// Build a url to the portforward endpoint
 	// example: http://localhost:8080/api/v1/namespaces/helm/pods/tiller-deploy-9itlq/portforward
 	u := t.client.Post().
@@ -81,7 +98,7 @@ func (t *Tunnel) ForwardPort(localPort int) error {
 	}
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", u)
 
-	local, err := getAvailablePort(localPort)
+	local, err := getAvailablePort(t.Local)
 	if err != nil {
 		return fmt.Errorf("could not find an available port: %s", err)
 	}

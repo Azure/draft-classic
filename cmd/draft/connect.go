@@ -18,7 +18,10 @@ const (
 `
 )
 
-var containerName string
+var (
+	containerName string
+	overridePorts []string
+)
 
 type connectCmd struct {
 	out      io.Writer
@@ -43,12 +46,13 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
-	f.StringVarP(&containerName, "container", "c", "", "name of the container to connect to")
+	f.StringSliceVarP(&overridePorts, "override-ports", "p", []string{}, "local ports to create the tunnels")
 
 	return cmd
 }
 
 func (cn *connectCmd) run(runningEnvironment string) (err error) {
+	fmt.Printf("override ports: %v", overridePorts)
 	deployedApp, err := local.DeployedApplication(draftToml, runningEnvironment)
 	if err != nil {
 		return err
@@ -59,7 +63,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		return err
 	}
 
-	connection, err := deployedApp.Connect(client, config, containerName)
+	connection, err := deployedApp.Connect(client, config, overridePorts)
 	if err != nil {
 		return err
 	}

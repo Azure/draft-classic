@@ -3,6 +3,8 @@ package local
 import (
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"k8s.io/api/core/v1"
@@ -10,9 +12,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/helm/pkg/kube"
 
 	"github.com/Azure/draft/pkg/draft/manifest"
+	"github.com/Azure/draft/pkg/draft/tunnel"
 	"github.com/Azure/draft/pkg/kube/podutil"
 )
 
@@ -40,7 +42,7 @@ type Connection struct {
 
 // ContainerConnection encapsulates a connection to a container in a pod
 type ContainerConnection struct {
-	Tunnels       []*kube.Tunnel
+	Tunnels       []*tunnel.Tunnel
 	ContainerName string
 }
 
@@ -62,59 +64,41 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 }
 
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
-func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, containerName string) (*Connection, error) {
+func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, overridePorts []string) (*Connection, error) {
 	var cc []*ContainerConnection
 	pod, err := getPod(a.Namespace, a.Name, clientset)
 	if err != nil {
 		return nil, err
 	}
 
-	// if no container was specified as flag, return tunnels to all containers in pod
-	if containerName == "" {
-		for _, c := range pod.Spec.Containers {
-			var tt []*kube.Tunnel
-
-			// iterate through all ports of the contaier and create tunnels
-			for _, p := range c.Ports {
-				t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, int(p.ContainerPort))
-				tt = append(tt, t)
-			}
-			cc = append(cc, &ContainerConnection{
-				ContainerName: c.Name,
-				Tunnels:       tt,
-			})
-		}
-
-		return &Connection{
-			ContainerConnections: cc,
-			PodName:              pod.Name,
-			Clientset:            clientset,
-		}, nil
-	}
-	var tt []*kube.Tunnel
-
-	// a container was specified - return tunnel to specified container
-	ports, err := getTargetContainerPorts(pod.Spec.Containers, containerName)
+	m, err := getPortMapping(overridePorts)
 	if err != nil {
 		return nil, err
 	}
 
-	// iterate through all ports of the container and create tunnels
-	for _, p := range ports {
-		t := kube.NewTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, p)
-		tt = append(tt, t)
-	}
+	// if no container was specified as flag, return tunnels to all containers in pod
+	for _, c := range pod.Spec.Containers {
+		var tt []*tunnel.Tunnel
 
-	cc = append(cc, &ContainerConnection{
-		ContainerName: containerName,
-		Tunnels:       tt,
-	})
+		// iterate through all ports of the contaier and create tunnels
+		for _, p := range c.Ports {
+			remote := int(p.ContainerPort)
+			local := m[remote]
+			t := tunnel.NewWithLocalTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, remote, local)
+			tt = append(tt, t)
+		}
+		cc = append(cc, &ContainerConnection{
+			ContainerName: c.Name,
+			Tunnels:       tt,
+		})
+	}
 
 	return &Connection{
 		ContainerConnections: cc,
 		PodName:              pod.Name,
 		Clientset:            clientset,
 	}, nil
+
 }
 
 // RequestLogStream returns a stream of the application pod's logs
@@ -128,6 +112,22 @@ func (c *Connection) RequestLogStream(namespace string, containerName string, lo
 
 	return req.Stream()
 
+}
+
+func getPortMapping(overridePorts []string) (map[int]int, error) {
+	var portMapping = make(map[int]int, len(overridePorts))
+
+	for _, p := range overridePorts {
+		m := strings.Split(p, ":")
+		local, err := strconv.Atoi(m[0])
+		remote, err := strconv.Atoi(m[1])
+		if err != nil {
+			return nil, fmt.Errorf("cannot get port mapping: %v", err)
+		}
+		portMapping[remote] = local
+	}
+
+	return portMapping, nil
 }
 
 func getPod(namespace, label string, clientset kubernetes.Interface) (*v1.Pod, error) {
