@@ -76,7 +76,6 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 		return nil, err
 	}
 
-	// if no container was specified as flag, return tunnels to all containers in pod
 	for _, c := range pod.Spec.Containers {
 		var tt []*tunnel.Tunnel
 
@@ -120,6 +119,10 @@ func getPortMapping(overridePorts []string) (map[int]int, error) {
 	for _, p := range overridePorts {
 		m := strings.Split(p, ":")
 		local, err := strconv.Atoi(m[0])
+		if err != nil {
+			return nil, fmt.Errorf("cannot get port mapping: %v", err)
+		}
+
 		remote, err := strconv.Atoi(m[1])
 		if err != nil {
 			return nil, fmt.Errorf("cannot get port mapping: %v", err)
@@ -145,25 +148,4 @@ func getPod(namespace, label string, clientset kubernetes.Interface) (*v1.Pod, e
 		}
 	}
 	return nil, fmt.Errorf("could not find a ready pod")
-}
-
-func getTargetContainerPorts(containers []v1.Container, targetContainer string) ([]int, error) {
-	var ports []int
-	containerFound := false
-
-	for _, c := range containers {
-
-		if c.Name == targetContainer && !containerFound {
-			containerFound = true
-			for _, p := range c.Ports {
-				ports = append(ports, int(p.ContainerPort))
-			}
-		}
-	}
-
-	if containerFound == false {
-		return nil, fmt.Errorf("container '%s' not found", targetContainer)
-	}
-
-	return ports, nil
 }

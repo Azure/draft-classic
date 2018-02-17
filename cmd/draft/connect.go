@@ -8,9 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/spf13/cobra"
-
 	"github.com/Azure/draft/pkg/draft/local"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -46,13 +45,12 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
-	f.StringSliceVarP(&overridePorts, "override-ports", "p", []string{}, "local ports to create the tunnels")
+	f.StringSliceVarP(&overridePorts, "override-ports", "p", []string{}, "specify a local port to connect to, in the form <local>:<remote>")
 
 	return cmd
 }
 
 func (cn *connectCmd) run(runningEnvironment string) (err error) {
-	fmt.Printf("override ports: %v", overridePorts)
 	deployedApp, err := local.DeployedApplication(draftToml, runningEnvironment)
 	if err != nil {
 		return err
