@@ -6,7 +6,9 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/Azure/draft/pkg/draft/local"
 	"github.com/spf13/cobra"
@@ -45,7 +47,7 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
-	f.StringSliceVarP(&overridePorts, "override-ports", "p", []string{}, "specify a local port to connect to, in the form <local>:<remote>")
+	f.StringSliceVarP(&overridePorts, "override-port", "p", []string{}, "specify a local port to connect to, in the form <local>:<remote>")
 
 	return cmd
 }
@@ -61,19 +63,31 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		return err
 	}
 
-	connection, err := deployedApp.Connect(client, config, overridePorts)
+	var ports []string
+	if len(overridePorts) == 0 {
+		// removes multiple spaces
+		s := strings.Join(strings.Fields(deployedApp.OverridePorts), " ")
+		ports = strings.Split(s, " ")
+	} else {
+		ports = overridePorts
+	}
+
+	connection, err := deployedApp.Connect(client, config, ports)
 	if err != nil {
 		return err
 	}
 
-	// output all local ports first - easier to spot
+	var connectionMessage = "Your connection is still active. \n"
+
 	for _, cc := range connection.ContainerConnections {
 		for _, t := range cc.Tunnels {
 			err = t.ForwardPort()
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cn.out, "Connect to %v:%v on localhost:%#v\n", cc.ContainerName, t.Remote, t.Local)
+			m := fmt.Sprintf("Connect to %v:%v on localhost:%#v\n", cc.ContainerName, t.Remote, t.Local)
+			connectionMessage += m
+			fmt.Fprintf(cn.out, m)
 		}
 	}
 
@@ -94,8 +108,10 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		os.Exit(0)
 	}()
 
-	<-stop
-	return nil
+	for {
+		fmt.Printf(connectionMessage)
+		time.Sleep(10 * time.Second)
+	}
 }
 
 func writeContainerLogs(out io.Writer, in io.ReadCloser, containerName string) error {
