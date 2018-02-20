@@ -109,7 +109,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 	}()
 
 	for {
-		fmt.Printf(connectionMessage)
+		fmt.Fprintf(cn.out, connectionMessage)
 		time.Sleep(10 * time.Second)
 	}
 }
