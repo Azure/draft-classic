@@ -79,5 +79,15 @@ func (u *upCmd) run(environment string) (err error) {
 		cancel()
 	}()
 	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
-	return <-errc
+
+	err = <-errc
+	if err != nil {
+		return err
+	}
+
+	if buildctx.Env.AutoConnect {
+		return newConnectCmd(u.out).Execute()
+	}
+
+	return nil
 }

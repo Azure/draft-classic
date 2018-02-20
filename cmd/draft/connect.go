@@ -65,13 +65,16 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 
 	var ports []string
 	if len(overridePorts) == 0 {
-		// removes multiple spaces
-		s := strings.Join(strings.Fields(deployedApp.OverridePorts), " ")
-		ports = strings.Split(s, " ")
+		if deployedApp.OverridePorts != "" {
+			// removes multiple spaces
+			s := strings.Join(strings.Fields(deployedApp.OverridePorts), " ")
+			ports = strings.Split(s, " ")
+		}
 	} else {
 		ports = overridePorts
 	}
 
+	fmt.Fprintf(cn.out, "Connecting to your application...\n")
 	connection, err := deployedApp.Connect(client, config, ports)
 	if err != nil {
 		return err

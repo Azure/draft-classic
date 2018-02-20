@@ -30,7 +30,7 @@ type Environment struct {
 	ChartTarPath  string   `toml:"chart_tar,omitempty"`
 	Namespace     string   `toml:"namespace,omitempty"`
 	Values        []string `toml:"set,omitempty"`
-	Wait          bool     `toml:"wait"`
+	AutoConnect   bool     `toml:"auto_connect"`
 	Watch         bool     `toml:"watch"`
 	WatchDelay    int      `toml:"watch_delay,omitempty"`
 	OverridePorts string   `toml:"override_ports,omitempty"`
