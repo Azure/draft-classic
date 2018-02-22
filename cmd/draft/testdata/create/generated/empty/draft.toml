@@ -2,6 +2,6 @@
   [environments.development]
     name = "myapp"
     namespace = "default"
-    wait = false
+    auto-connect = false
     watch = false
-    watch_delay = 2
+    watch-delay = 2
