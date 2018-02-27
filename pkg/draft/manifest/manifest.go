@@ -26,8 +26,8 @@ type Manifest struct {
 // Environment represents the environment for a given app at build time
 type Environment struct {
 	Name          string   `toml:"name,omitempty"`
-	BuildTarPath  string   `toml:"build_tar,omitempty"`
-	ChartTarPath  string   `toml:"chart_tar,omitempty"`
+	BuildTarPath  string   `toml:"build-tar,omitempty"`
+	ChartTarPath  string   `toml:"chart-tar,omitempty"`
 	Namespace     string   `toml:"namespace,omitempty"`
 	Values        []string `toml:"set,omitempty"`
 	AutoConnect   bool     `toml:"auto-connect"`
