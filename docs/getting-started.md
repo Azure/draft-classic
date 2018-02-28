@@ -12,6 +12,19 @@ $ cd examples/example-python
 
 ## Draft Create
 
+### Language Filtering
+Draft leverages the [generaltso/linguist](https://github.com/generaltso/linguist) library, which in turn leverages the [github/linguist](https://github.com/github/linguist/tree/6db773686089fb02ce4244c8e88f20a4c1b4034d) library.
+
+This is mentioned, as in some cases, the language discovery system recommends the wrong language. For example, when generating a SpringBoot app from [Spring Initializr](https://start.spring.io/) the language discovery will think that the project is of type Shell. In order to configure the system to discover a language project of Java the following was added to the .gitattributes file:
+
+```
+*mvnw* linguist-language=Java
+````
+
+For more details on filtering configuration [please see here](https://github.com/github/linguist/tree/6db773686089fb02ce4244c8e88f20a4c1b4034d).
+
+### Create Scaffolding
+
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
