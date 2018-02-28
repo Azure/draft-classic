@@ -2,30 +2,41 @@ package main
 
 import (
 	"fmt"
-	"io"
-
+	"github.com/Azure/draft/pkg/draft"
 	"github.com/spf13/cobra"
-
-	"github.com/Azure/draft/pkg/draft/local"
+	"golang.org/x/net/context"
+	"io"
 )
 
 const logsDesc = `This command outputs logs from the draft server to help debug builds.`
 
 type logsCmd struct {
+	client   *draft.Client
 	out      io.Writer
+	appName  string
+	buildID  string
 	logLines int64
+	args     []string
 }
 
 func newLogsCmd(out io.Writer) *cobra.Command {
 	lc := &logsCmd{
-		out: out,
+		out:  out,
+		args: []string{"app-name", "build-id"},
 	}
 
 	cmd := &cobra.Command{
-		Use:   "logs",
+		Use:   "logs <app-name> <build-id>",
 		Short: logsDesc,
 		Long:  logsDesc,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := setupConnection(cmd, args); err != nil {
+				return err
+			}
+			return lc.complete(args)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			lc.client = ensureDraftClient(lc.client)
 			return lc.run()
 		},
 	}
@@ -36,34 +47,20 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
+func (l *logsCmd) complete(args []string) error {
+	if err := validateArgs(args, l.args); err != nil {
+		return err
+	}
+	l.appName = args[0]
+	l.buildID = args[1]
+	return nil
+}
+
 func (l *logsCmd) run() error {
-	client, config, err := getKubeClient(kubeContext)
-	if err != nil {
-		return fmt.Errorf("Could not get a kube client: %s", err)
-	}
-
-	draftApp := &local.App{
-		Name:      "draftd",
-		Namespace: "kube-system",
-		Container: "draftd",
-	}
-
-	connection, err := draftApp.Connect(client, config, draftApp.Container)
-	if err != nil {
-		return fmt.Errorf("Could not connect to draftd: %s", err)
-	}
-
-	fmt.Fprintf(l.out, "Starting a log stream from the draft server...\n")
-	readCloser, err := connection.RequestLogStream(draftApp.Namespace, draftApp.Container, l.logLines)
-	if err != nil {
-		return fmt.Errorf("Could not get log stream: %s", err)
-	}
-
-	defer readCloser.Close()
-	_, err = io.Copy(l.out, readCloser)
+	b, err := l.client.GetLogs(context.Background(), l.appName, l.buildID, draft.WithLogsLimit(l.logLines))
 	if err != nil {
 		return err
 	}
-
+	fmt.Print(string(b))
 	return nil
 }
