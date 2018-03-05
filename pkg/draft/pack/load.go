@@ -20,15 +20,32 @@ func FromDir(dir string) (*Pack, error) {
 		return nil, err
 	}
 
-	pack.Chart, err = chartutil.LoadDir(filepath.Join(topdir, ChartsDir))
+	files, err := ioutil.ReadDir(topdir)
 	if err != nil {
 		return nil, err
 	}
+	for _, file := range files {
+		if file.IsDir() {
+			chart, err := chartutil.LoadDir(filepath.Join(topdir, file.Name()))
+			if err != nil {
+				return nil, err
+			}
+			pack.Charts = append(pack.Charts, chart)
+		} else {
+			var rootFile ChartRootFiles
+			rootFile.Filename = file.Name()
 
-	dockerfile := filepath.Join(topdir, DockerfileName)
-	pack.Dockerfile, err = ioutil.ReadFile(dockerfile)
-	if err != nil {
-		return nil, fmt.Errorf("error reading %s: %s", dockerfile, err)
+			rootFileName := filepath.Join(topdir, file.Name())
+			rootFile.File, err = ioutil.ReadFile(rootFileName)
+			if err != nil {
+				return nil, err
+			}
+			pack.Files = append(pack.Files, &rootFile)
+
+			if err != nil {
+				return nil, fmt.Errorf("error reading %s: %s", file.Name(), err)
+			}
+		}
 	}
 
 	return pack, nil

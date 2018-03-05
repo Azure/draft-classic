@@ -45,9 +45,15 @@ const (
 // Pack defines a Draft Starter Pack.
 type Pack struct {
 	// Chart is the Helm chart to be installed with the Pack.
-	Chart *chart.Chart
-	// Dockerfile is the pre-defined Dockerfile that will be installed with the Pack.
-	Dockerfile []byte
+	Charts []*chart.Chart
+	// Files are pre-defined files like a Dockerfile that will be installed with the Pack.
+	Files []*ChartRootFiles
+}
+
+// ChartRootFiles are pre-defined files like a Dockerfile which live in the charts root dir that will be installed with the Pack
+type ChartRootFiles struct {
+	Filename string
+	File     []byte
 }
 
 // SaveDir saves a pack as files in a directory.
@@ -57,19 +63,25 @@ func (p *Pack) SaveDir(dest string) error {
 	if err := os.Mkdir(chartPath, 0755); err != nil {
 		return fmt.Errorf("Could not create %s: %s", chartPath, err)
 	}
-	if err := chartutil.SaveDir(p.Chart, chartPath); err != nil {
-		return err
+
+	for _, chart := range p.Charts {
+		if err := chartutil.SaveDir(chart, chartPath); err != nil {
+			return err
+		}
 	}
 
-	// save Dockerfile
-	dockerfilePath := filepath.Join(dest, DockerfileName)
-	exists, err := osutil.Exists(dockerfilePath)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		if err := ioutil.WriteFile(dockerfilePath, p.Dockerfile, 0644); err != nil {
+	// save ChartRootfiles
+	for _, file := range p.Files {
+		filePath := filepath.Join(dest, file.Filename)
+		exists, err := osutil.Exists(filePath)
+		if err != nil {
 			return err
+		}
+		if !exists {
+			if err := ioutil.WriteFile(filePath, file.File, 0644); err != nil {
+				return err
+			}
+
 		}
 	}
 
