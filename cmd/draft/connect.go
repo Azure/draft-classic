@@ -22,6 +22,8 @@ const (
 var (
 	containerName string
 	overridePorts []string
+
+	waitFlag bool
 )
 
 type connectCmd struct {
@@ -48,6 +50,7 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
 	f.StringSliceVarP(&overridePorts, "override-port", "p", []string{}, "specify a local port to connect to, in the form <local>:<remote>")
+	f.BoolVarP(&waitFlag, "wait", "w", false, "exits with code 0 when draft can connect")
 
 	return cmd
 }
@@ -78,6 +81,10 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 	connection, err := deployedApp.Connect(client, config, ports)
 	if err != nil {
 		return err
+	}
+
+	if waitFlag {
+		return
 	}
 
 	var connectionMessage = "Your connection is still active. \n"
