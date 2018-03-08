@@ -45,6 +45,10 @@ var (
 	draftHost string
 	// draftNamespace depicts which namespace the Draftd server is running in. This is used when Draftd was installed in a different namespace than kube-system.
 	draftNamespace string
+
+	//rootCmd is the root command handling `draft`. It's used in other parts of package cmd to add/search the command tree.
+	rootCmd *cobra.Command
+
 	// tls flags, options, and defaults
 	tlsCaCertFile string // path to TLS CA certificate file
 	tlsCertFile   string // path to TLS certificate file
@@ -59,6 +63,10 @@ var (
 
 var globalUsage = `The application deployment tool for Kubernetes.
 `
+
+func init() {
+	rootCmd = newRootCmd(os.Stdout, os.Stdin)
+}
 
 func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	cmd := &cobra.Command{
@@ -218,8 +226,7 @@ func getKubeClient(context string) (kubernetes.Interface, *rest.Config, error) {
 }
 
 func main() {
-	cmd := newRootCmd(os.Stdout, os.Stdin)
-	if err := cmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
