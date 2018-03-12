@@ -69,6 +69,11 @@ func (s *serverImpl) GetLogs(ctx context.Context, req *GetLogsRequest) (*GetLogs
 	return s.h.Logs(ctx, req)
 }
 
+// GetLatestBuildID returns the latest build ID given an application name
+func (s *serverImpl) GetLatestBuildID(ctx context.Context, req *GetLatestBuildIDRequest) (*GetLatestBuildIDResponse, error) {
+	return s.h.GetLatestBuildID(ctx, req)
+}
+
 // UpStream accepts a stream of UpMessages each representing a separate draft up.
 // This is the rpc invoked by the draft client when doing a draft up with watch
 // enabled.

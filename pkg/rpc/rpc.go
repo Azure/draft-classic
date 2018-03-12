@@ -1,9 +1,10 @@
 package rpc
 
 import (
+	"net"
+
 	"github.com/Azure/draft/pkg/version"
 	"golang.org/x/net/context"
-	"net"
 )
 
 // RecvStream is returned by a Client for streaming summaries
@@ -23,6 +24,12 @@ type LogsHandler interface {
 	Logs(context.Context, *GetLogsRequest) (*GetLogsResponse, error)
 }
 
+// LatestBuildIDHandler is a mechanism by which draft connect gets
+// the latest build ID of an application
+type LatestBuildIDHandler interface {
+	GetLatestBuildID(context.Context, *GetLatestBuildIDRequest) (*GetLatestBuildIDResponse, error)
+}
+
 // UpHandler is the mechanism by which to accept draft up requests
 // initiated by the draft client dispatched by the rpc.Server.
 type UpHandler interface {
@@ -34,6 +41,7 @@ type UpHandler interface {
 // interfaces within Handler.
 type Handler interface {
 	LogsHandler
+	LatestBuildIDHandler
 	UpHandler
 }
 
@@ -47,6 +55,7 @@ type (
 		UpBuild(context.Context, *UpRequest, chan<- *UpSummary) error
 		UpStream(context.Context, <-chan *UpRequest, chan<- *UpSummary) error
 		GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error)
+		GetLatestBuildID(context.Context, *GetLatestBuildIDRequest) (*GetLatestBuildIDResponse, error)
 	}
 )
 

@@ -71,6 +71,16 @@ func (c *Client) GetLogs(ctx context.Context, appName, buildID string, opts ...C
 	return r.Content, nil
 }
 
+// GetLatestBuildID returns the latest build ID
+func (c *Client) GetLatestBuildID(ctx context.Context, appName string) (string, error) {
+	r, err := c.rpc.GetLatestBuildID(ctx, &rpc.GetLatestBuildIDRequest{AppName: appName})
+	if err != nil {
+		return "", err
+	}
+
+	return r.BuildID, nil
+}
+
 // Up uploads the build context and chart up to draftd, streaming results back to the client.
 func (c *Client) Up(ctx context.Context, app *build.Context) error {
 	req := &rpc.UpRequest{
