@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -92,10 +91,6 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 
 	if buildctx.Env.AutoConnect || autoConnect {
-		// TODO - once helm upgrade --wait works, remove this and pass the flag
-		// sleep only for existing pods to be in Terminating state
-		time.Sleep(10 * time.Second)
-
 		c := newConnectCmd(u.out)
 		return c.RunE(c, []string{})
 	}
