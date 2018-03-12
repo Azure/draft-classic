@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	connectDesc = `This command creates a local environment for you to test your app. It will give you a localhost url that you can use to see your application working and it will print out logs from your application. This command must be run in the root of your application directory.
+	connectDesc = `This command creates a local environment for you to test your app. It will give you a localhost urls that you can use to see your application working and it will print out logs from your application. This command must be run in the root of your application directory.
 `
 )
 
 var (
-	containerName string
-	overridePorts []string
+	targetContainer string
+	overridePorts   []string
 
 	waitFlag bool
 )
@@ -50,6 +50,7 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	f.Int64Var(&cc.logLines, "tail", 5, "lines of recent log lines to display")
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
 	f.StringSliceVarP(&overridePorts, "override-port", "p", []string{}, "specify a local port to connect to, in the form <local>:<remote>")
+	f.StringVarP(&targetContainer, "container", "c", "", "name of the container to connect to")
 	f.BoolVarP(&waitFlag, "wait", "w", false, "exits with code 0 when draft can connect")
 
 	return cmd
@@ -78,7 +79,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 	}
 
 	fmt.Fprintf(cn.out, "Connecting to your application...\n")
-	connection, err := deployedApp.Connect(client, config, ports)
+	connection, err := deployedApp.Connect(client, config, targetContainer, ports)
 	if err != nil {
 		return err
 	}

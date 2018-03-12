@@ -66,7 +66,7 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 }
 
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
-func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, overridePorts []string) (*Connection, error) {
+func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, targetContainer string, overridePorts []string) (*Connection, error) {
 	var cc []*ContainerConnection
 	pod := podutil.GetPod(a.Namespace, DraftLabelKey, a.Name, clientset)
 
@@ -75,21 +75,50 @@ func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.C
 		return nil, err
 	}
 
-	for _, c := range pod.Spec.Containers {
-		var tt []*tunnel.Tunnel
+	// if no container was specified as flag, return tunnels to all containers in pod
+	if targetContainer == "" {
+		for _, c := range pod.Spec.Containers {
+			var tt []*tunnel.Tunnel
 
-		// iterate through all ports of the contaier and create tunnels
-		for _, p := range c.Ports {
-			remote := int(p.ContainerPort)
-			local := m[remote]
-			t := tunnel.NewWithLocalTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, remote, local)
-			tt = append(tt, t)
+			// iterate through all ports of the contaier and create tunnels
+			for _, p := range c.Ports {
+				remote := int(p.ContainerPort)
+				local := m[remote]
+				t := tunnel.NewWithLocalTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, remote, local)
+				tt = append(tt, t)
+			}
+			cc = append(cc, &ContainerConnection{
+				ContainerName: c.Name,
+				Tunnels:       tt,
+			})
 		}
-		cc = append(cc, &ContainerConnection{
-			ContainerName: c.Name,
-			Tunnels:       tt,
-		})
+
+		return &Connection{
+			ContainerConnections: cc,
+			PodName:              pod.Name,
+			Clientset:            clientset,
+		}, nil
 	}
+
+	var tt []*tunnel.Tunnel
+
+	// a container was specified - return tunnels to specified container
+	containerPorts, err := getTargetContainerPorts(pod.Spec.Containers, targetContainer)
+	if err != nil {
+		return nil, err
+	}
+
+	// iterate through all ports of the container and create tunnels
+	for _, p := range containerPorts {
+		local := m[p]
+		t := tunnel.NewWithLocalTunnel(clientset.CoreV1().RESTClient(), clientConfig, a.Namespace, pod.Name, p, local)
+		tt = append(tt, t)
+	}
+
+	cc = append(cc, &ContainerConnection{
+		ContainerName: targetContainer,
+		Tunnels:       tt,
+	})
 
 	return &Connection{
 		ContainerConnections: cc,
@@ -126,8 +155,43 @@ func getPortMapping(overridePorts []string) (map[int]int, error) {
 		if err != nil {
 			return nil, fmt.Errorf("cannot get port mapping: %v", err)
 		}
+
+		// check if remote port already exists in port mapping
+		_, exists := portMapping[remote]
+		if exists {
+			return nil, fmt.Errorf("remote port %v already mapped", remote)
+		}
+
+		// check if local port already exists in port mapping
+		for _, l := range portMapping {
+			if local == l {
+				return nil, fmt.Errorf("local port %v already mapped", local)
+			}
+		}
+
 		portMapping[remote] = local
 	}
 
 	return portMapping, nil
+}
+
+func getTargetContainerPorts(containers []v1.Container, targetContainer string) ([]int, error) {
+	var ports []int
+	containerFound := false
+
+	for _, c := range containers {
+
+		if c.Name == targetContainer && !containerFound {
+			containerFound = true
+			for _, p := range c.Ports {
+				ports = append(ports, int(p.ContainerPort))
+			}
+		}
+	}
+
+	if containerFound == false {
+		return nil, fmt.Errorf("container '%s' not found", targetContainer)
+	}
+
+	return ports, nil
 }
