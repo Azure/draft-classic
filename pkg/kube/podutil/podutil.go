@@ -45,7 +45,7 @@ func GetPodCondition(status *v1.PodStatus, conditionType v1.PodConditionType) (i
 
 // GetPod waits for a pod with the specified labekl to be ready, then returns it
 // if no pod is ready, it checks every second until a pod is ready
-func GetPod(namespace, labelKey, labelValue string, clientset kubernetes.Interface) *v1.Pod {
+func GetPod(namespace, labelKey, labelValue, buildLabel, buildID string, clientset kubernetes.Interface) *v1.Pod {
 	var targetPod *v1.Pod
 	s := newStopChan()
 
@@ -55,7 +55,7 @@ func GetPod(namespace, labelKey, labelValue string, clientset kubernetes.Interfa
 			newPod := n.(*v1.Pod)
 
 			// check the pod label and if pod is in terminating state
-			if (newPod.Labels[labelKey] != labelValue) || (newPod.ObjectMeta.DeletionTimestamp != nil) {
+			if (newPod.Labels[buildLabel] != buildID) || (newPod.Labels[labelKey] != labelValue) || (newPod.ObjectMeta.DeletionTimestamp != nil) {
 				return
 			}
 

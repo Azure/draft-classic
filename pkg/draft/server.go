@@ -146,6 +146,18 @@ func (s *Server) Logs(ctx context.Context, req *rpc.GetLogsRequest) (*rpc.GetLog
 	return &rpc.GetLogsResponse{Content: buf.Bytes()}, nil
 }
 
+// GetLatestBuildID handles incoming requests to get the latest build ID
+//
+// GetLatestBuildID implements rpc.LatestBuildIDHandler
+func (s *Server) GetLatestBuildID(ctx context.Context, req *rpc.GetLatestBuildIDRequest) (*rpc.GetLatestBuildIDResponse, error) {
+	builds, err := s.cfg.Storage.GetBuilds(ctx, req.AppName)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get builds for app %v: %v", req.AppName, err)
+	}
+
+	return &rpc.GetLatestBuildIDResponse{BuildID: builds[len(builds)-1].BuildID}, nil
+}
+
 // Up handles incoming draft up requests and returns a stream of summaries or error.
 //
 // Up implements rpc.UpHandler

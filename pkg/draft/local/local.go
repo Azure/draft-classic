@@ -16,9 +16,15 @@ import (
 	"github.com/Azure/draft/pkg/kube/podutil"
 )
 
-// DraftLabelKey is the label selector key on a pod that allows
-//  us to identify which draft app a pod is associated with
-const DraftLabelKey = "draft"
+const (
+	// DraftLabelKey is the label selector key on a pod that allows
+	//  us to identify which draft app a pod is associated with
+	DraftLabelKey = "draft"
+
+	// BuildLabelKey is the label selector key on a pod which
+	// indicates the build ID
+	BuildLabelKey = "build"
+)
 
 // App encapsulates information about an application to connect to
 //
@@ -66,9 +72,9 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 }
 
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
-func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, targetContainer string, overridePorts []string) (*Connection, error) {
+func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, buildID, targetContainer string, overridePorts []string) (*Connection, error) {
 	var cc []*ContainerConnection
-	pod := podutil.GetPod(a.Namespace, DraftLabelKey, a.Name, clientset)
+	pod := podutil.GetPod(a.Namespace, DraftLabelKey, a.Name, BuildLabelKey, buildID, clientset)
 
 	m, err := getPortMapping(overridePorts)
 	if err != nil {

@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Azure/draft/pkg/draft"
 	"github.com/Azure/draft/pkg/draft/local"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -27,6 +29,7 @@ var (
 )
 
 type connectCmd struct {
+	client   *draft.Client
 	out      io.Writer
 	logLines int64
 }
@@ -38,10 +41,12 @@ func newConnectCmd(out io.Writer) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "connect",
-		Short: "connect to your application locally",
-		Long:  connectDesc,
+		Use:     "connect",
+		Short:   "connect to your application locally",
+		Long:    connectDesc,
+		PreRunE: setupConnection,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cc.client = ensureDraftClient(cc.client)
 			return cc.run(runningEnvironment)
 		},
 	}
@@ -78,8 +83,13 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		ports = overridePorts
 	}
 
+	buildID, err := cn.client.GetLatestBuildID(context.Background(), deployedApp.Name)
+	if err != nil {
+		return fmt.Errorf("cannot get latest build id: %v", err)
+	}
+
 	fmt.Fprintf(cn.out, "Connecting to your application...\n")
-	connection, err := deployedApp.Connect(client, config, targetContainer, ports)
+	connection, err := deployedApp.Connect(client, config, buildID, targetContainer, ports)
 	if err != nil {
 		return err
 	}
