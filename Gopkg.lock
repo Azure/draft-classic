@@ -1003,6 +1003,7 @@
     "pkg/storage/driver",
     "pkg/strvals",
     "pkg/tiller/environment",
+    "pkg/timeconv",
     "pkg/version"
   ]
   revision = "8478fb4fc723885b155c924d1c8c410b7a9444e6"
@@ -1198,6 +1199,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9b343ab01789c05b43ebe52723821418095400f9265c33672540d8b7b8519350"
+  inputs-digest = "6a494ae6b3b1cd15b552e01be096cefd9d1268107fb6fde105098c91bbf15fa6"
   solver-name = "gps-cdcl"
   solver-version = 1

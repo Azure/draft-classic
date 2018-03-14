@@ -3,7 +3,7 @@ package storage
 // To regenerate the protocol buffer types for this package, run:
 //		go generate
 
-//go:generate protoc object.proto --go_out=.
+//go:generate make proto
 
 import (
 	"context"
