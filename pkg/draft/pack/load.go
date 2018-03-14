@@ -1,10 +1,12 @@
 package pack
 
 import (
-	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
+	"fmt"
 	"k8s.io/helm/pkg/chartutil"
 )
 
@@ -14,21 +16,31 @@ import (
 // and hand off to the appropriate pack reader.
 func FromDir(dir string) (*Pack, error) {
 	pack := new(Pack)
+	pack.Files = make(map[string]io.ReadCloser)
 
 	topdir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	pack.Chart, err = chartutil.LoadDir(filepath.Join(topdir, ChartsDir))
+	files, err := ioutil.ReadDir(topdir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading %s: %s", topdir, err)
 	}
-
-	dockerfile := filepath.Join(topdir, DockerfileName)
-	pack.Dockerfile, err = ioutil.ReadFile(dockerfile)
-	if err != nil {
-		return nil, fmt.Errorf("error reading %s: %s", dockerfile, err)
+	for _, fInfo := range files {
+		if fInfo.IsDir() {
+			chart, err := chartutil.LoadDir(filepath.Join(topdir, fInfo.Name()))
+			if err != nil {
+				return nil, err
+			}
+			pack.Charts = append(pack.Charts, chart)
+		} else {
+			f, err := os.Open(filepath.Join(topdir, fInfo.Name()))
+			if err != nil {
+				return nil, err
+			}
+			pack.Files[fInfo.Name()] = f
+		}
 	}
 
 	return pack, nil

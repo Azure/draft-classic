@@ -28,6 +28,7 @@ func TestCreate(t *testing.T) {
 		{"testdata/create/src/simple-go", nil},
 		{"testdata/create/src/simple-go-with-draftignore", nil},
 		{"testdata/create/src/simple-go-with-chart", nil},
+		{"testdata/create/src/simple-go-with-multiple-charts", nil},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("create %s", tc.src), func(t *testing.T) {
