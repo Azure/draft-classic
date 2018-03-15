@@ -14,6 +14,11 @@ func (h Home) Packs() string {
 	return filepath.Join(string(h), "packs")
 }
 
+// Logs returns the path to the Draft logs.
+func (h Home) Logs() string {
+	return filepath.Join(string(h), "logs")
+}
+
 // Path returns Home with elements appended.
 func (h Home) Path(elem ...string) string {
 	p := []string{h.String()}

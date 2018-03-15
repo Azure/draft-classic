@@ -15,22 +15,23 @@ $ cd examples/example-python
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
-$ draft create
+$ draft create --repository microsoft
 --> Draft detected the primary language as Python with 97.267760% certainty.
 --> Ready to sail
 $ ls -a
 .draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
-The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container.
+The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container. The `--repository` flag told Draft what docker registry we wanted to publish this image to. In this case, the image will be pushed to `microsoft/example-python`.
 
-The `draft.toml` file contains basic configuration about the application like the name, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
+The `draft.toml` file contains basic configuration about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
 
 ```shell
 $ cat draft.toml
 [environments]
   [environments.development]
     name = "example-python"
+    name = "microsoft"
     namespace = "default"
     wait = false
     watch = false
@@ -47,9 +48,9 @@ Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these 
 
 - reads configuration from `draft.toml`
 - compresses the `chart/` directory and the application directory as two separate tarballs
-- uploads the tarballs to `draftd`, the server-side component
-- `draftd` builds the docker image and pushes the image to a registry
-- `draftd` instructs helm to install the chart, referencing the image just built
+- builds the image using `docker`
+- `docker` pushes the image to the registry specified in `draft.toml`
+- `draft` instructs helm to install the chart, referencing the image just built
 
 ```shell
 $ draft up
@@ -66,8 +67,7 @@ Now that the application has been deployed, we can connect to our app.
 
 ```shell
 $ draft connect
-Connecting to your app...SUCCESS...Connect to your app on localhost:55139
-Starting log streaming...
+Connect to python:8080 on localhost:39551
 172.17.0.1 - - [13/Sep/2017 19:10:09] "GET / HTTP/1.1" 200 -
 ```
 
@@ -116,8 +116,7 @@ example-python: Releasing Application: SUCCESS ⚓  (0.5533s)
 example-python: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
 ```
 
-We should notice a significant faster build time here. This is because Docker is caching unchanged
-layers and only compiling layers that need to be re-built in the background.
+We should notice a significant faster build time here. This is because Docker is caching unchanged layers and only compiling layers that need to be re-built in the background.
 
 ## Great Success!
 

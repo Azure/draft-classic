@@ -75,7 +75,7 @@ func Delete(app string) error {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
 
-	helmClient, err := setupHelm(client, config, draftNamespace)
+	helmClient, err := setupHelm(client, config, tillerNamespace)
 	if err != nil {
 		return err
 	}

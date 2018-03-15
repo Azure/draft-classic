@@ -5,12 +5,16 @@ import (
 	"io"
 	"os"
 
+	"github.com/Azure/draft/pkg/builder"
+	"github.com/Azure/draft/pkg/cmdline"
+	"github.com/Azure/draft/pkg/draft/draftpath"
+	"github.com/Azure/draft/pkg/storage/inprocess"
+	"github.com/Azure/draft/pkg/storage/kube/configmap"
+	"github.com/docker/cli/cli/command"
+	dockerflags "github.com/docker/cli/cli/flags"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
-
-	"github.com/Azure/draft/pkg/build"
-	"github.com/Azure/draft/pkg/cmdline"
-	"github.com/Azure/draft/pkg/draft"
+	"k8s.io/client-go/rest"
 )
 
 const upDesc = `
@@ -28,9 +32,11 @@ const (
 )
 
 type upCmd struct {
-	client *draft.Client
-	out    io.Writer
-	src    string
+	out  io.Writer
+	src  string
+	home draftpath.Home
+	// storage engine draft should use for storing builds, logs, etc.
+	storageEngine string
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -40,44 +46,71 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "up [path]",
-		Short:   "upload the current directory to the draft server for deployment",
-		Long:    upDesc,
-		PreRunE: setupConnection,
+		Use:   "up [path]",
+		Short: "upload the current directory to the draft server for deployment",
+		Long:  upDesc,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			if len(args) > 0 {
 				up.src = args[0]
 			}
-			up.client = ensureDraftClient(up.client)
 			if up.src == "" || up.src == "." {
 				if up.src, err = os.Getwd(); err != nil {
 					return err
 				}
 			}
+			up.home = draftpath.Home(homePath())
 			return up.run(runningEnvironment)
 		},
 	}
 
 	f := cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
+	f.StringVar(&up.storageEngine, "storage-engine", "inprocess", "storage engine draft should use (configmap|inprocess)")
 
 	return cmd
 }
 
 func (u *upCmd) run(environment string) (err error) {
-	var buildctx *build.Context
-	if buildctx, err = build.LoadWithEnv(u.src, environment); err != nil {
+	var (
+		buildctx *builder.Context
+		config   *rest.Config
+	)
+	if buildctx, err = builder.LoadWithEnv(u.src, environment); err != nil {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	errc := make(chan error)
-	go func() {
-		if err = u.client.Up(ctx, buildctx); err != nil {
-			errc <- fmt.Errorf("there was an error running 'draft up': %v", err)
-		}
-		close(errc)
-		cancel()
-	}()
-	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
-	return <-errc
+	ctx := context.Background()
+	bldr := &builder.Builder{
+		LogsDir: u.home.Logs(),
+	}
+
+	// setup docker
+	cli := &command.DockerCli{}
+	if err := cli.Initialize(dockerflags.NewClientOptions()); err != nil {
+		return fmt.Errorf("failed to create docker client: %v", err)
+	}
+	bldr.DockerClient = cli
+
+	// setup kube
+	bldr.Kube, config, err = getKubeClient(kubeContext)
+	if err != nil {
+		return fmt.Errorf("Could not get a kube client: %s", err)
+	}
+	bldr.Helm, err = setupHelm(bldr.Kube, config, tillerNamespace)
+	if err != nil {
+		return fmt.Errorf("Could not get a helm client: %s", err)
+	}
+
+	// setup the storage engine
+	switch u.storageEngine {
+	case "configmap":
+		namespace := envOr(namespaceEnvVar, tillerNamespace)
+		bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(namespace))
+	case "inprocess":
+		bldr.Storage = inprocess.NewStore()
+	default:
+		return fmt.Errorf("unknown storage engine name provided: %q", u.storageEngine)
+	}
+
+	cmdline.Display(ctx, buildctx.Env.Name, bldr.Up(ctx, buildctx))
+	return nil
 }

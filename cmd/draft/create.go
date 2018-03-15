@@ -12,7 +12,7 @@ import (
 	"unicode"
 
 	"github.com/BurntSushi/toml"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -34,11 +34,12 @@ const (
 var ErrNoLanguageDetected = errors.New("no languages were detected")
 
 type createCmd struct {
-	appName string
-	out     io.Writer
-	pack    string
-	home    draftpath.Home
-	dest    string
+	appName        string
+	out            io.Writer
+	pack           string
+	home           draftpath.Home
+	dest           string
+	repositoryName string
 }
 
 func newCreateCmd(out io.Writer) *cobra.Command {
@@ -67,6 +68,7 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default, this is a randomly generated name")
 	f.StringVarP(&cc.pack, "pack", "p", "", "the named Draft starter pack to scaffold the app with")
+	f.StringVarP(&cc.repositoryName, "repository", "r", "", "name of the Docker registry to publish this application to")
 
 	return cmd
 }
@@ -78,6 +80,8 @@ func (c *createCmd) run() error {
 	if c.appName != "" {
 		mfest.Environments[manifest.DefaultEnvironmentName].Name = c.appName
 	}
+
+	mfest.Environments[manifest.DefaultEnvironmentName].Repository = c.repositoryName
 
 	chartExists, err := osutil.Exists(filepath.Join(c.dest, pack.ChartsDir))
 	if err != nil {
