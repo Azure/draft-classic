@@ -16,7 +16,6 @@ import (
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/Azure/draft/pkg/draft/pack"
 	"github.com/Azure/draft/pkg/storage"
-	"github.com/BurntSushi/toml"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/image/build"
 	"github.com/docker/docker/api/types"
@@ -119,16 +118,8 @@ func newAppContext(b *Builder, buildCtx *Context, out io.Writer) (*AppContext, e
 func LoadWithEnv(appdir, whichenv string) (*Context, error) {
 	ctx := &Context{AppDir: appdir, EnvName: whichenv}
 	// read draft.toml from appdir.
-	b, err := ioutil.ReadFile(filepath.Join(appdir, "draft.toml"))
+	mfst, err := manifest.Load(filepath.Join(appdir, "draft.toml"))
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return nil, fmt.Errorf("draft.toml does not exist")
-		}
-		return nil, fmt.Errorf("failed to read draft.toml from %q: %v", appdir, err)
-	}
-	// unmarshal draft.toml into new manifest.
-	mfst := manifest.New()
-	if err := toml.Unmarshal(b, mfst); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal draft.toml from %q: %v", appdir, err)
 	}
 	// if environment does not exist return error.
