@@ -26,7 +26,7 @@ type AppContext struct {
 	req  *rpc.UpRequest
 	buf  *bytes.Buffer
 	tag  string
-	img  string
+	imgs []string
 	out  io.Writer
 	id   string
 	vals chartutil.Values
@@ -47,6 +47,7 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 	ctxtID := h.Sum(nil)
 	imgtag := fmt.Sprintf("%.20x", ctxtID)
 	image := fmt.Sprintf("%s/%s:%s", s.cfg.Registry.URL, req.AppName, imgtag)
+	imageLatest := fmt.Sprintf("%s/%s:latest", s.cfg.Registry.URL, req.AppName)
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
@@ -68,7 +69,7 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 		req:  req,
 		buf:  b,
 		tag:  imgtag,
-		img:  image,
+		imgs: []string{image, imageLatest},
 		out:  out,
 		vals: vals,
 	}, nil

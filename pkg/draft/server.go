@@ -222,7 +222,7 @@ func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.
 	msgc := make(chan string)
 	errc := make(chan error)
 	go func() {
-		buildopts := types.ImageBuildOptions{Tags: []string{app.img}}
+		buildopts := types.ImageBuildOptions{Tags: app.imgs}
 		resp, err := s.cfg.Docker.ImageBuild(ctx, app.buf, buildopts)
 		if err != nil {
 			errc <- err
@@ -238,7 +238,7 @@ func (s *Server) buildImg(ctx context.Context, app *AppContext, out chan<- *rpc.
 			errc <- err
 			return
 		}
-		if _, _, err = s.cfg.Docker.ImageInspectWithRaw(ctx, app.img); err != nil {
+		if _, _, err = s.cfg.Docker.ImageInspectWithRaw(ctx, app.imgs[0]); err != nil {
 			if docker.IsErrImageNotFound(err) {
 				errc <- fmt.Errorf("Could not locate image for %s: %v", app.req.AppName, err)
 				return
@@ -283,20 +283,23 @@ func (s *Server) pushImg(ctx context.Context, app *AppContext, out chan<- *rpc.U
 	errc := make(chan error, 1)
 	go func() {
 		pushopts := types.ImagePushOptions{RegistryAuth: s.cfg.Registry.Auth}
-		resp, err := s.cfg.Docker.ImagePush(ctx, app.img, pushopts)
-		if err != nil {
-			errc <- err
-			return
-		}
-		defer func() {
-			resp.Close()
-			close(errc)
-			close(msgc)
-		}()
-		outFd, isTerm := term.GetFdInfo(app.out)
-		if err := jsonmessage.DisplayJSONMessagesStream(resp, app.out, outFd, isTerm, nil); err != nil {
-			errc <- err
-			return
+		for _, img := range app.imgs {
+			resp, err := s.cfg.Docker.ImagePush(ctx, img, pushopts)
+			if err != nil {
+				errc <- err
+				return
+			}
+			defer func() {
+				resp.Close()
+				close(errc)
+				close(msgc)
+			}()
+
+			outFd, isTerm := term.GetFdInfo(app.out)
+			if err := jsonmessage.DisplayJSONMessagesStream(resp, app.out, outFd, isTerm, nil); err != nil {
+				errc <- err
+				return
+			}
 		}
 	}()
 	for msgc != nil || errc != nil {
