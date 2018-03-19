@@ -63,9 +63,9 @@ func LoadWithEnv(appdir, whichenv string) (*Context, error) {
 	}
 	// load the chart and the build archive; if a chart directory is present
 	// this will be given priority over the chart archive specified by the
-	// `chart_tar` field in the draft.toml. If this is the case, then build_tar
-	// is built from scratch. If no chart directory exists but a chart_tar and
-	// build_tar exist, then these will be used for values extraction.
+	// `chart-tar` field in the draft.toml. If this is the case, then build-tar
+	// is built from scratch. If no chart directory exists but a chart-tar and
+	// build-tar exist, then these will be used for values extraction.
 	if err := loadArchive(ctx); err != nil {
 		return nil, fmt.Errorf("failed to load chart: %v", err)
 	}
@@ -77,7 +77,7 @@ func LoadWithEnv(appdir, whichenv string) (*Context, error) {
 }
 
 // loadArchive loads the chart package and build archive.
-// Precedence is given to the `build_tar` and `chart_tar`
+// Precedence is given to the `build-tar` and `chart-tar`
 // indicated in the `draft.toml` if present. Otherwise,
 // loadArchive loads the chart directory and archives the
 // app directory to send to the draft server.
