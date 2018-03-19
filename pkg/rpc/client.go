@@ -59,6 +59,24 @@ func (c *clientImpl) GetLogs(ctx context.Context, req *GetLogsRequest) (*GetLogs
 	return r, nil
 }
 
+// GetLatestBuildID implements rpc.Client.GetLatestBuildID
+func (c *clientImpl) GetLatestBuildID(ctx context.Context, req *GetLatestBuildIDRequest) (*GetLatestBuildIDResponse, error) {
+	conn, err := connect(c)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := NewDraftClient(conn)
+	r, err := client.GetLatestBuildID(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error getting latest build ID: %v", err)
+	}
+
+	return r, nil
+
+}
+
 // UpBuild implements rpc.Client.UpBuild
 func (c *clientImpl) UpBuild(ctx context.Context, req *UpRequest, outc chan<- *UpSummary) (err error) {
 	conn, err := connect(c)

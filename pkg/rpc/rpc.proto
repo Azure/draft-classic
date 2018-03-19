@@ -15,6 +15,9 @@ service Draft {
 	// GetLogs returns the logs for a particular draft build.
 	rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
 
+	// GetLatestBuildID returns the latest build ID for a given application
+	rpc GetLatestBuildID(GetLatestBuildIDRequest) returns (GetLatestBuildIDResponse) {}
+
 	// UpBuild returns a stream of the UpSummary within
 	// for a given draft upload.
 	//
@@ -42,6 +45,16 @@ message GetLogsRequest {
 // for a draft build.
 message GetLogsResponse {
 	bytes content = 1;
+}
+
+// GetLatestBuildIDRequest is the message sent to draftd to retrieve the latest build ID for an app
+message GetLatestBuildIDRequest {
+	string app_name = 1;
+}
+
+// GetLatestBuildIDResponse is the message returned by draftd containing the latest build ID
+message GetLatestBuildIDResponse {
+	string buildID = 1;
 }
 
 // AppArchive represents the archived application included in a `draft up`.

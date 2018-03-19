@@ -27,6 +27,10 @@ const (
 	ignoreFileName = ".draftignore"
 )
 
+var (
+	autoConnect bool
+)
+
 type upCmd struct {
 	client *draft.Client
 	out    io.Writer
@@ -60,6 +64,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
+	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
 
 	return cmd
 }
@@ -79,5 +84,16 @@ func (u *upCmd) run(environment string) (err error) {
 		cancel()
 	}()
 	cmdline.Display(ctx, buildctx.Env.Name, u.client.Results())
-	return <-errc
+
+	err = <-errc
+	if err != nil {
+		return err
+	}
+
+	if buildctx.Env.AutoConnect || autoConnect {
+		c := newConnectCmd(u.out)
+		return c.RunE(c, []string{})
+	}
+
+	return nil
 }
