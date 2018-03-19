@@ -28,9 +28,10 @@ const DraftLabelKey = "draft"
 //  Namespace is the Kubernetes namespace it is deployed in
 //  Container is the name the name of the application container to connect to
 type App struct {
-	Name      string
-	Namespace string
-	Container string
+	Name          string
+	Namespace     string
+	Container     string
+	OverridePorts []string
 }
 
 // Connection encapsulated information to connect to an application
@@ -60,7 +61,10 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 		return nil, fmt.Errorf("Environment %v not found", draftEnvironment)
 	}
 
-	return &App{Name: appConfig.Name, Namespace: appConfig.Namespace}, nil
+	return &App{
+		Name:          appConfig.Name,
+		Namespace:     appConfig.Namespace,
+		OverridePorts: appConfig.OverridePorts}, nil
 }
 
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
