@@ -10,19 +10,29 @@ There are multiple example applications included within the [examples directory]
 $ cd examples/example-python
 ```
 
+## Draft Setup
+
+Before we start, we need to set a default registry where we will be pushing all of our images to. In this case, we want to push images to our custom registry sitting at `myregistry.com` so the image will be pushed and pulled from `myregistry.com/example-python`, so to do that, we run
+
+```
+draft config set registry myregistry.com
+```
+
+This command tells Draft to push images to this Docker registry, and for Kubernetes to pull images from this Docker registry.
+
 ## Draft Create
 
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
 
 ```shell
-$ draft create --repository microsoft
+$ draft create
 --> Draft detected the primary language as Python with 97.267760% certainty.
 --> Ready to sail
 $ ls -a
 .draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
 ```
 
-The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container. The `--repository` flag told Draft what docker registry we wanted to publish this image to. In this case, the image will be pushed to `microsoft/example-python`.
+The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container.
 
 The `draft.toml` file contains basic configuration about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
 
@@ -31,7 +41,6 @@ $ cat draft.toml
 [environments]
   [environments.development]
     name = "example-python"
-    name = "microsoft"
     namespace = "default"
     wait = false
     watch = false
@@ -49,7 +58,7 @@ Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these 
 - reads configuration from `draft.toml`
 - compresses the `chart/` directory and the application directory as two separate tarballs
 - builds the image using `docker`
-- `docker` pushes the image to the registry specified in `draft.toml`
+- `docker` pushes the image to the registry specified in `draft.toml` (or in `draft config get registry`, if set)
 - `draft` instructs helm to install the chart, referencing the image just built
 
 ```shell

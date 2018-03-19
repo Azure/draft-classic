@@ -65,6 +65,7 @@ func (i *initCmd) run() error {
 func (i *initCmd) setupDraftHome() error {
 	ensureFuncs := []func() error{
 		i.ensureDirectories,
+		i.ensureConfig,
 		i.ensurePlugins,
 		i.ensurePacks,
 	}

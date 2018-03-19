@@ -34,6 +34,25 @@ func (i *initCmd) ensureDirectories() error {
 	return nil
 }
 
+// ensureConfig checks to see if $DRAFT_HOME/config.toml exists
+//
+// If it does not exist, this function will create it.
+func (i *initCmd) ensureConfig() error {
+	fi, err := os.Stat(i.home.Config())
+	if err != nil {
+		fmt.Fprintf(i.out, "Creating %s \n", i.home.Config())
+		f, err := os.Create(i.home.Config())
+		if err != nil {
+			return fmt.Errorf("Could not create %s: %s", i.home.Config(), err)
+		}
+		defer f.Close()
+	} else if fi.IsDir() {
+		return fmt.Errorf("%s must not be a directory", i.home.Config())
+	}
+
+	return nil
+}
+
 // ensurePacks checks to see if the default packs exist.
 //
 // If the pack does not exist, this function will create it.

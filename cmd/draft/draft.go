@@ -42,6 +42,8 @@ var (
 	tillerNamespace string
 	//rootCmd is the root command handling `draft`. It's used in other parts of package cmd to add/search the command tree.
 	rootCmd *cobra.Command
+	// globalConfig is the configuration stored in $DRAFT_HOME/config.toml
+	globalConfig DraftConfig
 )
 
 var globalUsage = `The application deployment tool for Kubernetes.
@@ -57,11 +59,13 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 		Short:        globalUsage,
 		Long:         globalUsage,
 		SilenceUsage: true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			if flagDebug {
 				log.SetLevel(log.DebugLevel)
 			}
 			os.Setenv(homeEnvVar, draftHome)
+			globalConfig, err = ReadConfig()
+			return
 		},
 	}
 	p := cmd.PersistentFlags()
@@ -71,6 +75,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	p.StringVar(&tillerNamespace, "tiller-namespace", defaultTillerNamespace(), "namespace where Tiller is running. This is used when Tiller was installed in a different namespace than kube-system. Overrides $TILLER_NAMESPACE")
 
 	cmd.AddCommand(
+		newConfigCmd(out),
 		newCreateCmd(out),
 		newHomeCmd(out),
 		newInitCmd(out, in),

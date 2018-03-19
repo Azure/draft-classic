@@ -84,12 +84,12 @@ func newAppContext(b *Builder, buildCtx *Context, out io.Writer) (*AppContext, e
 	// equivalent of `shasum build.tar.gz | awk '{print $1}'`.
 	ctxtID := h.Sum(nil)
 	imgtag := fmt.Sprintf("%.20x", ctxtID)
-	image := fmt.Sprintf("%s/%s:%s", buildCtx.Env.Repository, buildCtx.Env.Name, imgtag)
+	image := fmt.Sprintf("%s/%s:%s", buildCtx.Env.Registry, buildCtx.Env.Name, imgtag)
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
 	tplstr := "image.repository=%s/%s,image.tag=%s,%s=%s"
-	inject := fmt.Sprintf(tplstr, buildCtx.Env.Repository, buildCtx.Env.Name, imgtag, local.DraftLabelKey, buildCtx.Env.Name)
+	inject := fmt.Sprintf(tplstr, buildCtx.Env.Registry, buildCtx.Env.Name, imgtag, local.DraftLabelKey, buildCtx.Env.Name)
 
 	vals, err := chartutil.ReadValues([]byte(buildCtx.Values.Raw))
 	if err != nil {
@@ -347,8 +347,8 @@ func (b *Builder) buildImg(ctx context.Context, app *AppContext, out chan<- *Sum
 	msgc := make(chan string)
 	errc := make(chan error)
 	go func() {
-		if app.ctx.Env.Repository == "" {
-			errc <- fmt.Errorf("No repository was found in draft.toml")
+		if app.ctx.Env.Registry == "" {
+			errc <- errors.New("No registry was configured")
 			return
 		}
 		buildopts := types.ImageBuildOptions{Tags: []string{app.img}}

@@ -49,7 +49,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		Use:   "up [path]",
 		Short: "upload the current directory to the draft server for deployment",
 		Long:  upDesc,
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		RunE: func(_ *cobra.Command, args []string) (err error) {
 			if len(args) > 0 {
 				up.src = args[0]
 			}
@@ -72,15 +72,23 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 func (u *upCmd) run(environment string) (err error) {
 	var (
-		buildctx *builder.Context
-		config   *rest.Config
+		buildctx   *builder.Context
+		kubeConfig *rest.Config
+		ctx        = context.Background()
+		bldr       = &builder.Builder{
+			LogsDir: u.home.Logs(),
+		}
 	)
 	if buildctx, err = builder.LoadWithEnv(u.src, environment); err != nil {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
-	ctx := context.Background()
-	bldr := &builder.Builder{
-		LogsDir: u.home.Logs(),
+
+	// if a registry has been set in their global config, use that instead of what's in draft.toml
+	if reg, ok := globalConfig["registry"]; ok {
+		if _, ok := globalConfig["suppress-registry-warnings"]; !ok {
+			fmt.Fprintf(u.out, "registry config found in $DRAFT_HOME/config.toml! Using that instead.\nNote: suppress this warning with `draft config set suppress-registry-warnings 1`", reg)
+		}
+		buildctx.Env.Registry = reg
 	}
 
 	// setup docker
@@ -91,11 +99,11 @@ func (u *upCmd) run(environment string) (err error) {
 	bldr.DockerClient = cli
 
 	// setup kube
-	bldr.Kube, config, err = getKubeClient(kubeContext)
+	bldr.Kube, kubeConfig, err = getKubeClient(kubeContext)
 	if err != nil {
 		return fmt.Errorf("Could not get a kube client: %s", err)
 	}
-	bldr.Helm, err = setupHelm(bldr.Kube, config, tillerNamespace)
+	bldr.Helm, err = setupHelm(bldr.Kube, kubeConfig, tillerNamespace)
 	if err != nil {
 		return fmt.Errorf("Could not get a helm client: %s", err)
 	}
