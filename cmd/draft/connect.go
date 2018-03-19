@@ -63,7 +63,17 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		return err
 	}
 
-	connection, err := deployedApp.Connect(client, config, targetContainer, overridePorts)
+	var ports []string
+	if len(deployedApp.OverridePorts) != 0 {
+		ports = deployedApp.OverridePorts
+	}
+
+	// --override-port takes precedence
+	if len(overridePorts) != 0 {
+		ports = overridePorts
+	}
+
+	connection, err := deployedApp.Connect(client, config, targetContainer, ports)
 	if err != nil {
 		return err
 	}
