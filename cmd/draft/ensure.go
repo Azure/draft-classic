@@ -16,8 +16,9 @@ import (
 func (i *initCmd) ensureDirectories() error {
 	configDirectories := []string{
 		i.home.String(),
-		i.home.Plugins(),
+		i.home.Cache(),
 		i.home.Packs(),
+		i.home.Plugins(),
 	}
 	for _, p := range configDirectories {
 		if fi, err := os.Stat(p); err != nil {

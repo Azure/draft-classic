@@ -165,7 +165,8 @@ spec:
     app: {{ .Chart.Name }}
 `
 
-const draftSecret = `apiVersion: v1
+// DraftSecret is the secret manifest for TLS configuration. It is not installed unless TLS is enabled.
+const DraftSecret = `apiVersion: v1
 kind: Secret
 type: Opaque
 data:

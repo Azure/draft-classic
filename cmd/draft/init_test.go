@@ -25,11 +25,13 @@ func TestSetupDraftd(t *testing.T) {
 		resetEnvVars()
 	}()
 
+	fi := &fakeInstaller{installed: false}
+
 	cmd := &initCmd{
 		out:            ioutil.Discard,
 		in:             bytes.NewBufferString("test-registry\ntest-user\n"),
 		home:           draftpath.Home(tempHome),
-		installer:      &fakeInstaller{installed: false},
+		installer:      fi,
 		passwordReader: mockSecureReader{},
 		env: &deployEnv{
 			helmClient: &helm.FakeClient{},
@@ -43,7 +45,7 @@ func TestSetupDraftd(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if cmd.installer.(*fakeInstaller).installed == false {
+	if fi.installed == false {
 		t.Error("Expected draftd to be installed but was not")
 	}
 

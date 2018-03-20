@@ -26,6 +26,11 @@ func (h Home) Plugins() string {
 	return filepath.Join(string(h), "plugins")
 }
 
+// Cache returns the path to the Draft cache.
+func (h Home) Cache() string {
+	return filepath.Join(string(h), "cache")
+}
+
 // String returns Home as a string.
 //
 // Implements fmt.Stringer.

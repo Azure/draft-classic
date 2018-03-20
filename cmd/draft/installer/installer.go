@@ -15,9 +15,14 @@ import (
 
 // Installer is the client used to install draftd into the kubernetes cluster via helm.
 type Installer struct {
-	client    helm.Interface
-	config    *draftconfig.DraftConfig
-	namespace string
+	// Client is the helm client used to install into the cluster
+	Client helm.Interface
+	// ChartFiles are the files in the chart used to install Draftd.
+	ChartFiles []*chartutil.BufferedFile
+	// Config is the draft-specific configuration to use with this chart
+	Config *draftconfig.DraftConfig
+	// Namespace is the kubernetes namespace to install draftd
+	Namespace string
 }
 
 // Interface defines the installer interface.
@@ -29,9 +34,10 @@ type Interface interface {
 // New creates a new Installer
 func New(client helm.Interface, config *draftconfig.DraftConfig, namespace string) *Installer {
 	return &Installer{
-		client:    client,
-		config:    config,
-		namespace: namespace,
+		Client:     client,
+		ChartFiles: DefaultChartFiles,
+		Config:     config,
+		Namespace:  namespace,
 	}
 }
 
@@ -74,23 +80,15 @@ var DefaultChartFiles = []*chartutil.BufferedFile{
 //
 // Returns an error if the command failed.
 func (in *Installer) Install() error {
-	if in.config.WithTLS() {
-		DefaultChartFiles = append(DefaultChartFiles, &chartutil.BufferedFile{
-			// TODO: Add chartutil.SecretName to k8s.io/helm/pkg/chartutil/create.go
-			Name: path.Join(chartutil.TemplatesDir, "secret.yaml"),
-			Data: []byte(draftSecret),
-		})
-	}
-
-	chart, err := chartutil.LoadFiles(DefaultChartFiles)
+	chart, err := chartutil.LoadFiles(in.ChartFiles)
 	if err != nil {
 		return err
 	}
-	_, err = in.client.InstallReleaseFromChart(
+	_, err = in.Client.InstallReleaseFromChart(
 		chart,
-		in.namespace,
+		in.Namespace,
 		helm.ReleaseName(ReleaseName),
-		helm.ValueOverrides([]byte(in.config.String())),
+		helm.ValueOverrides([]byte(in.Config.String())),
 	)
 	return prettyError(err)
 }
@@ -104,10 +102,10 @@ func (in *Installer) Upgrade() error {
 	if err != nil {
 		return err
 	}
-	_, err = in.client.UpdateReleaseFromChart(
+	_, err = in.Client.UpdateReleaseFromChart(
 		ReleaseName,
 		chart,
-		helm.UpdateValueOverrides([]byte(in.config.String())),
+		helm.UpdateValueOverrides([]byte(in.Config.String())),
 	)
 	return prettyError(err)
 }

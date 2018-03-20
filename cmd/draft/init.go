@@ -2,11 +2,13 @@ package main
 
 import (
 	"bufio"
+	"crypto/md5"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 	"syscall"
 
@@ -15,8 +17,10 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/plugin/cache"
 
 	"github.com/Azure/draft/cmd/draft/installer"
 	installerConfig "github.com/Azure/draft/cmd/draft/installer/config"
@@ -50,6 +54,9 @@ type initCmd struct {
 	upgrade        bool
 	draftConfig    *installerConfig.DraftConfig
 	installer      installer.Interface
+	driver         string
+	baseArgs       []string
+	chartCachePath string
 }
 
 type deployEnv struct {
@@ -80,6 +87,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 				return errors.New("This command does not accept arguments")
 			}
 			i.home = draftpath.Home(homePath())
+			i.baseArgs = args
 			return i.run()
 		},
 	}
@@ -88,6 +96,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 	f.BoolVarP(&i.clientOnly, "client-only", "c", false, "install local configuration, but skip remote configuration")
 	f.BoolVarP(&i.ingressEnabled, "ingress-enabled", "", false, "configure ingress")
 	f.BoolVar(&i.autoAccept, "auto-accept", false, "automatically accept configuration defaults (if detected). It will still prompt for information if this is set to true and no cloud provider was found")
+	f.StringVarP(&i.driver, "driver", "d", "", "(EXPERIMENTAL) the init driver used to bootstrap draftd")
 	f.BoolVar(&i.dryRun, "dry-run", false, "go through all the steps without actually installing anything. Mostly used along with --debug for debugging purposes.")
 	f.StringVarP(&i.image, "draftd-image", "i", "", "override Draftd image")
 	// flags for bootstrapping draftd with tls
@@ -114,14 +123,30 @@ func (i *initCmd) run() error {
 
 	if !i.clientOnly {
 
-		if i.env == nil {
-			if err := i.prepareDeployEnv(); err != nil {
+		// if the user requested to use an init driver
+		if i.driver != "" {
+			if err := i.setupDraftConfig(); err != nil {
 				return err
 			}
-		}
+			if err := i.prepareDraftChart(); err != nil {
+				return err
+			}
+			i.setupDriverEnv()
+			if err := i.deployDraftChart(); err != nil {
+				return err
+			}
+		} else {
+			// otherwise, use the default init path
+			// TODO: write this into a "default" init driver, then use that by default
+			if i.env == nil {
+				if err := i.prepareDeployEnv(); err != nil {
+					return err
+				}
+			}
 
-		if err := i.setupDraftd(); err != nil {
-			return err
+			if err := i.setupDraftd(); err != nil {
+				return err
+			}
 		}
 
 	} else {
@@ -191,6 +216,91 @@ func (i *initCmd) setupDraftd() error {
 
 	}
 
+	return nil
+}
+
+// setupDriverEnv prepares os.Env for the driver. It operates on os.Env because
+// the plugin subsystem itself needs access to the environment variables
+// created here. This extends setupPluginEnv by giving init drivers additional
+// context on what feature flags were set.
+func (i *initCmd) setupDriverEnv() {
+	envMap := map[string]string{
+		"DRAFT_INIT_DRIVER_NAME":     i.driver,
+		"DRAFT_INIT_DRAFT_NAMESPACE": draftNamespace,
+	}
+
+	if i.ingressEnabled {
+		envMap["DRAFT_INIT_INGRESS_ENABLED"] = "1"
+	}
+
+	if i.upgrade {
+		envMap["DRAFT_INIT_UPGRADE"] = "1"
+	}
+
+	for key, val := range envMap {
+		os.Setenv(key, val)
+	}
+}
+
+func (i *initCmd) setupDraftConfig() error {
+	i.draftConfig = &installerConfig.DraftConfig{
+		Image: i.image,
+	}
+	if err := i.tlsOptions(i.draftConfig); err != nil {
+		return err
+	}
+	log.Debugf("raw chart config: %s", i.draftConfig)
+	return nil
+}
+
+func (i *initCmd) prepareDraftChart() error {
+	chartFiles := installer.DefaultChartFiles
+	if tlsEnable {
+		chartFiles = append(chartFiles, &chartutil.BufferedFile{
+			// TODO: Add chartutil.SecretName to k8s.io/helm/pkg/chartutil/create.go
+			Name: path.Join(chartutil.TemplatesDir, "secret.yaml"),
+			Data: []byte(installer.DraftSecret),
+		})
+	}
+	valuesFile := chartutil.BufferedFile{
+		Name: chartutil.ValuesfileName,
+		Data: []byte(i.draftConfig.String()),
+	}
+	chartFiles = append(chartFiles, &valuesFile)
+
+	chart, err := chartutil.LoadFiles(chartFiles)
+	if err != nil {
+		return err
+	}
+
+	// identical chart config should end up with the same chart
+	key, err := cache.Key(fmt.Sprintf("%x", md5.Sum([]byte(i.draftConfig.String()))))
+	if err != nil {
+		return err
+	}
+
+	cachePath := i.home.Path("cache", "charts", key)
+	if err := os.MkdirAll(cachePath, 0755); err != nil {
+		return fmt.Errorf("Could not create %s: %s", cachePath, err)
+	}
+
+	i.chartCachePath, err = chartutil.Save(chart, cachePath)
+	return err
+}
+
+func (i *initCmd) deployDraftChart() error {
+	driverCmdName := fmt.Sprintf("init-%s", i.driver)
+	driverCmd, _, err := rootCmd.Find([]string{driverCmdName})
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "unknown command") {
+			return fmt.Errorf("Init driver `%s` was not found. Check with `draft plugin list` to confirm if it was installed, and install with `draft plugin install`", driverCmdName)
+		}
+		return err
+	}
+
+	if err := driverCmd.RunE(driverCmd, append(i.baseArgs, i.chartCachePath)); err != nil {
+		return fmt.Errorf("error installing Draftd: %s", err)
+	}
 	return nil
 }
 
@@ -317,8 +427,19 @@ func (r secureReader) readPassword() ([]byte, error) {
 }
 
 func (i *initCmd) deployDraft() error {
+	draftInstaller := installer.New(i.env.helmClient, i.draftConfig, draftNamespace)
+
+	if draftInstaller.Config.WithTLS() {
+		draftInstaller.ChartFiles = append(draftInstaller.ChartFiles, &chartutil.BufferedFile{
+			// TODO: Add chartutil.SecretName to k8s.io/helm/pkg/chartutil/create.go
+			Name: path.Join(chartutil.TemplatesDir, "secret.yaml"),
+			Data: []byte(installer.DraftSecret),
+		})
+	}
+
+	// used for unit tests; see init_test.go#TestSetupDraftd
 	if i.installer == nil {
-		i.installer = installer.New(i.env.helmClient, i.draftConfig, draftNamespace)
+		i.installer = draftInstaller
 	}
 
 	if i.upgrade {
