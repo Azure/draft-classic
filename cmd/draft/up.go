@@ -86,7 +86,7 @@ func (u *upCmd) run(environment string) (err error) {
 	// if a registry has been set in their global config, use that instead of what's in draft.toml
 	if reg, ok := globalConfig["registry"]; ok {
 		if _, ok := globalConfig["suppress-registry-warnings"]; !ok {
-			fmt.Fprintf(u.out, "registry config found in $DRAFT_HOME/config.toml! Using that instead.\nNote: suppress this warning with `draft config set suppress-registry-warnings 1`", reg)
+			fmt.Fprintln(u.out, "registry config found in $DRAFT_HOME/config.toml! Using that instead.\nNote: suppress this warning with `draft config set suppress-registry-warnings 1`")
 		}
 		buildctx.Env.Registry = reg
 	}
