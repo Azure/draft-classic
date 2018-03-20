@@ -8,7 +8,6 @@ import (
 	"github.com/Azure/draft/pkg/builder"
 	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/storage/inprocess"
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
 	"github.com/docker/cli/cli/command"
 	dockerflags "github.com/docker/cli/cli/flags"
@@ -65,7 +64,6 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
-	f.StringVar(&up.storageEngine, "storage-engine", "inprocess", "storage engine draft should use (configmap|inprocess)")
 
 	return cmd
 }
@@ -109,15 +107,7 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 
 	// setup the storage engine
-	switch u.storageEngine {
-	case "configmap":
-		namespace := envOr(namespaceEnvVar, tillerNamespace)
-		bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(namespace))
-	case "inprocess":
-		bldr.Storage = inprocess.NewStore()
-	default:
-		return fmt.Errorf("unknown storage engine name provided: %q", u.storageEngine)
-	}
+	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
 
 	cmdline.Display(ctx, buildctx.Env.Name, bldr.Up(ctx, buildctx))
 	return nil

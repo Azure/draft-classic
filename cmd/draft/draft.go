@@ -127,13 +127,6 @@ func configForContext(context string) (clientcmd.ClientConfig, *rest.Config, err
 	return clientConfig, config, nil
 }
 
-func envOr(name string, alt string) string {
-	if s := os.Getenv(name); s != "" {
-		return s
-	}
-	return alt
-}
-
 // getKubeClient creates a Kubernetes config and client for a given kubeconfig context.
 func getKubeClient(context string) (kubernetes.Interface, *rest.Config, error) {
 	_, config, err := configForContext(context)
