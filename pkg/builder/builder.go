@@ -3,7 +3,6 @@ package builder
 import (
 	"bytes"
 	"crypto/sha256"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -300,9 +299,11 @@ func (b *Builder) Up(ctx context.Context, bctx *Context) <-chan *Summary {
 			fmt.Printf("buildApp: buildImg error: %v\n", err)
 			return
 		}
-		if err := b.pushImg(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: pushImg error: %v\n", err)
-			return
+		if app.ctx.Env.Registry != "" {
+			if err := b.pushImg(ctx, app, ch); err != nil {
+				fmt.Printf("buildApp: pushImg error: %v\n", err)
+				return
+			}
 		}
 		if err := b.release(ctx, app, ch); err != nil {
 			fmt.Printf("buildApp: release error: %v\n", err)
@@ -347,10 +348,6 @@ func (b *Builder) buildImg(ctx context.Context, app *AppContext, out chan<- *Sum
 	msgc := make(chan string)
 	errc := make(chan error)
 	go func() {
-		if app.ctx.Env.Registry == "" {
-			errc <- errors.New("No registry was configured")
-			return
-		}
 		buildopts := types.ImageBuildOptions{Tags: []string{app.img}}
 		resp, err := b.DockerClient.Client().ImageBuild(ctx, app.buf, buildopts)
 		if err != nil {
