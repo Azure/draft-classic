@@ -83,12 +83,14 @@ func newAppContext(b *Builder, buildCtx *Context, out io.Writer) (*AppContext, e
 	// equivalent of `shasum build.tar.gz | awk '{print $1}'`.
 	ctxtID := h.Sum(nil)
 	imgtag := fmt.Sprintf("%.20x", ctxtID)
-	image := fmt.Sprintf("%s/%s:%s", buildCtx.Env.Registry, buildCtx.Env.Name, imgtag)
+	// if registry == "", then we just assume the image name is the app name and strip out the leading /
+	imageRepository := strings.TrimLeft(fmt.Sprintf("%s/%s", buildCtx.Env.Registry, buildCtx.Env.Name), "/")
+	image := fmt.Sprintf("%s:%s", imageRepository, imgtag)
 
 	// inject certain values into the chart such as the registry location,
 	// the application name, and the application version.
-	tplstr := "image.repository=%s/%s,image.tag=%s,%s=%s"
-	inject := fmt.Sprintf(tplstr, buildCtx.Env.Registry, buildCtx.Env.Name, imgtag, local.DraftLabelKey, buildCtx.Env.Name)
+	tplstr := "image.repository=%s,image.tag=%s,%s=%s"
+	inject := fmt.Sprintf(tplstr, imageRepository, imgtag, local.DraftLabelKey, buildCtx.Env.Name)
 
 	vals, err := chartutil.ReadValues([]byte(buildCtx.Values.Raw))
 	if err != nil {
