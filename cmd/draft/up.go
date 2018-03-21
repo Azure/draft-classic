@@ -81,11 +81,8 @@ func (u *upCmd) run(environment string) (err error) {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
 
-	// if a registry has been set in their global config, use that instead of what's in draft.toml
+	// if a registry has been set in their global config but nothing was in draft.toml, use that instead
 	if reg, ok := globalConfig["registry"]; ok {
-		if _, ok := globalConfig["suppress-registry-warnings"]; !ok {
-			fmt.Fprintln(u.out, "registry config found in $DRAFT_HOME/config.toml! Using that instead.\nNote: suppress this warning with `draft config set suppress-registry-warnings 1`")
-		}
 		buildctx.Env.Registry = reg
 	}
 
