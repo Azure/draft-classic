@@ -121,6 +121,14 @@ func (u *upCmd) run(environment string) (err error) {
 		buildctx.Env.Registry = reg
 	}
 
+	if buildctx.Env.Registry == "" {
+		// give a way for minikube users (and users who understand what they're doing) a way to opt out
+		if _, ok := globalConfig["disable-push-warning"]; !ok {
+			fmt.Fprintln(u.out, "WARNING: no registry has been set, therefore Draft will not push to a container registry.\nThis can be fixed by running\n\n\t$ draft config set registry docker.io/myusername")
+			fmt.Fprintln(u.out, "Hint: this warning can be disabled by running\n\n\t$ draft config set disable-push-warning 1")
+		}
+	}
+
 	// setup docker
 	cli := &command.DockerCli{}
 	if err := cli.Initialize(u.dockerClientOptions); err != nil {
