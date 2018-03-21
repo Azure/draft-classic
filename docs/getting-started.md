@@ -23,7 +23,7 @@ $ draft config set disable-push-warning 1
 
 Draft will pick up on this and build Docker images using Minikube's in-cluster Docker daemon, making the build process quick and speedy.
 
-The second command disables a warning that `draft up` outputs when no registry has been configured to push images to. Since docker builds on Minikube are immediately picked up by the Kubelet, we can safely disable this step.
+The second command disables a warning that `draft up` outputs when no registry has been configured to push images to. Since docker builds on Minikube are immediately picked up by the Kubelet, we can safely disable this warning.
 
 ### Other environments
 
