@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/Azure/draft/pkg/builder"
 	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
 	"github.com/docker/cli/cli/command"
+	cliconfig "github.com/docker/cli/cli/config"
 	dockerflags "github.com/docker/cli/cli/flags"
+	"github.com/docker/cli/opts"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
@@ -27,7 +30,13 @@ that changes have stopped before uploading, but that can be altered by the
 `
 
 const (
-	ignoreFileName = ".draftignore"
+	ignoreFileName        = ".draftignore"
+	dockerTLSEnvVar       = "DOCKER_TLS"
+	dockerTLSVerifyEnvVar = "DOCKER_TLS_VERIFY"
+)
+
+var (
+	dockerCertPath = os.Getenv("DOCKER_CERT_PATH")
 )
 
 type upCmd struct {
@@ -36,11 +45,26 @@ type upCmd struct {
 	home draftpath.Home
 	// storage engine draft should use for storing builds, logs, etc.
 	storageEngine string
+	// options common to the docker client and the daemon.
+	dockerClientOptions *dockerflags.ClientOptions
+}
+
+func stringPtr(s string) *string { return &s }
+
+func defaultDockerTLS() bool {
+	return os.Getenv(dockerTLSEnvVar) != ""
+}
+
+func defaultDockerTLSVerify() bool {
+	return os.Getenv(dockerTLSVerifyEnvVar) != ""
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
 	var (
-		up                 = &upCmd{out: out}
+		up = &upCmd{
+			out:                 out,
+			dockerClientOptions: dockerflags.NewClientOptions(),
+		}
 		runningEnvironment string
 	)
 
@@ -64,6 +88,17 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
+	f.BoolVar(&up.dockerClientOptions.Common.Debug, "docker-debug", false, "Enable debug mode")
+	f.StringVar(&up.dockerClientOptions.Common.LogLevel, "docker-log-level", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
+	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "Use TLS; implied by --tlsverify")
+	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "Use TLS and verify the remote")
+	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "Location of client config files")
+	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultCaFile))), "docker-tlscacert", "Trust certs signed only by this CA")
+	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultCertFile))), "docker-tlscert", "Path to TLS certificate file")
+	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultKeyFile))), "docker-tlskey", "Path to TLS key file")
+
+	hostOpt := opts.NewNamedListOptsRef("docker-hosts", &up.dockerClientOptions.Common.Hosts, opts.ValidateHost)
+	f.Var(hostOpt, "docker-host", "Daemon socket(s) to connect to")
 
 	return cmd
 }
@@ -88,7 +123,7 @@ func (u *upCmd) run(environment string) (err error) {
 
 	// setup docker
 	cli := &command.DockerCli{}
-	if err := cli.Initialize(dockerflags.NewClientOptions()); err != nil {
+	if err := cli.Initialize(u.dockerClientOptions); err != nil {
 		return fmt.Errorf("failed to create docker client: %v", err)
 	}
 	bldr.DockerClient = cli
