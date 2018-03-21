@@ -159,9 +159,10 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 	wg.Add(1)
 	go func() {
 		var (
-			buf = new(bytes.Buffer)
-			app *AppContext
-			err error
+			imageExists bool
+			buf         = new(bytes.Buffer)
+			app         *AppContext
+			err         error
 		)
 		defer func() {
 			s.finish(app, buf)
@@ -172,13 +173,20 @@ func (s *Server) buildApp(ctx context.Context, req *rpc.UpRequest) <-chan *rpc.U
 			fmt.Printf("buildApp: error creating app context: %v\n", err)
 			return
 		}
-		if err := s.buildImg(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: buildImg error: %v\n", err)
-			return
+		// first, check and see if this image has already been built before. If so, short-circuit this entire workflow.
+		if _, _, err = s.cfg.Docker.ImageInspectWithRaw(ctx, app.img); err == nil {
+			fmt.Printf("buildApp: image %s already exists. Skipping build and push steps", app.img)
+			imageExists = true
 		}
-		if err := s.pushImg(ctx, app, ch); err != nil {
-			fmt.Printf("buildApp: pushImg error: %v\n", err)
-			return
+		if !imageExists {
+			if err := s.buildImg(ctx, app, ch); err != nil {
+				fmt.Printf("buildApp: buildImg error: %v\n", err)
+				return
+			}
+			if err := s.pushImg(ctx, app, ch); err != nil {
+				fmt.Printf("buildApp: pushImg error: %v\n", err)
+				return
+			}
 		}
 		if err := s.release(ctx, app, ch); err != nil {
 			fmt.Printf("buildApp: release error: %v\n", err)
