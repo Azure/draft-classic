@@ -12,9 +12,12 @@ import (
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
 	"github.com/docker/cli/cli/command"
 	cliconfig "github.com/docker/cli/cli/config"
+	dockerdebug "github.com/docker/cli/cli/debug"
 	dockerflags "github.com/docker/cli/cli/flags"
 	"github.com/docker/cli/opts"
+	"github.com/docker/go-connections/tlsconfig"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
 )
@@ -49,14 +52,24 @@ type upCmd struct {
 	dockerClientOptions *dockerflags.ClientOptions
 }
 
-func stringPtr(s string) *string { return &s }
-
 func defaultDockerTLS() bool {
 	return os.Getenv(dockerTLSEnvVar) != ""
 }
 
 func defaultDockerTLSVerify() bool {
 	return os.Getenv(dockerTLSVerifyEnvVar) != ""
+}
+
+func dockerPreRun(opts *dockerflags.ClientOptions) {
+	dockerflags.SetLogLevel(opts.Common.LogLevel)
+
+	if opts.ConfigDir != "" {
+		cliconfig.SetDir(opts.ConfigDir)
+	}
+
+	if opts.Common.Debug {
+		dockerdebug.Enable()
+	}
 }
 
 func newUpCmd(out io.Writer) *cobra.Command {
@@ -66,12 +79,17 @@ func newUpCmd(out io.Writer) *cobra.Command {
 			dockerClientOptions: dockerflags.NewClientOptions(),
 		}
 		runningEnvironment string
+		f                  *pflag.FlagSet
 	)
 
 	cmd := &cobra.Command{
 		Use:   "up [path]",
 		Short: "upload the current directory to the draft server for deployment",
 		Long:  upDesc,
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			up.dockerClientOptions.Common.SetDefaultOptions(f)
+			dockerPreRun(up.dockerClientOptions)
+		},
 		RunE: func(_ *cobra.Command, args []string) (err error) {
 			if len(args) > 0 {
 				up.src = args[0]
@@ -86,16 +104,24 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		},
 	}
 
-	f := cmd.Flags()
+	f = cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
 	f.BoolVar(&up.dockerClientOptions.Common.Debug, "docker-debug", false, "Enable debug mode")
 	f.StringVar(&up.dockerClientOptions.Common.LogLevel, "docker-log-level", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
 	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "Use TLS; implied by --tlsverify")
 	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "Use TLS and verify the remote")
 	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "Location of client config files")
-	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultCaFile))), "docker-tlscacert", "Trust certs signed only by this CA")
-	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultCertFile))), "docker-tlscert", "Path to TLS certificate file")
-	f.Var(opts.NewQuotedString(stringPtr(filepath.Join(dockerCertPath, dockerflags.DefaultKeyFile))), "docker-tlskey", "Path to TLS key file")
+
+	up.dockerClientOptions.Common.TLSOptions = &tlsconfig.Options{
+		CAFile:   filepath.Join(dockerCertPath, dockerflags.DefaultCaFile),
+		CertFile: filepath.Join(dockerCertPath, dockerflags.DefaultCertFile),
+		KeyFile:  filepath.Join(dockerCertPath, dockerflags.DefaultKeyFile),
+	}
+
+	tlsOptions := up.dockerClientOptions.Common.TLSOptions
+	f.Var(opts.NewQuotedString(&tlsOptions.CAFile), "docker-tlscacert", "Trust certs signed only by this CA")
+	f.Var(opts.NewQuotedString(&tlsOptions.CertFile), "docker-tlscert", "Path to TLS certificate file")
+	f.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "docker-tlskey", "Path to TLS key file")
 
 	hostOpt := opts.NewNamedListOptsRef("docker-hosts", &up.dockerClientOptions.Common.Hosts, opts.ValidateHost)
 	f.Var(hostOpt, "docker-host", "Daemon socket(s) to connect to")
