@@ -24,6 +24,11 @@ jobs:
       - run:
           name: Test
           command: .circleci/test.sh
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
       - run:
           name: Deploy to Azure
           command: .circleci/deploy-azure.sh
