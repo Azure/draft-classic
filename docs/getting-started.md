@@ -10,6 +10,31 @@ There are multiple example applications included within the [examples directory]
 $ cd examples/example-python
 ```
 
+## Draft Setup
+
+### Minikube
+
+For minikube environments, the recommended way to get started is by talking to minikube's Docker daemon. To do this, we run
+
+```shell
+$ eval $(minikube docker-env)
+$ draft config set disable-push-warning 1
+```
+
+Draft will pick up on this and build Docker images using Minikube's in-cluster Docker daemon, making the build process quick and speedy.
+
+The second command disables a warning that `draft up` outputs when no registry has been configured to push images to. Since docker builds on Minikube are immediately picked up by the Kubelet, we can safely disable this warning.
+
+### Other environments
+
+If we're using a cloud-provided solution like [Azure Container Service](https://azure.microsoft.com/en-us/services/container-service/), we need to configure a registry where we will be pushing all of our images to, so all nodes in the Kubernetes cluster can pull the images we build using Draft. for this example, we want to push images to our registry sitting at `myregistry.com`, and pull those images down to the Kubernetes cluster from that same registry. To do that, we run
+
+```shell
+$ draft config set registry myregistry.com
+```
+
+This command tells Draft to push images to this Docker registry, and for Kubernetes to pull images from this Docker registry.
+
 ## Draft Create
 
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
@@ -24,7 +49,7 @@ $ ls -a
 
 The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container.
 
-The `draft.toml` file contains basic configuration about the application like the name, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
+The `draft.toml` file contains basic configuration about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
 
 ```shell
 $ cat draft.toml
@@ -47,9 +72,9 @@ Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these 
 
 - reads configuration from `draft.toml`
 - compresses the `chart/` directory and the application directory as two separate tarballs
-- uploads the tarballs to `draftd`, the server-side component
-- `draftd` builds the docker image and pushes the image to a registry
-- `draftd` instructs helm to install the chart, referencing the image just built
+- builds the image using `docker`
+- `docker` pushes the image to the registry specified in `draft.toml` (or in `draft config get registry`, if set)
+- `draft` instructs helm to install the chart, referencing the image just built
 
 ```shell
 $ draft up
@@ -66,8 +91,7 @@ Now that the application has been deployed, we can connect to our app.
 
 ```shell
 $ draft connect
-Connecting to your app...SUCCESS...Connect to your app on localhost:55139
-Starting log streaming...
+Connect to python:8080 on localhost:39551
 172.17.0.1 - - [13/Sep/2017 19:10:09] "GET / HTTP/1.1" 200 -
 ```
 
@@ -116,8 +140,7 @@ example-python: Releasing Application: SUCCESS ⚓  (0.5533s)
 example-python: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
 ```
 
-We should notice a significant faster build time here. This is because Docker is caching unchanged
-layers and only compiling layers that need to be re-built in the background.
+We should notice a significant faster build time here. This is because Docker is caching unchanged layers and only compiling layers that need to be re-built in the background.
 
 ## Great Success!
 

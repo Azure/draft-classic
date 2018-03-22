@@ -3,28 +3,28 @@
 Get started with Draft in three easy steps:
 
 1. Install CLI tools for Helm, Kubectl, [Minikube][] and Draft
-1. Boot Minikube and install Draft
+1. Boot Minikube and install Tiller
 1. Deploy your first application
-
-## Video: Deploying Draft on Azure Container Services
-
-This video will show you how to set up Draft with Azure Container Services and Azure Container Registry.
-
-[![Video: Deploying Draft on Azure Container Services](https://img.youtube.com/vi/-P3NKJ_hSUU/0.jpg)](https://www.youtube.com/watch?v=-P3NKJ_hSUU)
 
 ## Dependencies
 
-In order to get started, you will need to fetch the following:
+In order to get started, you will need to have the following:
 
 - the latest release of minikube
 - the latest release of kubectl
 - the latest release of Helm
+- the latest release of Docker
+- A Docker repository for storing your images
 
-All of the dependencies can be installed by the following:
+All of the dependencies (except Docker) can be installed by the following:
 
 ```shell
 $ brew cask install minikube
 ```
+
+Docker can be installed following the [Docker for Mac guide](https://docs.docker.com/docker-for-mac/install/).
+
+## Install Draft
 
 Afterwards, fetch [the latest release of Draft](https://github.com/Azure/draft/releases).
 
@@ -53,19 +53,21 @@ Alternative downloads:
 
 Unpack the Draft binary and add it to your PATH.
 
+Now that Draft has been installed, we can set up Draft by running this command:
+
+```shell
+$ draft init
+```
+
+It will prepare DRAFT_HOME with a default set of packs, plugins and other directories required to get working with Draft.
+
 ## Boot Minikube
 
 At this point, you can boot up minikube!
 
 ```shell
 $ minikube start
-Starting local Kubernetes v1.7.3 cluster...
-Starting VM...
-oving files into cluster...
-Setting up certs...
-Starting cluster components...
-Connecting to cluster...
-Setting up kubeconfig...
+...
 Kubectl is now configured to use the cluster.
 ```
 
@@ -78,19 +80,9 @@ Kubernetes master is running at https://192.168.99.100:8443
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-## Enable Minikube Add-ons
-
-Now that we have minikube running, we can go ahead and enable the `registry` add-on. The registry add-on is used to store the built docker container within the cluster.
-
-You can enable the add-on with
-
-```shell
-$ minikube addons enable registry
-```
-
 ## Install Helm
 
-Install Helm, a Kubernetes Package Manager, in your cluster. Helm manages the lifecycle of an application in Kubernetes, and it is also how Draft deploys an application to Kubernetes.
+Install Helm, the Kubernetes Package Manager, in your cluster. Helm manages the lifecycle of an application in Kubernetes, and it is also how Draft deploys an application to Kubernetes.
 
 Installing Helm and setting it up is quite simple:
 
@@ -100,16 +92,6 @@ $ helm init
 
 Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch` to wait for tiller to come up.
 
-## Install Draft
-
-Now that all the dependencies are set up, we can set up Draft by running this command:
-
-```shell
-$ draft init --auto-accept
-```
-
-Draft will read your local kube configuration and notice that it is pointing at minikube. It will then install Draftd (the Draft server) communicating with the installed registry add-on and Tiller (Helm server) instance.
-
 ## Take Draft for a Spin
 
 Once you've completed the above steps, you're ready to climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
@@ -118,8 +100,8 @@ Once you've completed the above steps, you're ready to climb aboard and explore 
 
 For more advanced users, [advanced setup documentation](install-advanced.md) is also provided for
 
-- running Draftd in a Kubernetes cluster with RBAC enabled
-- running Tiller/Draftd in a namespace other than kube-system
+- running Tiller in a Kubernetes cluster with RBAC enabled
+- running Tiller in a namespace other than kube-system
 
 [Getting Started]: getting-started.md
 [minikube]: https://github.com/kubernetes/minikube
