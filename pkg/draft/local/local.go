@@ -8,7 +8,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -70,11 +69,12 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 // Connect tunnels to a Kubernetes pod running the application and returns the connection information
 func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, targetContainer string, overridePorts []string) (*Connection, error) {
 	var cc []*ContainerConnection
-	pod, err := getPod(a.Namespace, a.Name, clientset)
+	label := labels.Set{DraftLabelKey: a.Name}
+
+	pod, err := podutil.GetPod(a.Namespace, label, clientset)
 	if err != nil {
 		return nil, err
 	}
-
 	m, err := getPortMapping(overridePorts)
 	if err != nil {
 		return nil, err
@@ -176,23 +176,6 @@ func (c *Connection) RequestLogStream(namespace string, containerName string, lo
 
 	return req.Stream()
 
-}
-
-func getPod(namespace, label string, clientset kubernetes.Interface) (*v1.Pod, error) {
-	options := metav1.ListOptions{LabelSelector: labels.Set{DraftLabelKey: label}.AsSelector().String()}
-	pods, err := clientset.CoreV1().Pods(namespace).List(options)
-	if err != nil {
-		return nil, err
-	}
-	if len(pods.Items) < 1 {
-		return nil, fmt.Errorf("could not find ready pod")
-	}
-	for _, p := range pods.Items {
-		if podutil.IsPodReady(&p) {
-			return &p, nil
-		}
-	}
-	return nil, fmt.Errorf("could not find a ready pod")
 }
 
 func getTargetContainerPorts(containers []v1.Container, targetContainer string) ([]int, error) {

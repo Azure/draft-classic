@@ -1,8 +1,17 @@
-// package podutil exists for functions that exist in k8s.io/kubernetes but not in k8s.io/client-go. Everything here should be contributed upstream.
+// package podutil exists for functions that exist in k8s.io/kubernetes but not in k8s.io/client-go. Most of the things here should be contributed upstream.
 
 package podutil
 
-import "k8s.io/api/core/v1"
+import (
+	"fmt"
+	"time"
+
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
+)
 
 // IsPodReady returns true if a pod is ready; false otherwise.
 func IsPodReady(pod *v1.Pod) bool {
@@ -34,4 +43,48 @@ func GetPodCondition(status *v1.PodStatus, conditionType v1.PodConditionType) (i
 		}
 	}
 	return -1, nil
+}
+
+// GetPod waits for a pod with the specified label to be ready, then returns it
+// if no pod is ready, it checks every second until a pod is ready until timeout is reached
+func GetPod(namespace string, l labels.Set, clientset kubernetes.Interface) (*v1.Pod, error) {
+	var targetPod *v1.Pod
+	s := newStopChan()
+
+	listwatch := cache.NewListWatchFromClient(clientset.CoreV1().RESTClient(), "pods", namespace, fields.Everything())
+	_, controller := cache.NewInformer(listwatch, &v1.Pod{}, time.Second, cache.ResourceEventHandlerFuncs{
+		UpdateFunc: func(o, n interface{}) {
+			newPod := n.(*v1.Pod)
+
+			// check the pod label and if pod is in terminating state
+			if (!hasLabels(l, newPod.Labels)) || (newPod.ObjectMeta.DeletionTimestamp != nil) {
+				return
+			}
+
+			if IsPodReady(newPod) {
+				targetPod = newPod
+				s.closeOnce()
+			}
+		},
+	})
+
+	go func() {
+		controller.Run(s.c)
+	}()
+
+	select {
+	case <-s.c:
+		return targetPod, nil
+	case <-time.After(5 * time.Minute):
+		return nil, fmt.Errorf("cannot get pod with labels %v: timed out", l)
+	}
+}
+
+func hasLabels(draftLabels, podLabels map[string]string) bool {
+	for k, v := range draftLabels {
+		if podLabels[k] != v {
+			return false
+		}
+	}
+	return true
 }
