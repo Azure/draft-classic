@@ -86,10 +86,12 @@ func newAppContext(b *Builder, buildCtx *Context, out io.Writer) (*AppContext, e
 	imageRepository := strings.TrimLeft(fmt.Sprintf("%s/%s", buildCtx.Env.Registry, buildCtx.Env.Name), "/")
 	image := fmt.Sprintf("%s:%s", imageRepository, imgtag)
 
+	buildID := getulid()
+
 	// inject certain values into the chart such as the registry location,
-	// the application name, and the application version.
-	tplstr := "image.repository=%s,image.tag=%s,%s=%s"
-	inject := fmt.Sprintf(tplstr, imageRepository, imgtag, local.DraftLabelKey, buildCtx.Env.Name)
+	// the application name, buildID and the application version.
+	tplstr := "image.repository=%s,image.tag=%s,%s=%s,%s=%s"
+	inject := fmt.Sprintf(tplstr, imageRepository, imgtag, local.DraftLabelKey, buildCtx.Env.Name, local.BuildIDKey, buildID)
 
 	vals, err := chartutil.ReadValues([]byte(buildCtx.Values.Raw))
 	if err != nil {
@@ -98,7 +100,6 @@ func newAppContext(b *Builder, buildCtx *Context, out io.Writer) (*AppContext, e
 	if err := strvals.ParseInto(inject, vals); err != nil {
 		return nil, err
 	}
-	buildID := getulid()
 	return &AppContext{
 		obj:  &storage.Object{BuildID: buildID, ContextID: ctxtID},
 		id:   buildID,
