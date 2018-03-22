@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -78,6 +79,8 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		return err
 	}
 
+	var connectionMessage = "Your connection is still active.\n"
+
 	// output all local ports first - easier to spot
 	for _, cc := range connection.ContainerConnections {
 		for _, t := range cc.Tunnels {
@@ -85,7 +88,9 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cn.out, "Connect to %v:%v on localhost:%#v\n", cc.ContainerName, t.Remote, t.Local)
+			m := fmt.Sprintf("Connect to %v:%v on localhost:%#v\n", cc.ContainerName, t.Remote, t.Local)
+			connectionMessage += m
+			fmt.Fprintf(cn.out, m)
 		}
 	}
 
@@ -106,8 +111,10 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		os.Exit(0)
 	}()
 
-	<-stop
-	return nil
+	for {
+		fmt.Fprintf(cn.out, connectionMessage)
+		time.Sleep(5 * time.Minute)
+	}
 }
 
 func writeContainerLogs(out io.Writer, in io.ReadCloser, containerName string) error {
