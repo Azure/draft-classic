@@ -86,7 +86,8 @@ func newUpCmd(out io.Writer) *cobra.Command {
 		Use:   "up [path]",
 		Short: "upload the current directory to the draft server for deployment",
 		Long:  upDesc,
-		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+		PersistentPreRun: func(c *cobra.Command, args []string) {
+			rootCmd.PersistentPreRunE(c, args)
 			up.dockerClientOptions.Common.SetDefaultOptions(f)
 			dockerPreRun(up.dockerClientOptions)
 		},
