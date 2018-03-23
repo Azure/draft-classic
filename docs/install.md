@@ -92,6 +92,17 @@ $ helm init
 
 Wait for Helm to come up and be in a `Ready` state. You can use `kubectl -n kube-system get deploy tiller-deploy --watch` to wait for tiller to come up.
 
+## Configure Docker
+
+For minikube environments, it's best to get started by telling Draft to build images directly using Minikube's Docker daemon, making the build process quick and speedy. To do this, we run
+
+```shell
+$ eval $(minikube docker-env)
+$ draft config set disable-push-warning 1
+```
+
+The second command disables a warning that `draft up` outputs when no registry has been configured to push images to. Since docker builds on Minikube are immediately picked up by the Kubelet, we don't require a container registry and thus can safely disable this warning.
+
 ## Take Draft for a Spin
 
 Once you've completed the above steps, you're ready to climb aboard and explore the [Getting Started Guide][Getting Started] - you'll soon be sailing!
