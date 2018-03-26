@@ -40,6 +40,7 @@ const (
 
 var (
 	dockerCertPath = os.Getenv("DOCKER_CERT_PATH")
+	autoConnect    bool
 )
 
 type upCmd struct {
@@ -112,6 +113,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "Use TLS; implied by --tlsverify")
 	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "Use TLS and verify the remote")
 	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "Location of client config files")
+	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
 
 	up.dockerClientOptions.Common.TLSOptions = &tlsconfig.Options{
 		CAFile:   filepath.Join(dockerCertPath, dockerflags.DefaultCaFile),
@@ -177,5 +179,11 @@ func (u *upCmd) run(environment string) (err error) {
 	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
 
 	cmdline.Display(ctx, buildctx.Env.Name, bldr.Up(ctx, buildctx))
+
+	if buildctx.Env.AutoConnect || autoConnect {
+		c := newConnectCmd(u.out)
+		return c.RunE(c, []string{})
+	}
+
 	return nil
 }

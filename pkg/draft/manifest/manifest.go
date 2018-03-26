@@ -35,6 +35,7 @@ type Environment struct {
 	Watch         bool     `toml:"watch"`
 	WatchDelay    int      `toml:"watch-delay,omitempty"`
 	OverridePorts []string `toml:"override-ports,omitempty"`
+	AutoConnect   bool     `toml:"auto-connect"`
 }
 
 // New creates a new manifest with the Environments intialized.
@@ -43,10 +44,11 @@ func New() *Manifest {
 		Environments: make(map[string]*Environment),
 	}
 	m.Environments[DefaultEnvironmentName] = &Environment{
-		Name:       generateName(),
-		Namespace:  DefaultNamespace,
-		Watch:      false,
-		WatchDelay: DefaultWatchDelaySeconds,
+		Name:        generateName(),
+		Namespace:   DefaultNamespace,
+		Watch:       false,
+		WatchDelay:  DefaultWatchDelaySeconds,
+		AutoConnect: false,
 	}
 	return &m
 }

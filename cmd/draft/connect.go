@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/draft/local"
 )
 
@@ -74,7 +76,12 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		ports = overridePorts
 	}
 
-	connection, err := deployedApp.Connect(client, config, targetContainer, ports)
+	buildID, err := getLatestBuildID()
+	if err != nil {
+		return err
+	}
+
+	connection, err := deployedApp.Connect(client, config, targetContainer, ports, buildID)
 	if err != nil {
 		return err
 	}
@@ -126,4 +133,13 @@ func writeContainerLogs(out io.Writer, in io.ReadCloser, containerName string) e
 		}
 		fmt.Fprintf(out, "[%v]: %v", containerName, line)
 	}
+}
+
+func getLatestBuildID() (string, error) {
+	h := draftpath.Home(homePath())
+	files, err := ioutil.ReadDir(h.Logs())
+	if err != nil {
+		return "", err
+	}
+	return files[len(files)-1].Name(), nil
 }
