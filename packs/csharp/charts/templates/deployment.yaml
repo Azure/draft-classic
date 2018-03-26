@@ -5,15 +5,15 @@ metadata:
   labels:
     draft: {{ default "draft-app" .Values.draft }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    buildID: {{ .Values.buildID }}
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
+      annotations:
+        buildID: {{ .Values.buildID }}
       labels:
         draft: {{ default "draft-app" .Values.draft }}
         app: {{ template "fullname" . }}
-        buildID: {{ .Values.buildID }}
     spec:
       containers:
       - name: {{ .Chart.Name }}

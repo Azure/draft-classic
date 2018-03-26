@@ -8,7 +8,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 
@@ -76,9 +75,7 @@ func DeployedApplication(draftTomlPath, draftEnvironment string) (*App, error) {
 func (a *App) Connect(clientset kubernetes.Interface, clientConfig *restclient.Config, targetContainer string, overridePorts []string, buildID string) (*Connection, error) {
 	var cc []*ContainerConnection
 
-	label := labels.Set{DraftLabelKey: a.Name, BuildIDKey: buildID}
-
-	pod, err := podutil.GetPod(a.Namespace, label, clientset)
+	pod, err := podutil.GetPod(a.Namespace, DraftLabelKey, a.Name, BuildIDKey, buildID, clientset)
 	if err != nil {
 		return nil, err
 	}
