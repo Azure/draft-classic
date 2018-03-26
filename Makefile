@@ -52,7 +52,6 @@ clean:
 	-rm bin/*
 	-rm rootfs/bin/*
 	-rm -rf _dist/
-	-rm -rf vendor/
 
 .PHONY: test
 test: TESTFLAGS += -race -v
