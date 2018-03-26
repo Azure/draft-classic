@@ -2,8 +2,10 @@ package configmap
 
 import (
 	"context"
+	"time"
 
 	"github.com/Azure/draft/pkg/storage"
+	"github.com/golang/protobuf/ptypes"
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,6 +66,12 @@ func (s *ConfigMaps) DeleteBuild(ctx context.Context, appName, buildID string) (
 //
 // CreateBuild implements storage.Creater.
 func (s *ConfigMaps) CreateBuild(ctx context.Context, appName string, build *storage.Object) error {
+	now, err := ptypes.TimestampProto(time.Now())
+	if err != nil {
+		return err
+	}
+	build.CreatedAt = now
+
 	cfgmap, err := newConfigMap(appName, build)
 	if err != nil {
 		return err
@@ -93,6 +101,9 @@ func (s *ConfigMaps) UpdateBuild(ctx context.Context, appName string, build *sto
 	}
 	if _, ok := cfgmap.Data[build.BuildID]; ok {
 		return storage.NewErrAppBuildExists(appName, build.BuildID)
+	}
+	if build.CreatedAt, err = ptypes.TimestampProto(time.Now()); err != nil {
+		return err
 	}
 	content, err := storage.EncodeToString(build)
 	if err != nil {

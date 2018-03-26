@@ -480,6 +480,7 @@ func (b *Builder) release(ctx context.Context, app *AppContext, out chan<- *Summ
 		if err != nil {
 			return fmt.Errorf("could not install release: %v", err)
 		}
+		app.obj.Release = rls.Release.Name
 		formatReleaseStatus(app, rls.Release, summary)
 
 	} else {
