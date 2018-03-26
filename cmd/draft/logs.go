@@ -32,7 +32,18 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 		Short:   logsDesc,
 		Long:    logsDesc,
 		PreRunE: lc.complete,
-		RunE:    lc.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			b, err := getLatestBuildID()
+			if err != nil {
+				return fmt.Errorf("cannot get latest build: %v", err)
+			}
+			lc.buildID = b
+
+			if len(args) > 0 {
+				lc.buildID = args[0]
+			}
+			return lc.run(cmd, args)
+		},
 	}
 
 	f := cmd.Flags()
@@ -42,10 +53,6 @@ func newLogsCmd(out io.Writer) *cobra.Command {
 }
 
 func (l *logsCmd) complete(_ *cobra.Command, args []string) error {
-	if err := validateArgs(args, l.args); err != nil {
-		return err
-	}
-	l.buildID = args[0]
 	l.home = draftpath.Home(homePath())
 	return nil
 }
