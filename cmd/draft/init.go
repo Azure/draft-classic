@@ -12,7 +12,7 @@ import (
 
 const (
 	initDesc = `
-This command sets up local configuration in $DRAFT_HOME (default ~/.draft/)
+This command sets up local configuration in $DRAFT_HOME (default ~/.draft/) with default set of packs, plugins, and other directories required to work with Draft
 `
 )
 
@@ -32,7 +32,7 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "initialize Draft on both client and server",
+		Short: "sets up local environment to work with Draft",
 		Long:  initDesc,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 0 {
