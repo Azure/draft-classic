@@ -39,15 +39,6 @@ Canary releases of the Draft client can be found at the following links:
 
 - [Linux amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.tar.gz)
 - [macOS amd64](https://azuredraft.blob.core.windows.net/draft/draft-canary-darwin-amd64.tar.gz)
-
-It can also be installed with
-
-```shell
-$ brew install draft-canary
-```
-
-Alternative downloads:
-
 - [Linux ARM](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-arm.tar.gz)
 - [Linux x86](https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-386.tar.gz)
 
