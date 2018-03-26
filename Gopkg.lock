@@ -123,6 +123,7 @@
     "cli/config",
     "cli/config/configfile",
     "cli/config/credentials",
+    "cli/debug",
     "cli/flags",
     "cli/manifest/store",
     "cli/manifest/types",
@@ -1197,6 +1198,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9667935cff951024e7a350d915e82a9f2a85b8051b07c29bdbb3326b14074e62"
+  inputs-digest = "9b343ab01789c05b43ebe52723821418095400f9265c33672540d8b7b8519350"
   solver-name = "gps-cdcl"
   solver-version = 1
