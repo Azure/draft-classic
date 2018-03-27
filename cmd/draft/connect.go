@@ -141,5 +141,9 @@ func getLatestBuildID() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return files[len(files)-1].Name(), nil
+	n := len(files)
+	if n == 0 {
+		return "", fmt.Errorf("could not find the latest build ID of your application. Try `draft up` first")
+	}
+	return files[n-1].Name(), nil
 }
