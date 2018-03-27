@@ -3,7 +3,6 @@ package installer
 import (
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 
@@ -77,7 +76,7 @@ func (i *VCSInstaller) Install() error {
 		return repo.ErrHomeMissing
 	}
 
-	if err := os.MkdirAll(path.Dir(i.Path()), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(i.Path()), 0755); err != nil {
 		return err
 	}
 
