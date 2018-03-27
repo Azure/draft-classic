@@ -7,6 +7,26 @@ In certain situations, users are given a Kubernetes cluster with tighter securit
 
 This document explains some of these situations as well as how it can be handled using draft.
 
+## Drafting in the Cloud
+
+When using Draft with cloud-provided Kubernetes solutions like [Azure Container Service](https://azure.microsoft.com/en-us/services/container-service/), we need a way to distribute the built image across the cluster. A container registry allows all nodes in the Kubernetes cluster to pull the images we build using Draft, and we have a way for our local Docker daemon to distribute the built image.
+
+For this example, we want to push images to our registry sitting at `myregistry.azurecr.io`, and pull those images down to the Kubernetes cluster from that same registry. To do that, we run
+
+```shell
+$ draft config set registry myregistry.azurecr.io
+```
+
+This command tells Draft to push images to this container registry as well as to tell Kubernetes to pull images from this container registry.
+
+We'll also need to log into the cluster to push images from our local docker daemon to the container registry:
+
+```
+$ az acr login -n myregistry -g myresourcegroup
+```
+
+NOTE: Kubernetes distributions like Azure Container Service are automatically authorized to pull from container registries in the same resource group. If this is not the case, then you'll need to [add a container registry secret to your chart](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry) to pull the private image.
+
 ## Running Tiller with RBAC enabled
 
 To install Tiller in a cluster with RBAC enabled, a few additional steps are required to grant tiller access to deploy in namespaces.

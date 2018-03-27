@@ -10,31 +10,6 @@ There are multiple example applications included within the [examples directory]
 $ cd examples/example-python
 ```
 
-## Draft Setup
-
-### Minikube
-
-For minikube environments, the recommended way to get started is by talking to minikube's Docker daemon. To do this, we run
-
-```shell
-$ eval $(minikube docker-env)
-$ draft config set disable-push-warning 1
-```
-
-Draft will pick up on this and build Docker images using Minikube's in-cluster Docker daemon, making the build process quick and speedy.
-
-The second command disables a warning that `draft up` outputs when no registry has been configured to push images to. Since docker builds on Minikube are immediately picked up by the Kubelet, we can safely disable this warning.
-
-### Other environments
-
-If we're using a cloud-provided solution like [Azure Container Service](https://azure.microsoft.com/en-us/services/container-service/), we need to configure a registry where we will be pushing all of our images to, so all nodes in the Kubernetes cluster can pull the images we build using Draft. for this example, we want to push images to our registry sitting at `myregistry.com`, and pull those images down to the Kubernetes cluster from that same registry. To do that, we run
-
-```shell
-$ draft config set registry myregistry.com
-```
-
-This command tells Draft to push images to this Docker registry, and for Kubernetes to pull images from this Docker registry.
-
 ## Draft Create
 
 We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
