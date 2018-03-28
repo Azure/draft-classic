@@ -14,7 +14,7 @@ When using Draft with cloud-provided Kubernetes solutions like [Azure Container 
 
 For local use with Minikube, only the `eval $(minikube docker-env)` command is required to inform Draft to use the local registry for deployment, which skips the step of pushing the container image and enables the deployment to Minikube to pull from the local registry. This makes the local inner-loop experience very fast. 
 
-For cloud registry services, like AKS or Docker Hub, two things are needed. 
+For cloud registry services, like ACR or Docker Hub, two things are needed. 
 1. You need to tell draft where the registry resides using the `draft config set registry` command, passing the registry's server URL (without the protocol scheme). 
 2. Unless there is a trust relationship between the cluster provider and the registry -- as there is with Azure Kubernetes Service (AKS) and the Azure Container Registry (ACR) -- you'll need to [add a container registry secret to your chart](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry) to pull the private image.
 
