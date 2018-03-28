@@ -38,7 +38,7 @@ We'll also need to log into the cluster to push images from our local docker dae
 $ az acr login -n myregistry -g myresourcegroup
 ```
 
-
+NOTE: Before deploying the chart to the cluster, Draft will inject a registry auth secret into the destination namespace so the image can be pulled into the cluster. You do not need to add a container registry secret into your chart; Draft will do this for you.
 
 ## Running Tiller with RBAC enabled
 
