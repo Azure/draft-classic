@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.12.0
+
+### Features
+
+* Removed draftd
+* New packs added:
+   * Rust (thanks to @FGRibreau)
+* Introduced `draft history`
+* Introduced `draft config`
+* `draft connect`
+   * Introduced the `--override-port` flag to specify a local:remote port mapping for tunnelling
+* `draft logs`
+   * Command has been simplified to `draft logs <build-id>`, or `draft logs` to get the latest build's logs
+* `draft up`
+   * Introduced the `--auto-connect` flag to automatically connect to your app once it's deployed
+
+### Bugs
+
+* fixed an ipv6 lookup error when connecting to draftd (before removing it)
+* fixed a rebase issue with the Swift pack that caused it to not work on `draft create`
+
+### Housekeeping
+
+* switched from SHA1 to SHA256 for app context shasums (thanks @thedrow for the heads up)
+
 ## v0.11.0
 
 ### Features
