@@ -36,8 +36,6 @@ const (
 	// ChartsDir is the directory name for the packaged chart.
 	// This also doubles as the directory name for chart dependencies.
 	ChartsDir = "charts"
-	// HerokuLicenseName is the name of the Neroku License
-	HerokuLicenseName = "NOTICE"
 	// DockerignoreName is the name of the Docker ignore file
 	DockerignoreName = ".dockerignore"
 )
