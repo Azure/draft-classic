@@ -3,6 +3,7 @@ package builder
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -28,12 +29,22 @@ import (
 	"github.com/docker/docker/pkg/term"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/strvals"
+)
+
+const (
+	// name of the docker pull secret draft will create in the desired destination namespace
+	PullSecretName = "draft-pullsecret"
+	// name of the default service account draft will modify with the imagepullsecret
+	DefaultServiceAccountName = "default"
 )
 
 // Builder contains information about the build environment
@@ -472,6 +483,13 @@ func (b *Builder) release(ctx context.Context, app *AppContext, out chan<- *Summ
 	// notify that particular stage has started.
 	summary("started", SummaryStarted)
 
+	// inject a registry secret only if a registry was configured
+	if app.ctx.Env.Registry != "" {
+		if err := b.prepareReleaseEnvironment(ctx, app); err != nil {
+			return err
+		}
+	}
+
 	// If a release does not exist, install it. If another error occurs during the check,
 	// ignore the error and continue with the upgrade.
 	//
@@ -520,6 +538,95 @@ func (b *Builder) release(ctx context.Context, app *AppContext, out chan<- *Summ
 		app.obj.Release = rls.Release.Name
 		formatReleaseStatus(app, rls.Release, summary)
 	}
+	return nil
+}
+
+func (b *Builder) prepareReleaseEnvironment(ctx context.Context, app *AppContext) error {
+	// determine if the destination namespace exists, create it if not.
+	if _, err := b.Kube.CoreV1().Namespaces().Get(app.ctx.Env.Namespace, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = b.Kube.CoreV1().Namespaces().Create(&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{Name: app.ctx.Env.Namespace},
+		})
+		if err != nil {
+			return fmt.Errorf("could not create namespace %q: %v", app.ctx.Env.Namespace, err)
+		}
+	}
+
+	regAuthToken, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.img)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve auth token from image %s: %v", app.img, err)
+	}
+
+	// we need to translate the auth token Docker gives us into a Kubernetes registry auth secret token.
+	regAuth, err := FromAuthConfigToken(regAuthToken)
+	if err != nil {
+		return fmt.Errorf("failed to convert '%s' to a kubernetes registry auth secret token: %v", regAuthToken, err)
+	}
+
+	// create a new json string with the full dockerauth, including the registry URL.
+	js, err := json.Marshal(map[string]*DockerConfigEntryWithAuth{app.ctx.Env.Registry: regAuth})
+	if err != nil {
+		return fmt.Errorf("could not json encode docker authentication string: %v", err)
+	}
+
+	// determine if the registry pull secret exists in the desired namespace, create it if not.
+	var secret *v1.Secret
+	if secret, err = b.Kube.CoreV1().Secrets(app.ctx.Env.Namespace).Get(PullSecretName, metav1.GetOptions{}); err != nil {
+		if !apiErrors.IsNotFound(err) {
+			return err
+		}
+		_, err = b.Kube.CoreV1().Secrets(app.ctx.Env.Namespace).Create(
+			&v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      PullSecretName,
+					Namespace: app.ctx.Env.Namespace,
+				},
+				Type: v1.SecretTypeDockercfg,
+				StringData: map[string]string{
+					".dockercfg": string(js),
+				},
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("could not create registry pull secret: %v", err)
+		}
+	} else {
+		// the registry pull secret exists, check if it needs to be updated.
+		if data, ok := secret.StringData[".dockercfg"]; ok && data != string(js) {
+			secret.StringData[".dockercfg"] = string(js)
+			_, err = b.Kube.CoreV1().Secrets(app.ctx.Env.Namespace).Update(secret)
+			if err != nil {
+				return fmt.Errorf("could not update registry pull secret: %v", err)
+			}
+		}
+	}
+
+	// determine if the default service account in the desired namespace has the correct
+	// imagePullSecret. If not, add it.
+	svcAcct, err := b.Kube.CoreV1().ServiceAccounts(app.ctx.Env.Namespace).Get(DefaultServiceAccountName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("could not load default service account: %v", err)
+	}
+	found := false
+	for _, ps := range svcAcct.ImagePullSecrets {
+		if ps.Name == PullSecretName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		svcAcct.ImagePullSecrets = append(svcAcct.ImagePullSecrets, v1.LocalObjectReference{
+			Name: PullSecretName,
+		})
+		_, err := b.Kube.CoreV1().ServiceAccounts(app.ctx.Env.Namespace).Update(svcAcct)
+		if err != nil {
+			return fmt.Errorf("could not modify default service account with registry pull secret: %v", err)
+		}
+	}
+
 	return nil
 }
 
