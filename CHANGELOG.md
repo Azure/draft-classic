@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.13.0
+
+### Features
+
+* introduced `draft logs --tail`
+* introduced `draft connect --dry-run`
+* `draft up` now writes logs directly to the file as it happens
+  * this allows users to run `draft logs` in another terminal as soon as they call `draft up`
+* added a more helpful error to run `draft pack-repo update` when a Draft Pack cannot be loaded
+* all files within the root directory of a Draft Pack is now loaded into the application's directory on `draft create`
+* an image pull secret is injected into the namespace on `draft up` when pushing an image to a container registry
+
+### Bugs
+
+* fixed up an issue where output from a `docker push` and `helm install` wasn't available in `draft logs`
+* fixed an issue where `draft pack-repo list` wouldn't work on Windows
+* fixed an issue where `draft config unset` wasn't truncating config.toml
+
 ## v0.12.0
 
 ### Features
