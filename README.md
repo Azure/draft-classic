@@ -7,7 +7,7 @@
 ## _NOTE: Draft is experimental and does not have a stable release yet._
 As an example, the 0.12 release moves the containment and deployment engine to your local machine. This changes quite a bit about how Draft works compared to prior releases; for details, see [the changelog](CHANGELOG.md).
 
-For previous users, this change means that you now have more control over where your container images are stored, and in the local minikube environment, you can skip pushing the images entirely, which speeds up the developer iteration speed dramatically. However, when you want to push your images to an image registry service like Docker hub (or ACR, GCR, Quay.io, and so on) you must inform draft which registry to use and your cluster must have access to the secrets for that registry. 
+For previous users, this change means that you now have more control over where your container images are stored, and in the local minikube environment you can skip pushing the images entirely, which speeds up the developer iteration speed dramatically. However, when you want to push your images to an image registry service like Docker hub (or ACR, GCR, Quay.io, and so on) you must inform draft which registry to use and your cluster must have access to the secrets for that registry. 
 
 ## Overview
 
