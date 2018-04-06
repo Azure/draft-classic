@@ -40,7 +40,7 @@ $ az acr login -n myregistry -g myresourcegroup
 
 If you were using Docker Hub, for example, this command would be the `docker login` command.
 
-NOTE: Once configured, Draft will inject a registry auth secret into the destination namespace deploying the chart to the cluster so the image can be pulled from the registry. You do not need to add a container registry secret into your chart; Draft will do this for you.
+NOTE: Once configured, Draft will inject a registry auth secret into the destination namespace deploying the chart to the cluster so the image can be pulled from the registry. 
 
 ## Running Tiller with RBAC enabled
 
