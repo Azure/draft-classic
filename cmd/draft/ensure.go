@@ -5,8 +5,6 @@ import (
 
 	"github.com/Azure/draft/pkg/osutil"
 
-	pluginbase "k8s.io/helm/pkg/plugin"
-
 	"github.com/Azure/draft/pkg/draft/pack/repo"
 	"github.com/Azure/draft/pkg/plugin"
 )
@@ -146,7 +144,7 @@ func (i *initCmd) ensurePlugins(plugins []plugin.Builtin) error {
 	return nil
 }
 
-func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*pluginbase.Plugin) error {
+func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugin.Plugin) error {
 
 	for _, pl := range existingPlugins {
 		if builtin.Name == pl.Metadata.Name {
