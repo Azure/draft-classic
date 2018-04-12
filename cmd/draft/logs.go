@@ -88,7 +88,7 @@ func (l *logsCmd) dumpLogs() error {
 }
 
 func (l *logsCmd) tailLogs(offset int64) error {
-	t, err := tail.TailFile(filepath.Join(l.home.Logs(), l.buildID), tail.Config{
+	t, err := tail.TailFile(filepath.Join(l.home.Logs(), l.appName, l.buildID), tail.Config{
 		Location: &tail.SeekInfo{Offset: -offset, Whence: os.SEEK_END},
 		Logger:   tail.DiscardingLogger,
 		Follow:   true,
