@@ -42,9 +42,9 @@ import (
 )
 
 const (
-	// name of the docker pull secret draft will create in the desired destination namespace
+	// PullSecretName is the name of the docker pull secret draft will create in the desired destination namespace
 	PullSecretName = "draft-pullsecret"
-	// name of the default service account draft will modify with the imagepullsecret
+	// DefaultServiceAccountName is the name of the default service account draft will modify with the imagepullsecret
 	DefaultServiceAccountName = "default"
 )
 
