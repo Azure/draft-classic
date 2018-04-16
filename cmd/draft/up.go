@@ -7,11 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Azure/draft/pkg/builder"
-	"github.com/Azure/draft/pkg/builder/docker"
-	"github.com/Azure/draft/pkg/cmdline"
-	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/storage/kube/configmap"
+	"github.com/Azure/go-autorest/autorest"
+	azurecli "github.com/Azure/go-autorest/autorest/azure/cli"
 	"github.com/docker/cli/cli/command"
 	cliconfig "github.com/docker/cli/cli/config"
 	dockerdebug "github.com/docker/cli/cli/debug"
@@ -23,7 +20,15 @@ import (
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
 
+	"github.com/Azure/draft/pkg/azure/containerregistry"
+	"github.com/Azure/draft/pkg/azure/iam"
+	"github.com/Azure/draft/pkg/builder"
+	azurecontainerbuilder "github.com/Azure/draft/pkg/builder/azure"
+	dockercontainerbuilder "github.com/Azure/draft/pkg/builder/docker"
+	"github.com/Azure/draft/pkg/cmdline"
+	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/local"
+	"github.com/Azure/draft/pkg/storage/kube/configmap"
 	"github.com/Azure/draft/pkg/tasks"
 )
 
@@ -145,9 +150,17 @@ func (u *upCmd) run(environment string) (err error) {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
 
+	if configuredBuilder, ok := globalConfig["container-builder"]; ok {
+		buildctx.Env.ContainerBuilder = configuredBuilder
+	}
+
 	// if a registry has been set in their global config but nothing was in draft.toml, use that instead
 	if reg, ok := globalConfig["registry"]; ok {
 		buildctx.Env.Registry = reg
+	}
+
+	if configuredResourceGroup, ok := globalConfig["resource-group-name"]; ok {
+		buildctx.Env.ResourceGroupName = configuredResourceGroup
 	}
 
 	if buildctx.Env.Registry == "" {
@@ -158,14 +171,41 @@ func (u *upCmd) run(environment string) (err error) {
 		}
 	}
 
-	// setup docker
-	cli := &command.DockerCli{}
-	if err := cli.Initialize(u.dockerClientOptions); err != nil {
-		return fmt.Errorf("failed to create docker client: %v", err)
+	var cb builder.ContainerBuilder
+	switch buildctx.Env.ContainerBuilder {
+	case "acrbuild":
+		subscription, err := getSubscriptionFromProfile()
+		if err != nil {
+			return fmt.Errorf("Could not retrieve azure profile information: %v", err)
+		}
+		token, err := iam.GetToken(iam.AuthGrantType())
+		if err != nil {
+			return fmt.Errorf("Could not retrieve adal token: %v", err)
+		}
+		auth := autorest.NewBearerAuthorizer(&token)
+		registriesClient := containerregistry.NewRegistriesClient(subscription.ID)
+		registriesClient.Authorizer = auth
+		registriesClient.AddToUserAgent(containerregistry.UserAgent())
+		buildsClient := containerregistry.NewBuildsClient(subscription.ID)
+		buildsClient.Authorizer = auth
+		buildsClient.AddToUserAgent(containerregistry.UserAgent())
+		cb = &azurecontainerbuilder.Builder{
+			RegistryClient: registriesClient,
+			BuildsClient:   buildsClient,
+			AdalToken:      token,
+			Subscription:   subscription,
+		}
+	default:
+		// setup docker
+		cli := &command.DockerCli{}
+		if err := cli.Initialize(u.dockerClientOptions); err != nil {
+			return fmt.Errorf("failed to create docker client: %v", err)
+		}
+		cb = &dockercontainerbuilder.Builder{
+			DockerClient: cli,
+		}
 	}
-	bldr.ContainerBuilder = &docker.Builder{
-		DockerClient: cli,
-	}
+	bldr.ContainerBuilder = cb
 
 	// setup kube
 	bldr.Kube, kubeConfig, err = getKubeClient(kubeContext)
@@ -236,4 +276,21 @@ func runPostDeployTasks(taskList *tasks.Tasks, buildID string) error {
 	}
 
 	return nil
+}
+
+func getSubscriptionFromProfile() (azurecli.Subscription, error) {
+	profilePath, err := azurecli.ProfilePath()
+	if err != nil {
+		return azurecli.Subscription{}, err
+	}
+	profile, err := azurecli.LoadProfile(profilePath)
+	if err != nil {
+		return azurecli.Subscription{}, err
+	}
+	for _, sub := range profile.Subscriptions {
+		if sub.IsDefault {
+			return sub, nil
+		}
+	}
+	return azurecli.Subscription{}, fmt.Errorf("could not find a default subscription ID from %s", profilePath)
 }

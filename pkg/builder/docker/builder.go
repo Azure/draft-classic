@@ -33,7 +33,7 @@ func (b *Builder) Build(ctx context.Context, app *builder.AppContext, out chan<-
 	errc := make(chan error)
 	go func() {
 		buildopts := types.ImageBuildOptions{
-			Tags:       app.Tags,
+			Tags:       app.Images,
 			Dockerfile: app.Ctx.Env.Dockerfile,
 		}
 
@@ -52,7 +52,7 @@ func (b *Builder) Build(ctx context.Context, app *builder.AppContext, out chan<-
 			errc <- err
 			return
 		}
-		if _, _, err = b.DockerClient.Client().ImageInspectWithRaw(ctx, app.Img); err != nil {
+		if _, _, err = b.DockerClient.Client().ImageInspectWithRaw(ctx, app.MainImage); err != nil {
 			if dockerclient.IsErrNotFound(err) {
 				errc <- fmt.Errorf("Could not locate image for %s: %v", app.Ctx.Env.Name, err)
 				return
@@ -101,21 +101,21 @@ func (b *Builder) Push(ctx context.Context, app *builder.AppContext, out chan<- 
 	errc := make(chan error, 1)
 
 	var wg sync.WaitGroup
-	wg.Add(len(app.Tags))
+	wg.Add(len(app.Images))
 
 	go func() {
-		registryAuth, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.Img)
+		registryAuth, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.MainImage)
 		if err != nil {
 			errc <- err
 			return
 		}
 
-		for _, img := range app.Tags {
+		for _, tag := range app.Images {
 
-			go func(img string) {
+			go func(tag string) {
 				defer wg.Done()
 
-				resp, err := b.DockerClient.Client().ImagePush(ctx, img, types.ImagePushOptions{RegistryAuth: registryAuth})
+				resp, err := b.DockerClient.Client().ImagePush(ctx, tag, types.ImagePushOptions{RegistryAuth: registryAuth})
 				if err != nil {
 					errc <- err
 					return
@@ -127,7 +127,7 @@ func (b *Builder) Push(ctx context.Context, app *builder.AppContext, out chan<- 
 					errc <- err
 					return
 				}
-			}(img)
+			}(tag)
 		}
 
 		defer func() {
@@ -157,4 +157,9 @@ func (b *Builder) Push(ctx context.Context, app *builder.AppContext, out chan<- 
 	}
 	wg.Wait()
 	return nil
+}
+
+// AuthToken retrieves the auth token for the given image.
+func (b *Builder) AuthToken(ctx context.Context, app *builder.AppContext) (string, error) {
+	return command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.MainImage)
 }

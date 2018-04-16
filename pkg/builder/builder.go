@@ -18,7 +18,6 @@ import (
 	"github.com/Azure/draft/pkg/local"
 	"github.com/Azure/draft/pkg/osutil"
 	"github.com/Azure/draft/pkg/storage"
-	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/image/build"
 	"github.com/docker/docker/builder/dockerignore"
 	"github.com/docker/docker/pkg/archive"
@@ -47,7 +46,6 @@ const (
 type Builder struct {
 	ID               string
 	ContainerBuilder ContainerBuilder
-	DockerClient     command.Cli
 	Helm             helm.Interface
 	Kube             k8s.Interface
 	Storage          storage.Store
@@ -58,6 +56,7 @@ type Builder struct {
 type ContainerBuilder interface {
 	Build(ctx context.Context, app *AppContext, out chan<- *Summary) error
 	Push(ctx context.Context, app *AppContext, out chan<- *Summary) error
+	AuthToken(ctx context.Context, app *AppContext) (string, error)
 }
 
 // Logs returns the path to the build logs.
@@ -80,17 +79,18 @@ type Context struct {
 
 // AppContext contains state information carried across the various draft stage boundaries.
 type AppContext struct {
-	Obj  *storage.Object
-	Bldr *Builder
-	Ctx  *Context
-	Buf  *bytes.Buffer
-	Tags []string
-	Img  string
-	Log  io.WriteCloser
-	ID   string
-	Vals chartutil.Values
+	Obj       *storage.Object
+	Bldr      *Builder
+	Ctx       *Context
+	Buf       *bytes.Buffer
+	MainImage string
+	Images    []string
+	Log       io.WriteCloser
+	ID        string
+	Vals      chartutil.Values
 }
 
+// New creates a new Builder.
 func New() *Builder {
 	return &Builder{
 		ID: getulid(),
@@ -115,9 +115,9 @@ func newAppContext(b *Builder, buildCtx *Context) (*AppContext, error) {
 	imageRepository := strings.TrimLeft(fmt.Sprintf("%s/%s", buildCtx.Env.Registry, buildCtx.Env.Name), "/")
 	image := fmt.Sprintf("%s:%s", imageRepository, imgtag)
 
-	t := []string{image}
+	images := []string{image}
 	for _, tag := range buildCtx.Env.CustomTags {
-		t = append(t, fmt.Sprintf("%s:%s", imageRepository, tag))
+		images = append(images, fmt.Sprintf("%s:%s", imageRepository, tag))
 	}
 
 	// inject certain values into the chart such as the registry location,
@@ -148,15 +148,15 @@ func newAppContext(b *Builder, buildCtx *Context) (*AppContext, error) {
 		LogsFileRef: b.Logs(buildCtx.Env.Name),
 	}
 	return &AppContext{
-		Obj:  state,
-		ID:   b.ID,
-		Bldr: b,
-		Ctx:  buildCtx,
-		Buf:  buf,
-		Tags: t,
-		Img:  image,
-		Log:  logf,
-		Vals: vals,
+		Obj:       state,
+		ID:        b.ID,
+		Bldr:      b,
+		Ctx:       buildCtx,
+		Buf:       buf,
+		Images:    images,
+		MainImage: image,
+		Log:       logf,
+		Vals:      vals,
 	}, nil
 }
 
@@ -460,15 +460,15 @@ func (b *Builder) prepareReleaseEnvironment(ctx context.Context, app *AppContext
 		}
 	}
 
-	regAuthToken, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.Img)
+	authToken, err := b.ContainerBuilder.AuthToken(ctx, app)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve auth token from image %s: %v", app.Img, err)
+		return fmt.Errorf("failed to retrieve auth token for image %s: %v", app.MainImage, err)
 	}
 
 	// we need to translate the auth token Docker gives us into a Kubernetes registry auth secret token.
-	regAuth, err := FromAuthConfigToken(regAuthToken)
+	regAuth, err := FromAuthConfigToken(authToken)
 	if err != nil {
-		return fmt.Errorf("failed to convert '%s' to a kubernetes registry auth secret token: %v", regAuthToken, err)
+		return fmt.Errorf("failed to convert '%s' to a kubernetes registry auth secret token: %v", authToken, err)
 	}
 
 	// create a new json string with the full dockerauth, including the registry URL.
