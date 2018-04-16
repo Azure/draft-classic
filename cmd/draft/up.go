@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/builder"
+	"github.com/Azure/draft/pkg/builder/docker"
 	"github.com/Azure/draft/pkg/cmdline"
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
@@ -132,10 +133,9 @@ func (u *upCmd) run(environment string) (err error) {
 		buildctx   *builder.Context
 		kubeConfig *rest.Config
 		ctx        = context.Background()
-		bldr       = &builder.Builder{
-			LogsDir: u.home.Logs(),
-		}
+		bldr       = builder.New()
 	)
+	bldr.LogsDir = u.home.Logs()
 	if buildctx, err = builder.LoadWithEnv(u.src, environment); err != nil {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
@@ -158,7 +158,9 @@ func (u *upCmd) run(environment string) (err error) {
 	if err := cli.Initialize(u.dockerClientOptions); err != nil {
 		return fmt.Errorf("failed to create docker client: %v", err)
 	}
-	bldr.DockerClient = cli
+	bldr.ContainerBuilder = &docker.Builder{
+		DockerClient: cli,
+	}
 
 	// setup kube
 	bldr.Kube, kubeConfig, err = getKubeClient(kubeContext)
@@ -173,7 +175,7 @@ func (u *upCmd) run(environment string) (err error) {
 	// setup the storage engine
 	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
 	progressC := bldr.Up(ctx, buildctx)
-	cmdline.Display(ctx, buildctx.Env.Name, progressC, cmdline.WithBuildID(bldr.ID()))
+	cmdline.Display(ctx, buildctx.Env.Name, progressC, cmdline.WithBuildID(bldr.ID))
 
 	if buildctx.Env.AutoConnect || autoConnect {
 		c := newConnectCmd(u.out)
