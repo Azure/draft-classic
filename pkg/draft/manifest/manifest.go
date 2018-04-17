@@ -36,6 +36,7 @@ type Environment struct {
 	WatchDelay    int      `toml:"watch-delay,omitempty"`
 	OverridePorts []string `toml:"override-ports,omitempty"`
 	AutoConnect   bool     `toml:"auto-connect"`
+	CustomTags    []string `toml:"custom-tags,omitempty"`
 }
 
 // New creates a new manifest with the Environments intialized.
