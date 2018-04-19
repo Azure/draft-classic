@@ -12,6 +12,7 @@ import (
 
 	"github.com/Azure/draft/pkg/draft/local"
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
+	"github.com/Azure/draft/pkg/tasks"
 )
 
 const deleteDesc = `This command deletes an application from your Kubernetes environment.`
@@ -97,6 +98,19 @@ func Delete(app string) error {
 	_, err = helmClient.DeleteRelease(app, helm.DeletePurge(true))
 	if err != nil {
 		return errors.New(grpc.ErrorDesc(err))
+	}
+
+	taskList, err := tasks.Load(tasksTOMLFile)
+	if err != nil {
+		if err == tasks.ErrNoTaskFile {
+			debug(err.Error())
+		} else {
+			return err
+		}
+	} else {
+		if _, err = taskList.Run(tasks.PostDelete, ""); err != nil {
+			return err
+		}
 	}
 
 	return nil
