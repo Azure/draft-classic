@@ -1012,12 +1012,9 @@
     "pkg/chartutil",
     "pkg/engine",
     "pkg/helm",
-    "pkg/helm/environment",
-    "pkg/helm/helmpath",
     "pkg/helm/portforwarder",
     "pkg/ignore",
     "pkg/kube",
-    "pkg/plugin",
     "pkg/plugin/cache",
     "pkg/proto/hapi/chart",
     "pkg/proto/hapi/release",
@@ -1224,6 +1221,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5560acb16b794bbf14d57bc2d3febbddc69c1288cb495801806ebcf7944880bc"
+  inputs-digest = "8c2333b4072ac5cfd4f0559f25bb411b602099ffe21e8693e403d66a8a97e5db"
   solver-name = "gps-cdcl"
   solver-version = 1
