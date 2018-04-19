@@ -41,7 +41,7 @@ func (i *initCmd) ensureConfig() error {
 // ensurePacks checks to see if the default packs exist.
 //
 // If the pack does not exist, this function will create it.
-func (i *initCmd) ensurePacks() error {
+func (i *initCmd) ensurePacks(repos []repo.Builtin) error {
 	existingRepos := repo.FindRepositories(i.home.Packs())
 
 	fmt.Fprintln(i.out, "Installing default pack repositories...")
@@ -51,6 +51,21 @@ func (i *initCmd) ensurePacks() error {
 		}
 	}
 	fmt.Fprintln(i.out, "Installation of default pack repositories complete")
+
+	if len(repos) > 0 {
+		existingRepos := repo.FindRepositories(i.home.Packs())
+		fmt.Fprintln(i.out, "Installing packs from config file")
+
+		for _, r := range repos {
+			if err := i.ensurePack(&r, existingRepos); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+
+		fmt.Fprintln(i.out, "Installation of packs from config file complete")
+
+	}
 	return nil
 }
 
@@ -94,7 +109,7 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin, existingRepos []repo.Reposit
 // ensurePlugins checks to see if the default plugins exist.
 //
 // If the plugin does not exist, this function will add it.
-func (i *initCmd) ensurePlugins() error {
+func (i *initCmd) ensurePlugins(plugins []plugin.Builtin) error {
 
 	existingPlugins, err := findPlugins(pluginDirPath(i.home))
 	if err != nil {
@@ -108,6 +123,26 @@ func (i *initCmd) ensurePlugins() error {
 		}
 	}
 	fmt.Fprintln(i.out, "Installation of default plugins complete")
+
+	if len(plugins) > 0 {
+		existingPlugins, err = findPlugins(pluginDirPath(i.home))
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintln(i.out, "Installing plugins from config file")
+
+		for _, plug := range plugins {
+			if err := i.ensurePlugin(&plug, existingPlugins); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+
+		fmt.Fprintln(i.out, "Installation of plugins from config file complete")
+
+	}
+
 	return nil
 }
 
