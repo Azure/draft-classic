@@ -204,3 +204,9 @@ func getTargetContainerPorts(containers []v1.Container, targetContainer string) 
 
 	return ports, nil
 }
+
+func (a *App) GetPodNames(buildID string, clientset kubernetes.Interface) ([]string, error) {
+	label := map[string]string{DraftLabelKey: a.Name}
+	annotations := map[string]string{BuildIDKey: buildID}
+	return podutil.ListPodNames(a.Namespace, label, annotations, clientset)
+}
