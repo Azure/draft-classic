@@ -6,3 +6,5 @@
     watch = false
     watch-delay = 2
     auto-connect = false
+    dockerfile = ""
+    chart = ""

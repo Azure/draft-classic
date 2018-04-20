@@ -37,6 +37,8 @@ type Environment struct {
 	OverridePorts []string `toml:"override-ports,omitempty"`
 	AutoConnect   bool     `toml:"auto-connect"`
 	CustomTags    []string `toml:"custom-tags,omitempty"`
+	Dockerfile    string   `toml:"dockerfile"`
+	Chart         string   `toml:"chart"`
 }
 
 // New creates a new manifest with the Environments intialized.
