@@ -215,24 +215,35 @@ func loadArchive(ctx *Context) (err error) {
 	if err = archiveSrc(ctx); err != nil {
 		return err
 	}
-	// find the first directory in chart/ and assume that is the chart we want to deploy.
-	chartDir := filepath.Join(ctx.AppDir, pack.ChartsDir)
-	files, err := ioutil.ReadDir(chartDir)
-	if err != nil {
-		return err
-	}
-	var found bool
-	for _, file := range files {
-		if file.IsDir() {
-			found = true
-			if ctx.Chart, err = chartutil.Load(filepath.Join(chartDir, file.Name())); err != nil {
-				return err
+
+	// if a chart was specified in manifest, use it
+	if ctx.Env.Chart != "" {
+		ctx.Chart, err = chartutil.Load(filepath.Join(ctx.AppDir, pack.ChartsDir, ctx.Env.Chart))
+		if err != nil {
+			return err
+		}
+	} else {
+		// otherwise, find the first directory in chart/ and assume that is the chart we want to deploy.
+		chartDir := filepath.Join(ctx.AppDir, pack.ChartsDir)
+		files, err := ioutil.ReadDir(chartDir)
+		if err != nil {
+			return err
+		}
+		var found bool
+		for _, file := range files {
+			if file.IsDir() {
+				found = true
+				if ctx.Chart, err = chartutil.Load(filepath.Join(chartDir, file.Name())); err != nil {
+					return err
+				}
+				break
 			}
 		}
+		if !found {
+			return ErrChartNotExist
+		}
 	}
-	if !found {
-		return ErrChartNotExist
-	}
+
 	return nil
 }
 
@@ -252,7 +263,7 @@ func loadValues(ctx *Context) error {
 }
 
 func archiveSrc(ctx *Context) error {
-	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, "")
+	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, ctx.Env.Dockerfile)
 	if err != nil {
 		return fmt.Errorf("unable to prepare docker context: %s", err)
 	}
@@ -382,7 +393,11 @@ func (b *Builder) buildImg(ctx context.Context, app *AppContext, out chan<- *Sum
 	msgc := make(chan string)
 	errc := make(chan error)
 	go func() {
-		buildopts := types.ImageBuildOptions{Tags: app.tags}
+		buildopts := types.ImageBuildOptions{
+			Tags:       app.tags,
+			Dockerfile: app.ctx.Env.Dockerfile,
+		}
+
 		resp, err := b.DockerClient.Client().ImageBuild(ctx, app.buf, buildopts)
 		if err != nil {
 			errc <- err
