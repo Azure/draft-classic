@@ -14,9 +14,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Azure/draft/pkg/draft/local"
 	"github.com/Azure/draft/pkg/draft/manifest"
 	"github.com/Azure/draft/pkg/draft/pack"
+	"github.com/Azure/draft/pkg/local"
 	"github.com/Azure/draft/pkg/osutil"
 	"github.com/Azure/draft/pkg/storage"
 	"github.com/docker/cli/cli/command"

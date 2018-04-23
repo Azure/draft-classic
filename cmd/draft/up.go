@@ -22,7 +22,7 @@ import (
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
 
-	"github.com/Azure/draft/pkg/draft/local"
+	"github.com/Azure/draft/pkg/local"
 	"github.com/Azure/draft/pkg/tasks"
 )
 
