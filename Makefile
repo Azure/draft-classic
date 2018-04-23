@@ -38,7 +38,8 @@ dist:
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf draft-${VERSION}-{}.tar.gz {} \; \
+		$(DIST_DIRS) tar -zcf draft-${VERSION}-{}.tar.gz {} \; && \
+		$(DIST_DIRS) zip -r draft-${VERSION}-{}.zip {} \; \
 	)
 
 .PHONY: checksum
