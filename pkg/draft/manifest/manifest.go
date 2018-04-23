@@ -49,6 +49,7 @@ func New() *Manifest {
 	m.Environments[DefaultEnvironmentName] = &Environment{
 		Name:        generateName(),
 		Namespace:   DefaultNamespace,
+		Wait:        true,
 		Watch:       false,
 		WatchDelay:  DefaultWatchDelaySeconds,
 		AutoConnect: false,
