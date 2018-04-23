@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/helm/pkg/helm"
 
-	"github.com/Azure/draft/pkg/draft/local"
+	"github.com/Azure/draft/pkg/local"
 	"github.com/Azure/draft/pkg/storage/kube/configmap"
 	"github.com/Azure/draft/pkg/tasks"
 )

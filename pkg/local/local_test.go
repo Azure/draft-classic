@@ -13,7 +13,7 @@ func TestDeployedApplication(t *testing.T) {
 		Namespace: "example-namespace",
 	}
 
-	app, err := DeployedApplication("../testdata/app/draft.toml", "development")
+	app, err := DeployedApplication("testdata/draft.toml", "development")
 	if err != nil {
 		t.Fatal(err)
 	}
