@@ -207,7 +207,7 @@ func (u *upCmd) run(environment string) (err error) {
 }
 
 func runPostDeployTasks(taskList *tasks.Tasks, buildID string) error {
-	if len(taskList.PostDeploy) == 0 {
+	if taskList == nil || len(taskList.PostDeploy) == 0 {
 		return errors.New("No post deploy tasks to run")
 	}
 
