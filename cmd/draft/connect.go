@@ -177,7 +177,6 @@ func (cn *connectCmd) detach() error {
 	if err != nil {
 		return err
 	}
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Env = os.Environ()
 	if err := cmd.Start(); err != nil {
 		return err
