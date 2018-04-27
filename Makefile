@@ -95,6 +95,5 @@ ifndef HAS_BINDATA
 endif
 	dep ensure -v
 	scripts/setup-apimachinery.sh
-	scripts/setup-protobuf-include.sh
 
 include versioning.mk
