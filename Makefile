@@ -44,7 +44,7 @@ dist:
 
 .PHONY: checksum
 checksum:
-	for f in _dist/*.gz ; do \
+	for f in _dist/*.{gz,zip} ; do \
 		shasum -a 256 "$${f}"  | awk '{print $$1}' > "$${f}.sha256" ; \
 	done
 
