@@ -22,7 +22,7 @@ func runHook(p *plugin.Plugin, event string) error {
 		return nil
 	}
 
-	prog := exec.Command("powershell.exe", "-ExecutionPolicy", "Bypass", "-NoLogo", "-NonInteractive", "-NoProfile", "-WindowStyle", "Hidden", "-Command", hook)
+	prog := exec.Command("powershell.exe", "-ExecutionPolicy", "Bypass", "-NoLogo", "-NonInteractive", "-NoProfile", "-Command", hook)
 
 	debug("running %s hook: %s %v", event, prog.Path, prog.Args)
 
