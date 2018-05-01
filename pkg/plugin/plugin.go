@@ -97,7 +97,7 @@ type Plugin struct {
 //
 // The result is suitable to pass to exec.Command.
 func (p *Plugin) PrepareCommand(extraArgs []string) (string, []string) {
-	parts := strings.Split(os.ExpandEnv(p.Metadata.Command), " ")
+	parts := strings.Split(p.Metadata.Command, " ")
 	main := parts[0]
 	baseArgs := []string{}
 	if len(parts) > 1 {
@@ -106,7 +106,13 @@ func (p *Plugin) PrepareCommand(extraArgs []string) (string, []string) {
 	if !p.Metadata.IgnoreFlags {
 		baseArgs = append(baseArgs, extraArgs...)
 	}
-	return main, baseArgs
+
+	expandedArgs := make([]string, 0, len(baseArgs))
+	for _, baseArg := range baseArgs {
+		expandedArgs = append(expandedArgs, os.ExpandEnv(baseArg))
+	}
+
+	return os.ExpandEnv(main), expandedArgs
 }
 
 // LoadDir loads a plugin from the given directory.
