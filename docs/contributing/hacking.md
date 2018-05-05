@@ -53,10 +53,11 @@ $ cd draft
 ```
 
 Add the conventional [upstream][] `git` remote in order to fetch changes from Draft's main master
-branch and to create pull requests:
+branch and to create pull requests. Furthermore, configure git to not allow you to push upstream:
 
 ```shell
 $ git remote add upstream https://github.com/Azure/draft.git
+$ git remote set-url --push upstream no_push
 ```
 
 ## Build Your Changes
