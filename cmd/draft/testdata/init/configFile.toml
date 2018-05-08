@@ -1,0 +1,8 @@
+[[plugin]]
+name = "plugin1"
+url = "a url"
+version = "1.0.0"
+
+[[repo]]
+name = "pack-repo"
+url = "some url"
