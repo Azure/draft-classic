@@ -32,7 +32,7 @@ $ cat draft.toml
   [environments.development]
     name = "example-python"
     namespace = "default"
-    wait = false
+    wait = true
     watch = false
     watch-delay = 2
     override-ports = ["8080:8080", "9229:9229"]
