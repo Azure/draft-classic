@@ -60,6 +60,11 @@ func TestFromDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		if err := os.Chdir(cwd); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	dir, err := ioutil.TempDir("", "draft-pack-test")
 	if err != nil {
