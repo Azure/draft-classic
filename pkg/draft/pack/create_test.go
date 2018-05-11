@@ -25,6 +25,13 @@ func TestCreateFrom(t *testing.T) {
 		}
 	}
 
+	// verify that some-script.sh was copied over
+	if _, err := os.Stat(filepath.Join(tdir, "scripts", "some-script.sh")); err != nil {
+		if os.IsNotExist(err) {
+			t.Error("expected scripts/some-script.sh to exist")
+		}
+	}
+
 	if err := CreateFrom(tdir, "testdata/pack-does-not-exist"); err == nil {
 		t.Error("expected err to be non-nil with an invalid source pack")
 	}

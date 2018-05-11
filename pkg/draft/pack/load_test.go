@@ -51,6 +51,11 @@ func TestFromDir(t *testing.T) {
 		t.Errorf("expected Dockerfile == expected file contents, got '%v'", dockerfileContents)
 	}
 
+	_, ok = pack.Files["scripts/some-script.sh"]
+	if !ok {
+		t.Errorf("Expected scripts/some-script.sh to have been loaded but wasn't")
+	}
+
 	if _, err := FromDir("dir-does-not-exist"); err == nil {
 		t.Errorf("expected err to be non-nil when path does not exist")
 	}
@@ -104,4 +109,16 @@ func TestFromDir(t *testing.T) {
 	if err := os.Chdir(cwd); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestExtractFiles(t *testing.T) {
+
+	packFiles, err := extractFiles("testdata/DirWithNestedDirs", "")
+	if err != nil {
+		t.Fatalf("Did not expect err but got err: %v", err)
+	}
+	if len(packFiles) != 4 {
+		t.Errorf("Expected 4 files to be extracted but got %v", len(packFiles))
+	}
+
 }
