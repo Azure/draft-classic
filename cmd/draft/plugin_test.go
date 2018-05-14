@@ -49,7 +49,7 @@ func TestManuallyProcessArgs(t *testing.T) {
 func TestLoadPlugins(t *testing.T) {
 	// Set draft home to point to testdata
 	old := draftHome
-	draftHome = "testdata/drafthome"
+	draftHome = filepath.Join("testdata", "drafthome")
 	resetEnvVars := unsetEnvVars()
 	defer func() {
 		draftHome = old
@@ -141,7 +141,7 @@ func TestLoadPlugins(t *testing.T) {
 func TestSetupEnv(t *testing.T) {
 	name := "pequod"
 	ver := "0.1.0"
-	ph := draftpath.Home("testdata/drafthome")
+	ph := draftpath.Home(filepath.Join("testdata", "drafthome"))
 	base := filepath.Join(ph.Plugins(), name)
 	plugdirs := ph.Plugins()
 	flagDebug = true

@@ -16,6 +16,7 @@ limitations under the License.
 package plugin
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -64,7 +65,7 @@ func TestPrepareCommand(t *testing.T) {
 }
 
 func TestLoadDir(t *testing.T) {
-	dirname := "testdata/plugdir/hello"
+	dirname := filepath.Join("testdata", "plugdir", "hello")
 	plug, err := LoadDir(dirname)
 	if err != nil {
 		t.Fatalf("error loading Hello plugin: %s", err)
@@ -95,7 +96,7 @@ func TestLoadDir(t *testing.T) {
 }
 
 func TestDownloader(t *testing.T) {
-	dirname := "testdata/plugdir/downloader"
+	dirname := filepath.Join("testdata", "plugdir", "downloader")
 	plug, err := LoadDir(dirname)
 	if err != nil {
 		t.Fatalf("error loading Downloader plugin: %s", err)
@@ -133,7 +134,7 @@ func TestLoadAll(t *testing.T) {
 		t.Fatalf("expected empty dir to have 0 plugins")
 	}
 
-	basedir := "testdata/plugdir"
+	basedir := filepath.Join("testdata", "plugdir")
 	plugs, err := LoadAll(basedir)
 	if err != nil {
 		t.Fatalf("Could not load %q: %s", basedir, err)

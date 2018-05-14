@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -27,7 +28,7 @@ func TestPluginRemoveCmd(t *testing.T) {
 		names: []string{"echo"},
 	}
 
-	helpers.CopyTree(t, "testdata/plugins/", pluginDirPath(remove.home))
+	helpers.CopyTree(t, filepath.Join("testdata", "plugins"), pluginDirPath(remove.home))
 
 	if err := remove.run(); err != nil {
 		t.Errorf("Error removing plugin: %v", err)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -15,7 +16,7 @@ func TestPluginListCmd(t *testing.T) {
 	defer resetEnvVars()
 
 	list := &pluginListCmd{
-		home: draftpath.Home("testdata/drafthome/"),
+		home: draftpath.Home(filepath.Join("testdata", "drafthome")),
 		out:  buf,
 	}
 

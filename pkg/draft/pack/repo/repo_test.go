@@ -1,17 +1,18 @@
 package repo
 
 import (
+	"path/filepath"
 	"testing"
 )
 
 func TestPack(t *testing.T) {
 	r := Repository{
 		Name: "testRepo1",
-		Dir:  "testdata/packs/github.com/testOrg1/testRepo1",
+		Dir:  filepath.Join("testdata", "packs", "github.com", "testOrg1", "testRepo1"),
 	}
 
 	targetPack := "testpack2"
-	expected := "testdata/packs/github.com/testOrg1/testRepo1/packs/testpack2"
+	expected := filepath.Join("testdata", "packs", "github.com", "testOrg1", "testRepo1", "packs", "testpack2")
 	pack, err := r.Pack(targetPack)
 	if err != nil {
 		t.Fatal(err)
@@ -25,7 +26,7 @@ func TestPack(t *testing.T) {
 func TestPackNotFound(t *testing.T) {
 	r := Repository{
 		Name: "testRepo1",
-		Dir:  "testdata/packs/github.com/testOrg1/testRepo1",
+		Dir:  filepath.Join("testdata", "packs", "github.com", "testOrg1", "testRepo1"),
 	}
 	targetPack := "nopack"
 	if _, err := r.Pack(targetPack); err == nil {

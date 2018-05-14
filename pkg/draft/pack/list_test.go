@@ -1,19 +1,21 @@
 package pack
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 )
 
 func TestListAll(t *testing.T) {
-	const packsRoot = "repo/testdata/packs"
-
-	var want = []string{
-		"github.com/testOrg1/testRepo1/testpack1",
-		"github.com/testOrg1/testRepo1/testpack2",
-		"github.com/testOrg1/testRepo2/testpack1",
-		"github.com/testOrg1/testRepo2/testpack2",
-	}
+	var (
+		packsRoot = filepath.Join("repo", "testdata", "packs")
+		want      = []string{
+			"github.com/testOrg1/testRepo1/testpack1",
+			"github.com/testOrg1/testRepo1/testpack2",
+			"github.com/testOrg1/testRepo2/testpack1",
+			"github.com/testOrg1/testRepo2/testpack2",
+		}
+	)
 	got, err := List(packsRoot, "")
 	if err != nil {
 		t.Fatal(err)
@@ -24,14 +26,14 @@ func TestListAll(t *testing.T) {
 }
 
 func TestListRepo(t *testing.T) {
-	const (
-		packsRoot = "repo/testdata/packs"
-		packsRepo = "github.com/testOrg1/testRepo1"
+	const packsRepo = "github.com/testOrg1/testRepo1"
+	var (
+		packsRoot = filepath.Join("repo", "testdata", "packs")
+		want      = []string{
+			"github.com/testOrg1/testRepo1/testpack1",
+			"github.com/testOrg1/testRepo1/testpack2",
+		}
 	)
-	var want = []string{
-		"github.com/testOrg1/testRepo1/testpack1",
-		"github.com/testOrg1/testRepo1/testpack2",
-	}
 
 	got, err := List(packsRoot, packsRepo)
 	if err != nil {

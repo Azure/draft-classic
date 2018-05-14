@@ -45,7 +45,7 @@ func TestVCSInstallerSuccess(t *testing.T) {
 	}
 
 	source := "https://github.com/org/draft-env"
-	testRepoPath, _ := filepath.Abs("../testdata/plugdir/echo")
+	testRepoPath, _ := filepath.Abs(filepath.Join("..", "testdata", "plugdir", "echo"))
 	repo := &testRepo{
 		local: testRepoPath,
 		tags:  []string{"0.1.0", "0.1.1"},

@@ -1,14 +1,15 @@
 package linguist
 
 import (
+	"path/filepath"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	appPythonPath   = "testdata/app-python"
-	appEmptydirPath = "testdata/app-emptydir"
+var (
+	appPythonPath   = filepath.Join("testdata", "app-python")
+	appEmptydirPath = filepath.Join("testdata", "app-emptydir")
 )
 
 func TestProcessDir(t *testing.T) {
@@ -22,7 +23,7 @@ func TestProcessDir(t *testing.T) {
 	}
 
 	// test with a bad dir
-	if _, err := ProcessDir("/dir/does/not/exist"); err == nil {
+	if _, err := ProcessDir(filepath.Join("/dir", "does", "not", "exist")); err == nil {
 		t.Error("expected err when running detect with a dir that does not exist")
 	}
 
@@ -38,11 +39,11 @@ func TestGitAttributes(t *testing.T) {
 		path         string
 		expectedLang string
 	}{
-		{"testdata/app-duck", "Duck"},
-		{"testdata/app-vendored", "Python"},
-		{"testdata/app-not-vendored", "HTML"},
-		{"testdata/app-documentation", "Python"},
-		{"testdata/app-generated", "Python"},
+		{filepath.Join("testdata", "app-duck"), "Duck"},
+		{filepath.Join("testdata", "app-vendored"), "Python"},
+		{filepath.Join("testdata", "app-not-vendored"), "HTML"},
+		{filepath.Join("testdata", "app-documentation"), "Python"},
+		{filepath.Join("testdata", "app-generated"), "Python"},
 	}
 
 	for _, tc := range testCases {

@@ -7,7 +7,9 @@ install:
   - ps: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fishworks/gofish/master/scripts/install.ps1'))
   - gofish init
   - gofish install dep
-  - dep ensure
+  - dep ensure -v
+cache:
+  - vendor -> Gopkg.lock
 build: "off"
 deploy: "off"
 test_script:
