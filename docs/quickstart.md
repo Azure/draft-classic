@@ -7,7 +7,7 @@ This guide covers how you can quickly get started using Draft
 The following prerequisites are required for successful use of Draft.
 
 1. A Kubernetes cluster and the `kubectl` CLI tool
-2. Installation of Helm on your Kubernetes cluster
+2. Installation of [Helm](https://github.com/Kubernetes/helm) on your Kubernetes cluster
 3. Installing and configuring Draft on your laptop
 
 ### Install Kubernetes or have access to a cluster
