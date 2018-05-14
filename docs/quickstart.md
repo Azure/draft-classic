@@ -37,7 +37,7 @@ $ brew tap azure/draft
 $ brew install azure/draft/draft
 ```
 
-#### Chocolately
+#### Chocolatey
 
 To install Draft on Windows using [Chocolatey](https://chocolatey.org/):
 
