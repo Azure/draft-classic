@@ -25,7 +25,7 @@
 
 [[constraint]]
   name = "k8s.io/helm"
-  version = "~v2.7.0"
+  version = "~v2.9.0"
 
 [[override]]
   name = "gopkg.in/fsnotify.v1"
@@ -34,15 +34,39 @@
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "=v1.8.0"
+  branch = "release-1.10"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.0"
+
+[[override]]
+  name = "k8s.io/api"
+  branch = "release-1.10"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  branch = "release-1.10"
+
+[[override]]
+  name = "k8s.io/apiserver"
+  branch = "release-1.10"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  branch = "release-1.10"
 
 [[override]]
   name = "github.com/imdario/mergo"
   revision = "6633656539c1639d9d78127b7d47c622b5d7b6dc"
 
 [[override]]
+  name = "github.com/russross/blackfriday"
+  version = "v1.4-2-g300106c"
+
+[[override]]
   name = "google.golang.org/grpc"
-  version = "=v1.2.1"
+  version = "1.7.2"
 
 [[constraint]]
   name = "github.com/jbrukh/bayesian"

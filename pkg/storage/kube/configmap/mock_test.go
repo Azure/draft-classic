@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"k8s.io/api/core/v1"
-	"k8s.io/kubernetes/pkg/api"
+	"k8s.io/apimachinery/pkg/apis/testapigroup"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,7 +64,7 @@ func (mock *MockConfigMaps) Init(t *testing.T, entries ...struct {
 func (mock *MockConfigMaps) Get(name string, options metav1.GetOptions) (*v1.ConfigMap, error) {
 	cfgmap, ok := mock.cfgmaps[name]
 	if !ok {
-		return nil, apierrors.NewNotFound(api.Resource("tests"), name)
+		return nil, apierrors.NewNotFound(testapigroup.Resource("tests"), name)
 	}
 	return cfgmap, nil
 }
@@ -73,7 +73,7 @@ func (mock *MockConfigMaps) Get(name string, options metav1.GetOptions) (*v1.Con
 func (mock *MockConfigMaps) Create(cfgmap *v1.ConfigMap) (*v1.ConfigMap, error) {
 	name := cfgmap.ObjectMeta.Name
 	if object, ok := mock.cfgmaps[name]; ok {
-		return object, apierrors.NewAlreadyExists(api.Resource("tests"), name)
+		return object, apierrors.NewAlreadyExists(testapigroup.Resource("tests"), name)
 	}
 	mock.cfgmaps[name] = cfgmap
 	return cfgmap, nil
@@ -89,7 +89,7 @@ func (mock *MockConfigMaps) Update(cfgmap *v1.ConfigMap) (*v1.ConfigMap, error) 
 // Delete deletes a ConfigMap by name.
 func (mock *MockConfigMaps) Delete(name string, opts *metav1.DeleteOptions) error {
 	if _, ok := mock.cfgmaps[name]; !ok {
-		return apierrors.NewNotFound(api.Resource("tests"), name)
+		return apierrors.NewNotFound(testapigroup.Resource("tests"), name)
 	}
 	delete(mock.cfgmaps, name)
 	return nil
