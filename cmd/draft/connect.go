@@ -142,24 +142,24 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 		os.Stdout.Close()
 		<-done
 		return nil
-	} else {
-		for _, cc := range connection.ContainerConnections {
-			readCloser, err := connection.RequestLogStream(deployedApp.Namespace, cc.ContainerName, cn.logLines)
-			if err != nil {
-				return err
-			}
-			defer readCloser.Close()
-			go writeContainerLogs(cn.out, readCloser, cc.ContainerName)
+	}
+
+	for _, cc := range connection.ContainerConnections {
+		readCloser, err := connection.RequestLogStream(deployedApp.Namespace, cc.ContainerName, cn.logLines)
+		if err != nil {
+			return err
 		}
-		ticker := time.NewTicker(5 * time.Minute)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				fmt.Fprintf(cn.out, connectionMessage)
-			case <-done:
-				return nil
-			}
+		defer readCloser.Close()
+		go writeContainerLogs(cn.out, readCloser, cc.ContainerName)
+	}
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Fprintf(cn.out, connectionMessage)
+		case <-done:
+			return nil
 		}
 	}
 }
