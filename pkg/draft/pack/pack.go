@@ -60,6 +60,7 @@ func (p *Pack) SaveDir(dest string) error {
 		return err
 	}
 
+	// create a tasks file
 	tasksFilePath := filepath.Join(dest, TargetTasksFileName)
 	exists, err := osutil.Exists(tasksFilePath)
 	if err != nil {
@@ -92,6 +93,10 @@ func (p *Pack) SaveDir(dest string) error {
 			return err
 		}
 		if !exists {
+			baseDir := filepath.Dir(path)
+			if os.MkdirAll(baseDir, 0755) != nil {
+				return fmt.Errorf("Error creating directory %v: %v", baseDir, err)
+			}
 			newfile, err := os.Create(path)
 			if err != nil {
 				return err
