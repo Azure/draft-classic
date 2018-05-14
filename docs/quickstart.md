@@ -26,7 +26,7 @@ $ helm init
 - Download the Draft binary using Homebrew via the commands below or from the [official releases page](https://github.com/Azure/draft/releases)
 ```console
 $ brew tap azure/draft
-$ brew install draft
+$ brew install azure/draft/draft
 ```
 - Set up Draft on your machine by running:
 ```console
