@@ -23,12 +23,40 @@ $ helm init
 ```
 
 ### Install and configure Draft
-- Download the Draft binary using Homebrew via the commands below or from the [official releases page](https://github.com/Azure/draft/releases)
+
+#### Standalone Binary
+
+Download the latest release of Draft from the [latest releases page](https://github.com/Azure/draft/releases/latest), unpack the binary and place it somewhere on your $PATH.
+
+#### Homebrew
+
+To install Draft on MacOS using [Homebrew](https://brew.sh/):
+
 ```console
 $ brew tap azure/draft
 $ brew install azure/draft/draft
 ```
-- Set up Draft on your machine by running:
+
+#### Chocolately
+
+To install Draft on Windows using [Chocolatey](https://chocolatey.org/):
+
+```console
+$ choco install draft
+```
+
+#### GoFish
+
+To install Draft on Windows/MacOS/Linux using [GoFish](https://gofi.sh):
+
+```console
+$ gofish install draft
+```
+
+#### Configure Draft
+
+Once you've installed Draft, set it up on your machine by running:
+
 ```console
 $ draft init
 $ eval $(minikube docker-env)
