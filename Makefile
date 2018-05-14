@@ -94,6 +94,5 @@ ifndef HAS_BINDATA
 	go get github.com/jteeuwen/go-bindata/...
 endif
 	dep ensure -v
-	scripts/setup-apimachinery.sh
 
 include versioning.mk
