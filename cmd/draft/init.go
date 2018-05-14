@@ -57,14 +57,9 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 // runInit initializes local config and installs Draft to Kubernetes Cluster
 func (i *initCmd) run() error {
 
-	pluginOverrides := []plugin.Builtin{}
-	repoOverrides := []repo.Builtin{}
-	if i.configFile != "" {
-		var err error
-		pluginOverrides, repoOverrides, err = parseConfigFile(i.configFile)
-		if err != nil {
-			return fmt.Errorf("Could not parse config file: %s", err)
-		}
+	pluginOverrides, repoOverrides, err := i.parseConfig()
+	if err != nil {
+		return err
 	}
 
 	if !i.dryRun {
@@ -75,6 +70,20 @@ func (i *initCmd) run() error {
 
 	fmt.Fprintf(i.out, "$DRAFT_HOME has been configured at %s.\nHappy Sailing!\n", draftHome)
 	return nil
+}
+
+func (i *initCmd) parseConfig() ([]plugin.Builtin, []repo.Builtin, error) {
+	pluginOverrides := []plugin.Builtin{}
+	repoOverrides := []repo.Builtin{}
+	if i.configFile != "" {
+		var err error
+		pluginOverrides, repoOverrides, err = parseConfigFile(i.configFile)
+		if err != nil {
+			return pluginOverrides, repoOverrides, fmt.Errorf("Could not parse config file: %s", err)
+		}
+	}
+
+	return pluginOverrides, repoOverrides, nil
 }
 
 func (i *initCmd) setupDraftHome(plugins []plugin.Builtin, repos []repo.Builtin) error {
