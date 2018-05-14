@@ -45,6 +45,8 @@ To install Draft on Windows using [Chocolatey](https://chocolatey.org/):
 $ choco install draft
 ```
 
+IMPORTANT: this package is [currently being maintained by the community](https://chocolatey.org/packages/draft) and not by any of the core maintainers. Always make sure to verify the security and contents of any untrusted package from the internet you are not familiar with.
+
 #### GoFish
 
 To install Draft on Windows/MacOS/Linux using [GoFish](https://gofi.sh):
