@@ -23,12 +23,69 @@ $ helm init
 ```
 
 ### Install and configure Draft
-- Download the Draft binary using Homebrew via the commands below or from the [official releases page](https://github.com/Azure/draft/releases)
+
+#### Standalone Binary
+
+Download the latest release of Draft from the [latest releases page](https://github.com/Azure/draft/releases/latest), unpack the binary and place it somewhere on your $PATH.
+
+For example, for the v0.14.1 release, this can be done via
+
+```console
+$ wget https://azuredraft.blob.core.windows.net/draft/draft-v0.14.1-linux-amd64.tar.gz
+$ wget https://azuredraft.blob.core.windows.net/draft/draft-v0.14.1-linux-amd64.tar.gz.sha256
+```
+
+Make sure to verify the contents have not been tampered with:
+
+```console
+$ cat draft-v0.14.1-linux-amd64.tar.gz.sha256
+$ shasum -a 256 draft-v0.14.1-linux-amd64.tar.gz
+```
+
+Then unpack it and place it on your $PATH:
+
+```console
+$ tar -xzvf draft-v0.14.1-linux-amd64.tar.gz
+$ sudo mv linux-amd64/draft /usr/local/bin/draft
+```
+
+Test it's working with
+
+```console
+$ draft version
+```
+
+#### Homebrew
+
+To install Draft on MacOS using [Homebrew](https://brew.sh/):
+
 ```console
 $ brew tap azure/draft
-$ brew install draft
+$ brew install azure/draft/draft
 ```
-- Set up Draft on your machine by running:
+
+#### Chocolatey
+
+To install Draft on Windows using [Chocolatey](https://chocolatey.org/):
+
+```console
+$ choco install draft
+```
+
+IMPORTANT: this package is [currently being maintained by the community](https://chocolatey.org/packages/draft) and not by any of the core maintainers. Always make sure to verify the security and contents of any untrusted package from the internet you are not familiar with.
+
+#### GoFish
+
+To install Draft on Windows/MacOS/Linux using [GoFish](https://gofi.sh):
+
+```console
+$ gofish install draft
+```
+
+#### Configure Draft
+
+Once you've installed Draft, set it up on your machine by running:
+
 ```console
 $ draft init
 $ eval $(minikube docker-env)
