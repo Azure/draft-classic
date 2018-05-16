@@ -134,9 +134,14 @@ func initLinguistAttributes(dir string) error {
 
 	isIgnored = func(filename string) bool {
 		for _, p := range ignore {
-			if m, _ := filepath.Match(p, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+			cleanPath, err := filepath.Rel(dir, filename)
+			if err != nil {
+				log.Debugf("could not get relative path: %v", err)
+				return false
+			}
+			if m, _ := filepath.Match(p, cleanPath); m {
 				for _, e := range except {
-					if m, _ := filepath.Match(e, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+					if m, _ := filepath.Match(e, cleanPath); m {
 						return false
 					}
 				}
@@ -147,7 +152,12 @@ func initLinguistAttributes(dir string) error {
 	}
 	isDetectedInGitAttributes = func(filename string) string {
 		for p, lang := range detected {
-			if m, _ := filepath.Match(p, strings.TrimPrefix(filename, dir+string(filepath.Separator))); m {
+			cleanPath, err := filepath.Rel(dir, filename)
+			if err != nil {
+				log.Debugf("could not get relative path: %v", err)
+				return ""
+			}
+			if m, _ := filepath.Match(p, cleanPath); m {
 				return lang
 			}
 		}

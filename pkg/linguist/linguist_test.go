@@ -56,6 +56,16 @@ func TestGitAttributes(t *testing.T) {
 	}
 }
 
+func TestIsIgnored(t *testing.T) {
+	path := filepath.Join("testdata", "app-documentation")
+	// populate isIgnored
+	ProcessDir(path)
+	ignorePath := filepath.Join(path, "docs")
+	if !isIgnored(ignorePath) {
+		t.Errorf("expected dir '%s' to be ignored", ignorePath)
+	}
+}
+
 func TestGetAlias(t *testing.T) {
 	testcases := map[string]string{
 		"maven pom": "Java",
