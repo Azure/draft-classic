@@ -206,15 +206,15 @@ func ProcessDir(dirname string) ([]*Language, error) {
 		size := int(file.Size())
 		log.Debugf("with file: %s", path)
 		log.Debugln(path, "is", size, "bytes")
-		if size == 0 {
-			log.Debugln(path, "is empty file, skipping")
-			return nil
-		}
 		if isIgnored(path) {
 			log.Debugln(path, "is ignored, skipping")
 			if file.IsDir() {
 				return filepath.SkipDir
 			}
+			return nil
+		}
+		if size == 0 {
+			log.Debugln(path, "is empty file, skipping")
 			return nil
 		}
 		if file.IsDir() {
