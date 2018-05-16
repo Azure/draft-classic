@@ -28,6 +28,33 @@ $ helm init
 
 Download the latest release of Draft from the [latest releases page](https://github.com/Azure/draft/releases/latest), unpack the binary and place it somewhere on your $PATH.
 
+For example, for the v0.14.1 release, this can be done via
+
+```console
+$ wget https://azuredraft.blob.core.windows.net/draft/draft-v0.14.1-linux-amd64.tar.gz
+$ wget https://azuredraft.blob.core.windows.net/draft/draft-v0.14.1-linux-amd64.tar.gz.sha256
+```
+
+Make sure to verify the contents have not been tampered with:
+
+```console
+$ cat draft-v0.14.1-linux-amd64.tar.gz.sha256
+$ shasum -a 256 draft-v0.14.1-linux-amd64.tar.gz
+```
+
+Then unpack it and place it on your $PATH:
+
+```console
+$ tar -xzvf draft-v0.14.1-linux-amd64.tar.gz
+$ sudo mv linux-amd64/draft /usr/local/bin/draft
+```
+
+Test it's working with
+
+```console
+$ draft version
+```
+
 #### Homebrew
 
 To install Draft on MacOS using [Homebrew](https://brew.sh/):
