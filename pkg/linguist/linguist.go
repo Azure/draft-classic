@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -112,6 +113,10 @@ func initLinguistAttributes(dir string) error {
 				continue
 			}
 			path := strings.Trim(words[0], string(filepath.Separator))
+			if runtime.GOOS == "windows" {
+				// on Windows, we also accept / as a path separator, so let's strip those as well
+				path = strings.Trim(words[0], "/")
+			}
 			attribute := words[1]
 			if strings.HasPrefix(attribute, "linguist-documentation") || strings.HasPrefix(attribute, "linguist-vendored") || strings.HasPrefix(attribute, "linguist-generated") {
 				if !strings.HasSuffix(strings.ToLower(attribute), "false") {
