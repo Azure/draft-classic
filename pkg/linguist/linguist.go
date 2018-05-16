@@ -194,7 +194,7 @@ func ProcessDir(dirname string) ([]*Language, error) {
 	}
 	filepath.Walk(dirname, func(path string, file os.FileInfo, err error) error {
 		size := int(file.Size())
-		log.Debugln("with file: ", path)
+		log.Debugf("with file: %s", path)
 		log.Debugln(path, "is", size, "bytes")
 		if size == 0 {
 			log.Debugln(path, "is empty file, skipping")
@@ -214,7 +214,7 @@ func ProcessDir(dirname string) ([]*Language, error) {
 			}
 		} else if (file.Mode() & os.ModeSymlink) == 0 {
 			if ShouldIgnoreFilename(path) {
-				log.Debugln(path, ": filename should be ignored, skipping")
+				log.Debugf("%s: filename should be ignored, skipping", path)
 				return nil
 			}
 

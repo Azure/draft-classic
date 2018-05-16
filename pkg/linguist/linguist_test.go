@@ -3,8 +3,6 @@ package linguist
 import (
 	"path/filepath"
 	"testing"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -13,7 +11,6 @@ var (
 )
 
 func TestProcessDir(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	output, err := ProcessDir(appPythonPath)
 	if err != nil {
 		t.Error("expected detect to pass")
