@@ -1,6 +1,7 @@
 package local
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -13,7 +14,7 @@ func TestDeployedApplication(t *testing.T) {
 		Namespace: "example-namespace",
 	}
 
-	app, err := DeployedApplication("testdata/draft.toml", "development")
+	app, err := DeployedApplication(filepath.Join("testdata", "draft.toml"), "development")
 	if err != nil {
 		t.Fatal(err)
 	}

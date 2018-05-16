@@ -77,9 +77,11 @@ func (p *Pack) SaveDir(dest string) error {
 			defer f.Close()
 			io.Copy(newfile, f)
 		} else {
-			if _, err := os.Create(tasksFilePath); err != nil {
+			tasksFile, err := os.Create(tasksFilePath)
+			if err != nil {
 				return err
 			}
+			tasksFile.Close()
 		}
 	}
 

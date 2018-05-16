@@ -3,7 +3,6 @@ package installer
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -27,7 +26,7 @@ type Installer interface {
 
 // Install installs a plugin to $DRAFT_HOME
 func Install(i Installer) error {
-	if _, pathErr := os.Stat(path.Dir(i.Path())); os.IsNotExist(pathErr) {
+	if _, pathErr := os.Stat(filepath.Dir(i.Path())); os.IsNotExist(pathErr) {
 
 		return plugin.ErrHomeMissing
 	}

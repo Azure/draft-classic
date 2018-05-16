@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 )
 
@@ -13,21 +12,24 @@ func TestExists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	name := file.Name()
 
-	exists, err := Exists(file.Name())
+	exists, err := Exists(name)
 	if err != nil {
 		t.Errorf("expected no error when calling Exists() on a file that exists, got %v", err)
 	}
 	if !exists {
 		t.Error("expected tempfile to exist")
 	}
-	os.Remove(file.Name())
-	exists, err = Exists(file.Name())
+	// on Windows, we need to close all open handles to a file before we remove it.
+	file.Close()
+	os.Remove(name)
+	stillExists, err := Exists(name)
 	if err != nil {
 		t.Errorf("expected no error when calling Exists() on a file that does not exist, got %v", err)
 	}
-	if exists {
-		t.Error("expected tempfile to NOT exist")
+	if stillExists {
+		t.Error("expected tempfile to NOT exist after removing it")
 	}
 }
 
@@ -53,22 +55,5 @@ func TestSymlinkWithFallback(t *testing.T) {
 
 	if err := SymlinkWithFallback(oldFileNamePath, newFileNamePath); err != nil {
 		t.Errorf("expected no error when calling SymlinkWithFallback() on a file that exists, got %v", err)
-	}
-	if runtime.GOOS == "windows" {
-		exists, err := Exists(oldFileNamePath)
-		if err != nil {
-			t.Errorf("expected no error when calling Exists() on a file that does not exist, got %v", err)
-		}
-		if exists {
-			// check that newFileName is a symlink. If this succeeds, then we are running this test as a
-			// user that has permission to create symbolic links, so the old file should still exist.
-			newFile, err := os.Lstat(newFileNamePath)
-			if err != nil {
-				t.Error(err)
-			}
-			if newFile.Mode() != os.ModeSymlink {
-				t.Errorf("expected %s to be removed when %s is not a symbolic link", oldFileNamePath, newFileNamePath)
-			}
-		}
 	}
 }

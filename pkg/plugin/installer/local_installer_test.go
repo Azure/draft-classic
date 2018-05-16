@@ -35,8 +35,7 @@ func TestLocalInstaller(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	source := "../testdata/plugdir/echo"
-	i, err := New(source, "", home)
+	i, err := New(filepath.Join("..", "testdata", "plugdir", "echo"), "", home)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

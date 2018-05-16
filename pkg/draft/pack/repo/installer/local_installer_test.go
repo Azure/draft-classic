@@ -3,6 +3,7 @@ package installer
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -31,8 +32,7 @@ func TestLocalInstaller(t *testing.T) {
 
 	defer os.RemoveAll(tdir)
 
-	source := "testdata/packdir/defaultpacks"
-	i, err := New(source, "", home)
+	i, err := New(filepath.Join("testdata", "packdir", "defaultpacks"), "", home)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

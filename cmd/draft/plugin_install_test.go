@@ -85,14 +85,14 @@ func TestPluginInstallCmd(t *testing.T) {
 		{
 			name:   "install plugin",
 			plugin: "echo",
-			path:   "testdata/plugins/echo",
+			path:   filepath.Join("testdata", "plugins", "echo"),
 			output: "Installed plugin: echo\n",
 			fail:   false,
 		},
 		{
 			name:   "error installing nonexistent plugin",
 			plugin: "dummy",
-			path:   "testdata/plugins/dummy",
+			path:   filepath.Join("testdata", "plugins", "dummy"),
 			output: "",
 			fail:   true,
 		},

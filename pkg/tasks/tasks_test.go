@@ -1,11 +1,12 @@
 package tasks
 
 import (
+	"path/filepath"
 	"testing"
 )
 
 func TestLoad(t *testing.T) {
-	tasksFile, err := Load("testdata/tasks.toml")
+	tasksFile, err := Load(filepath.Join("testdata", "tasks.toml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,18 +22,18 @@ func TestLoad(t *testing.T) {
 }
 
 func TestLoadError(t *testing.T) {
-	_, err := Load("testdata/nonexistent.yaml")
+	_, err := Load(filepath.Join("testdata", "nonexistent.yaml"))
 	if err == nil {
 		t.Error(err)
 	}
 
-	_, err = Load("testdata/malformedTasks.yaml")
+	_, err = Load(filepath.Join("testdata", "malformedTasks.yaml"))
 	if err == nil {
 	}
 }
 
 func TestRun(t *testing.T) {
-	taskFile, err := Load("testdata/tasks.toml")
+	taskFile, err := Load(filepath.Join("testdata", "tasks.toml"))
 	if err != nil {
 		t.Fatal(err)
 	}

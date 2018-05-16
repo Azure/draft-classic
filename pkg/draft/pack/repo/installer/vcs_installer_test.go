@@ -54,7 +54,7 @@ func TestVCSInstallerSuccess(t *testing.T) {
 	defer os.RemoveAll(home.String())
 
 	source := "https://github.com/org/defaultpacks"
-	testRepoPath, _ := filepath.Abs("testdata/packdir/defaultpacks")
+	testRepoPath, _ := filepath.Abs(filepath.Join("testdata", "packdir", "defaultpacks"))
 	repo := &testRepo{
 		local: testRepoPath,
 		tags:  []string{"0.1.0", "0.1.1"},
@@ -96,7 +96,7 @@ func TestVCSInstallerPath(t *testing.T) {
 	home := setupTempHome(t)
 	defer os.RemoveAll(home.String())
 
-	testRepoPath, _ := filepath.Abs("testdata/packdir/defaultpacks")
+	testRepoPath, _ := filepath.Abs(filepath.Join("testdata", "packdir", "defaultpacks"))
 	repo := &testRepo{
 		local: testRepoPath,
 		tags:  []string{"0.1.0", "0.1.1"},

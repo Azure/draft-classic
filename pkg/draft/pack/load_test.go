@@ -19,7 +19,7 @@ EXPOSE 80
 )
 
 func TestFromDir(t *testing.T) {
-	pack, err := FromDir("testdata/pack-python")
+	pack, err := FromDir(filepath.Join("testdata", "pack-python"))
 	if err != nil {
 		t.Fatalf("could not load python pack: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestFromDir(t *testing.T) {
 		t.Errorf("expected Dockerfile == expected file contents, got '%v'", dockerfileContents)
 	}
 
-	_, ok = pack.Files["scripts/some-script.sh"]
+	_, ok = pack.Files[filepath.Join("scripts", "some-script.sh")]
 	if !ok {
 		t.Errorf("Expected scripts/some-script.sh to have been loaded but wasn't")
 	}
@@ -113,7 +113,7 @@ func TestFromDir(t *testing.T) {
 
 func TestExtractFiles(t *testing.T) {
 
-	packFiles, err := extractFiles("testdata/DirWithNestedDirs", "")
+	packFiles, err := extractFiles(filepath.Join("testdata", "DirWithNestedDirs"), "")
 	if err != nil {
 		t.Fatalf("Did not expect err but got err: %v", err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ func TestDelete(t *testing.T) {
 		src     string
 		wantErr bool
 	}{
-		{"testdata/delete/src/simple-go-error", true},
+		{filepath.Join("testdata", "delete", "src", "simple-go-error"), true},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("delete %s", tc.src), func(t *testing.T) {

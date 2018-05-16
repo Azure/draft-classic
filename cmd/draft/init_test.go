@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
@@ -15,9 +16,9 @@ func TestParseConfig(t *testing.T) {
 		repoCount   int
 	}{
 		{"", false, 0, 0},
-		{"testdata/init/configFile.toml", false, 1, 1},
-		{"testdata/init/malformedConfigFile.toml", true, 0, 0},
-		{"testdata/init/missingConfigFile.toml", true, 0, 0},
+		{filepath.Join("testdata", "init", "configFile.toml"), false, 1, 1},
+		{filepath.Join("testdata", "init", "malformedConfigFile.toml"), true, 0, 0},
+		{filepath.Join("testdata", "init", "missingConfigFile.toml"), true, 0, 0},
 	}
 
 	for _, tc := range testCases {
