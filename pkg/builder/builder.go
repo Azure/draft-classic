@@ -219,12 +219,12 @@ func loadArchive(ctx *Context) (err error) {
 
 	// if a chart was specified in manifest, use it
 	if ctx.Env.Chart != "" {
-		ctx.Chart, err = chartutil.Load(filepath.Join(ctx.AppDir, pack.ChartsDir, ctx.Env.Chart))
+		ctx.Chart, err = chartutil.Load(filepath.Join(ctx.AppDir, ctx.Env.Chart))
 		if err != nil {
 			return err
 		}
 	} else {
-		// otherwise, find the first directory in chart/ and assume that is the chart we want to deploy.
+		// otherwise, find the first directory in charts/ and assume that is the chart we want to deploy.
 		chartDir := filepath.Join(ctx.AppDir, pack.ChartsDir)
 		files, err := ioutil.ReadDir(chartDir)
 		if err != nil {
