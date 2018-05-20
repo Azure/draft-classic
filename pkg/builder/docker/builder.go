@@ -32,9 +32,16 @@ func (b *Builder) Build(ctx context.Context, app *builder.AppContext, out chan<-
 	msgc := make(chan string)
 	errc := make(chan error)
 	go func() {
+		args := make(map[string]*string)
+		for k := range app.Ctx.Env.ImageBuildArgs {
+			v := app.Ctx.Env.ImageBuildArgs[k]
+			args[k] = &v
+		}
+
 		buildopts := types.ImageBuildOptions{
 			Tags:       app.Images,
 			Dockerfile: app.Ctx.Env.Dockerfile,
+			BuildArgs:  args,
 		}
 
 		resp, err := b.DockerClient.Client().ImageBuild(ctx, app.Buf, buildopts)
