@@ -619,7 +619,8 @@
   branch = "master"
   name = "github.com/rjeczalik/notify"
   packages = ["."]
-  revision = "27b537f07230b3f917421af6dcf044038dbe57e2"
+  #revision = "27b537f07230b3f917421af6dcf044038dbe57e2"
+  revision = "d152f3ce359a5464dc41e84a8919fc67e55bbbf0"
 
 [[projects]]
   name = "github.com/russross/blackfriday"
