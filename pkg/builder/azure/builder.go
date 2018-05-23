@@ -76,11 +76,25 @@ func (b *Builder) Build(ctx context.Context, app *builder.AppContext, out chan<-
 			imageNames = append(imageNames, fmt.Sprintf("%s:%s", app.Ctx.Env.Name, imageNameParts[len(imageNameParts)-1]))
 		}
 
+		var args []containerregistry.BuildArgument
+
+		// TODO: once the API includes this as default, remove it
+		buildArgType := "DockerBuildArgument"
+		for k := range app.Ctx.Env.ImageBuildArgs {
+			name := k
+			value := app.Ctx.Env.ImageBuildArgs[k]
+			arg := containerregistry.BuildArgument{
+				Type:  &buildArgType,
+				Name:  &name,
+				Value: &value,
+			}
+			args = append(args, arg)
+		}
+
 		req := containerregistry.QuickBuildRequest{
 			ImageNames:     to.StringSlicePtr(imageNames),
 			SourceLocation: sourceUploadDefinition.RelativePath,
-			// TODO: make this configurable with https://github.com/Azure/draft/issues/663
-			BuildArguments: nil,
+			BuildArguments: &args,
 			IsPushEnabled:  to.BoolPtr(true),
 			Timeout:        to.Int32Ptr(600),
 			Platform: &containerregistry.PlatformProperties{
