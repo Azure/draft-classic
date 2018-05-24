@@ -12,7 +12,6 @@ To compile and test Draft binaries and to build Docker images, you will need:
  - [git][]
  - [helm][], using the same version as recommended in the [installation guide][install].
  - [Go][] 1.8 or later, with support for compiling to `linux/amd64`
- - [upx][] (optional) to compress binaries for a smaller Docker image
 
 In most cases, install the prerequisite according to its instructions. See the next section
 for a note about Go cross-compiling support.
@@ -94,4 +93,3 @@ $ make clean
 [Kubernetes]: https://github.com/kubernetes/kubernetes
 [minikube]: https://github.com/kubernetes/minikube
 [upstream]: https://help.github.com/articles/fork-a-repo/
-[upx]: https://upx.github.io
