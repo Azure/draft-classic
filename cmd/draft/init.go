@@ -9,8 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
-	"github.com/Azure/draft/pkg/draft/pack/repo"
+	packrepo "github.com/Azure/draft/pkg/draft/pack/repo"
 	"github.com/Azure/draft/pkg/plugin"
+	"github.com/Azure/draft/pkg/plugin/repository"
 )
 
 const (
@@ -26,6 +27,12 @@ type initCmd struct {
 	in         io.Reader
 	home       draftpath.Home
 	configFile string
+}
+
+type configFile struct {
+	Plugins            []plugin.Builtin     `toml:"plugins"`
+	PluginRepositories []repository.Builtin `toml:"plugin-repositories"`
+	PackRepositories   []packrepo.Builtin   `toml:"pack-repositories"`
 }
 
 func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
@@ -57,13 +64,13 @@ func newInitCmd(out io.Writer, in io.Reader) *cobra.Command {
 // runInit initializes local config and installs Draft to Kubernetes Cluster
 func (i *initCmd) run() error {
 
-	pluginOverrides, repoOverrides, err := i.parseConfig()
+	conf, err := i.parseConfig()
 	if err != nil {
 		return err
 	}
 
 	if !i.dryRun {
-		if err := i.setupDraftHome(pluginOverrides, repoOverrides); err != nil {
+		if err := i.setupDraftHome(conf.PluginRepositories, conf.Plugins, conf.PackRepositories); err != nil {
 			return err
 		}
 	}
@@ -72,21 +79,18 @@ func (i *initCmd) run() error {
 	return nil
 }
 
-func (i *initCmd) parseConfig() ([]plugin.Builtin, []repo.Builtin, error) {
-	pluginOverrides := []plugin.Builtin{}
-	repoOverrides := []repo.Builtin{}
+func (i *initCmd) parseConfig() (*configFile, error) {
 	if i.configFile != "" {
-		var err error
-		pluginOverrides, repoOverrides, err = parseConfigFile(i.configFile)
+		conf, err := parseConfigFile(i.configFile)
 		if err != nil {
-			return pluginOverrides, repoOverrides, fmt.Errorf("Could not parse config file: %s", err)
+			return nil, fmt.Errorf("Could not parse config file: %s", err)
 		}
+		return conf, nil
 	}
-
-	return pluginOverrides, repoOverrides, nil
+	return &configFile{}, nil
 }
 
-func (i *initCmd) setupDraftHome(plugins []plugin.Builtin, repos []repo.Builtin) error {
+func (i *initCmd) setupDraftHome(pluginRepos []repository.Builtin, plugins []plugin.Builtin, repos []packrepo.Builtin) error {
 	ensureFuncs := []func() error{
 		i.ensureDirectories,
 		i.ensureConfig,
@@ -98,6 +102,9 @@ func (i *initCmd) setupDraftHome(plugins []plugin.Builtin, repos []repo.Builtin)
 		}
 	}
 
+	if err := i.ensurePluginRepositories(pluginRepos); err != nil {
+		return err
+	}
 	if err := i.ensurePlugins(plugins); err != nil {
 		return err
 	}
@@ -108,39 +115,10 @@ func (i *initCmd) setupDraftHome(plugins []plugin.Builtin, repos []repo.Builtin)
 	return nil
 }
 
-type obj struct {
-	Name    string `toml:"name"`
-	URL     string `toml:"url"`
-	Version string `toml:"version"`
-}
-
-func parseConfigFile(f string) ([]plugin.Builtin, []repo.Builtin, error) {
-	var conf map[string][]obj
-
+func parseConfigFile(f string) (*configFile, error) {
+	var conf configFile
 	if _, err := toml.DecodeFile(f, &conf); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	plugins := []plugin.Builtin{}
-	for _, pl := range conf["plugin"] {
-		p := plugin.Builtin{
-			Name:    pl.Name,
-			Version: pl.Version,
-			URL:     pl.URL,
-		}
-		plugins = append(plugins, p)
-
-	}
-
-	repos := []repo.Builtin{}
-	for _, re := range conf["repo"] {
-		r := repo.Builtin{
-			Name:    re.Name,
-			Version: re.Version,
-			URL:     re.URL,
-		}
-		repos = append(repos, r)
-	}
-
-	return plugins, repos, nil
+	return &conf, nil
 }

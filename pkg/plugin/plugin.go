@@ -1,165 +1,215 @@
-/*
-Copyright 2016 The Kubernetes Authors All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package plugin
 
 import (
+	"archive/zip"
+	"crypto/sha256"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
-	"github.com/ghodss/yaml"
+	"github.com/docker/docker/pkg/archive"
 )
 
-const pluginFileName = "plugin.yaml"
-
-// Downloaders represents the plugins capability if it can retrieve
-// charts from special sources
-type Downloaders struct {
-	// Protocols are the list of schemes from the charts URL.
-	Protocols []string `json:"protocols"`
-	// Command is the executable path with which the plugin performs
-	// the actual download for the corresponding Protocols
-	Command string `json:"command"`
-}
-
-// Metadata describes a plugin.
-//
-// This is the plugin equivalent of a chart.Metadata.
-type Metadata struct {
-	// Name is the name of the plugin
-	Name string `json:"name"`
-
-	// Version is a SemVer 2 version of the plugin.
-	Version string `json:"version"`
-
-	// Usage is the single-line usage text shown in help
-	Usage string `json:"usage"`
-
-	// Description is a long description shown in places like `helm help`
-	Description string `json:"description"`
-
-	// Command is the command, as a single string.
-	//
-	// The command will be passed through environment expansion, so env vars can
-	// be present in this command. Unless IgnoreFlags is set, this will
-	// also merge the flags passed from Helm.
-	//
-	// Note that command is not executed in a shell. To do so, we suggest
-	// pointing the command to a shell script.
-	Command string `json:"command"`
-
-	// IgnoreFlags ignores any flags passed in from Helm
-	//
-	// For example, if the plugin is invoked as `helm --debug myplugin`, if this
-	// is false, `--debug` will be appended to `--command`. If this is true,
-	// the `--debug` flag will be discarded.
-	IgnoreFlags bool `json:"ignoreFlags"`
-
-	// UseTunnel indicates that this command needs a tunnel.
-	// Setting this will cause a number of side effects, such as the
-	// automatic setting of HELM_HOST.
-	UseTunnel bool `json:"useTunnel"`
-
-	// PlatformHooks are commands that will run on events based on the platform specified.
-	PlatformHooks map[string]Hooks `json:"hooks"`
-
-	// Downloaders field is used if the plugin supply downloader mechanism
-	// for special protocols.
-	Downloaders []Downloaders `json:"downloaders"`
-}
-
-// Plugin represents a plugin.
+// Plugin provides metadata to install a piece of software.
 type Plugin struct {
-	// Metadata is a parsed representation of a plugin.yaml
-	Metadata *Metadata
-	// Dir is the string path to the directory that holds the plugin.
-	Dir string
+	// The canonical name of the software.
+	Name string
+	// A (short) description of the software.
+	Description string
+	// The license identifier for the software.
+	License string
+	// The homepage URL for the software.
+	Homepage string
+	// Caveats inform the user about any specific caveats regarding the software.
+	Caveats string
+	// The version of the software.
+	Version string
+	// The list of binary distributions available for the software.
+	Packages []*Package
+	// UseTunnel defines whether or not this plugin requires a tunneled connection to Tiller.
+	UseTunnel bool
 }
 
-// PrepareCommand takes a Plugin.Command and prepares it for execution.
-//
-// It merges extraArgs into any arguments supplied in the plugin. It
-// returns the name of the command and an args array.
-//
-// The result is suitable to pass to exec.Command.
-func (p *Plugin) PrepareCommand(extraArgs []string) (string, []string) {
-	parts := strings.Split(os.ExpandEnv(p.Metadata.Command), " ")
-	main := parts[0]
-	baseArgs := []string{}
-	if len(parts) > 1 {
-		baseArgs = parts[1:]
-	}
-	if !p.Metadata.IgnoreFlags {
-		baseArgs = append(baseArgs, extraArgs...)
-	}
-	return main, baseArgs
+// Package provides metadata to install a piece of software on a given operating system and architecture.
+type Package struct {
+	// the running program's operating system target. One of darwin, linux, windows, and so on.
+	OS string
+	// the running program's architecture target. One of 386, amd64, arm, s390x, and so on.
+	Arch string
+	// The URL used to download the binary distribution for this version of the software. The file must be a gzipped tarball (.tar.gz) or a zipfile (.zip) for unpacking.
+	URL string
+	// Additional URLs for this version of the software.
+	Mirrors []string
+	// To verify the cached download's integrity and security, we verify the SHA-256 hash matches what we've declared in the software.
+	SHA256 string
+	// Path is the path to the executable relative from the root of the unpacked archive. After it is unpacked, Path is made executable (chmod +x).
+	Path string
 }
 
-// LoadDir loads a plugin from the given directory.
-func LoadDir(dirname string) (*Plugin, error) {
-	data, err := ioutil.ReadFile(filepath.Join(dirname, pluginFileName))
+// Install attempts to install the plugin, returning errors if it fails.
+func (p *Plugin) Install(home Home) error {
+	plugDir := filepath.Join(home.Installed(), p.Name, p.Version)
+	pkg := p.GetPackage(runtime.GOOS, runtime.GOARCH)
+	if pkg == nil {
+		return fmt.Errorf("plugin '%s' does not support the current platform (%s/%s)", p.Name, runtime.GOOS, runtime.GOARCH)
+	}
+	cachedFilePath, err := downloadCachedFileToPath(home.Cache(), pkg.URL)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	if err := checksumVerifyPath(cachedFilePath, pkg.SHA256); err != nil {
+		return fmt.Errorf("shasum verify check failed: %v", err)
 	}
 
-	plug := &Plugin{Dir: dirname}
-	if err := yaml.Unmarshal(data, &plug.Metadata); err != nil {
-		return nil, err
+	if err := os.MkdirAll(plugDir, 0755); err != nil {
+		return err
 	}
-	return plug, nil
+	unarchiveOrCopy(cachedFilePath, plugDir)
+
+	if err := os.Chmod(filepath.Join(plugDir, pkg.Path), 0755); err != nil {
+		return err
+	}
+
+	if p.Caveats != "" {
+		fmt.Println(p.Caveats)
+	}
+
+	return nil
 }
 
-// LoadAll loads all plugins found beneath the base directory.
-//
-// This scans only one directory level.
-func LoadAll(basedir string) ([]*Plugin, error) {
-	plugins := []*Plugin{}
-	// We want basedir/*/plugin.yaml
-	scanpath := filepath.Join(basedir, "*", pluginFileName)
-	matches, err := filepath.Glob(scanpath)
+// Installed checks to see if this plugin is installed. This is actually just a check for if the
+// directory exists and is not empty.
+func (p *Plugin) Installed(home Home) bool {
+	files, err := ioutil.ReadDir(filepath.Join(home.Installed(), p.Name, p.Version))
 	if err != nil {
-		return plugins, err
+		return false
 	}
-
-	if matches == nil {
-		return plugins, nil
-	}
-
-	for _, yaml := range matches {
-		dir := filepath.Dir(yaml)
-		p, err := LoadDir(dir)
-		if err != nil {
-			return plugins, err
-		}
-		plugins = append(plugins, p)
-	}
-	return plugins, nil
+	return len(files) > 0
 }
 
-// FindPlugins returns a list of YAML files that describe plugins.
-func FindPlugins(plugdirs string) ([]*Plugin, error) {
-	found := []*Plugin{}
-	// Let's get all UNIXy and allow path separators
-	for _, p := range filepath.SplitList(plugdirs) {
-		matches, err := LoadAll(p)
-		if err != nil {
-			return matches, err
-		}
-		found = append(found, matches...)
+// Uninstall attempts to uninstall the package, returning errors if it fails.
+func (p *Plugin) Uninstall(home Home) error {
+	pkg := p.GetPackage(runtime.GOOS, runtime.GOARCH)
+	if pkg == nil {
+		return nil
 	}
-	return found, nil
+	plugDir := filepath.Join(home.Installed(), p.Name, p.Version)
+	return os.RemoveAll(plugDir)
+}
+
+func unarchiveOrCopy(src, dest string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	if archive.IsArchivePath(src) {
+		return archive.Untar(in, dest, &archive.TarOptions{NoLchown: true})
+	} else if isZipPath(src) {
+		in.Close()
+		return unzip(src, dest)
+	}
+	out, err := os.Create(filepath.Join(dest, filepath.Base(src)))
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	return err
+}
+
+// GetPackage does a lookup for a package supporting the given os/arch. If none were found, this
+// returns nil.
+func (p *Plugin) GetPackage(os, arch string) *Package {
+	for _, pkg := range p.Packages {
+		if pkg.OS == os && pkg.Arch == arch {
+			return pkg
+		}
+	}
+	return nil
+}
+
+// downloadCachedFileToPath will download a file from the given url to a directory, returning the
+// path to the cached file. If it already exists, it'll skip downloading the file and just return
+// the path to the cached file.
+func downloadCachedFileToPath(dir string, url string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	filePath := filepath.Join(dir, path.Base(req.URL.Path))
+
+	if _, err = os.Stat(filePath); err == nil {
+		return filePath, nil
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return filePath, err
+}
+
+func isZipPath(path string) bool {
+	_, err := zip.OpenReader(path)
+	return err == nil
+}
+
+func unzip(src, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	for _, zf := range r.File {
+		dst, err := os.Create(filepath.Join(dest, zf.Name))
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
+		src, err := zf.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		io.Copy(dst, src)
+	}
+	return nil
+}
+
+func checksumVerifyPath(path string, checksum string) error {
+	hasher := sha256.New()
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := io.Copy(hasher, f); err != nil {
+		return err
+	}
+
+	actualChecksum := fmt.Sprintf("%x", hasher.Sum(nil))
+	if strings.Compare(actualChecksum, checksum) != 0 {
+		return fmt.Errorf("checksums differ for %s: expected '%s', got '%s'", path, checksum, actualChecksum)
+	}
+	return nil
 }

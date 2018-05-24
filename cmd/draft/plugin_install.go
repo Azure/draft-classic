@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 	"io"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/plugin"
-	"github.com/Azure/draft/pkg/plugin/installer"
 )
 
 type pluginInstallCmd struct {
-	source  string
+	name    string
 	version string
 	home    draftpath.Home
 	out     io.Writer
@@ -26,8 +27,8 @@ func newPluginInstallCmd(out io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "install [options] <path|url>...",
-		Short: "install one or more Draft plugins",
+		Use:   "install [options] <name>",
+		Short: "install Draft plugins",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return pcmd.complete(args)
 		},
@@ -35,7 +36,6 @@ func newPluginInstallCmd(out io.Writer) *cobra.Command {
 			return pcmd.run()
 		},
 	}
-	cmd.Flags().StringVar(&pcmd.version, "version", "", "specify a version constraint. If this is not specified, the latest version is installed")
 	return cmd
 }
 
@@ -43,35 +43,46 @@ func (pcmd *pluginInstallCmd) complete(args []string) error {
 	if err := validateArgs(args, pcmd.args); err != nil {
 		return err
 	}
-	pcmd.source = args[0]
+	pcmd.name = args[0]
 	pcmd.home = draftpath.Home(homePath())
 	return nil
 }
 
 func (pcmd *pluginInstallCmd) run() error {
-	installer.Debug = flagDebug
-
-	i, err := installer.New(pcmd.source, pcmd.version, pcmd.home)
+	pHome := plugin.Home(pcmd.home.Plugins())
+	relevantPlugins := search([]string{pcmd.name}, pHome)
+	switch len(relevantPlugins) {
+	case 0:
+		return fmt.Errorf("no plugins with the name '%s' was found", pcmd.name)
+	case 1:
+		pcmd.name = relevantPlugins[0]
+	default:
+		var match bool
+		// check if we have an exact match
+		for _, f := range relevantPlugins {
+			if strings.Compare(f, pcmd.name) == 0 {
+				pcmd.name = f
+				match = true
+			}
+		}
+		if !match {
+			return fmt.Errorf("%d plugins with the name '%s' was found: %v", len(relevantPlugins), pcmd.name, relevantPlugins)
+		}
+	}
+	plug, _, err := getPlugin(pcmd.name, pHome)
 	if err != nil {
 		return err
 	}
-
-	debug("installing plugin from %s", pcmd.source)
-	if err := installer.Install(i); err != nil {
+	if len(findPluginVersions(pcmd.name, pHome)) > 0 {
+		fmt.Fprintf(pcmd.out, "%s is already installed. Please use `draft plugin upgrade %s` to upgrade.\n", pcmd.name, pcmd.name)
+		return nil
+	}
+	fmt.Fprintf(pcmd.out, "Installing %s...\n", pcmd.name)
+	start := time.Now()
+	if err := plug.Install(pHome); err != nil {
 		return err
 	}
-
-	debug("loading plugin from %s", i.Path())
-	p, err := plugin.LoadDir(i.Path())
-	if err != nil {
-		return err
-	}
-
-	debug("running any install instructions for plugin: %s", p.Metadata.Name)
-	if err := runHook(p, plugin.Install); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(pcmd.out, "Installed plugin: %s\n", p.Metadata.Name)
+	t := time.Now()
+	fmt.Fprintf(pcmd.out, "%s %s: installed in %s\n", plug.Name, plug.Version, t.Sub(start).String())
 	return nil
 }

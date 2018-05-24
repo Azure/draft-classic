@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/Azure/draft/pkg/plugin/repository"
+
 	"github.com/Azure/draft/pkg/osutil"
 
 	"github.com/Azure/draft/pkg/draft/pack/repo"
@@ -13,11 +15,15 @@ import (
 //
 // If $DRAFT_HOME does not exist, this function will create it.
 func (i *initCmd) ensureDirectories() error {
+	pHome := plugin.Home(i.home.Plugins())
 	configDirectories := []string{
 		i.home.String(),
 		i.home.Plugins(),
 		i.home.Packs(),
 		i.home.Logs(),
+		pHome.Cache(),
+		pHome.Installed(),
+		pHome.Repositories(),
 	}
 	for _, p := range configDirectories {
 		err := osutil.EnsureDirectory(p)
@@ -104,34 +110,56 @@ func (i *initCmd) ensurePack(builtin *repo.Builtin, existingRepos []repo.Reposit
 	return nil
 }
 
+// ensurePluginRepositories checks to see if the default plugin repositories exist.
+//
+// If the plugin repo does not exist, this function will add it.
+func (i *initCmd) ensurePluginRepositories(pluginRepos []repository.Builtin) error {
+	fmt.Fprintln(i.out, "Installing default plugin repositories...")
+	for _, builtin := range repository.Builtins() {
+		if err := i.ensurePluginRepository(string(builtin)); err != nil {
+			return err
+		}
+	}
+	fmt.Fprintln(i.out, "Installation of default plugin repositories complete")
+
+	if len(pluginRepos) > 0 {
+		fmt.Fprintln(i.out, "Installing plugin repositories from config file")
+
+		for _, plugRepo := range pluginRepos {
+			if err := i.ensurePluginRepository(string(plugRepo)); err != nil {
+				fmt.Println(err)
+				return err
+			}
+		}
+
+		fmt.Fprintln(i.out, "Installation of plugin repositories from config file complete")
+
+	}
+
+	return nil
+}
+
 // ensurePlugins checks to see if the default plugins exist.
 //
 // If the plugin does not exist, this function will add it.
 func (i *initCmd) ensurePlugins(plugins []plugin.Builtin) error {
-
-	existingPlugins, err := findPlugins(pluginDirPath(i.home))
-	if err != nil {
+	if err := i.updatePluginRepos(); err != nil {
 		return err
 	}
 
 	fmt.Fprintln(i.out, "Installing default plugins...")
 	for _, builtin := range plugin.Builtins() {
-		if err := i.ensurePlugin(builtin, existingPlugins); err != nil {
+		if err := i.ensurePlugin(string(builtin)); err != nil {
 			return err
 		}
 	}
 	fmt.Fprintln(i.out, "Installation of default plugins complete")
 
 	if len(plugins) > 0 {
-		existingPlugins, err = findPlugins(pluginDirPath(i.home))
-		if err != nil {
-			return err
-		}
-
 		fmt.Fprintln(i.out, "Installing plugins from config file")
 
 		for _, plug := range plugins {
-			if err := i.ensurePlugin(&plug, existingPlugins); err != nil {
+			if err := i.ensurePlugin(string(plug)); err != nil {
 				fmt.Println(err)
 				return err
 			}
@@ -144,33 +172,35 @@ func (i *initCmd) ensurePlugins(plugins []plugin.Builtin) error {
 	return nil
 }
 
-func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugin.Plugin) error {
-
-	for _, pl := range existingPlugins {
-		if builtin.Name == pl.Metadata.Name {
-			if builtin.Version == pl.Metadata.Version {
-				return nil
-			}
-
-			debug("Currently have %v version %v. Removing to install %v",
-				pl.Metadata.Name, pl.Metadata.Version, builtin.Version)
-
-			if err := removePlugin(pl); err != nil {
-				return err
-			}
-
-			debug("Successfully removed %v %v",
-				pl.Metadata.Name, pl.Metadata.Version)
-		}
+func (i *initCmd) updatePluginRepos() error {
+	flags := []string{
+		"--home",
+		string(i.home),
+		fmt.Sprintf("--debug=%v", flagDebug),
 	}
 
+	plugUpdateCmd, _, err := rootCmd.Find([]string{"plugin", "update"})
+	if err != nil {
+		return err
+	}
+
+	if err := plugUpdateCmd.ParseFlags(flags); err != nil {
+		return err
+	}
+
+	if err := plugUpdateCmd.PreRunE(plugUpdateCmd, []string{}); err != nil {
+		return err
+	}
+
+	return plugUpdateCmd.RunE(plugUpdateCmd, []string{})
+}
+
+func (i *initCmd) ensurePlugin(builtin string) error {
 	installArgs := []string{
-		builtin.URL,
+		builtin,
 	}
 
 	installFlags := []string{
-		"--version",
-		builtin.Version,
 		"--home",
 		string(i.home),
 		fmt.Sprintf("--debug=%v", flagDebug),
@@ -196,7 +226,37 @@ func (i *initCmd) ensurePlugin(builtin *plugin.Builtin, existingPlugins []*plugi
 	// reload plugins
 	loadPlugins(rootCmd, i.home, i.out, i.in)
 
-	debug("Successfully installed %v %v from %v",
-		builtin.Name, builtin.Version, builtin.URL)
+	debug("Successfully installed %v", builtin)
+	return nil
+}
+
+func (i *initCmd) ensurePluginRepository(builtin string) error {
+	installArgs := []string{
+		builtin,
+	}
+
+	installFlags := []string{
+		"--home",
+		string(i.home),
+		fmt.Sprintf("--debug=%v", flagDebug),
+	}
+
+	plugRepoAddCmd, _, err := rootCmd.Find([]string{"plugin", "repository", "add"})
+	if err != nil {
+		return err
+	}
+
+	if err := plugRepoAddCmd.ParseFlags(installFlags); err != nil {
+		return err
+	}
+
+	if err := plugRepoAddCmd.RunE(plugRepoAddCmd, installArgs); err != nil {
+		return err
+	}
+
+	// reload plugins
+	loadPlugins(rootCmd, i.home, i.out, i.in)
+
+	debug("Successfully installed %v", builtin)
 	return nil
 }

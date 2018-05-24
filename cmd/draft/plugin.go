@@ -3,16 +3,25 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"runtime"
+	"sort"
 	"strings"
 
+	"github.com/renstrom/fuzzysearch/fuzzy"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/yuin/gluamapper"
+	lua "github.com/yuin/gopher-lua"
 
 	"github.com/Azure/draft/pkg/draft/draftpath"
 	"github.com/Azure/draft/pkg/plugin"
+	"github.com/Azure/draft/pkg/plugin/repository"
+	"github.com/Azure/draft/pkg/plugin/repository/installer"
 )
 
 const (
@@ -27,26 +36,16 @@ func newPluginCmd(out io.Writer) *cobra.Command {
 		Long:  pluginHelp,
 	}
 	cmd.AddCommand(
+		newPluginCreateCmd(out),
 		newPluginInstallCmd(out),
 		newPluginListCmd(out),
-		newPluginRemoveCmd(out),
+		newPluginRepositoryCmd(out),
+		newPluginSearchCmd(out),
+		newPluginUninstallCmd(out),
 		newPluginUpdateCmd(out),
+		newPluginUpgradeCmd(out),
 	)
 	return cmd
-}
-
-// findPlugins returns a list of YAML files that describe plugins.
-func findPlugins(plugdirs string) ([]*plugin.Plugin, error) {
-	found := []*plugin.Plugin{}
-	// Let's get all UNIXy and allow path separators
-	for _, p := range filepath.SplitList(plugdirs) {
-		matches, err := plugin.LoadAll(p)
-		if err != nil {
-			return matches, err
-		}
-		found = append(found, matches...)
-	}
-	return found, nil
 }
 
 func pluginDirPath(home draftpath.Home) string {
@@ -65,36 +64,29 @@ func pluginDirPath(home draftpath.Home) string {
 // to inspect its environment and then add commands to the base command
 // as it finds them.
 func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in io.Reader) {
-	plugdirs := pluginDirPath(home)
-
-	found, err := findPlugins(plugdirs)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to load plugins: %s", err)
-		return
-	}
-
+	plugdir := pluginDirPath(home)
+	pHome := plugin.Home(plugdir)
 	// Now we create commands for all of these.
-	for _, plug := range found {
+	for _, plug := range findPlugins(pHome) {
+		p, _, err := getPlugin(plug, pHome)
+		if err != nil {
+			log.Debugf("could not load plugin %s: %v", p, err)
+			continue
+		}
 		var commandExists bool
 		for _, command := range baseCmd.Commands() {
-			if strings.Compare(command.Use, plug.Metadata.Usage) == 0 {
+			if strings.Compare(command.Short, p.Description) == 0 {
 				commandExists = true
 			}
 		}
 		if commandExists {
-			log.Debugf("command %s exists", plug.Metadata.Usage)
+			log.Debugf("command %s exists", p.Name)
 			continue
-		}
-		plug := plug
-		md := plug.Metadata
-		if md.Usage == "" {
-			md.Usage = fmt.Sprintf("the %q plugin", md.Name)
 		}
 
 		c := &cobra.Command{
-			Use:   md.Name,
-			Short: md.Usage,
-			Long:  md.Description,
+			Use:   p.Name,
+			Short: p.Description,
 			RunE: func(cmd *cobra.Command, args []string) error {
 
 				k, u := manuallyProcessArgs(args)
@@ -105,10 +97,10 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 				// Call setupEnv before PrepareCommand because
 				// PrepareCommand uses os.ExpandEnv and expects the
 				// setupEnv vars.
-				setupPluginEnv(md.Name, plug.Metadata.Version, plug.Dir, plugdirs, draftpath.Home(homePath()))
-				main, argv := plug.PrepareCommand(u)
+				setupPluginEnv(plug, filepath.Join(pHome.Installed(), p.Name, p.Version), plugdir, draftpath.Home(homePath()))
+				main := filepath.Join(os.Getenv("DRAFT_PLUGIN_DIR"), p.GetPackage(runtime.GOOS, runtime.GOARCH).Path)
 
-				prog := exec.Command(main, argv...)
+				prog := exec.Command(main, u...)
 				prog.Env = os.Environ()
 				prog.Stdout = out
 				prog.Stderr = os.Stderr
@@ -118,11 +110,12 @@ func loadPlugins(baseCmd *cobra.Command, home draftpath.Home, out io.Writer, in 
 			// This passes all the flags to the subcommand.
 			DisableFlagParsing: true,
 		}
-		if md.UseTunnel {
+
+		if p.UseTunnel {
 			c.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 				// Parse the parent flag, but not the local flags.
 				k, _ := manuallyProcessArgs(args)
-				if err := c.Parent().ParseFlags(k); err != nil {
+				if err := cmd.Parent().ParseFlags(k); err != nil {
 					return err
 				}
 				client, config, err := getKubeClient(kubeContext)
@@ -179,13 +172,12 @@ func manuallyProcessArgs(args []string) ([]string, []string) {
 // setupPluginEnv prepares os.Env for plugins. It operates on os.Env because
 // the plugin subsystem itself needs access to the environment variables
 // created here.
-func setupPluginEnv(shortname, ver, base, plugdirs string, home draftpath.Home) {
+func setupPluginEnv(shortname, base, plugdirs string, home draftpath.Home) {
 	// Set extra env vars:
 	for key, val := range map[string]string{
-		"DRAFT_PLUGIN_NAME":    shortname,
-		"DRAFT_PLUGIN_VERSION": ver,
-		"DRAFT_PLUGIN_DIR":     base,
-		"DRAFT_BIN":            os.Args[0],
+		"DRAFT_PLUGIN_NAME": shortname,
+		"DRAFT_PLUGIN_DIR":  base,
+		"DRAFT_BIN":         os.Args[0],
 
 		// Set vars that may not have been set, and save client the
 		// trouble of re-parsing.
@@ -201,4 +193,137 @@ func setupPluginEnv(shortname, ver, base, plugdirs string, home draftpath.Home) 
 	if flagDebug {
 		os.Setenv("DRAFT_DEBUG", "1")
 	}
+}
+
+// getPlugin renders a plugin's lua script and returns a plugin, along with the repository
+// the plugin was found under. It will return an error if there was an issue rendering the
+// plugin from Lua into a Go representation or by running the Lua script to generate the plugin.
+func getPlugin(pluginName string, home plugin.Home) (*plugin.Plugin, string, error) {
+	var (
+		name string
+		repo string
+	)
+	pluginInfo := strings.Split(pluginName, "/")
+	if len(pluginInfo) == 1 {
+		name = pluginInfo[0]
+		repo = repository.DefaultPluginRepository
+	} else {
+		name = pluginInfo[len(pluginInfo)-1]
+		repo = path.Dir(pluginName)
+	}
+	if strings.Contains(name, "./\\") {
+		return nil, "", fmt.Errorf("plugin name '%s' is invalid. Plugin names cannot include the following characters: './\\'", name)
+	}
+	l := lua.NewState()
+	defer l.Close()
+	if err := l.DoFile(filepath.Join(home.Repositories(), repo, "Plugins", fmt.Sprintf("%s.lua", name))); err != nil {
+		return nil, "", err
+	}
+	var plugin plugin.Plugin
+	if err := gluamapper.Map(l.GetGlobal(strings.ToLower("plugin")).(*lua.LTable), &plugin); err != nil {
+		return nil, "", err
+	}
+	return &plugin, repo, nil
+}
+
+// findPlugins returns a list of installed plugins.
+func findPlugins(home plugin.Home) []string {
+	var plugins []string
+	files, err := ioutil.ReadDir(home.Installed())
+	if err != nil {
+		return []string{}
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			files, err := ioutil.ReadDir(filepath.Join(home.Installed(), f.Name()))
+			if err != nil {
+				continue
+			}
+			if len(files) > 0 {
+				plugins = append(plugins, f.Name())
+			}
+		}
+	}
+	return plugins
+}
+
+// findPluginVersions returns a list of all installed versions of a given plugin.
+func findPluginVersions(name string, home plugin.Home) []string {
+	var versions []string
+	files, err := ioutil.ReadDir(filepath.Join(home.Installed(), name))
+	if err != nil {
+		return []string{}
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			versions = append(versions, f.Name())
+		}
+	}
+	return versions
+}
+
+func updatePluginRepositories(home plugin.Home) error {
+	repositories := findRepositories(home.Repositories())
+	for _, repository := range repositories {
+		i, err := installer.FindSource(filepath.Join(home.Repositories(), repository), home)
+		if err != nil {
+			return err
+		}
+		if err := installer.Update(i); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func search(keywords []string, home plugin.Home) []string {
+	var pluginNames = findPluginMetadata(home)
+	var foundPlugins = make(map[string]bool)
+	// if no keywords are given, display all available plugins
+	if len(keywords) == 0 {
+		for _, found := range pluginNames {
+			foundPlugins[found] = true
+		}
+	} else {
+		for _, keyword := range keywords {
+			for _, found := range fuzzy.Find(keyword, pluginNames) {
+				foundPlugins[found] = true
+			}
+		}
+	}
+	names := []string{}
+	for n := range foundPlugins {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
+}
+
+func findPluginMetadata(home plugin.Home) []string {
+	repoPath := home.Repositories()
+	var plugins []string
+	filepath.Walk(repoPath, func(p string, f os.FileInfo, err error) error {
+		if err != nil {
+			log.Errorln(err)
+			return nil
+		}
+		if !f.IsDir() && strings.HasSuffix(f.Name(), ".lua") {
+			pluginName := strings.TrimSuffix(f.Name(), ".lua")
+			repoName := strings.TrimPrefix(p, repoPath+string(os.PathSeparator))
+			repoName = strings.TrimSuffix(repoName, string(os.PathSeparator)+filepath.Join("Plugins", f.Name()))
+			// for Windows clients, we need to replace the path separator with forward slashes
+			repoName = strings.Replace(repoName, "\\", "/", -1)
+			name := pluginName
+			// if the plugin comes from a non-default repository, we tack on the repo name
+			if repoName != repository.DefaultPluginRepository {
+				name = path.Join(repoName, pluginName)
+			}
+			plugins = append(plugins, name)
+		}
+		return nil
+	})
+	sort.Strings(plugins)
+	return plugins
 }

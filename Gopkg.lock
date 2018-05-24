@@ -529,6 +529,12 @@
   revision = "ad45545899c7b13c020ea92b2072220eefad42b8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
+
+[[projects]]
   name = "github.com/oklog/ulid"
   packages = ["."]
   revision = "d311cb43c92434ec4072dfbbda3400741d0a6337"
@@ -616,6 +622,12 @@
   revision = "85fadb6e89903ef7cca6f6a804474cd5ea85b6e1"
 
 [[projects]]
+  name = "github.com/renstrom/fuzzysearch"
+  packages = ["fuzzy"]
+  revision = "d4ca9dfccd55dc6b076f9880d49c35315922c1f4"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/rjeczalik/notify"
   packages = ["."]
@@ -677,6 +689,23 @@
   ]
   revision = "34f53ad8a7f85c005be104cc90a66a9a89bb7421"
   version = "v0.6.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/yuin/gluamapper"
+  packages = ["."]
+  revision = "d836955830e75240d46ce9f0e6d148d94f2e1d3a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/yuin/gopher-lua"
+  packages = [
+    ".",
+    "ast",
+    "parse",
+    "pm"
+  ]
+  revision = "b0fa786cf4ea360285924c4a7fd42325be57aec8"
 
 [[projects]]
   branch = "master"
@@ -1296,6 +1325,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b7a0748890d10737fa30026a7eca0697c2ad9741a29c9bc47c5a5b6e4383c5cb"
+  inputs-digest = "d6e2d761c4e9f30128e3cf5535a9370265a907224b18f493325c28c8ad7b9dca"
   solver-name = "gps-cdcl"
   solver-version = 1
