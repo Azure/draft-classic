@@ -14,7 +14,7 @@ func TestCreateFrom(t *testing.T) {
 	}
 	defer os.RemoveAll(tdir)
 
-	if err := CreateFrom(tdir, filepath.Join("testdata", "pack-python")); err != nil {
+	if err := CreateFrom(tdir, filepath.Join("testdata", "pack-python"), ""); err != nil {
 		t.Errorf("expected err to be nil, got %v", err)
 	}
 
@@ -32,7 +32,7 @@ func TestCreateFrom(t *testing.T) {
 		}
 	}
 
-	if err := CreateFrom(tdir, filepath.Join("testdata", "pack-does-not-exist")); err == nil {
+	if err := CreateFrom(tdir, filepath.Join("testdata", "pack-does-not-exist"), ""); err == nil {
 		t.Error("expected err to be non-nil with an invalid source pack")
 	}
 }
