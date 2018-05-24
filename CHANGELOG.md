@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.15.0
+
+### Features
+
+- suppress terminal color escape sequences when running under Windows (thanks @itowlson)
+- `draft create` now does a deep copy of the pack directory
+- added a quickstart guide to help users find their way around the documentation
+- added links on how to install Draft using GoFish or Chocolatey
+- added support for testing Draft on Windows via AppVeyor
+- added support for allowing Draft to use charts in directories other than `charts/`
+
+### Bugs
+
+- fixed an issue where rjeczalik/notify caused Draft to be unable to build on MacOS (thanks @jgleonard)
+- fixed an issue where checksums weren't being generated for Draft release artifacts with a .zip extension
+- fixed an issue where the registry name in `draft config set registry` was being truncated too far when using ACR build
+- fixed an issue where the example Java app would display a ClassNotFound error
+- fixed an issue where backslashes in .gitattributes wasn't being parsed as a path separator on Windows
+- fixed an issue where Draft could not talk to clusters with oidc auth support enabled
+
+### Housekeeping
+
+- removed protobuf setup from the Makefile
+
 ## v0.14.0
 
 ### Features
