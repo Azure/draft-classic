@@ -112,7 +112,7 @@ next step, so let's commit our changes now.
 
 ```
 git add .
-git commit -m "bump version to $RELEASE_CANDIDATE_NAME"
+git commit --gpg-sign -m "bump version to $RELEASE_CANDIDATE_NAME"
 ```
 
 ## 3. Generate the CHANGELOG
@@ -158,7 +158,7 @@ Let's commit that now.
 
 ```
 git add CHANGELOG.md
-git commit -m "add $RELEASE_NAME CHANGELOG"
+git commit --gpg-sign -m "add $RELEASE_NAME CHANGELOG"
 ```
 
 ## 4. Commit and Push the Release Branch
@@ -246,7 +246,7 @@ official release name. Follow step 2 to make those changes then commit the chang
 
 ```
 git add .
-git commit -m "bump version to $RELEASE_NAME"
+git commit --gpg-sign -m "bump version to $RELEASE_NAME"
 ```
 
 Double-check one last time to make sure everything is in order, then finally push the release tag.
