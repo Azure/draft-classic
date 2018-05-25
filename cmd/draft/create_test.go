@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -154,7 +155,8 @@ func assertIdentical(t *testing.T, original, generated string) {
 		}
 
 		// chartdir should match app name, not pack name.
-		p = strings.Replace(p, "charts/myapp", "charts/go", 1)
+		re := regexp.MustCompile("(charts.)myapp")
+		p = re.ReplaceAllString(p, "${1}go")
 
 		fo, err := os.Stat(p)
 		if err != nil {
@@ -197,7 +199,8 @@ func assertIdentical(t *testing.T, original, generated string) {
 		p := filepath.Join(original, relp)
 
 		// chartdir should match app name, not pack name.
-		p = strings.Replace(p, "charts/go", "charts/myapp", 1)
+		re := regexp.MustCompile("(charts.)go")
+		p = re.ReplaceAllString(p, "${1}myapp")
 
 		// .keep files are only for keeping directory creations in remote git repo
 		if filepath.Base(p) == gitkeepfile {
