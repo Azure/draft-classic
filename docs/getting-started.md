@@ -69,10 +69,10 @@ A `.draft-tasks.toml` file is also created. This file allows you to configure ta
 Now we're ready to deploy this application to a Kubernetes cluster. Draft handles these tasks with one `draft up` command:
 
 - reads configuration from `draft.toml`
-- compresses the `chart/` directory and the application directory as two separate tarballs
+- compresses the `charts/` directory and the application directory as two separate tarballs
 - builds the image using `docker`
-- `docker` pushes the image to the registry specified in `draft.toml` (or in `draft config get registry`, if set)
-- `draft` instructs helm to install the chart, referencing the image just built
+- instructs `docker` to push the image to the registry specified in `draft.toml` (or in `draft config get registry`, if set)
+- instructs `helm` to install the chart, referencing the image just built
 
 ```shell
 $ draft up
