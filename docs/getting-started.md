@@ -43,7 +43,26 @@ $ cat draft.toml
 
 See [dep-006.md](dep006) for more information and available configuration on the `draft.toml` file.
 
-A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
+A `.draftignore` file is created for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
+
+```shell
+$ cat .draftignore
+*.swp
+*.tmp
+*.temp
+.git*
+```
+
+A [`.dockerignore`](https://docs.docker.com/engine/reference/builder/#dockerignore-file) file is created to ensure the docker context ignores files and directories that are not necessary.
+
+```shell
+$ cat .dockerignore
+Dockerfile
+draft.toml
+charts/
+```
+
+A `.draft-tasks.toml` file is also created. This file allows you to configure tasks to be run before `draft up` (`pre-up` tasks), after `draft up` (`post-up` tasks), or after `draft delete` (`post-delete` tasks). This file is empty by default. See [dep-008.md](dep008) for more information and available configuration on the `.draft-tasks.toml` file.
 
 ## Draft Up
 
