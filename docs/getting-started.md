@@ -19,7 +19,8 @@ $ draft create
 --> Draft detected Python (96.739130%)
 --> Ready to sail
 $ ls -a
-.draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
+.dockerignore     .draftignore      app.py            draft.toml
+.draft-tasks.toml Dockerfile        charts/           requirements.txt
 ```
 
 The `chart/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. And to align with the service values in `chart/values.yaml`, this Dockerfile exposes port 80 from the container.
