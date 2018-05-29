@@ -25,7 +25,7 @@ $ ls -a
 
 The `charts/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. To align with the `internalPort` service value in `charts/python/values.yaml`, this `Dockerfile` exposes port 8080 from the container.
 
-The `draft.toml` file contains basic configuration about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the app automatically when local files change.
+The `draft.toml` file contains basic configuration details about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the application automatically when local files change.
 
 ```shell
 $ cat draft.toml
