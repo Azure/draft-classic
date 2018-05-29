@@ -36,8 +36,9 @@ $ cat draft.toml
     wait = true
     watch = false
     watch-delay = 2
-    override-ports = ["8080:8080", "9229:9229"]
-    auto-connect = false    
+    auto-connect = false
+    dockerfile = ""
+    chart = ""
 ```
 
 See [DEP 6](reference/dep-006.md) for more information and available configuration on the `draft.toml`.
