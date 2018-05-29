@@ -2,6 +2,8 @@ package pack
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/Azure/draft/pkg/draft/pack/repo"
 )
@@ -17,6 +19,11 @@ func CreateFrom(dest, src string, appName string) error {
 	// Update ChartName if appName is non-empty
 	if appName != "" {
 		pack.Chart.Metadata.Name = appName
+	} else {
+		cwd, err := os.Getwd()
+		if err == nil {
+			pack.Chart.Metadata.Name = filepath.Base(cwd)
+		}
 	}
 	return pack.SaveDir(dest)
 }
