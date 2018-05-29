@@ -2,7 +2,7 @@
 
 This document shows how to deploy a "Hello World" app with Draft. If you haven't done so already, be sure you have Draft installed according to the [Installation Guide][Installation Guide].
 
-## App Setup
+## Application Setup
 
 There are multiple example applications included within the [examples directory](../examples). For this walkthrough, we'll be using the [python example application](../examples/example-python) which uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
 
@@ -62,7 +62,7 @@ example-python: Releasing Application: SUCCESS ⚓  (0.6875s)
 example-python: Build ID: 01BSY5R8J45QHG9D3B17PAXMGN
 ```
 
-## Interact with the Deployed App
+## Interact with the Deployed Application
 
 Now that the application has been deployed, we can connect to our app.
 
@@ -87,7 +87,7 @@ Once you're done playing with this app, cancel out of the `draft connect` sessio
 
 > You can customize the local ports for the `draft connect` command either through the `-p` flag or through the `override-ports` field in `draft.toml`. More info in [dep-007.md][dep007]
 
-## Update the App
+## Update the Application
 
 Now, let's change the output in `app.py` to output "Hello, Draft!" instead:
 
