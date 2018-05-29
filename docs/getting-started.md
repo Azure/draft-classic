@@ -76,12 +76,13 @@ Now we're ready to deploy this application to a Kubernetes cluster. Draft handle
 
 ```shell
 $ draft up
-Draft Up Started: 'example-python'
-example-python: Building Docker Image: SUCCESS ⚓  (73.0991s)
-example-python: Pushing Docker Image: SUCCESS ⚓  (69.1425s)
-example-python: Releasing Application: SUCCESS ⚓  (0.6875s)
-example-python: Build ID: 01BSY5R8J45QHG9D3B17PAXMGN
+Draft Up Started: 'example-python': 01BSY5R8J45QHG9D3B17PAXMGN
+example-python: Building Docker Image: SUCCESS ⚓  (52.1337s)
+example-python: Releasing Application: SUCCESS ⚓  (0.5309s)
+Inspect the logs with `draft logs 01BSY5R8J45QHG9D3B17PAXMGN`
 ```
+
+> NOTE: You might see a `WARNING: no registry has been set` message if no container registry has been configured in draft. You can set a container registry using the `draft config set registry docker.io/myusername` command. If you'd prefer to silence this warning instead, you can run `draft config set disable-push-warning 1`.
 
 ## Interact with the Deployed Application
 
