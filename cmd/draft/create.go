@@ -101,7 +101,7 @@ func (c *createCmd) run() error {
 
 		} else if len(packsFound) == 1 {
 			packSrc := packsFound[0]
-			if err = pack.CreateFrom(c.dest, packSrc); err != nil {
+			if err = pack.CreateFrom(c.dest, packSrc, c.appName); err != nil {
 				return err
 			}
 
@@ -115,7 +115,7 @@ func (c *createCmd) run() error {
 		if err != nil {
 			return err
 		}
-		err = pack.CreateFrom(c.dest, packPath)
+		err = pack.CreateFrom(c.dest, packPath, c.appName)
 		if err != nil {
 			return err
 		}

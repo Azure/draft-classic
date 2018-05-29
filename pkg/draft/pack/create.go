@@ -6,12 +6,17 @@ import (
 	"github.com/Azure/draft/pkg/draft/pack/repo"
 )
 
-// CreateFrom scaffolds a directory with the src pack.
-func CreateFrom(dest, src string) error {
+// CreateFrom scaffolds a directory with the src pack
+func CreateFrom(dest, src string, appName string) error {
 	// first do some validation that we are copying from a valid pack directory
 	pack, err := FromDir(src)
 	if err != nil {
 		return fmt.Errorf("could not load pack: %s\nTry running:\n\t$ draft pack-repo update", err)
+	}
+
+	// Update ChartName if appName is non-empty
+	if appName != "" {
+		pack.Chart.Metadata.Name = appName
 	}
 	return pack.SaveDir(dest)
 }

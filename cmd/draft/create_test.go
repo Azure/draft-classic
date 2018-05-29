@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -153,6 +154,10 @@ func assertIdentical(t *testing.T, original, generated string) {
 			return nil
 		}
 
+		// chartdir should match app name, not pack name.
+		re := regexp.MustCompile("(charts.)myapp")
+		p = re.ReplaceAllString(p, "${1}go")
+
 		fo, err := os.Stat(p)
 		if err != nil {
 			t.Fatalf("%s doesn't exist while %s does", p, f)
@@ -170,6 +175,7 @@ func assertIdentical(t *testing.T, original, generated string) {
 		if err != nil {
 			t.Fatalf("Couldn't read %s: %v", f, err)
 		}
+		wanted = bytes.Replace(wanted, []byte("name: myapp"), []byte("name: go"), 1)
 		actual, err := ioutil.ReadFile(p)
 		if err != nil {
 			t.Fatalf("Couldn't read %s: %v", p, err)
@@ -191,6 +197,10 @@ func assertIdentical(t *testing.T, original, generated string) {
 		}
 		relp = relp[1:]
 		p := filepath.Join(original, relp)
+
+		// chartdir should match app name, not pack name.
+		re := regexp.MustCompile("(charts.)go")
+		p = re.ReplaceAllString(p, "${1}myapp")
 
 		// .keep files are only for keeping directory creations in remote git repo
 		if filepath.Base(p) == gitkeepfile {
