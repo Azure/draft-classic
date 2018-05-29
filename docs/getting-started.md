@@ -12,7 +12,7 @@ $ cd examples/example-python
 
 ## Draft Create
 
-We need some "scaffolding" to deploy our app into a [Kubernetes](https://kubernetes.io/) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile` and a `draft.toml` with `draft create`:
+We need some "scaffolding" to deploy our application into a [Kubernetes](Kubernetes) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile`, and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
