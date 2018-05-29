@@ -32,7 +32,7 @@ easy_install pyOpenSSL
 pip install --disable-pip-version-check --no-cache-dir azure-cli~=2.0
 
 echo "Building Draft binaries"
-make clean build-cross
+make GOXFLAGS="-parallel 3" clean build-cross
 VERSION="${VERSION}" make dist checksum
 
 echo "Pushing binaries to Azure Blob Storage"
