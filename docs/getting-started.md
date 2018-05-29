@@ -41,7 +41,7 @@ $ cat draft.toml
     chart = ""
 ```
 
-See [DEP 6](reference/dep-006.md) for more information and available configuration on the `draft.toml`.
+See [dep-006.md](dep006) for more information and available configuration on the `draft.toml` file.
 
 A `.draftignore` file is created as well for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
 
@@ -136,4 +136,6 @@ Hello, Draft!
 [Helm]: https://github.com/kubernetes/helm
 [Kubernetes]: https://kubernetes.io/
 [Python]: https://www.python.org/
+[dep006]: reference/dep-006.md
 [dep007]: reference/dep-007.md
+[dep008]: reference/dep-008.md
