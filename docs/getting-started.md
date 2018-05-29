@@ -1,6 +1,6 @@
 # Getting Started
 
-This document shows how to deploy a "Hello World" app with Draft. If you haven't done so already, be sure you have Draft installed according to the [Installation Guide][Installation Guide].
+This document shows how to deploy a "Hello World" application with Draft. If you haven't done so already, be sure you have Draft installed according to the [Installation Guide][Installation Guide].
 
 ## Application Setup
 
@@ -66,7 +66,7 @@ A `.draft-tasks.toml` file is also created. This file allows you to configure ta
 
 ## Draft Up
 
-Now we're ready to deploy this app to a Kubernetes cluster. Draft handles these tasks with one `draft up` command:
+Now we're ready to deploy this application to a Kubernetes cluster. Draft handles these tasks with one `draft up` command:
 
 - reads configuration from `draft.toml`
 - compresses the `chart/` directory and the application directory as two separate tarballs
@@ -95,7 +95,7 @@ Connect to python:8080 on localhost:8080
 
 `draft connect` is the command used to interact with the application deployed on your cluster. It works by creating proxy connections to the ports exposed by the containers in your pod, while also streaming the logs from all containers.
 
-In another terminal window, we can connect to our app using the address displayed from `draft connect`'s output.
+In another terminal window, we can connect to our application using the address displayed from `draft connect`'s output.
 
 ```shell
 $ curl localhost:8080
@@ -144,7 +144,7 @@ We should notice a significant faster build time here. This is because Docker is
 
 ## Great Success!
 
-Now when we run `draft connect` and open the local URL using `curl` or our browser, we can see our app has been updated!
+Now when we run `draft connect` and open the local URL using `curl` or our browser, we can see our application has been updated!
 
 ```shell
 $ curl localhost:8080
