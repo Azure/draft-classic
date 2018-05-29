@@ -84,6 +84,18 @@ Inspect the logs with `draft logs 01BSY5R8J45QHG9D3B17PAXMGN`
 
 > NOTE: You might see a `WARNING: no registry has been set` message if no container registry has been configured in draft. You can set a container registry using the `draft config set registry docker.io/myusername` command. If you'd prefer to silence this warning instead, you can run `draft config set disable-push-warning 1`.
 
+To ensure your application deployed as expected, run `kubectl get pods` and take a look at the output.
+
+```shell
+$ kubectl get pods
+NAME                                     READY     STATUS    RESTARTS   AGE
+example-python-python-6755c4944d-zbgvj   1/1       Running   0          5s
+```
+
+> NOTE: If you're using Minikube and your `STATUS` shows an error such as `ErrImagePull` or `ImagePullBackOff`, make sure you've configured Draft to build images directly using Minikube's Docker daemon. You can do so by running `eval $(minikube docker-env)`. 
+
+> For more information on installing and configuring Minikube for use with Draft, check out [the Minikube installation guide here](install-minikube.md).
+
 ## Interact with the Deployed Application
 
 Now that the application has been deployed, we can connect to our app.
