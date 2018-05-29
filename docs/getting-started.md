@@ -16,7 +16,7 @@ We need some "scaffolding" to deploy our app into a [Kubernetes](https://kuberne
 
 ```shell
 $ draft create
---> Draft detected the primary language as Python with 97.267760% certainty.
+--> Draft detected Python (96.739130%)
 --> Ready to sail
 $ ls -a
 .draftignore  Dockerfile  app.py  chart/  draft.toml  requirements.txt
