@@ -13,6 +13,7 @@ TESTS     := .
 TESTFLAGS :=
 LDFLAGS   :=
 GOFLAGS   :=
+GOXFLAGS  :=
 BINDIR    := $(CURDIR)/bin
 BINARIES  := draft
 
@@ -30,7 +31,7 @@ build:
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross:
-	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' github.com/Azure/draft/cmd/$(APP)
+	CGO_ENABLED=0 gox -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' $(GOXFLAGS) github.com/Azure/draft/cmd/$(APP)
 
 .PHONY: dist
 dist:
