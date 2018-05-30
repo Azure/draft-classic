@@ -187,6 +187,34 @@ Hello, Draft!
 
 We can see the application updated successfully!
 
+## Draft Delete
+
+If you're done testing this application, you can terminate and remove it from your Kubernetes cluster. To do so, run `draft delete`:
+
+```shell
+$ draft delete
+app 'example-python' deleted
+```
+
+If you run `kubectl get pods` shortly after, you should see your application `STATUS` is `Terminating`:
+
+```shell
+$ kubectl get pods
+NAME                                     READY     STATUS        RESTARTS   AGE
+example-python-python-688fcf849f-8ddh7   1/1       Terminating   0          5m
+```
+
+Once the termination completes, a `kubectl get pods` will show that the application no longer exists in your Kubernetes cluster:
+
+```shell
+$ kubectl get pods
+No resources found.
+```
+
+> IMPORTANT NOTE: The `draft delete` command should be run with **extreme care and caution** as it performs a termination and removal of the application from your Kubernetes cluster.
+
+> INFO: The `draft delete` command does not any image(s) created for the deployment within your Docker registry.
+
 [Installation Guide]: ../README.md#installation
 [python example application]: ../examples/example-python
 [examples]: ../examples
