@@ -264,7 +264,9 @@ func loadValues(ctx *Context) error {
 }
 
 func archiveSrc(ctx *Context) error {
-	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, ctx.Env.Dockerfile)
+
+	dockerfilePath := filepath.Join(ctx.AppDir, ctx.Env.Dockerfile)
+	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, dockerfilePath)
 	if err != nil {
 		return fmt.Errorf("unable to prepare docker context: %s", err)
 	}
