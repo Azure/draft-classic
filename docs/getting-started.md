@@ -94,32 +94,40 @@ example-python-python-6755c4944d-zbgvj   1/1       Running   0          5s
 
 > NOTE: If you're using Minikube and your `STATUS` shows an error such as `ErrImagePull` or `ImagePullBackOff`, make sure you've configured Draft to build images directly using Minikube's Docker daemon. You can do so by running `eval $(minikube docker-env)`. 
 
-> For more information on installing and configuring Minikube for use with Draft, check out [the Minikube installation guide here](install-minikube.md).
+> INFO: For more information on installing and configuring Minikube for use with Draft, check out [the Minikube installation guide here](install-minikube.md).
 
 ## Interact with the Deployed Application
 
-Now that the application has been deployed, we can connect to our app.
+Now that the application has been deployed, we can connect to it using `draft connect`.
+
+The `draft connect` command is used to interact with the application deployed on your cluster. It works by creating proxy connections to the ports exposed by the containers in your pod. It also streams the logs from all containers.
 
 ```shell
 $ draft connect
-Connect to python:8080 on localhost:8080
-172.17.0.1 - - [13/Sep/2017 19:10:09] "GET / HTTP/1.1" 200 -
+Connect to python:8080 on localhost:54794
+[python]:  * Environment: production
+[python]:    WARNING: Do not use the development server in a production environment.
+[python]:    Use a production WSGI server instead.
+[python]:  * Debug mode: off
+[python]:  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-`draft connect` is the command used to interact with the application deployed on your cluster. It works by creating proxy connections to the ports exposed by the containers in your pod, while also streaming the logs from all containers.
+> NOTE: The `WARNING: Do not use the development server in a production environment` message is coming from Flask. The message is in regard to Flask's built-in server only serving one request at a time and can safely be ignored for our test purporses in this example.
 
-In another terminal window, we can connect to our application using the address displayed from `draft connect`'s output.
+In this example, you can see that `draft connect` has proxied port 8080 from our container to port 54794 on localhost. We can now open a browser window or another terminal window and connect to our application using the address and port displayed from `draft connect`'s output.
 
 ```shell
-$ curl localhost:8080
+$ curl localhost:54794
 Hello, World!
 ```
 
-Once you're done playing with this app, cancel out of the `draft connect` session using CTRL+C.
+> NOTE: If `localhost` does not resolve on your system, try `curl 127.0.0.1:<PORT>` instead.
 
-> Note that you can use the flag `draft up --auto-connect` in order to have the application automatically connect once the deployment is done.
+Once you're done checking the application out, you can cancel out of the `draft connect` session using `CTRL+C`.
 
-> You can customize the local ports for the `draft connect` command either through the `-p` flag or through the `override-ports` field in `draft.toml`. More info in [dep-007.md][dep007]
+> NOTE: You can use the flag `draft up --auto-connect` in order to have the application automatically connect once the deployment is done.
+
+> INFO: You can also customize the local ports for the `draft connect` command by using the `-p` flag or through the `override-ports` field in `draft.toml`. More information on this can be found in [dep-007.md][dep007].
 
 ## Update the Application
 
@@ -146,23 +154,36 @@ When we call `draft up` again, Draft determines that the Helm release already ex
 
 ```shell
 $ draft up
-Draft Up Started: 'example-python'
-example-python: Building Docker Image: SUCCESS ⚓  (13.0127s)
-example-python: Pushing Docker Image: SUCCESS ⚓  (16.0272s)
-example-python: Releasing Application: SUCCESS ⚓  (0.5533s)
-example-python: Build ID: 01BSYA4MW4BDNAPG6VVFWEPTH8
+Draft Up Started: 'example-python': 01CEQ5H21BWSR5M8HTJ5BVXPYW
+example-python: Building Docker Image: SUCCESS ⚓  (1.0010s)
+example-python: Releasing Application: SUCCESS ⚓  (2.1236s)
+Inspect the logs with `draft logs 01CEQ5H21BWSR5M8HTJ5BVXPYW`
 ```
 
-We should notice a significant faster build time here. This is because Docker is caching unchanged layers and only compiling layers that need to be re-built in the background.
+We should notice a significantly faster build time here. This is because Docker is caching unchanged layers and only compiling layers that need to be rebuilt in the background.
 
 ## Great Success!
 
-Now when we run `draft connect` and open the local URL using `curl` or our browser, we can see our application has been updated!
+Lets run `draft connect` one more time:
 
 ```shell
-$ curl localhost:8080
+$ draft connect
+Connect to python:8080 on localhost:54961
+[python]:  * Environment: production
+[python]:    WARNING: Do not use the development server in a production environment.
+[python]:    Use a production WSGI server instead.
+[python]:  * Debug mode: off
+[python]:  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+```
+
+Once we have the address and port, let's connect to it via `curl` in a new terminal window or in a browser window:
+
+```shell
+$ curl localhost:54961
 Hello, Draft!
 ```
+
+We can see the application updated successfully!
 
 [Installation Guide]: ../README.md#installation
 [Helm]: https://github.com/kubernetes/helm
