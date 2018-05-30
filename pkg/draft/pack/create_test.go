@@ -14,7 +14,28 @@ func TestCreateFrom(t *testing.T) {
 	}
 	defer os.RemoveAll(tdir)
 
-	if err := CreateFrom(tdir, filepath.Join("testdata", "pack-python"), ""); err != nil {
+	odir, err := os.Getwd()
+	if err != nil {
+		t.Error("could not get current workdir")
+	}
+
+	if err := os.Chdir(tdir); err != nil {
+		t.Errorf("expected err to be nil, got %v", err)
+	}
+
+	if err := CreateFrom(tdir, filepath.Join(odir, "testdata", "pack-python"), ""); err != nil {
+		t.Errorf("expected err to be nil, got %v", err)
+	}
+
+	// verify that chart dir used cwd
+	if _, err := os.Stat(filepath.Join(tdir, "charts/", filepath.Base(tdir))); err != nil {
+		if os.IsNotExist(err) {
+			t.Error("expected chart directory to match workingdir")
+		}
+	}
+
+	// return to previous workdir
+	if err := os.Chdir(odir); err != nil {
 		t.Errorf("expected err to be nil, got %v", err)
 	}
 
