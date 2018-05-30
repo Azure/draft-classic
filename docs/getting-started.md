@@ -4,7 +4,7 @@ This document shows how to deploy a "Hello World" application with Draft. If you
 
 ## Application Setup
 
-There are multiple example applications included within the [examples directory](examples directory). For this walkthrough, we'll be using the [python example application](python example application) which uses [Flask](Flask) to provide a very simple Hello World webserver.
+There are multiple example applications included within the [examples directory](Examples Directory). For this walkthrough, we'll be using the [python example application](Python Example Application) which uses [Flask](Flask) to provide a very simple Hello World webserver.
 
 ```shell
 $ cd examples/example-python
@@ -216,7 +216,7 @@ No resources found.
 > INFO: The `draft delete` command does not any image(s) created for the deployment within your Docker registry.
 
 [Installation Guide]: ../README.md#installation
-[python example application]: ../examples/example-python
+[Python Example Application]: ../examples/example-python
 [examples directory]: ../examples
 [Flask]: http://flask.pocoo.org/
 [Helm]: https://helm.sh/
