@@ -41,7 +41,7 @@ $ cat draft.toml
     chart = ""
 ```
 
-See [dep-006.md](dep006) for more information and available configuration on the `draft.toml` file.
+See [dep-006.md][dep006] for more information and available configuration on the `draft.toml` file.
 
 A `.draftignore` file is created for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
 
@@ -62,7 +62,7 @@ draft.toml
 charts/
 ```
 
-A `.draft-tasks.toml` file is also created. This file allows you to configure tasks to be run before `draft up` (`pre-up` tasks), after `draft up` (`post-up` tasks), or after `draft delete` (`post-delete` tasks). This file is empty by default. See [dep-008.md](dep008) for more information and available configuration on the `.draft-tasks.toml` file.
+A `.draft-tasks.toml` file is also created. This file allows you to configure tasks to be run before `draft up` (`pre-up` tasks), after `draft up` (`post-up` tasks), or after `draft delete` (`post-delete` tasks). This file is empty by default. See [dep-008.md][dep008] for more information and available configuration on the `.draft-tasks.toml` file.
 
 ## Draft Up
 
@@ -112,7 +112,7 @@ Connect to python:8080 on localhost:54794
 [python]:  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-> NOTE: The `WARNING: Do not use the development server in a production environment` message is coming from Flask. The message is in regard to Flask's built-in web server and can safely be ignored for our test purporses here.
+> NOTE: The `WARNING: Do not use the development server in a production environment` message is coming from Flask. The message is in regard to Flask's built-in web server and can safely be ignored for our test purposes here.
 
 In this example, you can see that `draft connect` has proxied port 8080 from our container to port 54794 on localhost. We can now open a browser window or another terminal window and connect to our application using the address and port displayed from `draft connect`'s output.
 
