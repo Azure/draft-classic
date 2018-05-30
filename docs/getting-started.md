@@ -112,7 +112,7 @@ Connect to python:8080 on localhost:54794
 [python]:  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-> NOTE: The `WARNING: Do not use the development server in a production environment` message is coming from Flask. The message is in regard to Flask's built-in server only serving one request at a time and can safely be ignored for our test purporses in this example.
+> NOTE: The `WARNING: Do not use the development server in a production environment` message is coming from Flask. The message is in regard to Flask's built-in web server and can safely be ignored for our test purporses here.
 
 In this example, you can see that `draft connect` has proxied port 8080 from our container to port 54794 on localhost. We can now open a browser window or another terminal window and connect to our application using the address and port displayed from `draft connect`'s output.
 
@@ -120,6 +120,8 @@ In this example, you can see that `draft connect` has proxied port 8080 from our
 $ curl localhost:54794
 Hello, World!
 ```
+
+> IMPORTANT: Your local port will likely be different than the one seen here.
 
 > NOTE: If `localhost` does not resolve on your system, try `curl 127.0.0.1:<PORT>` instead.
 
@@ -164,7 +166,7 @@ We should notice a significantly faster build time here. This is because Docker 
 
 ## Great Success!
 
-Lets run `draft connect` one more time:
+We can run `draft connect` again to set up a proxy to our application:
 
 ```shell
 $ draft connect
@@ -176,7 +178,7 @@ Connect to python:8080 on localhost:54961
 [python]:  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
 
-Once we have the address and port, let's connect to it via `curl` in a new terminal window or in a browser window:
+Once we have the address and port, we can connect again using `curl` in a new terminal window or by browsing to the host and port in a browser window:
 
 ```shell
 $ curl localhost:54961
