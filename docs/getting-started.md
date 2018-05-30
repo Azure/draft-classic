@@ -4,7 +4,7 @@ This document shows how to deploy a "Hello World" application with Draft. If you
 
 ## Application Setup
 
-There are multiple example applications included within the [examples directory](../examples). For this walkthrough, we'll be using the [python example application](../examples/example-python) which uses [Flask](http://flask.pocoo.org/) to provide a very simple Hello World webserver.
+There are multiple example applications included within the [examples directory](examples). For this walkthrough, we'll be using the [python example application](python example application) which uses [Flask](Flask) to provide a very simple Hello World webserver.
 
 ```shell
 $ cd examples/example-python
@@ -12,7 +12,7 @@ $ cd examples/example-python
 
 ## Draft Create
 
-We need some "scaffolding" to deploy our application into a [Kubernetes](Kubernetes) cluster. Draft can create a [Helm](https://helm.sh/) chart, a `Dockerfile`, and a `draft.toml` with `draft create`:
+We need some "scaffolding" to deploy our application into a [Kubernetes](Kubernetes) cluster. Draft can create a [Helm](Helm) chart, a `Dockerfile`, and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
@@ -23,7 +23,7 @@ $ ls -a
 .draft-tasks.toml Dockerfile        charts/           requirements.txt
 ```
 
-The `charts/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](https://hub.docker.com/_/python/) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. To align with the `internalPort` service value in `charts/python/values.yaml`, this `Dockerfile` exposes port 8080 from the container.
+The `charts/` and `Dockerfile` assets created by Draft default to a basic Python configuration. This `Dockerfile` harnesses the [python:onbuild](python onbuild) image, which will install the dependencies in `requirements.txt` and copy the current directory into `/usr/src/app`. To align with the `internalPort` service value in `charts/python/values.yaml`, this `Dockerfile` exposes port 8080 from the container.
 
 The `draft.toml` file contains basic configuration details about the application like the name, the repository, which namespace it will be deployed to, and whether to deploy the application automatically when local files change.
 
@@ -43,7 +43,7 @@ $ cat draft.toml
 
 See [dep-006.md](dep006) for more information and available configuration on the `draft.toml` file.
 
-A `.draftignore` file is created for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore).
+A `.draftignore` file is created for elements we want to exclude tracking on `draft up` when watching for changes. The syntax is identical to [helm's .helmignore file](helmignore file).
 
 ```shell
 $ cat .draftignore
@@ -53,7 +53,7 @@ $ cat .draftignore
 .git*
 ```
 
-A [`.dockerignore`](https://docs.docker.com/engine/reference/builder/#dockerignore-file) file is created to ensure the docker context ignores files and directories that are not necessary.
+A [`.dockerignore`](dockerignore file) file is created to ensure the docker context ignores files and directories that are not necessary.
 
 ```shell
 $ cat .dockerignore
@@ -94,7 +94,7 @@ example-python-python-6755c4944d-zbgvj   1/1       Running   0          5s
 
 > NOTE: If you're using Minikube and your `STATUS` shows an error such as `ErrImagePull` or `ImagePullBackOff`, make sure you've configured Draft to build images directly using Minikube's Docker daemon. You can do so by running `eval $(minikube docker-env)`. 
 
-> INFO: For more information on installing and configuring Minikube for use with Draft, check out [the Minikube installation guide here](install-minikube.md).
+> INFO: For more information on installing and configuring Minikube for use with Draft, check out [the Minikube installation guide here](minikube guide).
 
 ## Interact with the Deployed Application
 
@@ -188,9 +188,16 @@ Hello, Draft!
 We can see the application updated successfully!
 
 [Installation Guide]: ../README.md#installation
-[Helm]: https://github.com/kubernetes/helm
+[python example application]: ../examples/example-python
+[examples]: ../examples
+[Flask]: http://flask.pocoo.org/
+[Helm]: https://helm.sh/
+[helmignore file]: https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore
+[dockerignore file]: https://docs.docker.com/engine/reference/builder/#dockerignore-file
+[minikube guide]: install-minikube.md
 [Kubernetes]: https://kubernetes.io/
 [Python]: https://www.python.org/
+[python onbuild]: https://hub.docker.com/_/python/
 [dep006]: reference/dep-006.md
 [dep007]: reference/dep-007.md
 [dep008]: reference/dep-008.md
