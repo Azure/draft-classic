@@ -1,6 +1,6 @@
 # Getting Started
 
-This document shows how to deploy a "Hello World" application with Draft. If you haven't done so already, be sure you have Draft installed according to the [Installation Guide][Installation Guide].
+This document shows how to deploy a "Hello World" application with Draft. If you haven't done so already, be sure you have Draft installed properly. This [Quickstart Guide](quickstart.md) is the perfect resource if you still need to install Draft.
 
 ## Application Setup
 
@@ -215,7 +215,6 @@ No resources found.
 
 > INFO: The `draft delete` command does not any image(s) created for the deployment within your Docker registry.
 
-[Installation Guide]: ../README.md#installation-guides
 [dep006]: reference/dep-006.md
 [dep007]: reference/dep-007.md
 [dep008]: reference/dep-008.md
