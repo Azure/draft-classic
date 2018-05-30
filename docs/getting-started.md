@@ -12,7 +12,7 @@ $ cd examples/example-python
 
 ## Draft Create
 
-We need some "scaffolding" to deploy our application into a [Kubernetes](Kubernetes) cluster. Draft can create a [Helm](Helm) chart, a `Dockerfile`, and a `draft.toml` with `draft create`:
+We need some "scaffolding" to deploy our application into a [Kubernetes](kubernetes url) cluster. Draft can create a [Helm](Helm) chart, a `Dockerfile`, and a `draft.toml` with `draft create`:
 
 ```shell
 $ draft create
@@ -223,7 +223,7 @@ No resources found.
 [helmignore file]: https://github.com/kubernetes/helm/blob/master/pkg/repo/repotest/testdata/examplechart/.helmignore
 [dockerignore file]: https://docs.docker.com/engine/reference/builder/#dockerignore-file
 [minikube guide]: install-minikube.md
-[Kubernetes]: https://kubernetes.io/
+[kubernetes url]: https://kubernetes.io/
 [Python]: https://www.python.org/
 [python onbuild]: https://hub.docker.com/_/python/
 [dep006]: reference/dep-006.md
