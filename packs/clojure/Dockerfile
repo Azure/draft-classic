@@ -1,4 +1,4 @@
-FROM clojure:onbuild as BUILD
+FROM clojure as BUILD
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN lein ring uberjar
