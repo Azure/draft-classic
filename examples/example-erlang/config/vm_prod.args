@@ -1,0 +1,8 @@
+-name draft_example@${NODE}
+
+-setcookie ${COOKIE}
+
+-draft_example http_port ${HTTP_PORT}
+
++K true
++A30
