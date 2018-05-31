@@ -11,7 +11,7 @@ The following prerequisites are required for successful use of Draft.
 3. Installing and configuring Draft on your laptop
 
 ### Install Kubernetes or have access to a cluster
-- If you don't already have a running Kubernetes cluster, consider downloading and installing [Minikube][https://github.com/kubernetes/minikube] which can help you get a Kubernetes cluster running on your local machine
+- If you don't already have a running Kubernetes cluster, consider downloading and installing [Minikube](https://github.com/kubernetes/minikube) which can help you get a Kubernetes cluster running on your local machine
 - You can download and configure the `kubectl` binary using the directions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Install and configure Helm
