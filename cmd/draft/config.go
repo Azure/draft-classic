@@ -14,6 +14,19 @@ const (
 	configHelp = `Manage global Draft configuration stored in $DRAFT_HOME/config.toml.`
 )
 
+type configKey struct {
+	name        string
+	description string
+}
+
+var (
+	registry           = configKey{name: "registry", description: "Registry to push built containers to (e.g. docker.io/foo, foo.azurecr.io)"}
+	containerBuilder   = configKey{name: "container-builder", description: "How to build the container (supported values: docker, acrbuild)"}
+	resourceGroupName  = configKey{name: "resource-group-name", description: "The Azure resource group of the container registry (for Azure registries only)"}
+	disablePushWarning = configKey{name: "disable-push-warning", description: "Suppresses warning if no registry set"}
+	configKeys         = []configKey{registry, containerBuilder, resourceGroupName, disablePushWarning}
+)
+
 // DraftConfig is the configuration stored in $DRAFT_HOME/config.toml
 type DraftConfig map[string]string
 
