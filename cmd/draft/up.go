@@ -146,6 +146,22 @@ func (u *upCmd) run(environment string) (err error) {
 		bldr       = builder.New()
 	)
 	bldr.LogsDir = u.home.Logs()
+
+	// Run the pre-up tasks before loading the environment, that way any changes
+	// to the helm chart/dockerfile/etc are loaded correctly
+	taskList, err := tasks.Load(tasksTOMLFile)
+	if err != nil {
+		if err == tasks.ErrNoTaskFile {
+			debug(err.Error())
+		} else {
+			return err
+		}
+	} else {
+		if _, err = taskList.Run(tasks.PreUp, ""); err != nil {
+			return err
+		}
+	}
+
 	if buildctx, err = builder.LoadWithEnv(u.src, environment); err != nil {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
@@ -215,19 +231,6 @@ func (u *upCmd) run(environment string) (err error) {
 	bldr.Helm, err = setupHelm(bldr.Kube, kubeConfig, tillerNamespace)
 	if err != nil {
 		return fmt.Errorf("Could not get a helm client: %s", err)
-	}
-
-	taskList, err := tasks.Load(tasksTOMLFile)
-	if err != nil {
-		if err == tasks.ErrNoTaskFile {
-			debug(err.Error())
-		} else {
-			return err
-		}
-	} else {
-		if _, err = taskList.Run(tasks.PreUp, ""); err != nil {
-			return err
-		}
 	}
 
 	// setup the storage engine
