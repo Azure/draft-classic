@@ -164,22 +164,22 @@ func (u *upCmd) run(environment string) (err error) {
 		return fmt.Errorf("failed loading build context with env %q: %v", environment, err)
 	}
 
-	if configuredBuilder, ok := globalConfig["container-builder"]; ok {
+	if configuredBuilder, ok := globalConfig[containerBuilder.name]; ok {
 		buildctx.Env.ContainerBuilder = configuredBuilder
 	}
 
 	// if a registry has been set in their global config but nothing was in draft.toml, use that instead
-	if reg, ok := globalConfig["registry"]; ok {
+	if reg, ok := globalConfig[registry.name]; ok {
 		buildctx.Env.Registry = reg
 	}
 
-	if configuredResourceGroup, ok := globalConfig["resource-group-name"]; ok {
+	if configuredResourceGroup, ok := globalConfig[resourceGroupName.name]; ok {
 		buildctx.Env.ResourceGroupName = configuredResourceGroup
 	}
 
 	if buildctx.Env.Registry == "" {
 		// give a way for minikube users (and users who understand what they're doing) a way to opt out
-		if _, ok := globalConfig["disable-push-warning"]; !ok {
+		if _, ok := globalConfig[disablePushWarning.name]; !ok {
 			fmt.Fprintln(u.out, "WARNING: no registry has been set, therefore Draft will not push to a container registry. This can be fixed by running `draft config set registry docker.io/myusername`")
 			fmt.Fprintln(u.out, "Hint: this warning can be disabled by running `draft config set disable-push-warning 1`")
 		}

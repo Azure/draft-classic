@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +34,7 @@ func newConfigSetCmd(out io.Writer) *cobra.Command {
 }
 
 func (ccmd *configSetCmd) complete(args []string) error {
-	if err := validateArgs(args, ccmd.args); err != nil {
+	if err := validateConfigSetArgs(args, ccmd.args); err != nil {
 		return err
 	}
 	ccmd.key = args[0]
@@ -43,4 +45,23 @@ func (ccmd *configSetCmd) complete(args []string) error {
 func (ccmd *configSetCmd) run() error {
 	globalConfig[ccmd.key] = ccmd.value
 	return SaveConfig(globalConfig)
+}
+
+func validateConfigSetArgs(args, expectedArgs []string) error {
+	if len(args) == 1 {
+		for _, k := range configKeys {
+			if k.name == args[0] {
+				return fmt.Errorf("This command needs a value: %v", k.description)
+			}
+		}
+		return fmt.Errorf("This command needs a value. No help available for key '%v'", args[0])
+	}
+	if len(args) != len(expectedArgs) {
+		keys := []string{}
+		for _, k := range configKeys {
+			keys = append(keys, "  "+k.name+": "+k.description)
+		}
+		return fmt.Errorf("This command needs a key and a value to set it to. Supported keys:\n%v", strings.Join(keys, "\n"))
+	}
+	return nil
 }
