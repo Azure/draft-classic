@@ -16,6 +16,8 @@ const (
 	// DefaultWatchDelaySeconds is the time delay between files being changed and when a
 	// new draft up` invocation is called when --watch is supplied.
 	DefaultWatchDelaySeconds = 2
+	// DefaultDockerfile is the Dockerfile being used by default
+	DefaultDockerfile = "Dockerfile"
 )
 
 // Manifest represents a draft.toml
@@ -56,6 +58,7 @@ func New() *Manifest {
 		Watch:       false,
 		WatchDelay:  DefaultWatchDelaySeconds,
 		AutoConnect: false,
+		Dockerfile:  DefaultDockerfile
 	}
 	return &m
 }
