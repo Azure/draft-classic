@@ -58,7 +58,7 @@ func New() *Manifest {
 		Watch:       false,
 		WatchDelay:  DefaultWatchDelaySeconds,
 		AutoConnect: false,
-		Dockerfile:  DefaultDockerfile
+		Dockerfile:  DefaultDockerfile,
 	}
 	return &m
 }
