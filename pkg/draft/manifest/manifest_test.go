@@ -8,7 +8,7 @@ import (
 func TestNew(t *testing.T) {
 	m := New()
 	m.Environments[DefaultEnvironmentName].Name = "foobar"
-	expected := "&{foobar      default [] true false 2 [] false []   map[]}"
+	expected := "&{foobar      default [] true false 2 [] false [] Dockerfile  map[]}"
 
 	actual := fmt.Sprintf("%v", m.Environments[DefaultEnvironmentName])
 	if expected != actual {
