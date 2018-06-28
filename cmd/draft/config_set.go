@@ -43,6 +43,9 @@ func (ccmd *configSetCmd) complete(args []string) error {
 }
 
 func (ccmd *configSetCmd) run() error {
+	if globalConfig == nil {
+		return fmt.Errorf("Draft configuration in $DRAFT_HOME/config.toml has not been initialized. Run draft init to get started.")
+	}
 	globalConfig[ccmd.key] = ccmd.value
 	return SaveConfig(globalConfig)
 }
