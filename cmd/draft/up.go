@@ -155,7 +155,7 @@ func (u *upCmd) run(environment string) (err error) {
 			return err
 		}
 	} else {
-		if _, err = taskList.Run(tasks.PreUp, ""); err != nil {
+		if _, err = taskList.Run(tasks.DefaultRunner, tasks.PreUp, ""); err != nil {
 			return err
 		}
 	}
@@ -270,7 +270,7 @@ func runPostDeployTasks(taskList *tasks.Tasks, buildID string) error {
 	}
 
 	for _, name := range names {
-		_, err := taskList.Run(tasks.PostDeploy, name)
+		_, err := taskList.Run(tasks.DefaultRunner, tasks.PostDeploy, name)
 		if err != nil {
 			debug("error running task: %v", err)
 		}

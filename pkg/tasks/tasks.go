@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -19,6 +20,20 @@ const (
 	PostDeploy = "PostDeploy"
 	PostDelete = "PostDelete"
 )
+
+var (
+	// reEnvironmentVariable matches environment variables embedded in
+	// strings. Only simple expressions ($FOO) are supported. Variables
+	// may escaped to avoid interpolation, in the form $$FOO or \$FOO
+	reEnvironmentVariable = regexp.MustCompile(`([\\\$]?\$[a-zA-Z_][a-zA-Z0-9_]*)`)
+)
+
+// Runner runs the given command. An alternative to DefaultRunner can
+// be used in tests.
+type Runner func(c *exec.Cmd) error
+
+// DefaultRunner runs the given command
+var DefaultRunner = func(c *exec.Cmd) error { return c.Run() }
 
 type Tasks struct {
 	PreUp      map[string]string `toml:"pre-up"`
@@ -50,24 +65,24 @@ func Load(path string) (*Tasks, error) {
 	return &t, nil
 }
 
-func (t *Tasks) Run(kind, podName string) ([]Result, error) {
+func (t *Tasks) Run(runner Runner, kind, podName string) ([]Result, error) {
 	results := []Result{}
 
 	switch kind {
 	case PreUp:
 		for _, task := range t.PreUp {
-			result := executeTask(task, kind)
+			result := executeTask(runner, task, kind)
 			results = append(results, result)
 		}
 	case PostDeploy:
 		for _, task := range t.PostDeploy {
 			cmd := preparePostDeployTask(evaluateArgs(task), podName)
-			result := runTask(cmd, kind)
+			result := runTask(runner, cmd, kind)
 			results = append(results, result)
 		}
 	case PostDelete:
 		for _, task := range t.PostDelete {
-			result := executeTask(task, kind)
+			result := executeTask(runner, task, kind)
 			results = append(results, result)
 		}
 	default:
@@ -77,19 +92,19 @@ func (t *Tasks) Run(kind, podName string) ([]Result, error) {
 	return results, nil
 }
 
-func executeTask(task, kind string) Result {
+func executeTask(runner Runner, task, kind string) Result {
 	args := evaluateArgs(task)
 	cmd := prepareTask(args)
-	return runTask(cmd, kind)
+	return runTask(runner, cmd, kind)
 }
 
-func runTask(cmd *exec.Cmd, kind string) Result {
+func runTask(runner Runner, cmd *exec.Cmd, kind string) Result {
 	result := Result{Kind: kind, Pass: false}
 	result.Command = append([]string{cmd.Path}, cmd.Args[0:]...)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	err := runner(cmd)
 	if err != nil {
 		result.Pass = false
 		result.Message = err.Error()
@@ -117,14 +132,15 @@ func preparePostDeployTask(args []string, podName string) *exec.Cmd {
 
 func evaluateArgs(task string) []string {
 	args := strings.Split(task, " ")
-	argsCopy := args
-	count := 0
-	for _, part := range argsCopy {
-		if strings.HasPrefix(part, "$") {
-			evaluatedPart := os.Getenv(strings.TrimPrefix(part, "$"))
-			args[count] = evaluatedPart
-		}
-		count = count + 1
+	for i, arg := range args {
+		args[i] = reEnvironmentVariable.ReplaceAllStringFunc(arg, func(expr string) string {
+			// $$FOO and \$FOO are kept as-is
+			if strings.HasPrefix(expr, "$$") || strings.HasPrefix(expr, "\\$") {
+				return expr[1:]
+			}
+
+			return os.Getenv(expr[1:])
+		})
 	}
 	return args
 }
