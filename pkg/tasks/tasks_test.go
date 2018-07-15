@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 		t.Errorf("Expected 1 post-deploy task, got %v", len(tasksFile.PostDeploy))
 	}
 	if len(tasksFile.PostDelete) != 1 {
-		t.Errorf("Expected 1 post-delete task, got %v", len(tasksFile.PostDeploy))
+		t.Errorf("Expected 1 cleanup task, got %v", len(tasksFile.PostDeploy))
 	}
 }
 
@@ -53,6 +53,6 @@ func TestRun(t *testing.T) {
 
 	results, _ = taskFile.Run(PostDelete, "")
 	if len(results) != 1 {
-		t.Errorf("Expected one post-delete command to be run, got %v", len(results))
+		t.Errorf("Expected one cleanup command to be run, got %v", len(results))
 	}
 }
