@@ -62,7 +62,7 @@ draft.toml
 charts/
 ```
 
-A `.draft-tasks.toml` file is also created. This file allows you to configure tasks to be run before `draft up` (`pre-up` tasks), after `draft up` (`post-up` tasks), or after `draft delete` (`post-delete` tasks). This file is empty by default. See [dep-008.md][dep008] for more information and available configuration on the `.draft-tasks.toml` file.
+A `.draft-tasks.toml` file is also created. This file allows you to configure tasks to be run before `draft up` (`pre-up` tasks), after `draft up` (`post-up` tasks), or after `draft delete` (`cleanup` tasks). This file is empty by default. See [dep-008.md][dep008] for more information and available configuration on the `.draft-tasks.toml` file.
 
 ## Draft Up
 

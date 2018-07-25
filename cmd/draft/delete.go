@@ -108,7 +108,7 @@ func Delete(app string) error {
 			return err
 		}
 	} else {
-		if _, err = taskList.Run(tasks.PostDelete, ""); err != nil {
+		if _, err = taskList.Run(tasks.DefaultRunner, tasks.PostDelete, ""); err != nil {
 			return err
 		}
 	}
