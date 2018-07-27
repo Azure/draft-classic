@@ -170,13 +170,14 @@ func (u *upCmd) run(environment string) (err error) {
 		buildctx.Env.ContainerBuilder = configuredBuilder
 	}
 
+	// if a registry has been set in their global config but nothing was in draft.toml, use that instead.
+	if reg, ok := globalConfig[registry.name]; ok {
+		buildctx.Env.Registry = reg
+	}
+
 	// Check if skip-image-push is specified. If so, unset registry.
 	if skipImagePush {
 		buildctx.Env.Registry = ""
-	}
-	// if a registry has been set in their global config but nothing was in draft.toml, use that instead.
-	if reg, ok := globalConfig[registry.name]; ok && !skipImagePush {
-		buildctx.Env.Registry = reg
 	}
 
 	if configuredResourceGroup, ok := globalConfig[resourceGroupName.name]; ok {
