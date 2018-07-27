@@ -82,7 +82,7 @@ example-python: Releasing Application: SUCCESS ⚓  (0.5309s)
 Inspect the logs with `draft logs 01BSY5R8J45QHG9D3B17PAXMGN`
 ```
 
-> NOTE: You might see a `WARNING: no registry has been set` message if no container registry has been configured in draft. You can set a container registry using the `draft config set registry docker.io/myusername` command. If you'd prefer to silence this warning instead, you can run `draft config set disable-push-warning 1`.
+> NOTE: You might see a `WARNING: no registry has been set` message if no container registry has been configured in draft. You can set a container registry using the `draft config set registry docker.io/myusername` command. If you'd prefer to silence this warning instead, you can run `draft config set disable-push-warning 1`. Users can also skip the push process entirely using the `--skip-image-push` flag.
 
 To ensure your application deployed as expected, run `kubectl get pods` and take a look at the output.
 
