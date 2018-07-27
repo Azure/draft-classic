@@ -172,12 +172,10 @@ func (u *upCmd) run(environment string) (err error) {
 
 	// Check if skip-image-push is specified. If so, unset registry.
 	if skipImagePush {
-		fmt.Println("skip-image-push is set to: ", skipImagePush)
 		buildctx.Env.Registry = ""
 	}
 	// if a registry has been set in their global config but nothing was in draft.toml, use that instead.
 	if reg, ok := globalConfig[registry.name]; ok && !skipImagePush {
-		fmt.Println("skip-image-push is set to: ", skipImagePush)
 		buildctx.Env.Registry = reg
 	}
 
@@ -186,7 +184,6 @@ func (u *upCmd) run(environment string) (err error) {
 	}
 
 	if buildctx.Env.Registry == "" && !skipImagePush {
-		fmt.Println("skip-image-push is set to: ", skipImagePush)
 		// give a way for minikube users (and users who understand what they're doing) a way to opt out
 		if _, ok := globalConfig[disablePushWarning.name]; !ok {
 			fmt.Fprintln(u.out, "WARNING: no registry has been set, therefore Draft will not push to a container registry. This can be fixed by running `draft config set registry docker.io/myusername`")
