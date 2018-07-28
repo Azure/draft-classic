@@ -74,7 +74,6 @@ func (p *Pack) SaveDir(dest string) error {
 	if !exists {
 		f, ok := p.Files[TasksFileName]
 		if ok {
-			fmt.Println("Pack has a tasks file")
 			newfile, err := os.Create(tasksFilePath)
 			if err != nil {
 				return err
@@ -84,7 +83,6 @@ func (p *Pack) SaveDir(dest string) error {
 			io.Copy(newfile, f.file)
 			os.Chmod(tasksFilePath, f.perm)
 		} else {
-			fmt.Println("Pack DOESN'T have a tasks file")
 			tasksFile, err := os.Create(tasksFilePath)
 			if err != nil {
 				return err

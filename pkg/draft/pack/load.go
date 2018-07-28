@@ -2,7 +2,7 @@ package pack
 
 import (
 	"fmt"
-		"io/ioutil"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
