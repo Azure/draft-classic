@@ -2,14 +2,13 @@ package pack
 
 import (
 	"bytes"
-		"io/ioutil"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
-		"k8s.io/helm/pkg/proto/hapi/chart"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 	"fmt"
-	"reflect"
-)
+	)
 
 const testDockerfile = `FROM nginx:latest
 `
@@ -55,12 +54,6 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	fmt.Println("DockerFile on disk perms")
-	fmt.Println(uint32(fInfo.Mode().Perm()))
-	fmt.Println(reflect.TypeOf(fInfo.Mode()))
-	fmt.Println("DockerFile in memory perms")
-	fmt.Println(uint32(dockerPerm))
-	fmt.Println(reflect.TypeOf(dockerPerm))
 	if fInfo.Mode() != dockerPerm {
 		fmt.Println("DockerFile perms different")
 		t.Fail()
@@ -76,12 +69,6 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	fmt.Println("TasksFile on disk perms")
-	fmt.Println(uint32(fInfo.Mode().Perm()))
-	fmt.Println(reflect.TypeOf(fInfo.Mode()))
-	fmt.Println("TasksFile in memory perms")
-	fmt.Println(uint32(tasksPerm))
-	fmt.Println(reflect.TypeOf(tasksPerm))
 	if fInfo.Mode() != tasksPerm {
 		fmt.Println("Tasks file perms different")
 		t.Fail()
