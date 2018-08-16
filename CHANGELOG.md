@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.16.0
+
+### Features
+- Various improvements to `draft tasks`
+  - Added support for $VARIABLES in any part of task
+
+### Bugs
+- Fixed Dockerfile path issues whem running draft up from different directory
+- Fixed panic when using `draft config set` before `draft init`
+
+### Packs
+- upgrade Java packs to use Java 10
+- updated Dockerfiles
+  - replaced onbuild base images with non-onbuild base images
+  - added build steps needed when not using onbuild images
+
+### Housekeeping
+- removed Spring example app which was not working
+- added more detail about contribution process
+- added documentation for `draft config set`
+
+
 ## v0.15.0
 
 ### Features
