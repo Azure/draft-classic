@@ -1,0 +1,24 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+group = 'helloworld'
+version = '1.0'
+mainClassName = 'helloworld.Hello'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {        
+     mavenCentral()
+}
+dependencies {
+    compile 'com.sparkjava:spark-core:2.0.0'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
