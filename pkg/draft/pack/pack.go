@@ -41,7 +41,7 @@ const (
 	TargetTasksFileName = ".draft-tasks.toml"
 )
 
-type PackFile struct{
+type PackFile struct {
 	file io.ReadCloser
 	perm os.FileMode
 }

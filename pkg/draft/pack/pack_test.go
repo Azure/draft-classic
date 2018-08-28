@@ -2,13 +2,13 @@ package pack
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 	"os"
 	"path/filepath"
 	"testing"
-	"k8s.io/helm/pkg/proto/hapi/chart"
-	"fmt"
-	)
+)
 
 const testDockerfile = `FROM nginx:latest
 `
@@ -32,8 +32,8 @@ func TestSaveDir(t *testing.T) {
 			},
 		},
 		Files: map[string]PackFile{
-			dockerfileName: PackFile{ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), dockerPerm},
-			TasksFileName:  PackFile{ioutil.NopCloser(bytes.NewBufferString(testTasksFile)), tasksPerm},
+			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), dockerPerm},
+			TasksFileName:  {ioutil.NopCloser(bytes.NewBufferString(testTasksFile)), tasksPerm},
 		},
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")
@@ -58,7 +58,6 @@ func TestSaveDir(t *testing.T) {
 		fmt.Println("DockerFile perms different")
 		t.Fail()
 	}
-
 
 	tasksPath := filepath.Join(dir, TargetTasksFileName)
 	fInfo, err = os.Stat(tasksPath)
@@ -91,7 +90,7 @@ func TestSaveDirDockerfileExistsInAppDir(t *testing.T) {
 			},
 		},
 		Files: map[string]PackFile{
-			dockerfileName: PackFile{ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), 664},
+			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), 664},
 		},
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")
