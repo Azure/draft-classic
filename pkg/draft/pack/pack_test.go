@@ -2,7 +2,6 @@ package pack
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"os"
@@ -55,8 +54,7 @@ func TestSaveDir(t *testing.T) {
 		}
 	}
 	if fInfo.Mode() != dockerPerm {
-		fmt.Println("DockerFile perms different")
-		t.Fail()
+		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
 	}
 
 	tasksPath := filepath.Join(dir, TargetTasksFileName)
@@ -69,8 +67,7 @@ func TestSaveDir(t *testing.T) {
 		}
 	}
 	if fInfo.Mode() != tasksPerm {
-		fmt.Println("Tasks file perms different")
-		t.Fail()
+		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
 	}
 
 	data, err := ioutil.ReadFile(tasksPath)
