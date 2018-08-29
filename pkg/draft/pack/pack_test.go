@@ -22,8 +22,10 @@ cleanup-task = "echo cleanup"
 `
 
 func TestSaveDir(t *testing.T) {
-	dockerPerm := os.FileMode(0666)
-	tasksPerm := os.FileMode(0655)
+	dockerPerm := os.FileMode(0664)
+	winDockerPerm := os.FileMode(0666)
+	tasksPerm := os.FileMode(0644)
+	winTasksPerm := os.FileMode(0666)
 	p := &Pack{
 		Chart: &chart.Chart{
 			Metadata: &chart.Metadata{
@@ -53,7 +55,10 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != dockerPerm {
+	if fInfo.Mode() != dockerPerm && runtime.GOOS != "windows" {
+		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
+	}
+	if fInfo.Mode() != winDockerPerm && runtime.GOOS == "windows" {
 		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
 	}
 
@@ -66,7 +71,10 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != tasksPerm {
+	if fInfo.Mode() != tasksPerm && runtime.GOOS != "windows" {
+		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
+	}
+	if fInfo.Mode() != winTasksPerm && runtime.GOOS == "windows" {
 		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
 	}
 
