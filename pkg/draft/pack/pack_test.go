@@ -6,6 +6,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
