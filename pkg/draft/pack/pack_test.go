@@ -3,11 +3,12 @@ package pack
 import (
 	"bytes"
 	"io/ioutil"
-	"k8s.io/helm/pkg/proto/hapi/chart"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 const testDockerfile = `FROM nginx:latest
