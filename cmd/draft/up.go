@@ -47,6 +47,7 @@ const (
 var (
 	dockerCertPath = os.Getenv("DOCKER_CERT_PATH")
 	autoConnect    bool
+	skipImagePush  bool
 )
 
 type upCmd struct {
@@ -120,6 +121,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "Use TLS and verify the remote")
 	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "Location of client config files")
 	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
+	f.BoolVar(&skipImagePush, "skip-image-push", false, "skip pushing image to registry")
 
 	up.dockerClientOptions.Common.TLSOptions = &tlsconfig.Options{
 		CAFile:   filepath.Join(dockerCertPath, dockerflags.DefaultCaFile),
@@ -168,16 +170,21 @@ func (u *upCmd) run(environment string) (err error) {
 		buildctx.Env.ContainerBuilder = configuredBuilder
 	}
 
-	// if a registry has been set in their global config but nothing was in draft.toml, use that instead
+	// if a registry has been set in their global config but nothing was in draft.toml, use that instead.
 	if reg, ok := globalConfig[registry.name]; ok {
 		buildctx.Env.Registry = reg
+	}
+
+	// Check if skip-image-push is specified. If so, unset registry.
+	if skipImagePush {
+		buildctx.Env.Registry = ""
 	}
 
 	if configuredResourceGroup, ok := globalConfig[resourceGroupName.name]; ok {
 		buildctx.Env.ResourceGroupName = configuredResourceGroup
 	}
 
-	if buildctx.Env.Registry == "" {
+	if buildctx.Env.Registry == "" && !skipImagePush {
 		// give a way for minikube users (and users who understand what they're doing) a way to opt out
 		if _, ok := globalConfig[disablePushWarning.name]; !ok {
 			fmt.Fprintln(u.out, "WARNING: no registry has been set, therefore Draft will not push to a container registry. This can be fixed by running `draft config set registry docker.io/myusername`")
