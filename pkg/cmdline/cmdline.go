@@ -85,8 +85,9 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 	)
 	ongoing := make(map[string]chan builder.SummaryStatusCode)
 	var (
-		wg sync.WaitGroup
-		id string
+		wg     sync.WaitGroup
+		id     string
+		failed bool
 	)
 	defer func() {
 		for _, c := range ongoing {
@@ -94,7 +95,14 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 		}
 		cli.Stop()
 		wg.Wait()
-		fmt.Fprintf(cli.opts.stdout, "%s `%s`\n", blue("Inspect the logs with"), yellow("draft logs ", id))
+
+		logText := fmt.Sprintf("%s `%s`\n", blue("Inspect the logs with"), yellow("draft logs ", id))
+
+		if failed {
+			fmt.Fprintf(cli.opts.stderr, logText)
+		} else {
+			fmt.Fprintf(cli.opts.stdout, logText)
+		}
 	}()
 	for {
 		select {
@@ -104,6 +112,9 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 			}
 			if id == "" {
 				id = summary.BuildID
+			}
+			if summary.StatusCode == builder.SummaryFailure {
+				failed = true
 			}
 			if ch, ok := ongoing[summary.StageDesc]; !ok {
 				ch = make(chan builder.SummaryStatusCode, 1)
