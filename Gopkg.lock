@@ -10,8 +10,8 @@
 [[projects]]
   name = "github.com/Azure/azure-pipeline-go"
   packages = ["pipeline"]
-  revision = "098e490af5dc2a905cdc5b64cafda6887b29164b"
-  version = "0.1.6"
+  revision = "7571e8eb0876932ab505918ff7ed5107773e5ee2"
+  version = "0.1.7"
 
 [[projects]]
   branch = "master"
@@ -159,7 +159,7 @@
     "cli/trust",
     "opts"
   ]
-  revision = "37eebe5cb6eff08bde94d17111caa8fc099d7a94"
+  revision = "f285fe67e916055ea61d45d6249c9946ee27b216"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -234,8 +234,7 @@
   name = "github.com/docker/docker-credential-helpers"
   packages = [
     "client",
-    "credentials",
-    "pass"
+    "credentials"
   ]
   revision = "d68f9aeca33f5fd3f08eeae5e9d175edf4e731d1"
   version = "v0.6.0"
@@ -1350,6 +1349,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "276dc700632fb99aa5d595805ea550a1b3b43f02ee97e03b08f1412893854186"
+  inputs-digest = "9d90e3546e3ab0137a24ce8137c49e45c52514c2f57238de67d606459b892db0"
   solver-name = "gps-cdcl"
   solver-version = 1
