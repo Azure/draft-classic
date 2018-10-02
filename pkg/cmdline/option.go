@@ -11,9 +11,10 @@ import (
 type Option func(*options)
 
 type options struct {
-	stderr  io.Writer
-	stdout  io.Writer
-	buildID string
+	stderr       io.Writer
+	stdout       io.Writer
+	buildID      string
+	disableEmoji bool
 }
 
 // DefaultOpts is a convenience wrapper that enumerates and configures the set of default
@@ -56,5 +57,12 @@ func NoColor() Option {
 func WithBuildID(buildID string) Option {
 	return func(opts *options) {
 		opts.buildID = buildID
+	}
+}
+
+// WithDisableEmoji returns an Option that sets if the output should have emoji or not.
+func WithDisableEmoji(disableEmoji bool) Option {
+	return func(opts *options) {
+		opts.disableEmoji = disableEmoji
 	}
 }

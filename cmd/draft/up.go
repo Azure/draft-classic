@@ -241,7 +241,7 @@ func (u *upCmd) run(environment string) (err error) {
 	// setup the storage engine
 	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
 	progressC := bldr.Up(ctx, buildctx)
-	cmdline.Display(ctx, buildctx.Env.Name, progressC, cmdline.WithBuildID(bldr.ID))
+	cmdline.Display(ctx, buildctx.Env.Name, progressC, cmdline.WithBuildID(bldr.ID), cmdline.WithDisableEmoji(disableEmoji))
 
 	if buildctx.Env.AutoConnect || autoConnect {
 		c := newConnectCmd(u.out)
