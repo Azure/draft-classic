@@ -171,7 +171,7 @@ func concatStrAndEmoji(text string, emoji string, disableEmoji bool) string {
 	if !disableEmoji {
 		concatStr.WriteString(emoji)
 	}
-	concatStr.String()
+	return concatStr.String()
 }
 
 func consoleSupportsColor() bool {
