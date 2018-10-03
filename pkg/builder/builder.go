@@ -40,6 +40,8 @@ const (
 	PullSecretName = "draft-pullsecret"
 	// DefaultServiceAccountName is the name of the default service account draft will modify with the imagepullsecret
 	DefaultServiceAccountName = "default"
+	// DefaultDockerfile represents the default name of the Dockerfile if not specified in draft.toml
+	DefaultDockerfile = "Dockerfile"
 )
 
 // Builder contains information about the build environment
@@ -264,6 +266,9 @@ func loadValues(ctx *Context) error {
 }
 
 func archiveSrc(ctx *Context) error {
+	if ctx.Env.Dockerfile == "" {
+		ctx.Env.Dockerfile = DefaultDockerfile
+	}
 
 	dockerfilePath := filepath.Join(ctx.AppDir, ctx.Env.Dockerfile)
 	contextDir, relDockerfile, err := build.GetContextFromLocalDir(ctx.AppDir, dockerfilePath)
