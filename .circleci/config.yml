@@ -3,11 +3,10 @@ jobs:
   build:
     working_directory: /go/src/github.com/Azure/draft
     docker:
-      - image: golang:1.9
+      - image: golang:1.11.1
     environment:
       AZURE_CONTAINER: "draft"
       AZURE_STORAGE_ACCOUNT: "azuredraft"
-      DOCKER_USERNAME: "bacongobbler"
     steps:
       - checkout
       - run: echo 'export PATH=/go/src/github.com/Azure/draft/bin:$PATH' >> $BASH_ENV
