@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -48,6 +49,7 @@ var (
 	dockerCertPath = os.Getenv("DOCKER_CERT_PATH")
 	autoConnect    bool
 	skipImagePush  bool
+	quiet          bool
 )
 
 type upCmd struct {
@@ -115,13 +117,14 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	f = cmd.Flags()
 	f.StringVarP(&runningEnvironment, environmentFlagName, environmentFlagShorthand, defaultDraftEnvironment(), environmentFlagUsage)
-	f.BoolVar(&up.dockerClientOptions.Common.Debug, "docker-debug", false, "Enable debug mode")
-	f.StringVar(&up.dockerClientOptions.Common.LogLevel, "docker-log-level", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
-	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "Use TLS; implied by --tlsverify")
-	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "Use TLS and verify the remote")
-	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "Location of client config files")
+	f.BoolVar(&up.dockerClientOptions.Common.Debug, "docker-debug", false, "enable debug mode")
+	f.StringVar(&up.dockerClientOptions.Common.LogLevel, "docker-log-level", "info", `set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
+	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "use TLS; implied by --tlsverify")
+	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "use TLS and verify the remote")
+	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "location of client config files")
 	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
 	f.BoolVar(&skipImagePush, "skip-image-push", false, "skip pushing image to registry")
+	f.BoolVarP(&quiet, "quiet", "q", false, "only output errors")
 
 	up.dockerClientOptions.Common.TLSOptions = &tlsconfig.Options{
 		CAFile:   filepath.Join(dockerCertPath, dockerflags.DefaultCaFile),
@@ -241,7 +244,13 @@ func (u *upCmd) run(environment string) (err error) {
 	// setup the storage engine
 	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
 	progressC := bldr.Up(ctx, buildctx)
-	cmdline.Display(ctx, buildctx.Env.Name, progressC, cmdline.WithBuildID(bldr.ID))
+	opts := []cmdline.Option{cmdline.WithBuildID(bldr.ID)}
+
+	if quiet {
+		opts = append(opts, cmdline.WithStdout(ioutil.Discard))
+	}
+
+	cmdline.Display(ctx, buildctx.Env.Name, progressC, opts...)
 
 	if buildctx.Env.AutoConnect || autoConnect {
 		c := newConnectCmd(u.out)
