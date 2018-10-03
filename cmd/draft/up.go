@@ -250,8 +250,8 @@ func (u *upCmd) run(environment string) (err error) {
 		opts = append(opts, cmdline.WithStdout(ioutil.Discard))
 	}
 
-	if disableEmoji {
-		opts = append(opts, cmdline.WithDisableEmoji(disableEmoji))
+	if displayEmoji {
+		opts = append(opts, cmdline.WithDisplayEmoji(displayEmoji))
 	}
 
 	cmdline.Display(ctx, buildctx.Env.Name, progressC, opts...)

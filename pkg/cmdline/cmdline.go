@@ -1,9 +1,9 @@
 package cmdline
 
 import (
-	"bytes"
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -154,10 +154,10 @@ func progress(cli *cmdline, app, desc string, codes <-chan builder.SummaryStatus
 		case code := <-done:
 			switch code {
 			case builder.SummarySuccess:
-				done <- fmt.Sprintf("%s: %s (%.4fs)\n", cyan(app), passStr(desc, cli.opts.disableEmoji), time.Since(start).Seconds())
+				fmt.Fprintf(cli.opts.stdout, "\r%s: %s  (%.4fs)\n", cyan(app), passStr(desc, cli.opts.displayEmoji), time.Since(start).Seconds())
 				return
 			case builder.SummaryFailure:
-				done <- fmt.Sprintf("%s: %s (%.4fs)\n", cyan(app), failStr(desc, cli.opts.disableEmoji), time.Since(start).Seconds())
+				fmt.Fprintf(cli.opts.stderr, "\r%s: %s  (%.4fs)\n", cyan(app), failStr(desc, cli.opts.displayEmoji), time.Since(start).Seconds())
 				return
 			}
 		default:
@@ -168,18 +168,18 @@ func progress(cli *cmdline, app, desc string, codes <-chan builder.SummaryStatus
 	}
 }
 
-func passStr(msg string, disableEmoji bool) string {
-	return fmt.Sprintf("%s: %s", green(msg), concatStrAndEmoji("SUCCESS", " ⚓ ", disableEmoji))
+func passStr(msg string, displayEmoji bool) string {
+	return fmt.Sprintf("%s: %s", green(msg), concatStrAndEmoji("SUCCESS", " ⚓ ", displayEmoji))
 }
 
-func failStr(msg string, disableEmoji bool) string {
-	return fmt.Sprintf("%s: %s", red(msg), concatStrAndEmoji("FAIL", " ❌ ", disableEmoji))
+func failStr(msg string, displayEmoji bool) string {
+	return fmt.Sprintf("%s: %s", red(msg), concatStrAndEmoji("FAIL", " ❌ ", displayEmoji))
 }
 
-func concatStrAndEmoji(text string, emoji string, disableEmoji bool) string {
-	var concatStr bytes.Buffer
+func concatStrAndEmoji(text string, emoji string, displayEmoji bool) string {
+	var concatStr strings.Builder
 	concatStr.WriteString(text)
-	if !disableEmoji {
+	if displayEmoji {
 		concatStr.WriteString(emoji)
 	}
 	return concatStr.String()

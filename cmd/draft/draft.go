@@ -41,8 +41,8 @@ var (
 	tillerHost string
 	// tillerNamespace depicts which namespace Tiller is running in. This is used when Tiller was installed in a different namespace than kube-system.
 	tillerNamespace string
-	// disableEmoji ignores emoji from the console output
-	disableEmoji bool
+	// displayEmoji shows emoji in the console output
+	displayEmoji bool
 	//rootCmd is the root command handling `draft`. It's used in other parts of package cmd to add/search the command tree.
 	rootCmd *cobra.Command
 	// globalConfig is the configuration stored in $DRAFT_HOME/config.toml
@@ -76,7 +76,7 @@ func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	p.BoolVar(&flagDebug, "debug", false, "enable verbose output")
 	p.StringVar(&kubeContext, "kube-context", "", "name of the kubeconfig context to use when talking to Tiller")
 	p.StringVar(&tillerNamespace, "tiller-namespace", defaultTillerNamespace(), "namespace where Tiller is running. This is used when Tiller was installed in a different namespace than kube-system. Overrides $TILLER_NAMESPACE")
-	p.BoolVar(&disableEmoji, "disable-emoji", false, "disable emoji in output")
+	p.BoolVar(&displayEmoji, "display-emoji", true, "display emoji in output")
 
 	cmd.AddCommand(
 		newConfigCmd(out),

@@ -14,7 +14,7 @@ type options struct {
 	stderr       io.Writer
 	stdout       io.Writer
 	buildID      string
-	disableEmoji bool
+	displayEmoji bool
 }
 
 // DefaultOpts is a convenience wrapper that enumerates and configures the set of default
@@ -60,9 +60,9 @@ func WithBuildID(buildID string) Option {
 	}
 }
 
-// WithDisableEmoji returns an Option that sets if the output should have emoji or not.
-func WithDisableEmoji(disableEmoji bool) Option {
+// WithDisplayEmoji returns an Option that sets if the output should have emoji or not.
+func WithDisplayEmoji(displayEmoji bool) Option {
 	return func(opts *options) {
-		opts.disableEmoji = disableEmoji
+		opts.displayEmoji = displayEmoji
 	}
 }
