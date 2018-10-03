@@ -10,7 +10,7 @@ To compile and test Draft binaries and to build Docker images, you will need:
  - a [Kubernetes][] cluster. We recommend [minikube][].
  - [docker][]
  - [git][]
- - [helm][], using the same version as recommended in the [installation guide][install].
+ - [helm][], see the [quickstart guide][quickstart] for installing helm
  - [Go][] 1.8 or later, with support for compiling to `linux/amd64`
 
 In most cases, install the prerequisite according to its instructions. See the next section
@@ -85,10 +85,10 @@ $ make clean
 
 
 [docker]: https://www.docker.com/
-[install]: ../install.md
+[quickstart]: ../quickstart.md#install-and-configure-helm
 [git]: https://git-scm.com/
 [go]: https://golang.org/
-[helm]: https://github.com/kubernetes/helm
+[helm]: https://github.com/helm/helm
 [Homebrew]: https://brew.sh/
 [Kubernetes]: https://github.com/kubernetes/kubernetes
 [minikube]: https://github.com/kubernetes/minikube

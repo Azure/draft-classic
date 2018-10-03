@@ -86,8 +86,9 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 	)
 	ongoing := make(map[string]chan builder.SummaryStatusCode)
 	var (
-		wg sync.WaitGroup
-		id string
+		wg     sync.WaitGroup
+		id     string
+		failed bool
 	)
 	defer func() {
 		for _, c := range ongoing {
@@ -95,7 +96,14 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 		}
 		cli.Stop()
 		wg.Wait()
-		fmt.Fprintf(cli.opts.stdout, "%s `%s`\n", blue("Inspect the logs with"), yellow("draft logs ", id))
+
+		logText := fmt.Sprintf("%s `%s`\n", blue("Inspect the logs with"), yellow("draft logs ", id))
+
+		if failed {
+			fmt.Fprintf(cli.opts.stderr, logText)
+		} else {
+			fmt.Fprintf(cli.opts.stdout, logText)
+		}
 	}()
 	for {
 		select {
@@ -105,6 +113,9 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 			}
 			if id == "" {
 				id = summary.BuildID
+			}
+			if summary.StatusCode == builder.SummaryFailure {
+				failed = true
 			}
 			if ch, ok := ongoing[summary.StageDesc]; !ok {
 				ch = make(chan builder.SummaryStatusCode, 1)
@@ -126,10 +137,21 @@ func Display(ctx context.Context, app string, summaries <-chan *builder.Summary,
 
 func progress(cli *cmdline, app, desc string, codes <-chan builder.SummaryStatusCode) {
 	start := time.Now()
-	done := make(chan string, 1)
+	done := make(chan builder.SummaryStatusCode, 1)
 	go func() {
 		defer close(done)
 		for code := range codes {
+			if code == builder.SummarySuccess || code == builder.SummaryFailure {
+				done <- code
+			}
+		}
+	}()
+	m := fmt.Sprintf("%s: %s", cyan(app), yellow(desc))
+	s := `-\|/-`
+	i := 0
+	for {
+		select {
+		case code := <-done:
 			switch code {
 			case builder.SummarySuccess:
 				done <- fmt.Sprintf("%s: %s (%.4fs)\n", cyan(app), passStr(desc, cli.opts.disableEmoji), time.Since(start).Seconds())
@@ -138,17 +160,6 @@ func progress(cli *cmdline, app, desc string, codes <-chan builder.SummaryStatus
 				done <- fmt.Sprintf("%s: %s (%.4fs)\n", cyan(app), failStr(desc, cli.opts.disableEmoji), time.Since(start).Seconds())
 				return
 			}
-		}
-		done <- "\n"
-	}()
-	m := fmt.Sprintf("%s: %s", cyan(app), yellow(desc))
-	s := `-\|/-`
-	i := 0
-	for {
-		select {
-		case msg := <-done:
-			fmt.Fprintf(cli.opts.stdout, "\r%s", msg)
-			return
 		default:
 			fmt.Fprintf(cli.opts.stdout, "\r%s %c", m, s[i%len(s)])
 			time.Sleep(50 * time.Millisecond)
