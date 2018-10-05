@@ -250,6 +250,10 @@ func (u *upCmd) run(environment string) (err error) {
 		opts = append(opts, cmdline.WithStdout(ioutil.Discard))
 	}
 
+	if displayEmoji {
+		opts = append(opts, cmdline.WithDisplayEmoji(displayEmoji))
+	}
+
 	cmdline.Display(ctx, buildctx.Env.Name, progressC, opts...)
 
 	if buildctx.Env.AutoConnect || autoConnect {
