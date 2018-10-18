@@ -58,10 +58,11 @@ func init() {
 
 func newRootCmd(out io.Writer, in io.Reader) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "draft",
-		Short:        globalUsage,
-		Long:         globalUsage,
-		SilenceUsage: true,
+		Use:              "draft",
+		Short:            globalUsage,
+		Long:             globalUsage,
+		SilenceUsage:     true,
+		TraverseChildren: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			if flagDebug {
 				log.SetLevel(log.DebugLevel)

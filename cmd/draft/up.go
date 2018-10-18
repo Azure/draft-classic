@@ -47,7 +47,6 @@ const (
 
 var (
 	dockerCertPath = os.Getenv("DOCKER_CERT_PATH")
-	autoConnect    bool
 	skipImagePush  bool
 	quiet          bool
 )
@@ -122,7 +121,6 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.BoolVar(&up.dockerClientOptions.Common.TLS, "docker-tls", defaultDockerTLS(), "use TLS; implied by --tlsverify")
 	f.BoolVar(&up.dockerClientOptions.Common.TLSVerify, fmt.Sprintf("docker-%s", dockerflags.FlagTLSVerify), defaultDockerTLSVerify(), "use TLS and verify the remote")
 	f.StringVar(&up.dockerClientOptions.ConfigDir, "docker-config", cliconfig.Dir(), "location of client config files")
-	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
 	f.BoolVar(&skipImagePush, "skip-image-push", false, "skip pushing image to registry")
 	f.BoolVarP(&quiet, "quiet", "q", false, "only output errors")
 
@@ -139,6 +137,8 @@ func newUpCmd(out io.Writer) *cobra.Command {
 
 	hostOpt := opts.NewNamedListOptsRef("docker-hosts", &up.dockerClientOptions.Common.Hosts, opts.ValidateHost)
 	f.Var(hostOpt, "docker-host", "Daemon socket(s) to connect to")
+
+	cmd.AddCommand(newAutoConnectCmd(out, true))
 
 	return cmd
 }
@@ -256,8 +256,8 @@ func (u *upCmd) run(environment string) (err error) {
 
 	cmdline.Display(ctx, buildctx.Env.Name, progressC, opts...)
 
-	if buildctx.Env.AutoConnect || autoConnect {
-		c := newConnectCmd(u.out)
+	if buildctx.Env.AutoConnect {
+		c := newAutoConnectCmd(u.out, false)
 		return c.RunE(c, []string{})
 	}
 

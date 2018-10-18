@@ -37,6 +37,21 @@ type connectCmd struct {
 	logLines int64
 }
 
+func newAutoConnectCmd(out io.Writer, preRunUp bool) *cobra.Command {
+	autoConnectCmd := newConnectCmd(out)
+	autoConnectCmd.Use = "auto-connect"
+	autoConnectCmd.Short = "automatically connect to your application locally"
+	if preRunUp {
+		autoConnectCmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+			upCmd := newUpCmd(out)
+			upCmd.PersistentPreRun(cmd, args)
+			upCmd.Execute()
+			return upCmd.RunE(cmd, args)
+		}
+	}
+	return autoConnectCmd
+}
+
 func newConnectCmd(out io.Writer) *cobra.Command {
 	var (
 		cc                 = &connectCmd{out: out}
