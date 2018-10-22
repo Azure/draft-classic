@@ -41,12 +41,17 @@ const (
 	TargetTasksFileName = ".draft-tasks.toml"
 )
 
+type PackFile struct {
+	file io.ReadCloser
+	perm os.FileMode
+}
+
 // Pack defines a Draft Starter Pack.
 type Pack struct {
 	// Chart is the Helm chart to be installed with the Pack.
 	Chart *chart.Chart
 	// Files are the files inside the Pack that will be installed.
-	Files map[string]io.ReadCloser
+	Files map[string]PackFile
 }
 
 // SaveDir saves a pack as files in a directory.
@@ -74,8 +79,9 @@ func (p *Pack) SaveDir(dest string) error {
 				return err
 			}
 			defer newfile.Close()
-			defer f.Close()
-			io.Copy(newfile, f)
+			defer f.file.Close()
+			io.Copy(newfile, f.file)
+			os.Chmod(tasksFilePath, f.perm)
 		} else {
 			tasksFile, err := os.Create(tasksFilePath)
 			if err != nil {
@@ -104,8 +110,9 @@ func (p *Pack) SaveDir(dest string) error {
 				return err
 			}
 			defer newfile.Close()
-			defer f.Close()
-			io.Copy(newfile, f)
+			defer f.file.Close()
+			io.Copy(newfile, f.file)
+			os.Chmod(path, f.perm)
 		}
 	}
 

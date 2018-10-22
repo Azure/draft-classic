@@ -29,7 +29,7 @@ func TestFromDir(t *testing.T) {
 
 	defer func() {
 		for _, f := range pack.Files {
-			f.Close()
+			f.file.Close()
 		}
 	}()
 
@@ -42,7 +42,7 @@ func TestFromDir(t *testing.T) {
 		t.Error("expected Dockerfile to have been loaded")
 	}
 
-	dockerfileContents, err := ioutil.ReadAll(dockerfile)
+	dockerfileContents, err := ioutil.ReadAll(dockerfile.file)
 	if err != nil {
 		t.Errorf("expected Dockerfile to be readable, got %v", err)
 	}

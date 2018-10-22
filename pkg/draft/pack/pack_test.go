@@ -2,10 +2,10 @@ package pack
 
 import (
 	"bytes"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -24,15 +24,19 @@ cleanup-task = "echo cleanup"
 `
 
 func TestSaveDir(t *testing.T) {
+	dockerPerm := os.FileMode(0664)
+	winDockerPerm := os.FileMode(0666)
+	tasksPerm := os.FileMode(0644)
+	winTasksPerm := os.FileMode(0666)
 	p := &Pack{
 		Chart: &chart.Chart{
 			Metadata: &chart.Metadata{
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]io.ReadCloser{
-			dockerfileName: ioutil.NopCloser(bytes.NewBufferString(testDockerfile)),
-			TasksFileName:  ioutil.NopCloser(bytes.NewBufferString(testTasksFile)),
+		Files: map[string]PackFile{
+			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), dockerPerm},
+			TasksFileName:  {ioutil.NopCloser(bytes.NewBufferString(testTasksFile)), tasksPerm},
 		},
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")
@@ -45,7 +49,7 @@ func TestSaveDir(t *testing.T) {
 		t.Errorf("expected there to be no error when writing to %v, got %v", dir, err)
 	}
 
-	_, err = os.Stat(filepath.Join(dir, dockerfileName))
+	fInfo, err := os.Stat(filepath.Join(dir, dockerfileName))
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("Expected %s to be created but wasn't", dockerfileName)
@@ -53,15 +57,27 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	if fInfo.Mode() != dockerPerm && runtime.GOOS != "windows" {
+		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
+	}
+	if fInfo.Mode() != winDockerPerm && runtime.GOOS == "windows" {
+		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
+	}
 
 	tasksPath := filepath.Join(dir, TargetTasksFileName)
-	_, err = os.Stat(tasksPath)
+	fInfo, err = os.Stat(tasksPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("Expected %s to have been created but wasnt", TargetTasksFileName)
 		} else {
 			t.Fatal(err)
 		}
+	}
+	if fInfo.Mode() != tasksPerm && runtime.GOOS != "windows" {
+		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
+	}
+	if fInfo.Mode() != winTasksPerm && runtime.GOOS == "windows" {
+		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
 	}
 
 	data, err := ioutil.ReadFile(tasksPath)
@@ -80,8 +96,8 @@ func TestSaveDirDockerfileExistsInAppDir(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]io.ReadCloser{
-			dockerfileName: ioutil.NopCloser(bytes.NewBufferString(testDockerfile)),
+		Files: map[string]PackFile{
+			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), 664},
 		},
 	}
 	dir, err := ioutil.TempDir("", "draft-pack-test")

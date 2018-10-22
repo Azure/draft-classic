@@ -10,7 +10,7 @@ Most of the time, when you find a bug in Draft, it should be reported using GitH
 
 We'd love to accept your patches! Before we can take them, we have to jump a couple of legal hurdles.
 
-Community contributors to code repositories open sourced by Microsoft must sign the [Microsoft Contributor License Agreement][cla]. By signing a CLA, we ensure that the community is free to use your contributions. 
+Community contributors to code repositories open sourced by Microsoft must sign the [Microsoft Contributor License Agreement][cla]. By signing a CLA, we ensure that the community is free to use your contributions.
 
 Once you are CLA'ed, we'll be able to accept your pull requests. For any issues that you face during this process, please write a comment explaining the issue and we will help get it sorted out.
 
