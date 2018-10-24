@@ -8,7 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ template "chart.name" . }}
     chart: {{ template "chart.chart" . }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
   annotations:

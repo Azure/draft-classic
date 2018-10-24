@@ -6,14 +6,14 @@ metadata:
     app.kubernetes.io/name: {{ template "chart.name" . }}
     chart: {{ template "chart.chart" . }}
     draft: {{ default "draft-app" .Values.draft }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "chart.name" . }}
-      release: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       annotations:
@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ template "chart.name" . }}
         draft: {{ default "draft-app" .Values.draft }}
-        release: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
