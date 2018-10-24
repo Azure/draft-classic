@@ -4,7 +4,7 @@ metadata:
   name: {{ template "chart.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ template "chart.name" . }}
-    chart: {{ template "chart.chart" . }}
+    helm.sh/chart: {{ template "chart.chart" . }}
     draft: {{ default "draft-app" .Values.draft }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

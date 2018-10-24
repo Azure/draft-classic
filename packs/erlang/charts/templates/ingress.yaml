@@ -7,7 +7,7 @@ metadata:
   name: {{ $fullName }}
   labels:
     app.kubernetes.io/name: {{ template "chart.name" . }}
-    chart: {{ template "chart.chart" . }}
+    helm.sh/chart: {{ template "chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
