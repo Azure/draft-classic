@@ -12,7 +12,7 @@ spec:
       annotations:
         buildID: {{ .Values.buildID }}
       labels:
-        app: {{ template "fullname" . }}
+        app.kubernetes.io/name: {{ template "fullname" . }}
         draft: {{ default "draft-app" .Values.draft }}
     spec:
       containers:

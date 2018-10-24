@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         draft: {{ default "draft-app" .Values.draft }}
-        app: {{ template "fullname" . }}
+        app.kubernetes.io/name: {{ template "fullname" . }}
     spec:
       containers:
       - name: {{ .Chart.Name }}

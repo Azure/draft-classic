@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "chart.fullname" . }}
   labels:
-    app: {{ template "chart.name" . }}
+    app.kubernetes.io/name: {{ template "chart.name" . }}
     chart: {{ template "chart.chart" . }}
     draft: {{ default "draft-app" .Values.draft }}
     release: {{ .Release.Name }}
@@ -12,14 +12,14 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "chart.name" . }}
+      app.kubernetes.io/name: {{ template "chart.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         buildID: {{ .Values.buildID }}
       labels:
-        app: {{ template "chart.name" . }}
+        app.kubernetes.io/name: {{ template "chart.name" . }}
         draft: {{ default "draft-app" .Values.draft }}
         release: {{ .Release.Name }}
     spec:
