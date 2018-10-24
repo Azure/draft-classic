@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: {{ template "chart.name" . }}
     helm.sh/chart: {{ template "chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   type: {{ .Values.service.type }}
   ports:
