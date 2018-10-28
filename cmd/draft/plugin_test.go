@@ -123,9 +123,7 @@ func TestLoadPlugins(t *testing.T) {
 			t.Errorf("%d: Expected Use=%q, got %q", i, tt.long, pp.Long)
 		}
 
-		for _, variant := range tt.variants {
-			out.Reset()
-		}
+		out.Reset()
 	}
 }
 

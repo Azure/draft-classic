@@ -26,9 +26,7 @@ cleanup-task = "echo cleanup"
 
 func TestSaveDir(t *testing.T) {
 	dockerPerm := os.FileMode(0664)
-	winDockerPerm := os.FileMode(0666)
 	tasksPerm := os.FileMode(0644)
-	winTasksPerm := os.FileMode(0666)
 	p := &Pack{
 		Chart: &chart.Chart{
 			Metadata: &chart.Metadata{
