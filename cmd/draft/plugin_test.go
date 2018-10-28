@@ -1,10 +1,11 @@
+// +build !windows
+
 package main
 
 import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -124,16 +125,6 @@ func TestLoadPlugins(t *testing.T) {
 
 		for _, variant := range tt.variants {
 			out.Reset()
-			// Currently, plugins assume a Linux subsystem. Skip the execution
-			// tests until this is fixed
-			if runtime.GOOS != "windows" {
-				if err := pp.RunE(pp, variant.args); err != nil {
-					t.Errorf("Error running %s: %s", tt.use, err)
-				}
-				if out.String() != variant.expect {
-					t.Errorf("Expected %s to output:\n%s\ngot\n%s", tt.use, variant.expect, out.String())
-				}
-			}
 		}
 	}
 }

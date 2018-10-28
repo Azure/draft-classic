@@ -1,5 +1,3 @@
-// +build !windows
-
 package pack
 
 import (
@@ -58,7 +56,7 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != dockerPerm {
+	if fInfo.Mode() != winDockerPerm {
 		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
 	}
 
@@ -71,7 +69,7 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != tasksPerm {
+	if fInfo.Mode() != winTasksPerm {
 		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
 	}
 
