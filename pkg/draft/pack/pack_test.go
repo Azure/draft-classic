@@ -34,7 +34,7 @@ func TestSaveDir(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]PackFile{
+		Files: map[string]File{
 			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), dockerPerm},
 			TasksFileName:  {ioutil.NopCloser(bytes.NewBufferString(testTasksFile)), tasksPerm},
 		},
@@ -96,7 +96,7 @@ func TestSaveDirDockerfileExistsInAppDir(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]PackFile{
+		Files: map[string]File{
 			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), 664},
 		},
 	}
