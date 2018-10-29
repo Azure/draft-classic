@@ -15,7 +15,7 @@ import (
 // and hand off to the appropriate pack reader.
 func FromDir(dir string) (*Pack, error) {
 	pack := new(Pack)
-	pack.Files = make(map[string]PackFile)
+	pack.Files = make(map[string]File)
 
 	topdir, err := filepath.Abs(dir)
 	if err != nil {
@@ -40,7 +40,7 @@ func FromDir(dir string) (*Pack, error) {
 				return nil, err
 			}
 			if fInfo.Name() != "README.md" {
-				pack.Files[fInfo.Name()] = PackFile{f, fInfo.Mode().Perm()}
+				pack.Files[fInfo.Name()] = File{f, fInfo.Mode().Perm()}
 			}
 		} else {
 			if fInfo.Name() != "charts" {
@@ -58,9 +58,9 @@ func FromDir(dir string) (*Pack, error) {
 	return pack, nil
 }
 
-func extractFiles(dir, base string) (map[string]PackFile, error) {
+func extractFiles(dir, base string) (map[string]File, error) {
 	baseDir := filepath.Join(base, filepath.Base(dir))
-	packFiles := make(map[string]PackFile)
+	packFiles := make(map[string]File)
 
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -79,13 +79,13 @@ func extractFiles(dir, base string) (map[string]PackFile, error) {
 			if err != nil {
 				return nil, err
 			}
-			packFiles[filepath.Join(baseDir, fInfo.Name())] = PackFile{f, fInfo.Mode().Perm()}
+			packFiles[filepath.Join(baseDir, fInfo.Name())] = File{f, fInfo.Mode().Perm()}
 		} else {
-			nestedPackFiles, err := extractFiles(filepath.Join(dir, fInfo.Name()), baseDir)
+			nestedFiles, err := extractFiles(filepath.Join(dir, fInfo.Name()), baseDir)
 			if err != nil {
 				return nil, err
 			}
-			for k, v := range nestedPackFiles {
+			for k, v := range nestedFiles {
 				packFiles[k] = v
 			}
 		}
