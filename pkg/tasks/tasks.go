@@ -19,6 +19,8 @@ var (
 const (
 	// PreUp are the kind of tasks to be executed in preparation to an up command
 	PreUp = "PreUp"
+	// PostUp are the kind of tasks to be executed after an up command and post-deploy tasks have executed
+	PostUp = "PostUp"
 	// PostDeploy are the kind of tasks to be executed after a deploy command
 	PostDeploy = "PostDeploy"
 	// PostDelete are the kind of tasks to be executed after a delete command
@@ -42,6 +44,7 @@ var DefaultRunner = func(c *exec.Cmd) error { return c.Run() }
 // Tasks represents the different kinds of tasks read from Tasks' file
 type Tasks struct {
 	PreUp      map[string]string `toml:"pre-up"`
+	PostUp     map[string]string `toml:"post-up"`
 	PostDeploy map[string]string `toml:"post-deploy"`
 	PostDelete map[string]string `toml:"cleanup"`
 }
@@ -78,6 +81,11 @@ func (t *Tasks) Run(runner Runner, kind, podName string) ([]Result, error) {
 	switch kind {
 	case PreUp:
 		for _, task := range t.PreUp {
+			result := executeTask(runner, task, kind)
+			results = append(results, result)
+		}
+	case PostUp:
+		for _, task := range t.PostUp {
 			result := executeTask(runner, task, kind)
 			results = append(results, result)
 		}
