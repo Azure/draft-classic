@@ -1,10 +1,17 @@
 DOCKER_REGISTRY ?= docker.io
 IMAGE_PREFIX    ?= microsoft
 IMAGE_TAG       ?= canary
-SHORT_NAME      ?= draft
 TARGETS         = darwin/amd64 linux/amd64 linux/386 linux/arm windows/amd64
 DIST_DIRS       = find * -type d -exec
 APP             = draft
+INSTALL_DIR     := /usr/local/bin
+PROJECT         := draft
+
+ifeq ($(OS),Windows_NT)
+	TARGET = $(PROJECT).exe
+else
+	TARGET = $(PROJECT)
+endif
 
 # go option
 GO        ?= go
@@ -54,6 +61,10 @@ clean:
 	-rm bin/*
 	-rm rootfs/bin/*
 	-rm -rf _dist/
+
+.PHONY: install
+install:
+	install $(BINDIR)/$(TARGET) $(INSTALL_DIR)
 
 .PHONY: test
 test: TESTFLAGS += -race -v
