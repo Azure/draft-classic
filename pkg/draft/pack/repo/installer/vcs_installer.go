@@ -73,7 +73,7 @@ func (i *VCSInstaller) Install() error {
 	}
 
 	if !isPackRepo(i.Repo.LocalPath()) {
-		return repo.ErrHomeMissing
+		return repo.ErrNotRepo
 	}
 
 	if err := os.MkdirAll(filepath.Dir(i.Path()), 0755); err != nil {
@@ -92,7 +92,7 @@ func (i *VCSInstaller) Update() error {
 		return err
 	}
 	if !isPackRepo(i.Repo.LocalPath()) {
-		return repo.ErrHomeMissing
+		return repo.ErrNotRepo
 	}
 	return nil
 }
