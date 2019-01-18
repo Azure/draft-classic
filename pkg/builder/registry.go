@@ -20,6 +20,8 @@ type DockerConfigEntryWithAuth struct {
 	Email string `json:"email,omitempty"`
 	// +optional
 	Auth string `json:"auth,omitempty"`
+	// +optional
+	ServerAddress string `json:"serveraddress,omitempty"`
 }
 
 // FromAuthConfigToken converts a docker auth token into type DockerConfigEntryWithAuth. This allows us to
@@ -40,9 +42,10 @@ func FromAuthConfigToken(authToken string) (*DockerConfigEntryWithAuth, error) {
 // Marshal the object into a Kubernetes registry auth secret.
 func FromAuthConfig(ac types.AuthConfig) *DockerConfigEntryWithAuth {
 	return &DockerConfigEntryWithAuth{
-		Username: ac.Username,
-		Password: ac.Password,
-		Email:    ac.Email,
-		Auth:     ac.Auth,
+		Username:      ac.Username,
+		Password:      ac.Password,
+		Email:         ac.Email,
+		Auth:          ac.Auth,
+		ServerAddress: ac.ServerAddress,
 	}
 }

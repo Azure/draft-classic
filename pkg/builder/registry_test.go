@@ -16,7 +16,7 @@ func TestFromAuthConfigToken(t *testing.T) {
 		{"e30K", false, &DockerConfigEntryWithAuth{}},
 		{"eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwicGFzc3dvcmQiOiJwYXNzd29yZCJ9Cg==", false, &DockerConfigEntryWithAuth{Username: "username", Password: "password"}},
 		{"eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwicGFzc3dvcmQiOiJwYXNzd29yZCIsImVtYWlsIjoiZW1haWwiLCJhdXRoIjoiYXV0aCJ9Cg==", false, &DockerConfigEntryWithAuth{Username: "username", Password: "password", Email: "email", Auth: "auth"}},
-		{"eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwicGFzc3dvcmQiOiJwYXNzd29yZCIsImVtYWlsIjoiZW1haWwiLCJhdXRoIjoiYXV0aCIsInNlcnZlcmFkZHJlc3MiOiJodHRwOi8vc2VydmVyYWRkcmVzcy5jb20ifQo=", false, &DockerConfigEntryWithAuth{Username: "username", Password: "password", Email: "email", Auth: "auth"}},
+		{"eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwicGFzc3dvcmQiOiJwYXNzd29yZCIsImVtYWlsIjoiZW1haWwiLCJhdXRoIjoiYXV0aCIsInNlcnZlcmFkZHJlc3MiOiJodHRwOi8vc2VydmVyYWRkcmVzcy5jb20ifQo=", false, &DockerConfigEntryWithAuth{Username: "username", Password: "password", Email: "email", Auth: "auth", ServerAddress: "http://serveraddress.com"}},
 	}
 
 	for _, tt := range authConfigTests {
