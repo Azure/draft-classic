@@ -263,7 +263,10 @@ func (u *upCmd) run(environment string) (err error) {
 
 	if err := runPostDeployTasks(taskList, bldr.ID); err != nil {
 		debug(err.Error())
-		return nil
+	}
+
+	if _, err = taskList.Run(tasks.DefaultRunner, tasks.PostUp, ""); err != nil {
+		debug(err.Error())
 	}
 
 	return nil

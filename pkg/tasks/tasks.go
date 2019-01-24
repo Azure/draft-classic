@@ -12,12 +12,18 @@ import (
 )
 
 var (
+	// ErrNoTaskFile is the error message shown when no Task file is found
 	ErrNoTaskFile = errors.New(".draft-tasks.toml not found")
 )
 
 const (
-	PreUp      = "PreUp"
+	// PreUp are the kind of tasks to be executed in preparation to an up command
+	PreUp = "PreUp"
+	// PostUp are the kind of tasks to be executed after an up command and post-deploy tasks have executed
+	PostUp = "PostUp"
+	// PostDeploy are the kind of tasks to be executed after a deploy command
 	PostDeploy = "PostDeploy"
+	// PostDelete are the kind of tasks to be executed after a delete command
 	PostDelete = "PostDelete"
 )
 
@@ -35,12 +41,15 @@ type Runner func(c *exec.Cmd) error
 // DefaultRunner runs the given command
 var DefaultRunner = func(c *exec.Cmd) error { return c.Run() }
 
+// Tasks represents the different kinds of tasks read from Tasks' file
 type Tasks struct {
 	PreUp      map[string]string `toml:"pre-up"`
+	PostUp     map[string]string `toml:"post-up"`
 	PostDeploy map[string]string `toml:"post-deploy"`
 	PostDelete map[string]string `toml:"cleanup"`
 }
 
+// Result represents the result of a Task's execution
 type Result struct {
 	Kind    string
 	Command []string
@@ -65,12 +74,18 @@ func Load(path string) (*Tasks, error) {
 	return &t, nil
 }
 
+// Run executes a series of tasks of a given kind and returns the list of results
 func (t *Tasks) Run(runner Runner, kind, podName string) ([]Result, error) {
 	results := []Result{}
 
 	switch kind {
 	case PreUp:
 		for _, task := range t.PreUp {
+			result := executeTask(runner, task, kind)
+			results = append(results, result)
+		}
+	case PostUp:
+		for _, task := range t.PostUp {
 			result := executeTask(runner, task, kind)
 			results = append(results, result)
 		}

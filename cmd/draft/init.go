@@ -101,11 +101,7 @@ func (i *initCmd) setupDraftHome(plugins []plugin.Builtin, repos []repo.Builtin)
 	if err := i.ensurePlugins(plugins); err != nil {
 		return err
 	}
-	if err := i.ensurePacks(repos); err != nil {
-		return err
-	}
-
-	return nil
+	return i.ensurePacks(repos)
 }
 
 type obj struct {

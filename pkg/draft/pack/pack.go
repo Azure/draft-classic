@@ -41,7 +41,8 @@ const (
 	TargetTasksFileName = ".draft-tasks.toml"
 )
 
-type PackFile struct {
+// File defines a file inside the pack that will be installed
+type File struct {
 	file io.ReadCloser
 	perm os.FileMode
 }
@@ -51,7 +52,7 @@ type Pack struct {
 	// Chart is the Helm chart to be installed with the Pack.
 	Chart *chart.Chart
 	// Files are the files inside the Pack that will be installed.
-	Files map[string]PackFile
+	Files map[string]File
 }
 
 // SaveDir saves a pack as files in a directory.

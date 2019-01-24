@@ -38,10 +38,28 @@ func (b *Builder) Build(ctx context.Context, app *builder.AppContext, out chan<-
 			args[k] = &v
 		}
 
+		authToken, err := b.AuthToken(ctx, app)
+		if err != nil {
+			return
+		}
+
+		// we need to translate the auth token Docker gives us into a Kubernetes registry auth secret token.
+		regAuth, err := builder.FromAuthConfigToken(authToken)
+		if err != nil {
+			return
+		}
+
 		buildopts := types.ImageBuildOptions{
 			Tags:       app.Images,
 			Dockerfile: app.Ctx.Env.Dockerfile,
 			BuildArgs:  args,
+			AuthConfigs: map[string]types.AuthConfig{
+				regAuth.ServerAddress: {
+					Username:      regAuth.Username,
+					Password:      regAuth.Password,
+					ServerAddress: regAuth.ServerAddress,
+				},
+			},
 		}
 
 		resp, err := b.DockerClient.Client().ImageBuild(ctx, app.Buf, buildopts)

@@ -213,7 +213,7 @@ No resources found.
 
 > IMPORTANT NOTE: The `draft delete` command should be run with **extreme care and caution** as it performs a termination and removal of the application from your Kubernetes cluster.
 
-> INFO: The `draft delete` command does not any image(s) created for the deployment within your Docker registry.
+> INFO: The `draft delete` command does not delete any image(s) created for the deployment within your Docker registry.
 
 [dep006]: reference/dep-006.md
 [dep007]: reference/dep-007.md
