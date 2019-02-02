@@ -60,7 +60,6 @@ $ draft version
 To install Draft on MacOS using [Homebrew](https://brew.sh/):
 
 ```console
-$ brew tap azure/draft
 $ brew install azure/draft/draft
 ```
 

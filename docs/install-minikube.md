@@ -35,8 +35,7 @@ Afterwards, fetch [the latest release of Draft](https://github.com/Azure/draft/r
 Installing Draft via Homebrew can be done using
 
 ```shell
-$ brew tap azure/draft
-$ brew install draft
+$ brew install azure/draft/draft
 ```
 
 Canary releases of the Draft client can be found at the following links:
