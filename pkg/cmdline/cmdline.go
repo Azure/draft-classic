@@ -2,7 +2,6 @@ package cmdline
 
 import (
 	"fmt"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -37,7 +36,9 @@ func (cli *cmdline) Init(rootctx context.Context, opts ...Option) {
 	for _, opt := range opts {
 		opt(&cli.opts)
 	}
-	if !consoleSupportsColor() {
+	if out := cli.opts.stdout; isTerminal(out) {
+		initTerminal(out)
+	} else {
 		NoColor()(&cli.opts)
 	}
 
@@ -183,11 +184,4 @@ func concatStrAndEmoji(text string, emoji string, displayEmoji bool) string {
 		concatStr.WriteString(emoji)
 	}
 	return concatStr.String()
-}
-
-func consoleSupportsColor() bool {
-	// We could try to detect the shell in use (and the mode for the Windows
-	// console), and see if it accepts VT100 escape sequences, but this is
-	// a good enough heuristic to start with!
-	return runtime.GOOS != "windows"
 }

@@ -615,6 +615,14 @@
   version = "1.0.4"
 
 [[projects]]
+  digest = "1:0f51cee70b0d254dbc93c22666ea2abf211af81c1701a96d04e2284b408621db"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = ""
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
+
+[[projects]]
   branch = "master"
   digest = "1:ccc20cacf54eb16464dad02efa1c14fa7c0b9e124639b0d2a51dcc87b0154e4c"
   name = "github.com/mailru/easyjson"
@@ -1608,12 +1616,14 @@
     "github.com/gosuri/uitable",
     "github.com/hpcloud/tail",
     "github.com/jbrukh/bayesian",
+    "github.com/konsorten/go-windows-terminal-sequences",
     "github.com/oklog/ulid",
     "github.com/rjeczalik/notify",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
     "github.com/technosophos/moniker",
+    "golang.org/x/crypto/ssh/terminal",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
     "k8s.io/api/core/v1",
