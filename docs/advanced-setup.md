@@ -7,7 +7,7 @@ Use the `--dry-run` flag to see what what Draft will install without actually do
 
 Your team may also have a set of plugins and pack repositories (repos) that they want to use or you all may even want to override some of the default ones that are installed. In this scenario, you can pass a TOML file in via the `--config` flag with the specified plugins and pack repositories you'd like to install during the `draft init` process.
 
-Specify in double brackets what you'd like to install: `[[plugin]]` or `[[repo]]`. Under that, specifiy some key/value pairs for information on the thing you're trying to install. Specify a `name` for the plugin or pack repository (repo) to install along with a `url` (location of the plugin or repo). Specify what version of a plugin you'd like to install using the `version` key. Case matters here. Keys need to be lowercase. See example below.
+Specify in double brackets what you'd like to install: `[[plugin]]` or `[[repo]]`. Under that, specify some key/value pairs for information on the thing you're trying to install. Specify a `name` for the plugin or pack repository (repo) to install along with a `url` (location of the plugin or repo). Specify what version of a plugin you'd like to install using the `version` key. Case matters here. Keys need to be lowercase. See example below.
 
 In `config-file.toml`:
 
