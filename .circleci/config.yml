@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/Azure/draft
     docker:
-      - image: golang:1.11.1
+      - image: golang:1.13.8
     environment:
       AZURE_CONTAINER: "draft"
       AZURE_STORAGE_ACCOUNT: "azuredraft"
