@@ -11,7 +11,7 @@ Draft targets the "inner loop" of a developer's workflow: as they hack on code, 
 ## Install the draft binary
 To install via homebrew, run `brew install azure/draft/draft` or download the binary via the [github releases page](https://github.com/Azure/draft/releases)
 
-_Note:_ Draft requires a running Kubernetes cluster and [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md ). If you don't already have a running Kubernetes cluster, check out the [minikube install guide](docs/install-minikube.md).
+_Note:_ Draft requires a running Kubernetes cluster and [Helm](https://github.com/helm/helm#install). If you don't already have a running Kubernetes cluster, check out the [minikube install guide](docs/install-minikube.md).
 
 ## Overview
 
