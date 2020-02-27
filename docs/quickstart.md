@@ -90,6 +90,6 @@ $ draft init
 $ eval $(minikube docker-env)
 ```
 
-The `eval $(minikube docker-env)` command allows Draft to build images directly using Minikube's Docker daemon which lets you skip having to set up a remote/external container registry.
+The `eval $(minikube docker-env)` command allows Draft to build images directly using Minikube's Docker daemon which let's you skip having to set up a remote/external container registry.
 
 Congratulations! You're all set! Check out the [Getting Started](getting-started.md) page to see how to use Draft with a sample application.

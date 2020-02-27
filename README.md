@@ -24,7 +24,7 @@ Using Draft is as simple as:
 3. `draft up` to deploy your application to a Kubernetes dev sandbox, accessible using `draft connect` over a secured tunnel.
 4. Use a local editor to modify the application, with changes deployed to Kubernetes in seconds.
 
-Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
+Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over. Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
 [Join the conversation in Slack!](https://kubernetes.slack.com/messages/draft-users) If you don't already have a Kubernetes slack account, sign up [here](http://slack.k8s.io/).
 
