@@ -131,7 +131,7 @@ func (cn *connectCmd) run(runningEnvironment string) (err error) {
 
 	stop := make(chan os.Signal, 1)
 	done := make(chan struct{})
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-stop
 		close(done)
