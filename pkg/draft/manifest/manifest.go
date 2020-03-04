@@ -35,6 +35,7 @@ type Environment struct {
 	ChartTarPath      string            `toml:"chart-tar,omitempty"`
 	Namespace         string            `toml:"namespace,omitempty"`
 	Values            []string          `toml:"set,omitempty"`
+	ValuesFiles       []string          `toml:"values-files,omitempty"`
 	Wait              bool              `toml:"wait"`
 	Watch             bool              `toml:"watch"`
 	WatchDelay        int               `toml:"watch-delay,omitempty"`
