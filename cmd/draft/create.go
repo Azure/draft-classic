@@ -89,6 +89,9 @@ func (c *createCmd) run() error {
 		fmt.Fprintln(c.out, "--> chart directory charts/ already exists. Ready to sail!")
 		return nil
 	}
+	if !checkPacksExist(c.home.Packs(), c.out) {
+		return fmt.Errorf("No packs found in %s, did you `draft init`?", c.home.Packs())
+	}
 
 	if c.pack != "" {
 		// --pack was explicitly defined, so we can just lazily use that here. No detection required.
@@ -168,6 +171,15 @@ func (c *createCmd) normalizeApplicationName() {
 		lowerCaseName,
 	)
 	c.appName = lowerCaseName
+}
+
+// checkPacksExist checks for the existence of packs in the pack directory.
+// This is helpful for catching if the user didn't run `draft init` first.
+func checkPacksExist(packHome string, out io.Writer) bool {
+	if _, err := os.Stat(packHome); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 // doPackDetection performs pack detection across all the packs available in $(draft home)/packs in
