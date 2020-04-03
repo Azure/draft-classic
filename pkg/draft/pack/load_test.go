@@ -10,7 +10,7 @@ import (
 const (
 	packName           = "foo"
 	dockerfileName     = "Dockerfile"
-	expectedDockerfile = `FROM python:onbuild
+	expectedDockerfile = `FROM python
 
 CMD [ "python", "./hello.py" ]
 

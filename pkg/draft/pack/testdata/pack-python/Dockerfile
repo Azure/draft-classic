@@ -1,4 +1,4 @@
-FROM python:onbuild
+FROM python
 
 CMD [ "python", "./hello.py" ]
 
