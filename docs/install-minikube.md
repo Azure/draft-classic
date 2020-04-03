@@ -21,7 +21,7 @@ In order to get started, you will need to have the following:
 All of the dependencies (except Docker) can be installed by the following:
 
 ```shell
-$ brew cask install minikube
+$ brew install minikube
 ```
 
 Docker can be installed following the appropriate path in the [Install Docker](https://docs.docker.com/install/) guide.
