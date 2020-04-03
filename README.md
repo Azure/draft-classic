@@ -3,8 +3,8 @@
 
 # Draft: Streamlined Kubernetes Development
 Draft makes it easier for developers to build applications that run on Kubernetes by doing two main things:
-1. The `draft create` command gives developers the artifacts they need to build and run their applications in Kubernetes
-2. The `draft up` command builds the container image for an application and deploys it to Kubernetes
+1. The `draft create` command gives developers the artifacts they need to build and run their applications in Kubernetes.
+2. The `draft up` command builds the container image for an application and deploys it to Kubernetes.
 
 Draft targets the "inner loop" of a developer's workflow: as they hack on code, but before code is committed to version control.
 
@@ -19,12 +19,12 @@ _Note:_ Draft requires a running Kubernetes cluster and [Helm](https://github.co
 
 Using Draft is as simple as:
 
-1. `draft init` to set up draft (after prerequisites are installed)
-2. `draft create` to containerize your application based on Draft [packs](docs/reference/dep-003.md)
+1. `draft init` to set up draft (after prerequisites are installed).
+2. `draft create` to containerize your application based on Draft [packs](docs/reference/dep-003.md).
 3. `draft up` to deploy your application to a Kubernetes dev sandbox, accessible using `draft connect` over a secured tunnel.
 4. Use a local editor to modify the application, with changes deployed to Kubernetes in seconds.
 
-Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over.  Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
+Once the developer is happy with changes made via Draft, they commit and push to version control, after which a continuous integration (CI) system takes over. Draft builds upon [Kubernetes Helm][helm] and the [Kubernetes Chart format](https://github.com/kubernetes/helm/blob/master/docs/charts.md), making it easy to construct CI pipelines from Draft-enabled applications.
 
 [Join the conversation in Slack!](https://kubernetes.slack.com/messages/draft-users) If you don't already have a Kubernetes slack account, sign up [here](http://slack.k8s.io/).
 
