@@ -39,6 +39,12 @@ const (
 	//TargetTasksFileName is the name of the file where the tasks file from the
 	//  draft pack will be copied to
 	TargetTasksFileName = ".draft-tasks.toml"
+	// ReadmeFileName is the name of the README
+	ReadmeFileName = "README.md"
+	// DockerIgnoreFileName is the name of the docker ignore file
+	DockerignoreFileName = ".dockerignore"
+	//DockerfileName is the name of the Dockerfile
+	DockerfileName = "Dockerfile"
 )
 
 // File defines a file inside the pack that will be installed
