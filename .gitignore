@@ -15,3 +15,24 @@ examples/**/target
 pkg/linguist/data/classifier
 pkg/linguist/data/linguist
 pkg/linguist/data/*.yml
+
+# IntelliJ IDE specific
+.idea
+
+# VSCode specific
+.vscode
+
+#
+# VIM SPECIFIC
+#
+
+# swap
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+
+# session
+Session.vim
+
+# temporary
+.netrwhist
+*~
