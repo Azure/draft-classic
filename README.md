@@ -15,7 +15,7 @@ _Note:_ Draft requires a running Kubernetes cluster and [Helm](https://github.co
 
 ## Overview
 
-[![asciicast](https://asciinema.org/a/WGVE7JNodpBEOautl105tdc97.png)](https://asciinema.org/a/WGVE7JNodpBEOautl105tdc97)
+<a href="https://gfycat.com/TenseDifferentJuliabutterfly"><img src="https://thumbs.gfycat.com/TenseDifferentJuliabutterfly-size_restricted.gif" alt="gif" width="500"/></a>
 
 Using Draft is as simple as:
 
