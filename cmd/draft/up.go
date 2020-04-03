@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Azure/go-autorest/autorest"
 	azurecli "github.com/Azure/go-autorest/autorest/azure/cli"
@@ -50,6 +52,7 @@ var (
 	autoConnect    bool
 	skipImagePush  bool
 	quiet          bool
+	isDryRun       bool
 )
 
 type upCmd struct {
@@ -125,6 +128,7 @@ func newUpCmd(out io.Writer) *cobra.Command {
 	f.BoolVarP(&autoConnect, "auto-connect", "", false, "specifies if draft up should automatically connect to the application")
 	f.BoolVar(&skipImagePush, "skip-image-push", false, "skip pushing image to registry")
 	f.BoolVarP(&quiet, "quiet", "q", false, "only output errors")
+	f.BoolVarP(&isDryRun, "dry-run", "", false, "explains the steps without actually executing anything")
 
 	up.dockerClientOptions.Common.TLSOptions = &tlsconfig.Options{
 		CAFile:   filepath.Join(dockerCertPath, dockerflags.DefaultCaFile),
@@ -243,6 +247,34 @@ func (u *upCmd) run(environment string) (err error) {
 
 	// setup the storage engine
 	bldr.Storage = configmap.NewConfigMaps(bldr.Kube.CoreV1().ConfigMaps(tillerNamespace))
+
+	if isDryRun {
+		h := sha256.New()
+		ctxtID := h.Sum(nil)
+		imgtag := fmt.Sprintf("%.20x", ctxtID)
+		imageRepository := strings.TrimLeft(fmt.Sprintf("%s/%s", buildctx.Env.Registry, buildctx.Env.Name), "/")
+		image := fmt.Sprintf("%s:%s", imageRepository, imgtag)
+
+		tplstr := "Draft will bundle up this directory and send it to the draft server in this cluster: %s where it will:"
+		str := fmt.Sprintf(tplstr, kubeConfig.Host)
+		fmt.Println(str)
+
+		ctr := 1
+
+		if buildctx.Env.Registry != "" && !skipImagePush {
+			tplstr = "%d. Create a Docker image: %s and send it to this container registry: %s"
+			str = fmt.Sprintf(tplstr, ctr, image, buildctx.Env.Registry)
+			fmt.Println(str)
+			ctr++
+		}
+
+		tplstr = "%d. Deploy %s using the helm chart provided in `charts/`"
+		str = fmt.Sprintf(tplstr, ctr, image)
+		fmt.Println(str)
+
+		return
+	}
+
 	progressC := bldr.Up(ctx, buildctx)
 	opts := []cmdline.Option{cmdline.WithBuildID(bldr.ID)}
 
