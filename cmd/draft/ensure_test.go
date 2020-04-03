@@ -114,3 +114,25 @@ func TestEnsurePluginExisting(t *testing.T) {
 	}
 
 }
+
+func unsetEnvVars() func() {
+	envs := []string{"DRAFT_PLUGIN_NAME", "DRAFT_PLUGIN_DIR", "DRAFT_PLUGIN", "DRAFT_DEBUG", "DRAFT_HOME", "DRAFT_PACKS_HOME", "DRAFT_HOST"}
+
+	resetVals := map[string]string{}
+
+	for _, env := range envs {
+		val := os.Getenv(env)
+		resetVals[env] = val
+		if err := os.Unsetenv(env); err != nil {
+			debug("error unsetting env %v: %v", env, err)
+		}
+	}
+
+	return func() {
+		for env, val := range resetVals {
+			if err := os.Setenv(env, val); err != nil {
+				debug("error setting env variable %s to %s: %s", env, val, err)
+			}
+		}
+	}
+}

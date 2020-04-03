@@ -1,5 +1,3 @@
-// +build !windows
-
 package pack
 
 import (
@@ -26,14 +24,16 @@ cleanup-task = "echo cleanup"
 
 func TestSaveDir(t *testing.T) {
 	dockerPerm := os.FileMode(0664)
+	winDockerPerm := os.FileMode(0666)
 	tasksPerm := os.FileMode(0644)
+	winTasksPerm := os.FileMode(0666)
 	p := &Pack{
 		Chart: &chart.Chart{
 			Metadata: &chart.Metadata{
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]File{
+		Files: map[string]PackFile{
 			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), dockerPerm},
 			TasksFileName:  {ioutil.NopCloser(bytes.NewBufferString(testTasksFile)), tasksPerm},
 		},
@@ -56,7 +56,7 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != dockerPerm {
+	if fInfo.Mode() != winDockerPerm {
 		t.Errorf("DockerFile perms different. Expected %s, but got %s", dockerPerm, fInfo.Mode())
 	}
 
@@ -69,7 +69,7 @@ func TestSaveDir(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if fInfo.Mode() != tasksPerm {
+	if fInfo.Mode() != winTasksPerm {
 		t.Errorf("Tasks file perms different. Expected %s, but got %s", tasksPerm, fInfo.Mode())
 	}
 
@@ -89,7 +89,7 @@ func TestSaveDirDockerfileExistsInAppDir(t *testing.T) {
 				Name: "chart-for-nigel-thornberry",
 			},
 		},
-		Files: map[string]File{
+		Files: map[string]PackFile{
 			dockerfileName: {ioutil.NopCloser(bytes.NewBufferString(testDockerfile)), 664},
 		},
 	}

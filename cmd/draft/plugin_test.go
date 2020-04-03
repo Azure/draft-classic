@@ -1,10 +1,11 @@
+// +build !windows
+
 package main
 
 import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -122,19 +123,7 @@ func TestLoadPlugins(t *testing.T) {
 			t.Errorf("%d: Expected Use=%q, got %q", i, tt.long, pp.Long)
 		}
 
-		for _, variant := range tt.variants {
-			out.Reset()
-			// Currently, plugins assume a Linux subsystem. Skip the execution
-			// tests until this is fixed
-			if runtime.GOOS != "windows" {
-				if err := pp.RunE(pp, variant.args); err != nil {
-					t.Errorf("Error running %s: %s", tt.use, err)
-				}
-				if out.String() != variant.expect {
-					t.Errorf("Expected %s to output:\n%s\ngot\n%s", tt.use, variant.expect, out.String())
-				}
-			}
-		}
+		out.Reset()
 	}
 }
 
@@ -167,28 +156,6 @@ func TestSetupEnv(t *testing.T) {
 	} {
 		if got := os.Getenv(tt.name); got != tt.expect {
 			t.Errorf("Expected $%s=%q, got %q", tt.name, tt.expect, got)
-		}
-	}
-}
-
-func unsetEnvVars() func() {
-	envs := []string{"DRAFT_PLUGIN_NAME", "DRAFT_PLUGIN_DIR", "DRAFT_PLUGIN", "DRAFT_DEBUG", "DRAFT_HOME", "DRAFT_PACKS_HOME", "DRAFT_HOST"}
-
-	resetVals := map[string]string{}
-
-	for _, env := range envs {
-		val := os.Getenv(env)
-		resetVals[env] = val
-		if err := os.Unsetenv(env); err != nil {
-			debug("error unsetting env %v: %v", env, err)
-		}
-	}
-
-	return func() {
-		for env, val := range resetVals {
-			if err := os.Setenv(env, val); err != nil {
-				debug("error setting env variable %s to %s: %s", env, val, err)
-			}
 		}
 	}
 }
