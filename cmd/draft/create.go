@@ -36,6 +36,7 @@ type createCmd struct {
 	appName        string
 	out            io.Writer
 	pack           string
+	win            bool
 	home           draftpath.Home
 	dest           string
 	repositoryName string
@@ -67,7 +68,7 @@ func newCreateCmd(out io.Writer) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVarP(&cc.appName, "app", "a", "", "name of the Helm release. By default, this is a randomly generated name")
 	f.StringVarP(&cc.pack, "pack", "p", "", "the named Draft starter pack to scaffold the app with")
-
+	f.BoolVarP(&cc.win, "win", "w", false, "whether the Draft starter pack should be built against Windows")
 	return cmd
 }
 
@@ -101,6 +102,10 @@ func (c *createCmd) run() error {
 
 		} else if len(packsFound) == 1 {
 			packSrc := packsFound[0]
+			if c.win {
+				i := strings.LastIndex(packSrc, "/")
+				packSrc = packSrc[:i] + "/windows" + packSrc[i:]
+			}
 			if err = pack.CreateFrom(c.dest, packSrc, c.appName); err != nil {
 				return err
 			}
@@ -114,6 +119,10 @@ func (c *createCmd) run() error {
 		packPath, err := doPackDetection(c.home, c.out)
 		if err != nil {
 			return err
+		}
+		if c.win {
+			i := strings.LastIndex(packPath, "/")
+			packPath = packPath[:i] + "/windows" + packPath[i:]
 		}
 		err = pack.CreateFrom(c.dest, packPath, c.appName)
 		if err != nil {
