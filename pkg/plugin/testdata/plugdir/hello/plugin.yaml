@@ -5,6 +5,6 @@ description: "description"
 command: "$HELM_PLUGIN_SELF/hello.sh"
 useTunnel: true
 ignoreFlags: true
-hooks:
+tasks:
   bash:
     install: "echo installing..."

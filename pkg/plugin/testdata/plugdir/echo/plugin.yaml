@@ -4,6 +4,6 @@ usage: "echo something"
 description: |-
   This is a testing fixture. Thank you Helm.
 command: "echo Hello"
-hooks:
+tasks:
   bash:
     install: "echo Installing"

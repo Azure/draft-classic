@@ -83,7 +83,7 @@ func TestLoadDir(t *testing.T) {
 		Command:     "$HELM_PLUGIN_SELF/hello.sh",
 		UseTunnel:   true,
 		IgnoreFlags: true,
-		PlatformHooks: map[string]Hooks{
+		PlatformTasks: map[string]Tasks{
 			"bash": {
 				Install: "echo installing...",
 			},

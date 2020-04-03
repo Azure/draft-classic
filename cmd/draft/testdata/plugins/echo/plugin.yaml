@@ -3,7 +3,7 @@ usage: "echo stuff"
 description: "This echos stuff"
 command: "echo hello"
 version: "1.0.0"
-hooks:
+tasks:
   bash:
     install: "echo installing"
   powershell:

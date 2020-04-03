@@ -15,7 +15,7 @@ limitations under the License.
 
 package plugin
 
-// Types of hooks
+// Types of tasks
 const (
 	// Install is executed after the plugin is added.
 	Install = "install"
@@ -25,11 +25,11 @@ const (
 	Update = "update"
 )
 
-// Hooks is a map of events to commands.
-type Hooks map[string]string
+// Tasks is a map of events to commands.
+type Tasks map[string]string
 
-// Get returns a hook for an event.
-func (hooks Hooks) Get(event string) string {
-	h, _ := hooks[event]
+// Get returns a task for an event.
+func (tasks Tasks) Get(event string) string {
+	h, _ := tasks[event]
 	return h
 }

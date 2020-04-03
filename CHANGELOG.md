@@ -54,7 +54,7 @@
 * implemented Draft tasks (see DEP 008)
 * introduced ACR Build support, with support for writing alternative container builders (see DEP 009)
 * introduced Windows support
-* introduced Powershell support for plugin install hooks
+* introduced Powershell support for plugin install tasks
 * introduced `draft pack list`
 * introduced support for custom image tags on `draft up`
 * introduced `draft init --config` to specify a default set of plugins and pack repositories to bootstrap Draft

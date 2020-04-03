@@ -11,20 +11,20 @@ import (
 	"github.com/Azure/draft/pkg/plugin"
 )
 
-// runHook will execute a plugin hook.
-func runHook(p *plugin.Plugin, event string) error {
-	hooks, ok := p.Metadata.PlatformHooks["bash"]
+// runTask will execute a plugin task.
+func runTask(p *plugin.Plugin, event string) error {
+	tasks, ok := p.Metadata.PlatformTasks["bash"]
 	if !ok {
 		return nil
 	}
-	hook := hooks.Get(event)
-	if hook == "" {
+	task := tasks.Get(event)
+	if task == "" {
 		return nil
 	}
 
-	prog := exec.Command("sh", "-c", hook)
+	prog := exec.Command("sh", "-c", task)
 
-	debug("running %s hook: %s %v", event, prog.Path, prog.Args)
+	debug("running %s task: %s %v", event, prog.Path, prog.Args)
 
 	home := draftpath.Home(homePath())
 	setupPluginEnv(p.Metadata.Name, p.Metadata.Version, p.Dir, home.Plugins(), home)
@@ -32,7 +32,7 @@ func runHook(p *plugin.Plugin, event string) error {
 	if err := prog.Run(); err != nil {
 		if eerr, ok := err.(*exec.ExitError); ok {
 			os.Stderr.Write(eerr.Stderr)
-			return fmt.Errorf("plugin %s hook for %q exited with error", event, p.Metadata.Name)
+			return fmt.Errorf("plugin %s task for %q exited with error", event, p.Metadata.Name)
 		}
 		return err
 	}

@@ -95,5 +95,5 @@ func updatePlugin(p *plugin.Plugin, home draftpath.Home) error {
 		return err
 	}
 
-	return runHook(updatedPlugin, plugin.Update)
+	return runTask(updatedPlugin, plugin.Update)
 }

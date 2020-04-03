@@ -68,7 +68,7 @@ func (pcmd *pluginInstallCmd) run() error {
 	}
 
 	debug("running any install instructions for plugin: %s", p.Metadata.Name)
-	if err := runHook(p, plugin.Install); err != nil {
+	if err := runTask(p, plugin.Install); err != nil {
 		return err
 	}
 

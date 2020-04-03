@@ -71,7 +71,7 @@ func removePlugin(p *plugin.Plugin) error {
 	if err := os.RemoveAll(p.Dir); err != nil {
 		return err
 	}
-	return runHook(p, plugin.Delete)
+	return runTask(p, plugin.Delete)
 }
 
 func findPlugin(plugins []*plugin.Plugin, name string) *plugin.Plugin {
