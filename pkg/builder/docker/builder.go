@@ -122,65 +122,66 @@ func (b *Builder) Push(ctx context.Context, app *builder.AppContext, out chan<- 
 	// notify that particular stage has started.
 	summary("started", builder.SummaryStarted)
 
-	msgc := make(chan string, 1)
-	errc := make(chan error, 1)
+	registryAuth, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.MainImage)
+	if err != nil {
+		return err
+	}
+
+	cnt := len(app.Images)
+	type result struct {
+		msg string
+		err error
+	}
+	resultChan := make(chan result, cnt)
 
 	var wg sync.WaitGroup
-	wg.Add(len(app.Images))
+	wg.Add(cnt)
 
 	go func() {
-		registryAuth, err := command.RetrieveAuthTokenFromImage(ctx, b.DockerClient, app.MainImage)
-		if err != nil {
-			errc <- err
-			return
-		}
+		defer close(resultChan)
 
 		for _, tag := range app.Images {
-
 			go func(tag string) {
 				defer wg.Done()
 
 				resp, err := b.DockerClient.Client().ImagePush(ctx, tag, types.ImagePushOptions{RegistryAuth: registryAuth})
 				if err != nil {
-					errc <- err
+					resultChan <- result{err: err}
 					return
 				}
 
 				defer resp.Close()
 				outFd, isTerm := term.GetFdInfo(app.Log)
 				if err := jsonmessage.DisplayJSONMessagesStream(resp, app.Log, outFd, isTerm, nil); err != nil {
-					errc <- err
+					resultChan <- result{err: err}
 					return
 				}
+
+				resultChan <- result{msg: ""}
+
 			}(tag)
 		}
 
-		defer func() {
-			close(errc)
-			close(msgc)
-		}()
-
+		wg.Wait()
 	}()
-	for msgc != nil || errc != nil {
+
+	for resultChan != nil {
 		select {
-		case msg, ok := <-msgc:
+		case result, ok := <-resultChan:
 			if !ok {
-				msgc = nil
-				continue
+				resultChan = nil
+				break
 			}
-			summary(msg, builder.SummaryLogging)
-		case err, ok := <-errc:
-			if !ok {
-				errc = nil
-				continue
+			if result.err != nil {
+				return result.err
 			}
-			return err
+			summary(result.msg, builder.SummaryLogging)
 		default:
 			summary("ongoing", builder.SummaryOngoing)
 			time.Sleep(time.Second)
 		}
 	}
-	wg.Wait()
+
 	return nil
 }
 
