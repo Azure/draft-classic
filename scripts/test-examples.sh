@@ -2,6 +2,7 @@
 
 REPO_ROOT=$PWD
 EXAMPLES_FOLDER=$PWD/examples
+SKIP_K8S=${1:-false}
 
 for example in $(ls $EXAMPLES_FOLDER); do
     if [[ -d "$EXAMPLES_FOLDER/$example" ]]; then
@@ -11,8 +12,12 @@ for example in $(ls $EXAMPLES_FOLDER); do
         rm -rf charts
         rm -rf Dockerfile
         
-        draft create 
-        draft up    
-        draft delete 
+        draft create
+        if [ $SKIP_K8S = true ]; then
+            docker image build -t $(basename $PWD):test .
+        else 
+            draft up    
+            draft delete 
+        fi
     fi
 done
